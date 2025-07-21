@@ -15,6 +15,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Skill;
@@ -48,6 +49,7 @@ public class SkillsScreen extends Screen {
 	private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
 	private static final Identifier ICONS_TEXTURE = new Identifier("textures/gui/icons.png");
 	private static final Identifier RECIPE_BOOK_TEXTURE = new Identifier("textures/gui/recipe_book.png");
+	private static final Identifier TRIAL_ICON_TEXTURE = new Identifier("realms", "textures/gui/realms/trial_icon.png");
 
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
@@ -203,6 +205,7 @@ public class SkillsScreen extends Screen {
 					.max(Comparator.comparing(ClientCategoryData::getLastOpen));
 			resize();
 		}
+		optActiveCategoryData.ifPresent(ClientCategoryData::updateUnseenPoints);
 	}
 
 	private int getTabX(int i) {
@@ -808,6 +811,22 @@ public class SkillsScreen extends Screen {
 
 		textureRenderer.draw();
 		itemBatch.draw();
+
+		forEachVisibleTab((x, category) -> {
+			if (category.hasUnseenPoints()) {
+				context.drawTexture(
+						TRIAL_ICON_TEXTURE,
+						x + 10,
+						FRAME_PADDING - 5,
+						0,
+						(float) (Util.getMeasuringTimeMs() / 800 & 1) * 8,
+						8,
+						8,
+						8,
+						16
+				);
+			}
+		});
 	}
 
 	private void drawWindow(DrawContext context, double mouseX, double mouseY) {

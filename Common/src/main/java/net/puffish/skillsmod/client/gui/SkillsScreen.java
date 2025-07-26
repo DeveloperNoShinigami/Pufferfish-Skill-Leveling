@@ -656,16 +656,18 @@ public class SkillsScreen extends Screen {
 
 				var lines = new ArrayList<OrderedText>();
 				lines.add(definition.title().asOrderedText());
-				lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
-						definition.description().copy(),
-						Style.EMPTY.withFormatting(Formatting.GRAY)
-				)));
-				if (Screen.hasShiftDown()) {
-					lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
-							definition.extraDescription().copy(),
-							Style.EMPTY.withFormatting(Formatting.GRAY)
-					)));
-				}
+                                var desc = definition.descriptions().isEmpty() ? Text.empty() : definition.descriptions().get(0).copy();
+                                lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+                                                desc,
+                                                Style.EMPTY.withFormatting(Formatting.GRAY)
+                                )));
+                                if (Screen.hasShiftDown()) {
+                                        var extraDesc = definition.extraDescriptions().isEmpty() ? Text.empty() : definition.extraDescriptions().get(0).copy();
+                                        lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+                                                        extraDesc,
+                                                        Style.EMPTY.withFormatting(Formatting.GRAY)
+                                        )));
+                                }
 				if (client.options.advancedItemTooltips) {
 					lines.add(Text.literal(hoveredSkill.id()).formatted(Formatting.DARK_GRAY).asOrderedText());
 				}

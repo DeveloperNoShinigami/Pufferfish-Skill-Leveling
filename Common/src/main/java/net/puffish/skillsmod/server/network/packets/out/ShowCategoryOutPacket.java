@@ -70,20 +70,22 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeInt(general.spentPointsLimit());
 	}
 
-	public void write(PacketByteBuf buf, SkillDefinitionConfig definition) {
-		buf.writeString(definition.id());
-		buf.writeText(definition.title());
-		buf.writeText(definition.description());
-		buf.writeText(definition.extraDescription());
-		write(buf, definition.frame());
-		write(buf, definition.icon());
-		buf.writeFloat(definition.size());
-		buf.writeInt(definition.cost());
-		buf.writeInt(definition.requiredSkills());
-		buf.writeInt(definition.requiredPoints());
-		buf.writeInt(definition.requiredSpentPoints());
-		buf.writeInt(definition.requiredExclusions());
-	}
+        public void write(PacketByteBuf buf, SkillDefinitionConfig definition) {
+                buf.writeString(definition.id());
+                buf.writeIdentifier(definition.type());
+                buf.writeInt(definition.maxLevels());
+                buf.writeCollection(definition.descriptions(), PacketByteBuf::writeText);
+                buf.writeCollection(definition.extraDescriptions(), PacketByteBuf::writeText);
+                buf.writeText(definition.title());
+                write(buf, definition.frame());
+                write(buf, definition.icon());
+                buf.writeFloat(definition.size());
+                buf.writeInt(definition.cost());
+                buf.writeInt(definition.requiredSkills());
+                buf.writeInt(definition.requiredPoints());
+                buf.writeInt(definition.requiredSpentPoints());
+                buf.writeInt(definition.requiredExclusions());
+        }
 
 	public void write(PacketByteBuf buf, SkillsConfig skills) {
 		buf.writeCollection(skills.getAll(), ShowCategoryOutPacket::write);

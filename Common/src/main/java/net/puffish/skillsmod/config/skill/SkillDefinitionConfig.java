@@ -1,6 +1,7 @@
 package net.puffish.skillsmod.config.skill;
 
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
 import net.puffish.skillsmod.api.json.JsonElement;
@@ -17,9 +18,11 @@ import java.util.List;
 
 public record SkillDefinitionConfig(
 		String id,
+		Identifier type,
+		int maxLevels,
+		List<Text> descriptions,
+		List<Text> extraDescriptions,
 		Text title,
-		Text description,
-		Text extraDescription,
 		IconConfig icon,
 		FrameConfig frame,
 		float size,
@@ -45,21 +48,47 @@ public record SkillDefinitionConfig(
 				.ifFailure(problems::add)
 				.getSuccess();
 
-		var description = rootObject.get("description")
+		var type = rootObject.get("type")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement)
+				.flatMap(element -> BuiltinJson.parseIdentifier(element)
 						.ifFailure(problems::add)
-						.getSuccess()
-				)
-				.orElseGet(Text::empty);
+						.getSuccess())
+				.orElse(Identifier.of("puffish_skills", "default"));
 
-		var extraDescription = rootObject.get("extra_description")
+		var maxLevels = rootObject.get("max_levels")
 				.getSuccess() // ignore failure because this property is optional
-				.flatMap(descriptionElement -> BuiltinJson.parseText(descriptionElement)
+				.flatMap(element -> element.getAsInt()
 						.ifFailure(problems::add)
-						.getSuccess()
-				)
-				.orElseGet(Text::empty);
+						.getSuccess())
+				.orElse(1);
+
+		var descriptions = rootObject.getArray("descriptions")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(array -> array.getAsList((i, e) -> BuiltinJson.parseText(e))
+						.mapFailure(Problem::combine)
+						.ifFailure(problems::add)
+						.getSuccess())
+				.orElseGet(() -> rootObject.get("description")
+						.getSuccess() // ignore failure because this property is optional
+						.flatMap(element -> BuiltinJson.parseText(element)
+								.ifFailure(problems::add)
+								.getSuccess())
+						.map(List::of)
+						.orElseGet(List::of));
+
+		var extraDescriptions = rootObject.getArray("extra_descriptions")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(array -> array.getAsList((i, e) -> BuiltinJson.parseText(e))
+						.mapFailure(Problem::combine)
+						.ifFailure(problems::add)
+						.getSuccess())
+				.orElseGet(() -> rootObject.get("extra_description")
+						.getSuccess() // ignore failure because this property is optional
+						.flatMap(element -> BuiltinJson.parseText(element)
+								.ifFailure(problems::add)
+								.getSuccess())
+						.map(List::of)
+						.orElseGet(List::of));
 
 		var optIcon = rootObject.get("icon")
 				.andThen(element -> IconConfig.parse(element, context))
@@ -135,9 +164,11 @@ public record SkillDefinitionConfig(
 		if (problems.isEmpty()) {
 			return Result.success(new SkillDefinitionConfig(
 					id,
+					type,
+					maxLevels,
+					descriptions,
+					extraDescriptions,
 					optTitle.orElseThrow(),
-					description,
-					extraDescription,
 					optIcon.orElseThrow(),
 					frame,
 					size,

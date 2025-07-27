@@ -104,9 +104,11 @@ public class ShowCategoryInPacket implements InPacket {
 
 	public static ClientSkillDefinitionConfig readDefinition(PacketByteBuf buf) {
 		var id = buf.readString();
+		var type = buf.readIdentifier();
+		var maxLevels = buf.readInt();
+		var descriptions = buf.readList(PacketByteBuf::readText);
+		var extraDescriptions = buf.readList(PacketByteBuf::readText);
 		var title = buf.readText();
-		var description = buf.readText();
-		var extraDescription = buf.readText();
 		var frame = readFrameIcon(buf);
 		var icon = readSkillIcon(buf);
 		var size = buf.readFloat();
@@ -117,14 +119,16 @@ public class ShowCategoryInPacket implements InPacket {
 		var requiredExclusions = buf.readInt();
 
 		return new ClientSkillDefinitionConfig(
-				id,
-				title,
-				description,
-				extraDescription,
-				icon,
-				frame,
-				size,
-				cost,
+			id,
+			type,
+			maxLevels,
+			descriptions,
+			extraDescriptions,
+			title,
+			icon,
+			frame,
+			size,
+			cost,
 				requiredSkills,
 				requiredPoints,
 				requiredSpentPoints,

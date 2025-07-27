@@ -72,9 +72,11 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 
 	public void write(PacketByteBuf buf, SkillDefinitionConfig definition) {
 		buf.writeString(definition.id());
+		buf.writeIdentifier(definition.type());
+		buf.writeInt(definition.maxLevels());
+		buf.writeCollection(definition.descriptions(), PacketByteBuf::writeText);
+		buf.writeCollection(definition.extraDescriptions(), PacketByteBuf::writeText);
 		buf.writeText(definition.title());
-		buf.writeText(definition.description());
-		buf.writeText(definition.extraDescription());
 		write(buf, definition.frame());
 		write(buf, definition.icon());
 		buf.writeFloat(definition.size());

@@ -17,15 +17,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record SkillDefinitionConfig(
-                String id,
-                Identifier type,
-                int maxLevels,
-                List<Text> descriptions,
-                List<Text> extraDescriptions,
-                Text title,
-                IconConfig icon,
-                FrameConfig frame,
-                float size,
+
+		String id,
+		Identifier type,
+		int maxLevels,
+		List<Text> descriptions,
+		List<Text> extraDescriptions,
+		Text title,
+		IconConfig icon,
+		FrameConfig frame,
+		float size,
+
 		List<SkillRewardConfig> rewards,
 		int cost,
 		int requiredSkills,
@@ -43,52 +45,54 @@ public record SkillDefinitionConfig(
 	public static Result<SkillDefinitionConfig, Problem> parse(String id, JsonObject rootObject, ConfigContext context) {
 		var problems = new ArrayList<Problem>();
 
-                var optTitle = rootObject.get("title")
-                                .andThen(BuiltinJson::parseText)
-                                .ifFailure(problems::add)
-                                .getSuccess();
 
-                var type = rootObject.get("type")
-                                .getSuccess() // ignore failure because this property is optional
-                                .flatMap(element -> BuiltinJson.parseIdentifier(element)
-                                                .ifFailure(problems::add)
-                                                .getSuccess())
-                                .orElse(Identifier.of("puffish_skills", "default"));
+		var optTitle = rootObject.get("title")
+				.andThen(BuiltinJson::parseText)
+				.ifFailure(problems::add)
+				.getSuccess();
 
-                var maxLevels = rootObject.get("max_levels")
-                                .getSuccess() // ignore failure because this property is optional
-                                .flatMap(element -> element.getAsInt()
-                                                .ifFailure(problems::add)
-                                                .getSuccess())
-                                .orElse(1);
+		var type = rootObject.get("type")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> BuiltinJson.parseIdentifier(element)
+						.ifFailure(problems::add)
+						.getSuccess())
+				.orElse(Identifier.of("puffish_skills", "default"));
 
-                var descriptions = rootObject.getArray("descriptions")
-                                .getSuccess() // ignore failure because this property is optional
-                                .flatMap(array -> array.getAsList((i, e) -> BuiltinJson.parseText(e))
-                                                .mapFailure(Problem::combine)
-                                                .ifFailure(problems::add)
-                                                .getSuccess())
-                                .orElseGet(() -> rootObject.get("description")
-                                                .getSuccess() // ignore failure because this property is optional
-                                                .flatMap(element -> BuiltinJson.parseText(element)
-                                                                .ifFailure(problems::add)
-                                                                .getSuccess())
-                                                .map(List::of)
-                                                .orElseGet(List::of));
+		var maxLevels = rootObject.get("max_levels")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(element -> element.getAsInt()
+						.ifFailure(problems::add)
+						.getSuccess())
+				.orElse(1);
 
-                var extraDescriptions = rootObject.getArray("extra_descriptions")
-                                .getSuccess() // ignore failure because this property is optional
-                                .flatMap(array -> array.getAsList((i, e) -> BuiltinJson.parseText(e))
-                                                .mapFailure(Problem::combine)
-                                                .ifFailure(problems::add)
-                                                .getSuccess())
-                                .orElseGet(() -> rootObject.get("extra_description")
-                                                .getSuccess() // ignore failure because this property is optional
-                                                .flatMap(element -> BuiltinJson.parseText(element)
-                                                                .ifFailure(problems::add)
-                                                                .getSuccess())
-                                                .map(List::of)
-                                                .orElseGet(List::of));
+		var descriptions = rootObject.getArray("descriptions")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(array -> array.getAsList((i, e) -> BuiltinJson.parseText(e))
+						.mapFailure(Problem::combine)
+						.ifFailure(problems::add)
+						.getSuccess())
+				.orElseGet(() -> rootObject.get("description")
+						.getSuccess() // ignore failure because this property is optional
+						.flatMap(element -> BuiltinJson.parseText(element)
+								.ifFailure(problems::add)
+								.getSuccess())
+						.map(List::of)
+						.orElseGet(List::of));
+
+		var extraDescriptions = rootObject.getArray("extra_descriptions")
+				.getSuccess() // ignore failure because this property is optional
+				.flatMap(array -> array.getAsList((i, e) -> BuiltinJson.parseText(e))
+						.mapFailure(Problem::combine)
+						.ifFailure(problems::add)
+						.getSuccess())
+				.orElseGet(() -> rootObject.get("extra_description")
+						.getSuccess() // ignore failure because this property is optional
+						.flatMap(element -> BuiltinJson.parseText(element)
+								.ifFailure(problems::add)
+								.getSuccess())
+						.map(List::of)
+						.orElseGet(List::of));
+
 
 		var optIcon = rootObject.get("icon")
 				.andThen(element -> IconConfig.parse(element, context))
@@ -161,27 +165,29 @@ public record SkillDefinitionConfig(
 		// this field is generated be the editor, access it to avoid unused field error
 		rootObject.get("metadata");
 
-                if (problems.isEmpty()) {
-                        return Result.success(new SkillDefinitionConfig(
-                                        id,
-                                        type,
-                                        maxLevels,
-                                        descriptions,
-                                        extraDescriptions,
-                                        optTitle.orElseThrow(),
-                                        optIcon.orElseThrow(),
-                                        frame,
-                                        size,
-                                        rewards,
-                                        cost,
-                                        requiredSkills,
-                                        requiredPoints,
-                                        requiredSpentPoints,
-                                        requiredExclusions
-                        ));
-                } else {
-                        return Result.failure(Problem.combine(problems));
-                }
+
+		if (problems.isEmpty()) {
+			return Result.success(new SkillDefinitionConfig(
+					id,
+					type,
+					maxLevels,
+					descriptions,
+					extraDescriptions,
+					optTitle.orElseThrow(),
+					optIcon.orElseThrow(),
+					frame,
+					size,
+					rewards,
+					cost,
+					requiredSkills,
+					requiredPoints,
+					requiredSpentPoints,
+					requiredExclusions
+			));
+		} else {
+			return Result.failure(Problem.combine(problems));
+		}
+
 	}
 
 	public void dispose(DisposeContext context) {

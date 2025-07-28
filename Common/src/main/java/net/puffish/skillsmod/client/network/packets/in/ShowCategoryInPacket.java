@@ -102,33 +102,34 @@ public class ShowCategoryInPacket implements InPacket {
 		);
 	}
 
-        public static ClientSkillDefinitionConfig readDefinition(PacketByteBuf buf) {
-                var id = buf.readString();
-                var type = buf.readIdentifier();
-                var maxLevels = buf.readInt();
-                var descriptions = buf.readList(PacketByteBuf::readText);
-                var extraDescriptions = buf.readList(PacketByteBuf::readText);
-                var title = buf.readText();
-                var frame = readFrameIcon(buf);
-                var icon = readSkillIcon(buf);
-                var size = buf.readFloat();
-                var cost = buf.readInt();
-                var requiredSkills = buf.readInt();
-                var requiredPoints = buf.readInt();
-                var requiredSpentPoints = buf.readInt();
-                var requiredExclusions = buf.readInt();
+	public static ClientSkillDefinitionConfig readDefinition(PacketByteBuf buf) {
+		var id = buf.readString();
+		var type = buf.readIdentifier();
+		var maxLevels = buf.readInt();
+		var descriptions = buf.readList(PacketByteBuf::readText);
+		var extraDescriptions = buf.readList(PacketByteBuf::readText);
+		var title = buf.readText();
+		var frame = readFrameIcon(buf);
+		var icon = readSkillIcon(buf);
+		var size = buf.readFloat();
+		var cost = buf.readInt();
+		var requiredSkills = buf.readInt();
+		var requiredPoints = buf.readInt();
+		var requiredSpentPoints = buf.readInt();
+		var requiredExclusions = buf.readInt();
 
-                return new ClientSkillDefinitionConfig(
-                                id,
-                                type,
-                                maxLevels,
-                                descriptions,
-                                extraDescriptions,
-                                title,
-                                icon,
-                                frame,
-                                size,
-				cost,
+		return new ClientSkillDefinitionConfig(
+			id,
+			type,
+			maxLevels,
+			descriptions,
+			extraDescriptions,
+			title,
+			icon,
+			frame,
+			size,
+			cost,
+
 				requiredSkills,
 				requiredPoints,
 				requiredSpentPoints,

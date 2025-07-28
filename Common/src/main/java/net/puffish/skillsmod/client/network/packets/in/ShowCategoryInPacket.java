@@ -129,6 +129,7 @@ public class ShowCategoryInPacket implements InPacket {
 			frame,
 			size,
 			cost,
+
 				requiredSkills,
 				requiredPoints,
 				requiredSpentPoints,

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record SkillDefinitionConfig(
+
 		String id,
 		Identifier type,
 		int maxLevels,
@@ -26,6 +27,7 @@ public record SkillDefinitionConfig(
 		IconConfig icon,
 		FrameConfig frame,
 		float size,
+
 		List<SkillRewardConfig> rewards,
 		int cost,
 		int requiredSkills,
@@ -42,6 +44,7 @@ public record SkillDefinitionConfig(
 
 	public static Result<SkillDefinitionConfig, Problem> parse(String id, JsonObject rootObject, ConfigContext context) {
 		var problems = new ArrayList<Problem>();
+
 
 		var optTitle = rootObject.get("title")
 				.andThen(BuiltinJson::parseText)
@@ -89,6 +92,7 @@ public record SkillDefinitionConfig(
 								.getSuccess())
 						.map(List::of)
 						.orElseGet(List::of));
+
 
 		var optIcon = rootObject.get("icon")
 				.andThen(element -> IconConfig.parse(element, context))
@@ -161,6 +165,7 @@ public record SkillDefinitionConfig(
 		// this field is generated be the editor, access it to avoid unused field error
 		rootObject.get("metadata");
 
+
 		if (problems.isEmpty()) {
 			return Result.success(new SkillDefinitionConfig(
 					id,
@@ -182,6 +187,7 @@ public record SkillDefinitionConfig(
 		} else {
 			return Result.failure(Problem.combine(problems));
 		}
+
 	}
 
 	public void dispose(DisposeContext context) {

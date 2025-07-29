@@ -10,9 +10,11 @@ Skill definitions describe how a skill looks and what it grants. Datapacks may n
 - `max_levels` – how many times the skill can be unlocked.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
+
 - Tooltip lines automatically adjust based on how many times the skill has been unlocked. When hovering a skill, the
   entry matching the player's current level is shown, and holding Shift displays the line for the next level (or a final
   message if the skill is maxed).
+
 - `title`, `icon`, `frame`, `size`, and `rewards` work as before.
 
 A basic skill definition might look like this:
@@ -73,7 +75,9 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 ```
 
 Each nested reward behaves as if it were a normal reward, but is only active when the player's skill level is at least the specified level.
+
 All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration.
+
 
 ## Example datapack
 

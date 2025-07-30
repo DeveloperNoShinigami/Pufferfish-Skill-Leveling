@@ -14,6 +14,7 @@ import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.config.skill.SkillRewardConfig;
 import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
+import net.puffish.skillsmod.util.DisposeContext;
 import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
@@ -90,9 +91,10 @@ public class PerLevelRewardsReward implements Reward {
 
     @Override
     public void dispose(RewardDisposeContext context) {
+        var disposeContext = new DisposeContext(context.getServer());
         for (var rewardList : levelRewards.values()) {
             for (var reward : rewardList) {
-                reward.dispose(context);
+                reward.dispose(disposeContext);
             }
         }
     }

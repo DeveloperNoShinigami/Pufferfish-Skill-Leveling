@@ -290,18 +290,28 @@ public class SkillsScreen extends Screen {
 		var activeCategory = activeCategoryData.getConfig();
 
                 if (isInsideContent(mouse)) {
-                        var stream = activeCategory.skills().values().stream()
-                                        .filter(skill -> activeCategory
-                                                        .getDefinitionById(skill.definitionId())
-                                                        .map(definition -> isInsideSkill(transformedMouse, skill, definition))
-                                                        .orElse(false));
+            var stream = activeCategory.skills().values().stream()
+                            .filter(skill -> activeCategory
+                                            .getDefinitionById(skill.definitionId())
+                                            .map(definition -> isInsideSkill(transformedMouse, skill, definition))
+                                            .orElse(false));
 
-                        stream.filter(skill -> activeCategoryData.getSkillState(skill) != Skill.State.UNLOCKED)
-                                        .findFirst()
-                                        .or(() -> stream.findFirst())
-                                        .ifPresent(skill -> SkillsClientMod.getInstance()
-                                                        .getPacketSender()
-                                                        .send(new SkillClickOutPacket(activeCategory.id(), skill.id())));
+            var optSkill = stream
+                            .filter(skill -> activeCategoryData.getSkillState(skill) != Skill.State.UNLOCKED)
+                            .findFirst();
+
+            if (optSkill.isEmpty()) {
+                optSkill = activeCategory.skills().values().stream()
+                                .filter(skill -> activeCategory
+                                                .getDefinitionById(skill.definitionId())
+                                                .map(definition -> isInsideSkill(transformedMouse, skill, definition))
+                                                .orElse(false))
+                                .findFirst();
+            }
+
+            optSkill.ifPresent(skill -> SkillsClientMod.getInstance()
+                            .getPacketSender()
+                            .send(new SkillClickOutPacket(activeCategory.id(), skill.id())));
                 }
         }
 

@@ -23,13 +23,12 @@ A basic skill definition might look like this:
 ```json
 {
   "my_skill": {
-    "type": "puffish_skills:stackable", //allows a new type that lets you utlize level based skill types and standard rewards.
+    "type": "puffish_skills:stackable", // unlock the skill multiple times
     "max_levels": 5,
     "title": "Master Miner",
     "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
-    "frame": { /* your frame config */ },
     "size": 1.0,
-    "descriptions": [ 
+    "descriptions": [
       "Current: +5% mining speed",
       "Current: +10% mining speed",
       "Current: +15% mining speed",
@@ -43,13 +42,22 @@ A basic skill definition might look like this:
       "Next: +25% mining speed",
       "— MAXED OUT —"
     ],
-    "cost": 1,
-    "required_skills": 0,
-    "required_points": 0,
-    "required_spent_points": 0,
-    "required_exclusions": 0,
     "rewards": [
-      "puffish_skills:attribute/mining_speed_i"
+      {
+        "type": "puffish_skills:per_level_rewards",
+        "data": {
+          "skill_id": "my_skill",
+          "max_level": 5,
+          "points_per_level": 1,
+          "levels": {
+            "1": [ "puffish_skills:attribute/mining_speed_i" ],
+            "2": [ "puffish_skills:attribute/mining_speed_i" ],
+            "3": [ "puffish_skills:attribute/mining_speed_i" ],
+            "4": [ "puffish_skills:attribute/mining_speed_i" ],
+            "5": [ "puffish_skills:attribute/mining_speed_i" ]
+          }
+        }
+      }
     ]
   }
 }
@@ -75,12 +83,12 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 }
 ```
 
-Each nested reward behaves as if it were a normal reward, but is only active when the player's skill level is at least the specified level.
+Each nested reward behaves as if it were a normal reward, but it only activates once the player has reached the listed level.
 
-All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration. When a level is unlocked the category loses `points_per_level` points. A player cannot level beyond `max_level` unless they have enough points to pay for the additional levels.
+Rewards remain active after being unlocked. If you include the same reward in multiple level entries it will be applied repeatedly, effectively stacking the effect. When a level is unlocked the category loses `points_per_level` points and players cannot level past `max_level` unless they have enough points to pay for each step.
 
 
 ## Example datapack
 
-The `example-skill-level-template.zip` file contains a datapack demonstrating a stackable skill using per-level rewards. Drop the zip into the `datapacks` folder of a world to test the feature.
+An example datapack is provided as `example-skill-level-template.zip`. Drop this file (or its extracted folder) into your world's `datapacks` directory and reload the world. The JSON files inside illustrate how to configure a stackable skill with per-level rewards that accumulate as you unlock each tier.
 

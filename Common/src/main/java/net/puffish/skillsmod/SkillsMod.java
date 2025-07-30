@@ -38,6 +38,7 @@ import net.puffish.skillsmod.impl.config.ConfigContextImpl;
 import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.reward.BuiltinRewards;
+import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
 import net.puffish.skillsmod.reward.builtin.PointsReward;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.server.data.PlayerData;
@@ -693,17 +694,34 @@ public class SkillsMod {
 		}
 	}
 
-        private void updateSkillRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, boolean isUnlock) {
-                category.definitions().getById(skill.definitionId()).ifPresent(definition -> {
-                        var count = categoryData.countUnlocked(category, definition.id());
+    private void updateSkillRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, boolean isUnlock) {
+        category.definitions().getById(skill.definitionId()).ifPresent(definition -> {
+            var count = categoryData.countUnlocked(category, definition.id());
 
-                        var action = isUnlock && count == 1;
-
-                        for (var reward : definition.rewards()) {
-                                reward.instance().update(new RewardUpdateContextImpl(player, count, action));
+            if (isUnlock) {
+                int prev = count - 1;
+                for (var reward : definition.rewards()) {
+                    var inst = reward.instance();
+                    if (inst instanceof PerLevelRewardsReward plr) {
+                        if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
+                            int newLevel = Math.min(count, plr.getMaxLevel());
+                            int oldLevel = Math.min(prev, plr.getMaxLevel());
+                            int diff = newLevel - oldLevel;
+                            if (diff > 0 && plr.getPointsPerLevel() > 0) {
+                                addPoints(player, category, categoryData, PointSources.LEVEL_REWARDS, -plr.getPointsPerLevel() * diff, true);
+                            }
                         }
-                });
-        }
+                    }
+                }
+            }
+
+            var action = isUnlock && count == 1;
+
+            for (var reward : definition.rewards()) {
+                reward.instance().update(new RewardUpdateContextImpl(player, count, action));
+            }
+        });
+    }
 
 	private void resetRewards(ServerPlayerEntity player, CategoryConfig category) {
 		for (var definition : category.definitions().getAll()) {

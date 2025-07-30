@@ -92,6 +92,7 @@ public class SkillDefinitionsConfig {
                 );
                 merged.put(id, mergedDef);
                 return mergedDef;
+
         }
 
 	public Optional<SkillDefinitionConfig> getById(String id) {

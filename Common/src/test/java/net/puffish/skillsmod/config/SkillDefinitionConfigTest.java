@@ -5,7 +5,6 @@ import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonPath;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
-import net.puffish.skillsmod.config.skill.SkillDefinitionsConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

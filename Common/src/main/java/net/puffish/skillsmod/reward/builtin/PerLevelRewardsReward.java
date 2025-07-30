@@ -25,11 +25,29 @@ import java.util.Map;
 public class PerLevelRewardsReward implements Reward {
 	public static final Identifier ID = SkillsMod.createIdentifier("per_level_rewards");
 
-	private final Map<Integer, List<SkillRewardConfig>> levelRewards;
+    private final Map<Integer, List<SkillRewardConfig>> levelRewards;
+    private final String skillId;
+    private final int maxLevel;
+    private final int pointsPerLevel;
 
-	private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards) {
-	this.levelRewards = levelRewards;
-	}
+    private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards, String skillId, int maxLevel, int pointsPerLevel) {
+        this.levelRewards = levelRewards;
+        this.skillId = skillId;
+        this.maxLevel = maxLevel;
+        this.pointsPerLevel = pointsPerLevel;
+    }
+
+    public String getSkillId() {
+        return skillId;
+    }
+
+    public int getMaxLevel() {
+        return maxLevel;
+    }
+
+    public int getPointsPerLevel() {
+        return pointsPerLevel;
+    }
 
 	public static void register() {
 	SkillsAPI.registerReward(ID, PerLevelRewardsReward::parse);
@@ -66,16 +84,32 @@ public class PerLevelRewardsReward implements Reward {
 		}
 	});
 
-	// Access optional fields to avoid unused warnings
-	rootObject.get("skill_id");
-	rootObject.get("max_level");
-	rootObject.get("points_per_level");
+        var optSkillId = rootObject.getString("skill_id")
+                .ifFailure(problems::add)
+                .getSuccess();
 
-	if (problems.isEmpty()) {
-		return Result.success(new PerLevelRewardsReward(levelRewards));
-	} else {
-		return Result.failure(Problem.combine(problems));
-	}
+        var optMaxLevel = rootObject.get("max_level")
+                .getSuccess() // optional
+                .flatMap(element -> element.getAsInt()
+                                .ifFailure(problems::add)
+                                .getSuccess())
+                .orElse(Integer.MAX_VALUE);
+
+        var optPointsPerLevel = rootObject.get("points_per_level")
+                .getSuccess() // optional
+                .flatMap(element -> element.getAsInt()
+                                .ifFailure(problems::add)
+                                .getSuccess())
+                .orElse(0);
+
+        if (problems.isEmpty()) {
+                return Result.success(new PerLevelRewardsReward(levelRewards,
+                                optSkillId.orElse(null),
+                                optMaxLevel,
+                                optPointsPerLevel));
+        } else {
+                return Result.failure(Problem.combine(problems));
+        }
 	}
 
 	@Override

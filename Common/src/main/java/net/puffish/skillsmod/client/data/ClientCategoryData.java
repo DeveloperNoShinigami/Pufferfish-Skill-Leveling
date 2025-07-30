@@ -94,18 +94,18 @@ public class ClientCategoryData {
 		}
 	}
 
-        public Skill.State getSkillState(ClientSkillConfig skill) {
-                return skillStates.get(skill.id());
-        }
+	public Skill.State getSkillState(ClientSkillConfig skill) {
+		return skillStates.get(skill.id());
+	}
 
-        public int countUnlocked(String definitionId) {
-                return (int) config.skills()
-                                .values()
-                                .stream()
-                                .filter(skill -> skill.definitionId().equals(definitionId))
-                                .filter(skill -> getSkillState(skill) == Skill.State.UNLOCKED)
-                                .count();
-        }
+	public int countUnlocked(String definitionId) {
+		return (int) config.skills()
+				.values()
+				.stream()
+				.filter(skill -> skill.definitionId().equals(definitionId))
+				.filter(skill -> getSkillState(skill) == Skill.State.UNLOCKED)
+				.count();
+	}
 
 	public void unlock(String skillId) {
 		var skill = config.skills().get(skillId);

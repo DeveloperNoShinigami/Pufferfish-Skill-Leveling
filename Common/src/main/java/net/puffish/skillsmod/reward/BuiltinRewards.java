@@ -12,8 +12,8 @@ public class BuiltinRewards {
 		AttributeReward.register();
 		CommandReward.register();
 		PointsReward.register();
-                ScoreboardReward.register();
-                TagReward.register();
-                PerLevelRewardsReward.register();
-        }
+		ScoreboardReward.register();
+		TagReward.register();
+		PerLevelRewardsReward.register();
+	}
 }

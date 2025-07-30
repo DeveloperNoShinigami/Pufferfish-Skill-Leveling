@@ -66,10 +66,32 @@ public class PerLevelRewardsReward implements Reward {
 		}
 	});
 
-	// Access optional fields to avoid unused warnings
+	// Access optional fields and validate values
 	rootObject.get("skill_id");
-	rootObject.get("max_level");
-	rootObject.get("points_per_level");
+	
+	var optMaxLevel = rootObject.get("max_level")
+	.getSuccess() // ignore failure because this property is optional
+	.flatMap(element -> element.getAsInt()
+	.ifFailure(problems::add)
+	.getSuccess());
+	optMaxLevel.ifPresent(maxLevel -> {
+	if (maxLevel < 1) {
+	problems.add(rootObject.getPath().getObject("max_level")
+	.createProblem("Expected a value \u2265 1"));
+	}
+	});
+	
+	var optPointsPerLevel = rootObject.get("points_per_level")
+	.getSuccess() // ignore failure because this property is optional
+	.flatMap(element -> element.getAsInt()
+	.ifFailure(problems::add)
+	.getSuccess());
+	optPointsPerLevel.ifPresent(points -> {
+	if (points < 0) {
+	problems.add(rootObject.getPath().getObject("points_per_level")
+	.createProblem("Expected a value \u2265 0"));
+	}
+	});
 
 	if (problems.isEmpty()) {
 		return Result.success(new PerLevelRewardsReward(levelRewards));

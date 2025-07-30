@@ -10,8 +10,7 @@ Skill definitions describe how a skill looks and what it grants. Datapacks may n
 - `max_levels` – how many times the skill can be unlocked.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
-- `parent` – id of another definition to inherit from.
-- `merge_description` – when `true`, descriptions and extra descriptions from the parent are appended to this definition's own lists. Defaults to `false` when omitted. You only want to use this when you are adding the total number of rewards together (such as origins skill types, effect, or command even), other wise you will want to write what the progression of the reward would look like.
+- `merge_description` – when `true`, descriptions and extra descriptions accumulate from earlier levels instead of replacing them. Defaults to `false` when omitted.
 
 - Tooltip lines automatically adjust based on how many times the skill has been unlocked. When hovering a skill, the
   entry matching the player's current level is shown, and holding Shift displays the line for the next level (or a final

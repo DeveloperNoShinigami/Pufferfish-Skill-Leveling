@@ -693,15 +693,17 @@ public class SkillsMod {
 		}
 	}
 
-	private void updateSkillRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, boolean isUnlock) {
-		category.definitions().getById(skill.definitionId()).ifPresent(definition -> {
-			var count = categoryData.countUnlocked(category, definition.id());
+        private void updateSkillRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, boolean isUnlock) {
+                category.definitions().getById(skill.definitionId()).ifPresent(definition -> {
+                        var count = categoryData.countUnlocked(category, definition.id());
 
-			for (var reward : definition.rewards()) {
-				reward.instance().update(new RewardUpdateContextImpl(player, count, isUnlock));
-			}
-		});
-	}
+                        var action = isUnlock && count == 1;
+
+                        for (var reward : definition.rewards()) {
+                                reward.instance().update(new RewardUpdateContextImpl(player, count, action));
+                        }
+                });
+        }
 
 	private void resetRewards(ServerPlayerEntity player, CategoryConfig category) {
 		for (var definition : category.definitions().getAll()) {

@@ -35,7 +35,7 @@ import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillRewardConfig;
 import net.puffish.skillsmod.experience.source.BuiltinExperienceSources;
 import net.puffish.skillsmod.impl.config.ConfigContextImpl;
-import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
+import net.puffish.skillsmod.impl.rewards.SkillRewardUpdateContextImpl;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.reward.BuiltinRewards;
 import net.puffish.skillsmod.reward.builtin.PointsReward;
@@ -673,25 +673,39 @@ public class SkillsMod {
 				for (var definition : category.definitions().getAll()) {
 					var count = categoryData.countUnlocked(category, definition.id());
 
-					for (var reward : definition.rewards()) {
-						if (predicate.test(reward)) {
-							reward.instance().update(new RewardUpdateContextImpl(player, count, false));
-						}
-					}
+                                        for (var reward : definition.rewards()) {
+                                                if (predicate.test(reward)) {
+                                                        reward.instance().update(
+                                                                new SkillRewardUpdateContextImpl(
+                                                                        player,
+                                                                        count,
+                                                                        false,
+                                                                        category.id(),
+                                                                        null
+                                                                )
+                                                        );
+                                                }
+                                        }
 				}
 			});
 		}
 	}
 
-	private void updateRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
-		for (var definition : category.definitions().getAll()) {
-			var count = categoryData.countUnlocked(category, definition.id());
+        private void updateRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData) {
+                for (var definition : category.definitions().getAll()) {
+                        var count = categoryData.countUnlocked(category, definition.id());
 
-			for (var reward : definition.rewards()) {
-				reward.instance().update(new RewardUpdateContextImpl(player, count, false));
-			}
-		}
-	}
+                        for (var reward : definition.rewards()) {
+                                reward.instance().update(new SkillRewardUpdateContextImpl(
+                                                player,
+                                                count,
+                                                false,
+                                                category.id(),
+                                                null
+                                ));
+                        }
+                }
+        }
 
         private void updateSkillRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, boolean isUnlock) {
                 category.definitions().getById(skill.definitionId()).ifPresent(definition -> {
@@ -700,18 +714,30 @@ public class SkillsMod {
                         var action = isUnlock && count == 1;
 
                         for (var reward : definition.rewards()) {
-                                reward.instance().update(new RewardUpdateContextImpl(player, count, action));
+                                reward.instance().update(new SkillRewardUpdateContextImpl(
+                                                player,
+                                                count,
+                                                action,
+                                                category.id(),
+                                                skill.id()
+                                ));
                         }
                 });
         }
 
-	private void resetRewards(ServerPlayerEntity player, CategoryConfig category) {
-		for (var definition : category.definitions().getAll()) {
-			for (var reward : definition.rewards()) {
-				reward.instance().update(new RewardUpdateContextImpl(player, 0, false));
-			}
-		}
-	}
+        private void resetRewards(ServerPlayerEntity player, CategoryConfig category) {
+                for (var definition : category.definitions().getAll()) {
+                        for (var reward : definition.rewards()) {
+                                reward.instance().update(new SkillRewardUpdateContextImpl(
+                                                player,
+                                                0,
+                                                false,
+                                                category.id(),
+                                                null
+                                ));
+                        }
+                }
+        }
 
 	private Optional<CategoryData> getCategoryDataIfUnlocked(ServerPlayerEntity player, CategoryConfig category) {
 		return getCategoryDataIfUnlocked(getPlayerData(player), category);

@@ -71,10 +71,10 @@ public class SkillDefinitionConfigTest {
                 result.getFailure().map(Object::toString).orElse("Unexpected failure"));
         var defs = result.getSuccess().orElseThrow();
         var child = defs.getById("child").orElseThrow();
-        Assertions.assertEquals(2, child.descriptions().size());
-        Assertions.assertEquals(2, child.extraDescriptions().size());
-        Assertions.assertEquals("A", child.descriptions().get(0).getString());
-        Assertions.assertEquals("EA", child.extraDescriptions().get(0).getString());
+        Assertions.assertEquals(1, child.descriptions().size());
+        Assertions.assertEquals(1, child.extraDescriptions().size());
+        Assertions.assertEquals("B", child.descriptions().get(0).getString());
+        Assertions.assertEquals("EB", child.extraDescriptions().get(0).getString());
     }
 
     @Test
@@ -106,15 +106,11 @@ public class SkillDefinitionConfigTest {
                 result.getFailure().map(Object::toString).orElse("Unexpected failure"));
         var defs = result.getSuccess().orElseThrow();
         var child = defs.getById("child").orElseThrow();
-        Assertions.assertEquals(4, child.descriptions().size());
-        Assertions.assertEquals(4, child.extraDescriptions().size());
-        Assertions.assertEquals("A1", child.descriptions().get(0).getString());
-        Assertions.assertEquals("A2", child.descriptions().get(1).getString());
-        Assertions.assertEquals("B1", child.descriptions().get(2).getString());
-        Assertions.assertEquals("B2", child.descriptions().get(3).getString());
-        Assertions.assertEquals("EA1", child.extraDescriptions().get(0).getString());
-        Assertions.assertEquals("EA2", child.extraDescriptions().get(1).getString());
-        Assertions.assertEquals("EB1", child.extraDescriptions().get(2).getString());
-        Assertions.assertEquals("EB2", child.extraDescriptions().get(3).getString());
+        Assertions.assertEquals(2, child.descriptions().size());
+        Assertions.assertEquals(2, child.extraDescriptions().size());
+        Assertions.assertEquals("B1", child.descriptions().get(0).getString());
+        Assertions.assertEquals("B2", child.descriptions().get(1).getString());
+        Assertions.assertEquals("EB1", child.extraDescriptions().get(0).getString());
+        Assertions.assertEquals("EB2", child.extraDescriptions().get(1).getString());
     }
 }

@@ -61,7 +61,7 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 
 ```json
 {
-  "type": "puffish_skills:per_level_rewards", //Skill not only have levels but each can contain rewards per level. 
+  "type": "puffish_skills:per_level_rewards", // Skill levels can provide different rewards.
   "data": {
     "skill_id": "stacked_power",
     "max_level": 3,
@@ -77,7 +77,7 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 
 Each nested reward behaves as if it were a normal reward, but is only active when the player's skill level is at least the specified level.
 
-All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration.
+All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration. When a level is unlocked the category loses `points_per_level` points. A player cannot level beyond `max_level` unless they have enough points to pay for the additional levels.
 
 
 ## Example datapack

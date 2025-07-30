@@ -14,47 +14,51 @@ import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
 import net.puffish.skillsmod.util.PointSources;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public class CategoryData {
-	private final Set<String> unlockedSkills;
+       private final Map<String, Integer> unlockedSkills;
 	private final Map<Identifier, Integer> points;
 	private boolean unlocked;
 	private int experience;
 
-	private CategoryData(Set<String> unlockedSkills, Map<Identifier, Integer> points, boolean unlocked, int experience) {
-		this.unlockedSkills = unlockedSkills;
+       private CategoryData(Map<String, Integer> unlockedSkills, Map<Identifier, Integer> points, boolean unlocked, int experience) {
+               this.unlockedSkills = unlockedSkills;
 		this.points = points;
 		this.unlocked = unlocked;
 		this.experience = experience;
 	}
 
-	public static CategoryData create(GeneralConfig general) {
-		var points = new HashMap<Identifier, Integer>();
-		points.put(PointSources.STARTING, general.startingPoints());
+       public static CategoryData create(GeneralConfig general) {
+               var points = new HashMap<Identifier, Integer>();
+               points.put(PointSources.STARTING, general.startingPoints());
 
-		return new CategoryData(
-				new HashSet<>(),
-				points,
-				general.unlockedByDefault(),
-				0
-		);
-	}
+               return new CategoryData(
+                               new HashMap<>(),
+                               points,
+                               general.unlockedByDefault(),
+                               0
+               );
+       }
 
 	public static CategoryData read(NbtCompound nbt) {
 		var unlocked = nbt.getBoolean("unlocked");
 		var experience = nbt.getInt("experience");
 
-		var unlockedSkills = new HashSet<String>();
-		var unlockedNbt = nbt.getList("unlocked_skills", NbtElement.STRING_TYPE);
-		for (var elementNbt : unlockedNbt) {
-			if (elementNbt instanceof NbtString stringNbt) {
-				unlockedSkills.add(stringNbt.asString());
-			}
-		}
+               var unlockedSkills = new HashMap<String, Integer>();
+               var unlockedNbt = nbt.get("unlocked_skills");
+               if (unlockedNbt instanceof NbtList unlockedList) {
+                       for (var elementNbt : unlockedList) {
+                               if (elementNbt instanceof NbtString stringNbt) {
+                                       unlockedSkills.put(stringNbt.asString(), 1);
+                               }
+                       }
+               } else if (unlockedNbt instanceof NbtCompound unlockedCompound) {
+                       for (var key : unlockedCompound.getKeys()) {
+                               unlockedSkills.put(key, unlockedCompound.getInt(key));
+                       }
+               }
 
 		var points = new HashMap<Identifier, Integer>();
 		var pointsNbt = nbt.get("points");
@@ -73,11 +77,13 @@ public class CategoryData {
 		nbt.putBoolean("unlocked", unlocked);
 		nbt.putInt("experience", experience);
 
-		var unlockedNbt = new NbtList();
-		for (var skill : unlockedSkills) {
-			unlockedNbt.add(NbtString.of(skill));
-		}
-		nbt.put("unlocked_skills", unlockedNbt);
+               var unlockedNbt = new NbtCompound();
+               for (var entry : unlockedSkills.entrySet()) {
+                       if (entry.getValue() > 0) {
+                               unlockedNbt.putInt(entry.getKey(), entry.getValue());
+                       }
+               }
+               nbt.put("unlocked_skills", unlockedNbt);
 
 		var pointsNbt = new NbtCompound();
 		for (var entry : points.entrySet()) {
@@ -91,14 +97,19 @@ public class CategoryData {
 	}
 
 	public Skill.State getSkillState(CategoryConfig category, SkillConfig skill, SkillDefinitionConfig definition) {
-		if (unlockedSkills.contains(skill.id())) {
-			return Skill.State.UNLOCKED;
-		}
+               var level = unlockedSkills.getOrDefault(skill.id(), 0);
+               var total = countUnlocked(category, definition.id());
+               if (total >= definition.maxLevels()) {
+                       return level > 0 ? Skill.State.UNLOCKED : Skill.State.LOCKED;
+               }
+               if (level >= definition.maxLevels()) {
+                       return Skill.State.UNLOCKED;
+               }
 
 		if (category.connections()
 				.exclusive()
 				.getNeighborsFor(skill.id())
-				.map(neighbors -> neighbors.stream().filter(unlockedSkills::contains).count())
+                               .map(neighbors -> neighbors.stream().filter(unlockedSkills::containsKey).count())
 				.orElse(0L) >= definition.requiredExclusions()
 		) {
 			return Skill.State.EXCLUDED;
@@ -107,14 +118,14 @@ public class CategoryData {
 		if (category.connections()
 				.normal()
 				.getNeighborsFor(skill.id())
-				.map(neighbors -> neighbors.stream().filter(unlockedSkills::contains).count())
+                               .map(neighbors -> neighbors.stream().filter(unlockedSkills::containsKey).count())
 				.orElse(0L) >= definition.requiredSkills()
 		) {
 			return canAfford(category, definition) ? Skill.State.AFFORDABLE : Skill.State.AVAILABLE;
 		}
 
 		if (skill.isRoot()) {
-			if (category.general().exclusiveRoot() && unlockedSkills.stream()
+                       if (category.general().exclusiveRoot() && unlockedSkills.keySet().stream()
 					.flatMap(skillId -> category.skills().getById(skillId).stream())
 					.anyMatch(SkillConfig::isRoot)
 			) {
@@ -144,32 +155,30 @@ public class CategoryData {
 				.orElse(false);
 	}
 
-	public int countUnlocked(CategoryConfig category, String definitionId) {
-		return category.definitions().getById(definitionId).map(
-				definition -> category.skills()
-						.getAll()
-						.stream()
-						.filter(skill -> skill.definitionId().equals(definitionId))
-						.filter(skill -> getSkillState(category, skill, definition) == Skill.State.UNLOCKED)
-						.count()
-		).orElse(0L).intValue();
-	}
+       public int countUnlocked(CategoryConfig category, String definitionId) {
+               return category.skills()
+                               .getAll()
+                               .stream()
+                               .filter(skill -> skill.definitionId().equals(definitionId))
+                               .mapToInt(skill -> unlockedSkills.getOrDefault(skill.id(), 0))
+                               .sum();
+       }
 
-	public void unlockSkill(String id) {
-		unlockedSkills.add(id);
-	}
+       public void unlockSkill(String id) {
+               unlockedSkills.merge(id, 1, Integer::sum);
+       }
 
-	public void lockSkill(String id) {
-		unlockedSkills.remove(id);
-	}
+       public void lockSkill(String id) {
+               unlockedSkills.remove(id);
+       }
 
-	public void resetSkills() {
-		unlockedSkills.clear();
-	}
+       public void resetSkills() {
+               unlockedSkills.clear();
+       }
 
-	public Set<String> getUnlockedSkillIds() {
-		return unlockedSkills;
-	}
+       public Set<String> getUnlockedSkillIds() {
+               return unlockedSkills.keySet();
+       }
 
 	public int getExperience() {
 		return experience;
@@ -180,7 +189,7 @@ public class CategoryData {
 	}
 
 	public int getSpentPoints(CategoryConfig category) {
-		return unlockedSkills.stream()
+               return unlockedSkills.keySet().stream()
 				.flatMap(skillId -> category.skills()
 						.getById(skillId)
 						.flatMap(skill -> category.definitions().getById(skill.definitionId()))

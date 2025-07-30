@@ -25,11 +25,17 @@ import java.util.Map;
 public class PerLevelRewardsReward implements Reward {
 	public static final Identifier ID = SkillsMod.createIdentifier("per_level_rewards");
 
-	private final Map<Integer, List<SkillRewardConfig>> levelRewards;
+    private final Map<Integer, List<SkillRewardConfig>> levelRewards;
+    private final String skillId;
+    private final int maxLevel;
+    private final int pointsPerLevel;
 
-	private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards) {
-	this.levelRewards = levelRewards;
-	}
+    private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards, String skillId, int maxLevel, int pointsPerLevel) {
+        this.levelRewards = levelRewards;
+        this.skillId = skillId;
+        this.maxLevel = maxLevel;
+        this.pointsPerLevel = pointsPerLevel;
+    }
 
 	public static void register() {
 	SkillsAPI.registerReward(ID, PerLevelRewardsReward::parse);
@@ -66,28 +72,45 @@ public class PerLevelRewardsReward implements Reward {
 		}
 	});
 
-	// Access optional fields to avoid unused warnings
-	rootObject.get("skill_id");
-	rootObject.get("max_level");
-	rootObject.get("points_per_level");
+        var optSkillId = rootObject.getString("skill_id")
+                .ifFailure(problems::add)
+                .getSuccess();
 
-	if (problems.isEmpty()) {
-		return Result.success(new PerLevelRewardsReward(levelRewards));
-	} else {
-		return Result.failure(Problem.combine(problems));
-	}
+        var optMaxLevel = rootObject.getInt("max_level")
+                .ifFailure(problems::add)
+                .getSuccess();
+
+        var optPointsPerLevel = rootObject.getInt("points_per_level")
+                .ifFailure(problems::add)
+                .getSuccess();
+
+        if (problems.isEmpty()) {
+                return Result.success(new PerLevelRewardsReward(
+                                levelRewards,
+                                optSkillId.orElse(null),
+                                optMaxLevel.orElse(Integer.MAX_VALUE),
+                                optPointsPerLevel.orElse(0)
+                ));
+        } else {
+                return Result.failure(Problem.combine(problems));
+        }
 	}
 
-	@Override
-	public void update(RewardUpdateContext context) {
-	for (var entry : levelRewards.entrySet()) {
-		int level = entry.getKey();
-		int count = context.getCount() >= level ? 1 : 0;
-		for (var reward : entry.getValue()) {
-		reward.instance().update(new RewardUpdateContextImpl(context.getPlayer(), count, context.isAction()));
-		}
-	}
-	}
+        @Override
+        public void update(RewardUpdateContext context) {
+        int currentLevel = Math.min(context.getCount(), maxLevel);
+        for (var entry : levelRewards.entrySet()) {
+                int level = entry.getKey();
+                int count = currentLevel >= level ? 1 : 0;
+                for (var reward : entry.getValue()) {
+                        reward.instance().update(new RewardUpdateContextImpl(context.getPlayer(), count, context.isAction()));
+                }
+        }
+
+        if (pointsPerLevel != 0 && context.isAction()) {
+                context.getPlayer().addExperience(pointsPerLevel * currentLevel);
+        }
+        }
 
 	@Override
 	public void dispose(RewardDisposeContext context) {

@@ -674,20 +674,44 @@ public class SkillsScreen extends Screen {
 						level,
 						definition.maxLevels()
 				).asOrderedText());
-				var descIndex = Math.min(level, definition.descriptions().size() - 1);
-				var desc = definition.descriptions().isEmpty() ? Text.empty() : definition.descriptions().get(descIndex).copy();
-				lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
-						desc,
-						Style.EMPTY.withFormatting(Formatting.GRAY)
-				)));
-				if (Screen.hasShiftDown()) {
-					var extraIndex = Math.min(level, definition.extraDescriptions().size() - 1);
-					var extraDesc = definition.extraDescriptions().isEmpty() ? Text.empty() : definition.extraDescriptions().get(extraIndex).copy();
-					lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
-							extraDesc,
-							Style.EMPTY.withFormatting(Formatting.GRAY)
-					)));
-				}
+                                var descIndex = Math.min(level, definition.descriptions().size() - 1);
+                                MutableText desc = Text.empty();
+                                if (!definition.descriptions().isEmpty()) {
+                                        if (definition.mergeDescription()) {
+                                                for (int i = 0; i <= descIndex; i++) {
+                                                        if (i > 0) {
+                                                                desc.append(Text.literal("\n"));
+                                                        }
+                                                        desc.append(definition.descriptions().get(i).copy());
+                                                }
+                                        } else {
+                                                desc = definition.descriptions().get(descIndex).copy();
+                                        }
+                                }
+                                lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+                                                desc,
+                                                Style.EMPTY.withFormatting(Formatting.GRAY)
+                                )));
+                                if (Screen.hasShiftDown()) {
+                                        var extraIndex = Math.min(level, definition.extraDescriptions().size() - 1);
+                                        MutableText extraDesc = Text.empty();
+                                        if (!definition.extraDescriptions().isEmpty()) {
+                                                if (definition.mergeDescription()) {
+                                                        for (int i = 0; i <= extraIndex; i++) {
+                                                                if (i > 0) {
+                                                                        extraDesc.append(Text.literal("\n"));
+                                                                }
+                                                                extraDesc.append(definition.extraDescriptions().get(i).copy());
+                                                        }
+                                                } else {
+                                                        extraDesc = definition.extraDescriptions().get(extraIndex).copy();
+                                                }
+                                        }
+                                        lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+                                                        extraDesc,
+                                                        Style.EMPTY.withFormatting(Formatting.GRAY)
+                                        )));
+                                }
 
 				if (client.options.advancedItemTooltips) {
 					lines.add(Text.literal(hoveredSkill.id()).formatted(Formatting.DARK_GRAY).asOrderedText());

@@ -22,13 +22,13 @@ A basic skill definition might look like this:
 ```json
 {
   "my_skill": {
-    "type": "mystackableskills:stackable",
+    "type": "puffish_skills:stackable", //allows a new type that lets you utlize level based skill types and standard rewards.
     "max_levels": 5,
     "title": "Master Miner",
     "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
     "frame": { /* your frame config */ },
     "size": 1.0,
-    "descriptions": [
+    "descriptions": [ 
       "Current: +5% mining speed",
       "Current: +10% mining speed",
       "Current: +15% mining speed",
@@ -56,11 +56,11 @@ A basic skill definition might look like this:
 
 ## Per level rewards
 
-The reward registry includes `puffish_skills:per_level_rewards` which lets you specify rewards that depend on the player’s current level. The `levels` object maps level numbers to arrays of nested rewards.
+The reward registry includes `puffish_skills:per_level_rewards` which lets you specify rewards that depend on the skill's level. The `levels` object maps level numbers to arrays of nested rewards.
 
 ```json
 {
-  "type": "puffish_skills:per_level_rewards",
+  "type": "puffish_skills:per_level_rewards", //Skill not only have levels but each can contain rewards per level. 
   "data": {
     "skill_id": "stacked_power",
     "max_level": 3,

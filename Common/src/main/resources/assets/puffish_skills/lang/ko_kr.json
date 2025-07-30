@@ -7,6 +7,7 @@
 	"tooltip.puffish_skills.to_next_level": "다음 레벨까지: %s",
 	"tooltip.puffish_skills.earned_points": "받은 포인트: %s",
 	"tooltip.puffish_skills.spent_points": "사용한 포인트: %s",
+        "tooltip.puffish_skills.skill_level": "Level: %s/%s",
 
 	"category.puffish_skills.skills": "스킬",
 	"key.puffish_skills.open": "스킬트리 열기",

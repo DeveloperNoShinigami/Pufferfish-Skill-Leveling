@@ -7,6 +7,7 @@
 	"tooltip.puffish_skills.to_next_level": "Para o próximo nível: %s",
 	"tooltip.puffish_skills.earned_points": "Pontos ganhos: %s",
 	"tooltip.puffish_skills.spent_points": "Pontos gastos: %s",
+        "tooltip.puffish_skills.skill_level": "Level: %s/%s",
 
 	"category.puffish_skills.skills": "Habilidades",
 	"key.puffish_skills.open": "Abrir Árvore de talentos",

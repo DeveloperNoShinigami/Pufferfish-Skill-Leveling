@@ -7,6 +7,7 @@
 	"tooltip.puffish_skills.to_next_level": "До следующего уровня: %s",
 	"tooltip.puffish_skills.earned_points": "Заработано очков: %s",
 	"tooltip.puffish_skills.spent_points": "Потрачено очков: %s",
+        "tooltip.puffish_skills.skill_level": "Level: %s/%s",
 
 	"category.puffish_skills.skills": "Навыки",
 	"key.puffish_skills.open": "Открыть дерево навыков",

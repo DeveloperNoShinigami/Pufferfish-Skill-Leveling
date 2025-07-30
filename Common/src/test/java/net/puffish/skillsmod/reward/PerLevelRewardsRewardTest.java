@@ -1,9 +1,9 @@
-package net.puffish.skillsmod.reward;
+package net.puffish.skill_leveling.reward;
 
-import net.puffish.skillsmod.api.config.ConfigContext;
-import net.puffish.skillsmod.api.json.JsonElement;
-import net.puffish.skillsmod.api.json.JsonPath;
-import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
+import net.puffish.skill_leveling.api.config.ConfigContext;
+import net.puffish.skill_leveling.api.json.JsonElement;
+import net.puffish.skill_leveling.api.json.JsonPath;
+import net.puffish.skill_leveling.reward.builtin.PerLevelRewardsReward;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

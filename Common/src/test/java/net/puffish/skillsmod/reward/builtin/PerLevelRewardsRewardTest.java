@@ -1,11 +1,11 @@
-package net.puffish.skillsmod.reward.builtin;
+package net.puffish.skill_leveling.reward.builtin;
 
 import net.minecraft.server.MinecraftServer;
-import net.puffish.skillsmod.api.json.JsonElement;
-import net.puffish.skillsmod.api.json.JsonPath;
-import net.puffish.skillsmod.api.reward.RewardConfigContext;
-import net.puffish.skillsmod.api.util.Problem;
-import net.puffish.skillsmod.api.util.Result;
+import net.puffish.skill_leveling.api.json.JsonElement;
+import net.puffish.skill_leveling.api.json.JsonPath;
+import net.puffish.skill_leveling.api.reward.RewardConfigContext;
+import net.puffish.skill_leveling.api.util.Problem;
+import net.puffish.skill_leveling.api.util.Result;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

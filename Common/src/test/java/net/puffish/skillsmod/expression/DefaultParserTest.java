@@ -1,6 +1,6 @@
-package net.puffish.skillsmod.expression;
+package net.puffish.skill_leveling.expression;
 
-import net.puffish.skillsmod.api.util.Problem;
+import net.puffish.skill_leveling.api.util.Problem;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

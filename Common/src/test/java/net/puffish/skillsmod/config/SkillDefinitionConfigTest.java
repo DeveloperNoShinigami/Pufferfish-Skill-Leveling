@@ -1,10 +1,10 @@
-package net.puffish.skillsmod.config;
+package net.puffish.skill_leveling.config;
 
 import net.minecraft.server.MinecraftServer;
-import net.puffish.skillsmod.api.config.ConfigContext;
-import net.puffish.skillsmod.api.json.JsonElement;
-import net.puffish.skillsmod.api.json.JsonPath;
-import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
+import net.puffish.skill_leveling.api.config.ConfigContext;
+import net.puffish.skill_leveling.api.json.JsonElement;
+import net.puffish.skill_leveling.api.json.JsonPath;
+import net.puffish.skill_leveling.config.skill.SkillDefinitionConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

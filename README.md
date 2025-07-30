@@ -10,6 +10,7 @@ Skill definitions describe how a skill looks and what it grants. Datapacks may n
 - `max_levels` – how many times the skill can be unlocked.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
+- `merge_description` – merges descriptions with inherited definitions. Defaults to `false` when omitted.
 
 - Tooltip lines automatically adjust based on how many times the skill has been unlocked. When hovering a skill, the
   entry matching the player's current level is shown, and holding Shift displays the line for the next level (or a final

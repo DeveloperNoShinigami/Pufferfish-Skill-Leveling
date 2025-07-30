@@ -84,46 +84,36 @@ public class PerLevelRewardsReward implements Reward {
 		}
 	});
 
-	// Access optional fields and validate values
-	rootObject.get("skill_id");
-	
-	var optMaxLevel = rootObject.get("max_level")
-	.getSuccess() // ignore failure because this property is optional
-	.flatMap(element -> element.getAsInt()
-	.ifFailure(problems::add)
-	.getSuccess());
-	optMaxLevel.ifPresent(maxLevel -> {
-	if (maxLevel < 1) {
-	problems.add(rootObject.getPath().getObject("max_level")
-	.createProblem("Expected a value \u2265 1"));
-	}
-	});
-	
-	var optPointsPerLevel = rootObject.get("points_per_level")
-	.getSuccess() // ignore failure because this property is optional
-	.flatMap(element -> element.getAsInt()
-	.ifFailure(problems::add)
-	.getSuccess());
-	optPointsPerLevel.ifPresent(points -> {
-	if (points < 0) {
-	problems.add(rootObject.getPath().getObject("points_per_level")
-	.createProblem("Expected a value \u2265 0"));
-	}
-	});
+        // Access optional fields and validate values
+        var optSkillId = rootObject.getString("skill_id")
+                .ifFailure(problems::add)
+                .getSuccess();
 
-        var optMaxLevel = rootObject.get("max_level")
+        var optMaxLevelTmp = rootObject.get("max_level")
                 .getSuccess() // optional
                 .flatMap(element -> element.getAsInt()
                                 .ifFailure(problems::add)
-                                .getSuccess())
-                .orElse(Integer.MAX_VALUE);
+                                .getSuccess());
+        optMaxLevelTmp.ifPresent(maxLevel -> {
+                if (maxLevel < 1) {
+                        problems.add(rootObject.getPath().getObject("max_level")
+                                        .createProblem("Expected a value \u2265 1"));
+                }
+        });
+        int optMaxLevel = optMaxLevelTmp.orElse(Integer.MAX_VALUE);
 
-        var optPointsPerLevel = rootObject.get("points_per_level")
+        var optPointsPerLevelTmp = rootObject.get("points_per_level")
                 .getSuccess() // optional
                 .flatMap(element -> element.getAsInt()
                                 .ifFailure(problems::add)
-                                .getSuccess())
-                .orElse(0);
+                                .getSuccess());
+        optPointsPerLevelTmp.ifPresent(points -> {
+                if (points < 0) {
+                        problems.add(rootObject.getPath().getObject("points_per_level")
+                                        .createProblem("Expected a value \u2265 0"));
+                }
+        });
+        int optPointsPerLevel = optPointsPerLevelTmp.orElse(0);
 
         if (problems.isEmpty()) {
                 return Result.success(new PerLevelRewardsReward(levelRewards,

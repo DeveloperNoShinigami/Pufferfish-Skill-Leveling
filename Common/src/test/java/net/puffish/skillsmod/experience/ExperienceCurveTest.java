@@ -1,4 +1,4 @@
-package net.puffish.skillsmod.experience;
+package net.puffish.skill_leveling.experience;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

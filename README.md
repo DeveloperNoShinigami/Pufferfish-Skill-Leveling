@@ -1,6 +1,7 @@
 # Pufferfish Skill Leveling
 
-This mod provides an API to create skill trees via datapacks. Categories and skills can unlock rewards and gain experience.
+This addon provides an API to create skill trees via datapacks. Categories and skills can unlock rewards and gain experience.
+It uses the mod ID `puffish_skill_leveling` and is designed to load alongside the original Pufferfish's Skills mod.
 
 ## Player skill definitions
 

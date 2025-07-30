@@ -25,11 +25,12 @@ public record SkillDefinitionConfig(
 		List<Text> extraDescriptions,
 		Text title,
 		IconConfig icon,
-		FrameConfig frame,
-		float size,
+                FrameConfig frame,
+                float size,
+                boolean mergeDescription,
 
-		List<SkillRewardConfig> rewards,
-		int cost,
+                List<SkillRewardConfig> rewards,
+                int cost,
 		int requiredSkills,
 		int requiredPoints,
 		int requiredSpentPoints,
@@ -107,13 +108,21 @@ public record SkillDefinitionConfig(
 				)
 				.orElseGet(FrameConfig::createDefault);
 
-		var size = rootObject.get("size")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(element -> element.getAsFloat()
-						.ifFailure(problems::add)
-						.getSuccess()
-				)
-				.orElse(1f);
+                var size = rootObject.get("size")
+                                .getSuccess() // ignore failure because this property is optional
+                                .flatMap(element -> element.getAsFloat()
+                                                .ifFailure(problems::add)
+                                                .getSuccess()
+                                )
+                                .orElse(1f);
+
+                var mergeDescription = rootObject.get("merge_description")
+                                .getSuccess() // ignore failure because this property is optional
+                                .flatMap(element -> element.getAsBoolean()
+                                                .ifFailure(problems::add)
+                                                .getSuccess()
+                                )
+                                .orElse(false);
 
 		var rewards = rootObject.getArray("rewards")
 				.getSuccess() // ignore failure because this property is optional
@@ -175,11 +184,12 @@ public record SkillDefinitionConfig(
 					extraDescriptions,
 					optTitle.orElseThrow(),
 					optIcon.orElseThrow(),
-					frame,
-					size,
-					rewards,
-					cost,
-					requiredSkills,
+                                        frame,
+                                        size,
+                                        mergeDescription,
+                                        rewards,
+                                        cost,
+                                        requiredSkills,
 					requiredPoints,
 					requiredSpentPoints,
 					requiredExclusions

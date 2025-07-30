@@ -78,9 +78,10 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeCollection(definition.extraDescriptions(), PacketByteBuf::writeText);
 		buf.writeText(definition.title());
 		write(buf, definition.frame());
-		write(buf, definition.icon());
-		buf.writeFloat(definition.size());
-		buf.writeInt(definition.cost());
+                write(buf, definition.icon());
+                buf.writeFloat(definition.size());
+                buf.writeBoolean(definition.mergeDescription());
+                buf.writeInt(definition.cost());
 		buf.writeInt(definition.requiredSkills());
 		buf.writeInt(definition.requiredPoints());
 		buf.writeInt(definition.requiredSpentPoints());

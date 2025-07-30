@@ -29,13 +29,13 @@ public record ClientBackgroundConfig(
 			int height,
 			BackgroundPosition position
 	) {
-                var id = SkillsMod.createIdentifier(RandomStringUtils.random(16, "abcdefghijklmnopqrstuvwxyz0123456789"));
-                var texture = new ClientBackgroundTexture(textureId);
-                MinecraftClient.getInstance().submit(() ->
-                        MinecraftClient.getInstance()
-                                        .getTextureManager()
-                                        .registerTexture(id, texture)
-                );
+		var id = SkillsMod.createIdentifier(RandomStringUtils.random(16, "abcdefghijklmnopqrstuvwxyz0123456789"));
+		var texture = new ClientBackgroundTexture(textureId);
+		MinecraftClient.getInstance().submit(() ->
+			MinecraftClient.getInstance()
+					.getTextureManager()
+					.registerTexture(id, texture)
+		);
 
 		return new ClientBackgroundConfig(
 				id,

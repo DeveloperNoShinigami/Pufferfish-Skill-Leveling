@@ -47,12 +47,12 @@ public class SkillDefinitionsConfig {
                         return merged.get(id);
                 }
                 if (!visiting.add(id)) {
-                        problems.add(Problem.of("Cycle in skill definition inheritance at '" + id + "'"));
+                        problems.add(Problem.message("Cycle in skill definition inheritance at '" + id + "'"));
                         return null;
                 }
                 var def = all.get(id);
                 if (def == null) {
-                        problems.add(Problem.of("Unknown skill definition '" + id + "'"));
+                        problems.add(Problem.message("Unknown skill definition '" + id + "'"));
                         return null;
                 }
                 java.util.List<net.minecraft.text.Text> descriptions = def.descriptions();
@@ -92,6 +92,7 @@ public class SkillDefinitionsConfig {
                 );
                 merged.put(id, mergedDef);
                 return mergedDef;
+
         }
 
 	public Optional<SkillDefinitionConfig> getById(String id) {

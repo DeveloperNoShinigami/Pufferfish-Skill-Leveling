@@ -19,7 +19,6 @@ import java.util.List;
 public record SkillDefinitionConfig(
 
                 String id,
-                java.util.Optional<String> parent,
                 Identifier type,
 		int maxLevels,
 		List<Text> descriptions,
@@ -53,13 +52,6 @@ public record SkillDefinitionConfig(
                                 .ifFailure(problems::add)
                                 .getSuccess();
 
-                var optParent = rootObject.get("parent")
-                                .getSuccess() // ignore failure because this property is optional
-                                .flatMap(element -> element.getAsString()
-                                                .ifFailure(problems::add)
-                                                .getSuccess()
-                                )
-                                .orElse(null);
 
 		var type = rootObject.get("type")
 				.getSuccess() // ignore failure because this property is optional
@@ -187,7 +179,6 @@ public record SkillDefinitionConfig(
 		if (problems.isEmpty()) {
                         return Result.success(new SkillDefinitionConfig(
                                         id,
-                                        java.util.Optional.ofNullable(optParent),
                                         type,
                                         maxLevels,
 					descriptions,

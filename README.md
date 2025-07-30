@@ -10,8 +10,7 @@ Skill definitions describe how a skill looks and what it grants. Datapacks may n
 - `max_levels` – how many times the skill can be unlocked.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
-- `parent` – id of another definition to inherit from.
-- `merge_description` – when `true`, descriptions and extra descriptions from the parent are appended to this definition's own lists. Defaults to `false` when omitted. You only want to use this when you are adding the total number of rewards together (such as origins skill types, effect, or command even), other wise you will want to write what the progression of the reward would look like.
+- `merge_description` – when `true`, descriptions and extra descriptions accumulate from earlier levels instead of replacing them. Defaults to `false` when omitted.
 
 - Tooltip lines automatically adjust based on how many times the skill has been unlocked. When hovering a skill, the
   entry matching the player's current level is shown, and holding Shift displays the line for the next level (or a final
@@ -62,7 +61,7 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 
 ```json
 {
-  "type": "puffish_skills:per_level_rewards", //Skill not only have levels but each can contain rewards per level. 
+  "type": "puffish_skills:per_level_rewards", // Skill levels can provide different rewards.
   "data": {
     "skill_id": "stacked_power",
     "max_level": 3,
@@ -78,7 +77,7 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 
 Each nested reward behaves as if it were a normal reward, but is only active when the player's skill level is at least the specified level.
 
-All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration.
+All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration. When a level is unlocked the category loses `points_per_level` points. A player cannot level beyond `max_level` unless they have enough points to pay for the additional levels.
 
 
 ## Example datapack

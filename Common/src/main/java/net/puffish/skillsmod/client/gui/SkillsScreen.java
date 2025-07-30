@@ -655,29 +655,29 @@ public class SkillsScreen extends Screen {
 				}
 
 				var lines = new ArrayList<OrderedText>();
-                                lines.add(definition.title().asOrderedText());
+				lines.add(definition.title().asOrderedText());
 
-                                var level = activeCategoryData.countUnlocked(definition.id());
-                                lines.add(SkillsMod.createTranslatable(
-                                                "tooltip",
-                                                "skill_level",
-                                                level,
-                                                definition.maxLevels()
-                                ).asOrderedText());
-                                var descIndex = Math.min(level, definition.descriptions().size() - 1);
-                                var desc = definition.descriptions().isEmpty() ? Text.empty() : definition.descriptions().get(descIndex).copy();
-                                lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
-                                                desc,
-                                                Style.EMPTY.withFormatting(Formatting.GRAY)
-                                )));
-                                if (Screen.hasShiftDown()) {
-                                        var extraIndex = Math.min(level, definition.extraDescriptions().size() - 1);
-                                        var extraDesc = definition.extraDescriptions().isEmpty() ? Text.empty() : definition.extraDescriptions().get(extraIndex).copy();
-                                        lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
-                                                        extraDesc,
-                                                        Style.EMPTY.withFormatting(Formatting.GRAY)
-                                        )));
-                                }
+				var level = activeCategoryData.countUnlocked(definition.id());
+				lines.add(SkillsMod.createTranslatable(
+						"tooltip",
+						"skill_level",
+						level,
+						definition.maxLevels()
+				).asOrderedText());
+				var descIndex = Math.min(level, definition.descriptions().size() - 1);
+				var desc = definition.descriptions().isEmpty() ? Text.empty() : definition.descriptions().get(descIndex).copy();
+				lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+						desc,
+						Style.EMPTY.withFormatting(Formatting.GRAY)
+				)));
+				if (Screen.hasShiftDown()) {
+					var extraIndex = Math.min(level, definition.extraDescriptions().size() - 1);
+					var extraDesc = definition.extraDescriptions().isEmpty() ? Text.empty() : definition.extraDescriptions().get(extraIndex).copy();
+					lines.addAll(Tooltip.wrapLines(client, Texts.setStyleIfAbsent(
+							extraDesc,
+							Style.EMPTY.withFormatting(Formatting.GRAY)
+					)));
+				}
 
 				if (client.options.advancedItemTooltips) {
 					lines.add(Text.literal(hoveredSkill.id()).formatted(Formatting.DARK_GRAY).asOrderedText());

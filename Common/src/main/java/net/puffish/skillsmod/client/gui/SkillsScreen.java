@@ -289,18 +289,21 @@ public class SkillsScreen extends Screen {
 		var transformedMouse = getTransformedMousePos(mouseX, mouseY, activeCategoryData);
 		var activeCategory = activeCategoryData.getConfig();
 
-		if (isInsideContent(mouse)) {
-			activeCategory.skills().values().stream()
-					.filter(skill -> activeCategory
-							.getDefinitionById(skill.definitionId())
-							.map(definition -> isInsideSkill(transformedMouse, skill, definition))
-							.orElse(false))
-					.findFirst()
-					.ifPresent(skill -> SkillsClientMod.getInstance()
-							.getPacketSender()
-							.send(new SkillClickOutPacket(activeCategory.id(), skill.id())));
-		}
-	}
+                if (isInsideContent(mouse)) {
+                        var stream = activeCategory.skills().values().stream()
+                                        .filter(skill -> activeCategory
+                                                        .getDefinitionById(skill.definitionId())
+                                                        .map(definition -> isInsideSkill(transformedMouse, skill, definition))
+                                                        .orElse(false));
+
+                        stream.filter(skill -> activeCategoryData.getSkillState(skill) != Skill.State.UNLOCKED)
+                                        .findFirst()
+                                        .or(() -> stream.findFirst())
+                                        .ifPresent(skill -> SkillsClientMod.getInstance()
+                                                        .getPacketSender()
+                                                        .send(new SkillClickOutPacket(activeCategory.id(), skill.id())));
+                }
+        }
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {

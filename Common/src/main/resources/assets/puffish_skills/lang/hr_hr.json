@@ -7,6 +7,7 @@
 	"tooltip.puffish_skills.to_next_level": "Do sljedeće razine: %s",
 	"tooltip.puffish_skills.earned_points": "Zarađenih Bodova: %s",
 	"tooltip.puffish_skills.spent_points": "Potrošenih Bodova: %s",
+        "tooltip.puffish_skills.skill_level": "Level: %s/%s",
 
 	"category.puffish_skills.skills": "Vještine",
 	"key.puffish_skills.open": "Otvori Stablo Vještina",

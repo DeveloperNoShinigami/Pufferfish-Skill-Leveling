@@ -7,6 +7,7 @@
 	"tooltip.puffish_skills.to_next_level": "距下一级：%s",
 	"tooltip.puffish_skills.earned_points": "获得点数：%s",
 	"tooltip.puffish_skills.spent_points": "消耗点数：%s",
+        "tooltip.puffish_skills.skill_level": "Level: %s/%s",
 
 	"category.puffish_skills.skills": "技能",
 	"key.puffish_skills.open": "打开技能树",

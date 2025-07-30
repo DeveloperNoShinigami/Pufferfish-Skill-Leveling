@@ -7,6 +7,7 @@
 	"tooltip.puffish_skills.to_next_level": "次のレベルまで: %s",
 	"tooltip.puffish_skills.earned_points": "これまで獲得したポイント: %s",
 	"tooltip.puffish_skills.spent_points": "使用済みポイント: %s",
+        "tooltip.puffish_skills.skill_level": "Level: %s/%s",
 
 	"category.puffish_skills.skills": "スキル",
 	"key.puffish_skills.open": "スキルツリーの開閉",

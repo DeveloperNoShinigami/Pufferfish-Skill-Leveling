@@ -9,6 +9,7 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;

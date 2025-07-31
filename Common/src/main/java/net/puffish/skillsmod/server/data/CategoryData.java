@@ -173,6 +173,10 @@ public class CategoryData {
                unlockedSkills.remove(id);
        }
 
+       public int getSkillLevel(String id) {
+               return unlockedSkills.getOrDefault(id, 0);
+       }
+
        public void resetSkills() {
                unlockedSkills.clear();
        }

@@ -12,6 +12,6 @@ plugins {
     id("dev.architectury.loom") version "1.5.388" apply false
 }
 
-rootProject.name = "Pufferfish Skill Leveling"
+rootProject.name = "Pufferfish's Skills"
 
 include("Common", "Fabric", "Forge")

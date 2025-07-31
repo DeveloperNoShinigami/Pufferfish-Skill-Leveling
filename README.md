@@ -1,13 +1,12 @@
 # Pufferfish Skill Leveling
 
-This addon provides an API to create skill trees via datapacks. Categories and skills can unlock rewards and gain experience.
-It uses the mod ID `puffish_skill_leveling` and is designed to load alongside the original Pufferfish's Skills mod.
+This mod provides an API to create skill trees via datapacks. Categories and skills can unlock rewards and gain experience.
 
 ## Player skill definitions
 
 Skill definitions describe how a skill looks and what it grants. Datapacks may now define stackable skills with extra fields:
 
- - `type` – identifier of the skill type. Defaults to `puffish_skill_leveling:default`.
+- `type` – identifier of the skill type. Defaults to `puffish_skills:default`.
 - `max_levels` – how many times the skill can be unlocked.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
@@ -24,7 +23,7 @@ A basic skill definition might look like this:
 ```json
 {
   "my_skill": {
-    "type": "puffish_skill_leveling:stackable", // unlock the skill multiple times
+    "type": "puffish_skills:stackable", // unlock the skill multiple times
     "max_levels": 5,
     "title": "Master Miner",
     "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
@@ -45,17 +44,17 @@ A basic skill definition might look like this:
     ],
     "rewards": [
       {
-        "type": "puffish_skill_leveling:per_level_rewards",
+        "type": "puffish_skills:per_level_rewards",
         "data": {
           "skill_id": "my_skill",
           "max_level": 5,
           "points_per_level": 1,
           "levels": {
-            "1": [ "puffish_skill_leveling:attribute/mining_speed_i" ],
-            "2": [ "puffish_skill_leveling:attribute/mining_speed_i" ],
-            "3": [ "puffish_skill_leveling:attribute/mining_speed_i" ],
-            "4": [ "puffish_skill_leveling:attribute/mining_speed_i" ],
-            "5": [ "puffish_skill_leveling:attribute/mining_speed_i" ]
+            "1": [ "puffish_skills:attribute/mining_speed_i" ],
+            "2": [ "puffish_skills:attribute/mining_speed_i" ],
+            "3": [ "puffish_skills:attribute/mining_speed_i" ],
+            "4": [ "puffish_skills:attribute/mining_speed_i" ],
+            "5": [ "puffish_skills:attribute/mining_speed_i" ]
           }
         }
       }
@@ -66,19 +65,19 @@ A basic skill definition might look like this:
 
 ## Per level rewards
 
-The reward registry includes `puffish_skill_leveling:per_level_rewards` which lets you specify rewards that depend on the skill's level. The `levels` object maps level numbers to arrays of nested rewards.
+The reward registry includes `puffish_skills:per_level_rewards` which lets you specify rewards that depend on the skill's level. The `levels` object maps level numbers to arrays of nested rewards.
 
 ```json
 {
-  "type": "puffish_skill_leveling:per_level_rewards", // Skill levels can provide different rewards.
+  "type": "puffish_skills:per_level_rewards", // Skill levels can provide different rewards.
   "data": {
     "skill_id": "stacked_power",
     "max_level": 3,
     "points_per_level": 1,
     "levels": {
-      "1": [ { "type": "puffish_skill_leveling:attribute", "data": { "attribute": "generic.attack_damage", "value": 1, "operation": "addition" } } ],
-      "2": [ { "type": "puffish_skill_leveling:effect", "data": { "effect": "speed", "amplifier": 0, "duration": 200 } } ],
-      "3": [ { "type": "puffish_skill_leveling:attribute", "data": { "attribute": "generic.max_health", "value": 2, "operation": "addition" } } ]
+      "1": [ { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 1, "operation": "addition" } } ],
+      "2": [ { "type": "puffish_skills:effect", "data": { "effect": "speed", "amplifier": 0, "duration": 200 } } ],
+      "3": [ { "type": "puffish_skills:attribute", "data": { "attribute": "generic.max_health", "value": 2, "operation": "addition" } } ]
     }
   }
 }

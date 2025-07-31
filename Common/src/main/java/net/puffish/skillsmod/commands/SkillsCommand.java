@@ -9,6 +9,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.puffish.skillsmod.commands.arguments.CategoryArgumentType;
 import net.puffish.skillsmod.commands.arguments.SkillArgumentType;
 import net.puffish.skillsmod.util.CommandUtils;
+import net.puffish.skillsmod.SkillsMod;
 
 public class SkillsCommand {
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
@@ -32,14 +33,26 @@ public class SkillsCommand {
 								)
 						)
 				)
-				.then(CommandManager.literal("reset")
-						.then(CommandManager.argument("players", EntityArgumentType.players())
-								.then(CommandManager.argument("category", CategoryArgumentType.category())
-										.executes(SkillsCommand::reset)
-								)
-						)
-				);
-	}
+                                .then(CommandManager.literal("reset")
+                                                .then(CommandManager.argument("players", EntityArgumentType.players())
+                                                                .then(CommandManager.argument("category", CategoryArgumentType.category())
+                                                                                .executes(SkillsCommand::reset)
+                                                                )
+                                                )
+                                )
+                                .then(CommandManager.literal("refund")
+                                                .then(CommandManager.argument("players", EntityArgumentType.players())
+                                                                .then(CommandManager.argument("category", CategoryArgumentType.category())
+                                                                                .then(CommandManager.argument("skill", SkillArgumentType.skillFromCategory("category"))
+                                                                                                .executes(ctx -> refund(ctx, false))
+                                                                                                .then(CommandManager.literal("all")
+                                                                                                                .executes(ctx -> refund(ctx, true))
+                                                                                                )
+                                                                                )
+                                                                )
+                                                )
+                                );
+        }
 
 	private static int unlock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
 		var players = EntityArgumentType.getPlayers(context, "players");
@@ -77,9 +90,9 @@ public class SkillsCommand {
 		return players.size();
 	}
 
-	private static int reset(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		var players = EntityArgumentType.getPlayers(context, "players");
-		var category = CategoryArgumentType.getCategory(context, "category");
+        private static int reset(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+                var players = EntityArgumentType.getPlayers(context, "players");
+                var category = CategoryArgumentType.getCategory(context, "category");
 
 		for (var player : players) {
 			category.resetSkills(player);
@@ -90,6 +103,24 @@ public class SkillsCommand {
 				"skills.reset",
 				category.getId()
 		);
-		return players.size();
-	}
+                return players.size();
+        }
+
+        private static int refund(CommandContext<ServerCommandSource> context, boolean all) throws CommandSyntaxException {
+                var players = EntityArgumentType.getPlayers(context, "players");
+                var category = CategoryArgumentType.getCategory(context, "category");
+                var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
+
+                for (var player : players) {
+                        SkillsMod.getInstance().refundSkill(player, category.getId(), skill.getId(), all);
+                }
+                CommandUtils.sendSuccess(
+                                context,
+                                players,
+                                all ? "skills.refund_all" : "skills.refund",
+                                category.getId(),
+                                skill.getId()
+                );
+                return players.size();
+        }
 }

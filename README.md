@@ -91,3 +91,14 @@ All active level rewards stack automatically, so unlocking additional levels inc
 
 The `example-skill-level-template.zip` file contains a datapack demonstrating a stackable skill using per-level rewards. Drop the zip into the `datapacks` folder of a world to test the feature.
 
+
+
+## Commands
+
+Administrators can refund skill levels using `/puffish_skills skills refund`.
+
+```
+/puffish_skills skills refund <players> <category> <skill> [all]
+```
+
+Running without `all` refunds a single level. Adding `all` removes every level of the chosen skill.

@@ -173,6 +173,15 @@ public class CategoryData {
                unlockedSkills.remove(id);
        }
 
+       public void refundSkill(String id) {
+               unlockedSkills.compute(id, (k, v) -> {
+                       if (v == null || v <= 1) {
+                               return null;
+                       }
+                       return v - 1;
+               });
+       }
+
        public int getSkillLevel(String id) {
                return unlockedSkills.getOrDefault(id, 0);
        }

@@ -58,7 +58,7 @@ public record SkillDefinitionConfig(
 				.flatMap(element -> BuiltinJson.parseIdentifier(element)
 						.ifFailure(problems::add)
 						.getSuccess())
-				.orElse(Identifier.of("puffish_skills", "default"));
+				.orElse(Identifier.of("puffish_skill_leveling", "default"));
 
 		var maxLevels = rootObject.get("max_levels")
 				.getSuccess() // ignore failure because this property is optional

@@ -313,36 +313,53 @@ public class SkillsMod {
 						packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
 						syncPoints(player, category, categoryData);
 					});
-					SKILL_UNLOCK.invoker().onSkillUnlock(categoryId, skillId);
-					updateSkillRewards(player, category, categoryData, skill, true);
-				}
-			});
-		});
-	}
+                                        SKILL_UNLOCK.invoker().onSkillUnlock(categoryId, skillId);
+                                        updateSkillRewards(player, category, categoryData, skill, 1);
+                                }
+                        });
+                });
+        }
 
 	public void lockSkill(ServerPlayerEntity player, Identifier categoryId, String skillId) {
 		getCategory(categoryId).ifPresent(category -> {
 			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
 			category.skills().getById(skillId).ifPresent(skill -> {
-				watchNewPoints(player, category, categoryData, false, () -> {
-					categoryData.lockSkill(skillId);
-					packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
-					syncPoints(player, category, categoryData);
-				});
-				SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
-				updateSkillRewards(player, category, categoryData, skill, false);
-			});
-		});
-	}
+                                int prevLevel = categoryData.getSkillLevel(skillId);
+                                watchNewPoints(player, category, categoryData, false, () -> {
+                                        categoryData.lockSkill(skillId);
+                                        packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
+                                        syncPoints(player, category, categoryData);
+                                });
+                                SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
+                                updateSkillRewards(player, category, categoryData, skill, -prevLevel);
+                        });
+                });
+        }
 
-	public void resetSkills(ServerPlayerEntity player, Identifier categoryId) {
-		getCategory(categoryId).ifPresent(category -> {
-			var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-			categoryData.resetSkills();
-			updateRewards(player, category, categoryData);
-			showCategory(player, category, categoryData);
-		});
-	}
+        public void resetSkills(ServerPlayerEntity player, Identifier categoryId) {
+                getCategory(categoryId).ifPresent(category -> {
+                        var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+
+                        var prevLevels = new HashMap<SkillConfig, Integer>();
+                        for (var skillId : categoryData.getUnlockedSkillIds()) {
+                                category.skills().getById(skillId).ifPresent(skill -> {
+                                        int level = categoryData.getSkillLevel(skillId);
+                                        if (level > 0) {
+                                                prevLevels.put(skill, level);
+                                        }
+                                });
+                        }
+
+                        categoryData.resetSkills();
+
+                        for (var entry : prevLevels.entrySet()) {
+                                updateSkillRewards(player, category, categoryData, entry.getKey(), -entry.getValue());
+                        }
+
+                        updateRewards(player, category, categoryData);
+                        showCategory(player, category, categoryData);
+                });
+        }
 
 	public void eraseCategory(ServerPlayerEntity player, Identifier categoryId) {
 		getCategory(categoryId).ifPresent(category -> {
@@ -694,12 +711,12 @@ public class SkillsMod {
 		}
 	}
 
-    private void updateSkillRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, boolean isUnlock) {
+    private void updateSkillRewards(ServerPlayerEntity player, CategoryConfig category, CategoryData categoryData, SkillConfig skill, int levelChange) {
         category.definitions().getById(skill.definitionId()).ifPresent(definition -> {
             var count = categoryData.countUnlocked(category, definition.id());
+            int prev = count - levelChange;
 
-            if (isUnlock) {
-                int prev = count - 1;
+            if (levelChange != 0) {
                 for (var reward : definition.rewards()) {
                     var inst = reward.instance();
                     if (inst instanceof PerLevelRewardsReward plr) {
@@ -707,7 +724,7 @@ public class SkillsMod {
                             int newLevel = Math.min(count, plr.getMaxLevel());
                             int oldLevel = Math.min(prev, plr.getMaxLevel());
                             int diff = newLevel - oldLevel;
-                            if (diff > 0 && plr.getPointsPerLevel() > 0) {
+                            if (diff != 0 && plr.getPointsPerLevel() > 0) {
                                 addPoints(player, category, categoryData, PointSources.LEVEL_REWARDS, -plr.getPointsPerLevel() * diff, true);
                             }
                         }
@@ -715,7 +732,7 @@ public class SkillsMod {
                 }
             }
 
-            var action = isUnlock && count == 1;
+            var action = levelChange > 0 && count == 1;
 
             for (var reward : definition.rewards()) {
                 reward.instance().update(new RewardUpdateContextImpl(player, count, action));

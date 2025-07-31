@@ -23,9 +23,9 @@ public class SkillDefinitionsConfig {
 	}
 
         public static Result<SkillDefinitionsConfig, Problem> parse(JsonObject rootObject, ConfigContext context) {
-                return rootObject.getAsMap((id, element) -> SkillDefinitionConfig.parse(id, element, context))
-                                .mapFailure(problems -> Problem.combine(problems.values()))
-                                .map(SkillDefinitionsConfig::new);
+               return rootObject.getAsMap((id, element) -> SkillDefinitionConfig.parse(id, element, context))
+                               .mapFailure(problems -> Problem.combine(problems.values()))
+                               .mapSuccess(SkillDefinitionsConfig::new);
         }
 
 	public Optional<SkillDefinitionConfig> getById(String id) {

@@ -3,6 +3,16 @@
 This repository hosts a Fabric/Forge cross platform Minecraft mod written in Java and built with Gradle.
 These rules apply to any automated agent (such as OpenAI Codex) contributing to this project.
 
+## Minecraft version support
+This mod targets recent versions of Minecraft (1.20 and newer) but may be ported
+to older releases when needed. When adding features or bug fixes:
+- Keep shared logic in the `Common` module whenever possible.
+- Add version-specific code only in the `Fabric` or `Forge` modules.
+- Check the appropriate mappings and API changes for the target version before
+  submitting code.
+- For legacy versions prior to 1.12, consider using separate branches or forks
+  as modern build scripts may not support them directly.
+
 ## Repository layout
 - `Common`, `Fabric` and `Forge` contain the core and platform-specific code.
   - Java source lives in `src/main/java` and resources in `src/main/resources`.

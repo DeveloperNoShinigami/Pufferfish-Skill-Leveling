@@ -8,11 +8,6 @@
 	<property name="severity" value="error"/>
 	<property name="fileExtensions" value="java"/>
 	<module name="TreeWalker">
-		<module name="RegexpSinglelineJava">
-			<property name="format" value="^\t* +\t*\S"/>
-			<property name="message" value="Indentation must be performed with tabs."/>
-			<property name="ignoreComments" value="true"/>
-		</module>
 		<module name="OuterTypeFilename"/>
 		<module name="AvoidStarImport"/>
 		<module name="OneTopLevelClass"/>

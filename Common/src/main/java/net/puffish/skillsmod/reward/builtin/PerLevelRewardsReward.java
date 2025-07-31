@@ -99,8 +99,8 @@ public class PerLevelRewardsReward implements Reward {
         optMaxLevelTmp.ifPresent(maxLevel -> {
             if (maxLevel < 1) {
                 var path = rootObject.getPath().getObject(
-                        rootObject.getJson().has("max_skill_level") ?
-                                "max_skill_level" : "max_level");
+                        rootObject.getJson().has("max_skill_level")
+                                ? "max_skill_level" : "max_level");
                 problems.add(path.createProblem("Expected a value \u2265 1"));
             }
         });

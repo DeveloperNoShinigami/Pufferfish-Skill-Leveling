@@ -42,7 +42,7 @@ public class PerLevelRewardsRewardTest {
 
 	@Test
 	public void testValidValues() {
-	    String json = "{\"skill_id\":\"s\",\"max_level\":1,\"points_per_level\":0,\"levels\":{\"1\":[]}}";
+            String json = "{\"skill_id\":\"s\",\"max_skill_level\":1,\"points_per_level\":0,\"levels\":{\"1\":[]}}";
 	    var result = parse(json);
 	    Assertions.assertTrue(result.getSuccess().isPresent(),
 	            result.getFailure().map(Object::toString).orElse("Unexpected failure"));
@@ -50,14 +50,14 @@ public class PerLevelRewardsRewardTest {
 
 	@Test
 	public void testInvalidMaxLevel() {
-	    String json = "{\"skill_id\":\"s\",\"max_level\":0,\"points_per_level\":0,\"levels\":{\"1\":[]}}";
+            String json = "{\"skill_id\":\"s\",\"max_skill_level\":0,\"points_per_level\":0,\"levels\":{\"1\":[]}}";
 	    var result = parse(json);
 	    Assertions.assertTrue(result.getFailure().isPresent());
 	}
 
 	@Test
 	public void testInvalidPointsPerLevel() {
-	    String json = "{\"skill_id\":\"s\",\"max_level\":1,\"points_per_level\":-1,\"levels\":{\"1\":[]}}";
+            String json = "{\"skill_id\":\"s\",\"max_skill_level\":1,\"points_per_level\":-1,\"levels\":{\"1\":[]}}";
 	    var result = parse(json);
 	    Assertions.assertTrue(result.getFailure().isPresent());
 	}

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class PerLevelRewardsReward implements Reward {
 	public static final Identifier ID = SkillsMod.createIdentifier("per_level_rewards");
@@ -53,13 +54,13 @@ public class PerLevelRewardsReward implements Reward {
 	SkillsAPI.registerReward(ID, PerLevelRewardsReward::parse);
 	}
 
-	private static Result<PerLevelRewardsReward, Problem> parse(RewardConfigContext context) {
+        static Result<PerLevelRewardsReward, Problem> parse(RewardConfigContext context) {
 	return context.getData()
 		.andThen(JsonElement::getAsObject)
 		.andThen(LegacyUtils.wrapNoUnused(obj -> parse(obj, context), context));
 	}
 
-        private static Result<PerLevelRewardsReward, Problem> parse(JsonObject rootObject, ConfigContext context) {
+        static Result<PerLevelRewardsReward, Problem> parse(JsonObject rootObject, ConfigContext context) {
         var problems = new ArrayList<Problem>();
 
         var optLevelsMap = rootObject.getObject("levels")
@@ -89,15 +90,18 @@ public class PerLevelRewardsReward implements Reward {
                 .ifFailure(problems::add)
                 .getSuccess();
 
-        var optMaxLevelTmp = rootObject.get("max_level")
-                .getSuccess() // optional
-                .flatMap(element -> element.getAsInt()
-                                .ifFailure(problems::add)
-                                .getSuccess());
+        var maxLevelElement = rootObject.get("max_skill_level").getSuccess()
+                .or(() -> rootObject.get("max_level").getSuccess());
+
+        var optMaxLevelTmp = maxLevelElement.flatMap(element -> element.getAsInt()
+                .ifFailure(problems::add)
+                .getSuccess());
         optMaxLevelTmp.ifPresent(maxLevel -> {
             if (maxLevel < 1) {
-                problems.add(rootObject.getPath().getObject("max_level")
-                                .createProblem("Expected a value \u2265 1"));
+                var path = rootObject.getPath().getObject(
+                        rootObject.getJson().has("max_skill_level") ?
+                                "max_skill_level" : "max_level");
+                problems.add(path.createProblem("Expected a value \u2265 1"));
             }
         });
         int optMaxLevel = optMaxLevelTmp.orElse(Integer.MAX_VALUE);

@@ -7,7 +7,9 @@ This mod provides an API to create skill trees via datapacks. Categories and ski
 Skill definitions describe how a skill looks and what it grants. Datapacks may now define stackable skills with extra fields:
 
 - `type` – identifier of the skill type. Defaults to `puffish_skills:default`.
-- `max_levels` – how many times the skill can be unlocked.
+- `max_levels` – how many times the skill can be unlocked. This value defines
+  the maximum level a stackable skill can reach and determines how many times
+  its rewards can be obtained.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
 - `merge_description` – when `true`, descriptions and extra descriptions accumulate from earlier levels instead of replacing them. Defaults to `false` when omitted.
@@ -63,7 +65,7 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 {
   "type": "puffish_skills:per_level_rewards", // Skill levels can provide different rewards.
   "data": {
-    "skill_id": "stacked_power",
+    "skill_id": "19aazycn9ii0lfh1",
     "max_skill_level": 3,
     "points_per_level": 1,
     "levels": {
@@ -76,6 +78,11 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 ```
 
 Each nested reward behaves as if it were a normal reward, but is only active when the player's skill level is at least the specified level.
+
+The fields `skill_id`, `max_skill_level` and `points_per_level` are used only by
+`puffish_skills:per_level_rewards`. They define which skill is leveled, the
+highest level obtainable through the reward, and how many category points are
+spent per level.
 
 All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration. When a level is unlocked the category loses `points_per_level` points. A player cannot level beyond `max_skill_level` unless they have enough points to pay for the additional levels.
 

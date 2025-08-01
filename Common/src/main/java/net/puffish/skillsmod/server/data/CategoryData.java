@@ -173,13 +173,18 @@ public class CategoryData {
                unlockedSkills.remove(id);
        }
 
-       public void refundSkill(String id) {
-               unlockedSkills.compute(id, (k, v) -> {
+       /**
+        * Reduces the skill level by one. Returns {@code true} if the skill
+        * still has remaining levels unlocked afterwards.
+        */
+       public boolean refundSkill(String id) {
+               Integer level = unlockedSkills.compute(id, (k, v) -> {
                        if (v == null || v <= 1) {
                                return null;
                        }
                        return v - 1;
                });
+               return level != null;
        }
 
        public int getSkillLevel(String id) {

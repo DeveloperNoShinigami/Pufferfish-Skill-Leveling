@@ -346,13 +346,14 @@ public class SkillsMod {
                                }
                                int amount = all ? prevLevel : 1;
                                watchNewPoints(player, category, categoryData, false, () -> {
+                                       boolean stillUnlocked;
                                        if (all) {
                                                categoryData.lockSkill(skillId);
-                                               packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
+                                               stillUnlocked = false;
                                        } else {
-                                               categoryData.refundSkill(skillId);
-                                               packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
+                                               stillUnlocked = categoryData.refundSkill(skillId);
                                        }
+                                       packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, stillUnlocked));
                                        syncPoints(player, category, categoryData);
                                });
                                if (all || prevLevel - amount <= 0) {

@@ -24,6 +24,7 @@ This document summarizes best practices for automating Minecraft mod development
 - Run `./gradlew check` to perform code style analysis using Checkstyle. The rules
   come from `config/checkstyle/checkstyle.xml` and are applied to each module.
 - Generated artifacts are found under `build/libs` for each platform.
+- The repository ships a .tool-versions file so environments using mise will automatically select Java 17.
 
 ## Continuous Integration
 Set up a CI workflow (for example with GitHub Actions) that runs `./gradlew build`

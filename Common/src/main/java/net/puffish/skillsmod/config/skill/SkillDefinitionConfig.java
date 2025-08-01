@@ -60,12 +60,14 @@ public record SkillDefinitionConfig(
 						.getSuccess())
 				.orElse(Identifier.of("puffish_skills", "default"));
 
-		var maxLevels = rootObject.get("max_levels")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(element -> element.getAsInt()
-						.ifFailure(problems::add)
-						.getSuccess())
-				.orElse(1);
+		var maxLevelsElement = rootObject.get("max_skill_level").getSuccess()
+                                .or(() -> rootObject.get("max_levels").getSuccess());
+
+                var maxLevels = maxLevelsElement
+                                .flatMap(element -> element.getAsInt()
+                                                .ifFailure(problems::add)
+                                                .getSuccess())
+                                .orElse(1);
 
 		var descriptions = rootObject.getArray("descriptions")
 				.getSuccess() // ignore failure because this property is optional

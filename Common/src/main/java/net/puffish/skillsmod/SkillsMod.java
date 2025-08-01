@@ -336,32 +336,33 @@ public class SkillsMod {
                 });
         }
 
-        public void refundSkill(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean all) {
-                getCategory(categoryId).ifPresent(category -> {
-                        var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
-                        category.skills().getById(skillId).ifPresent(skill -> {
-                                int prevLevel = categoryData.getSkillLevel(skillId);
-                                if (prevLevel <= 0) {
-                                        return;
-                                }
-                                int amount = all ? prevLevel : 1;
-                                watchNewPoints(player, category, categoryData, false, () -> {
-                                        if (all) {
-                                                categoryData.lockSkill(skillId);
-                                                packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
-                                        } else {
-                                                categoryData.refundSkill(skillId);
-                                                packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
-                                        }
-                                        syncPoints(player, category, categoryData);
-                                });
-                                if (all || prevLevel - amount <= 0) {
-                                        SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
-                                }
-                                updateSkillRewards(player, category, categoryData, skill, -amount);
-                        });
-                });
-        }
+       public boolean refundSkill(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean all) {
+               return getCategory(categoryId).map(category -> {
+                       var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
+                       return category.skills().getById(skillId).map(skill -> {
+                               int prevLevel = categoryData.getSkillLevel(skillId);
+                               if (prevLevel <= 0) {
+                                       return false;
+                               }
+                               int amount = all ? prevLevel : 1;
+                               watchNewPoints(player, category, categoryData, false, () -> {
+                                       if (all) {
+                                               categoryData.lockSkill(skillId);
+                                               packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
+                                       } else {
+                                               categoryData.refundSkill(skillId);
+                                               packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
+                                       }
+                                       syncPoints(player, category, categoryData);
+                               });
+                               if (all || prevLevel - amount <= 0) {
+                                       SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
+                               }
+                               updateSkillRewards(player, category, categoryData, skill, -amount);
+                               return true;
+                       }).orElse(false);
+               }).orElse(false);
+       }
 
         public void resetSkills(ServerPlayerEntity player, Identifier categoryId) {
                 getCategory(categoryId).ifPresent(category -> {

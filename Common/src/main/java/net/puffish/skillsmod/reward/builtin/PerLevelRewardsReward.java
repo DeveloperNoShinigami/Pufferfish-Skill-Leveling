@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class PerLevelRewardsReward implements Reward {
 	public static final Identifier ID = SkillsMod.createIdentifier("per_level_rewards");
@@ -30,6 +31,7 @@ public class PerLevelRewardsReward implements Reward {
     private final String skillId;
     private final int maxLevel;
     private final int pointsPerLevel;
+    private final Map<UUID, Integer> counts = new HashMap<>();
 
     private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards, String skillId, int maxLevel, int pointsPerLevel) {
         this.levelRewards = levelRewards;
@@ -130,23 +132,32 @@ public class PerLevelRewardsReward implements Reward {
     }
 
 	@Override
-	public void update(RewardUpdateContext context) {
-	for (var entry : levelRewards.entrySet()) {
-		int level = entry.getKey();
-		int count = context.getCount() >= level ? 1 : 0;
-		for (var reward : entry.getValue()) {
-		reward.instance().update(new RewardUpdateContextImpl(context.getPlayer(), count, context.isAction()));
-		}
-	}
-	}
+    public void update(RewardUpdateContext context) {
+        var player = context.getPlayer();
+        var uuid = player.getUuid();
+        int newCount = context.getCount();
+        int oldCount = counts.getOrDefault(uuid, 0);
+        counts.put(uuid, newCount);
+
+        for (var entry : levelRewards.entrySet()) {
+            int level = entry.getKey();
+            int count = newCount >= level ? 1 : 0;
+            boolean action = level > oldCount && level <= newCount;
+
+            for (var reward : entry.getValue()) {
+                reward.instance().update(new RewardUpdateContextImpl(player, count, action));
+            }
+        }
+    }
 
 	@Override
-	public void dispose(RewardDisposeContext context) {
-	var disposeContext = new DisposeContext(context.getServer());
-	for (var rewardList : levelRewards.values()) {
-		for (var reward : rewardList) {
-		reward.dispose(disposeContext);
-		}
-	}
-	}
+        public void dispose(RewardDisposeContext context) {
+        var disposeContext = new DisposeContext(context.getServer());
+        for (var rewardList : levelRewards.values()) {
+                for (var reward : rewardList) {
+                reward.dispose(disposeContext);
+                }
+        }
+        counts.clear();
+        }
 }

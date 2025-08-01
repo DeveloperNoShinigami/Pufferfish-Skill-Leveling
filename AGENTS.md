@@ -28,6 +28,7 @@ This document summarizes best practices for automating Minecraft mod development
 - Launch a modded client locally with `./gradlew :Fabric:runClient` or
   `./gradlew :Forge:runClient` for quick testing.
 - Use `./gradlew clean` when encountering unexpected build issues to reset outputs.
+- The repository ships a .tool-versions file so environments using mise will automatically select Java 17.
 
 ## Continuous Integration
 Set up a CI workflow (for example with GitHub Actions) that runs `./gradlew build`

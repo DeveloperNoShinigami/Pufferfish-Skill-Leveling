@@ -368,10 +368,14 @@ public class SkillsMod {
                                        packetSender.send(player, new SkillUpdateOutPacket(categoryId, finalSkillId, stillUnlocked));
                                        syncPoints(player, category, categoryData);
                                });
+
+                               // deactivate rewards for the refunded level without firing any
+                               // additional triggers
+                               updateSkillRewards(player, category, categoryData, refundSkill, -1);
+
                                if (prevLevel - 1 <= 0) {
                                        SKILL_LOCK.invoker().onSkillLock(categoryId, refundSkillId);
                                }
-                               updateSkillRewards(player, category, categoryData, refundSkill, -1);
                                return true;
                        }).orElse(false);
                }).orElse(false);

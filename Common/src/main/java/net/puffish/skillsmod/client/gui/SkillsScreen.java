@@ -678,7 +678,7 @@ public class SkillsScreen extends Screen {
                                 var descIndex = Math.min(level, definition.descriptions().size() - 1);
                                 MutableText desc = Text.empty();
                                 if (!definition.descriptions().isEmpty()) {
-                                        if (definition.mergeDescription()) {
+                                        if (definition.mergeDescription() && level > 1) {
                                                 for (int i = 0; i <= descIndex; i++) {
                                                         if (i > 0) {
                                                                 desc.append(Text.literal("\n"));
@@ -697,7 +697,7 @@ public class SkillsScreen extends Screen {
                                         var extraIndex = Math.min(level, definition.extraDescriptions().size() - 1);
                                         MutableText extraDesc = Text.empty();
                                         if (!definition.extraDescriptions().isEmpty()) {
-                                                if (definition.mergeDescription()) {
+                                                if (definition.mergeDescription() && level > 1) {
                                                         for (int i = 0; i <= extraIndex; i++) {
                                                                 if (i > 0) {
                                                                         extraDesc.append(Text.literal("\n"));

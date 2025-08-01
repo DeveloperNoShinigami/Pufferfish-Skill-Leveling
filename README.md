@@ -12,7 +12,7 @@ Skill definitions describe how a skill looks and what it grants. Datapacks may n
   its rewards can be obtained.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
-- `merge_description` – when `true`, descriptions and extra descriptions accumulate from earlier levels instead of replacing them. Defaults to `false` when omitted.
+- `merge_description` – when `true`, descriptions and extra descriptions accumulate from earlier levels instead of replacing them. Defaults to `false` when omitted. The first unlocked level shows only its own description, and earlier levels are merged once level 2 or higher is reached.
 
 - Tooltip lines automatically adjust based on how many times the skill has been unlocked. When hovering a skill, the
   entry matching the player's current level is shown, and holding Shift displays the line for the next level (or a final
@@ -101,4 +101,4 @@ Administrators can refund skill levels using `/puffish_skills skills refund`.
 /puffish_skills skills refund <players> <category> <skill> [all]
 ```
 
-Running without `all` refunds a single level. Adding `all` removes every level of the chosen skill.
+Running without `all` refunds a single level. Adding `all` removes every level of the chosen skill. The command can be repeated as needed and reports an error if none of the selected players have any levels to refund.

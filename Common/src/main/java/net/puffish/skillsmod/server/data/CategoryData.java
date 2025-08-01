@@ -99,10 +99,6 @@ public class CategoryData {
 
 	public Skill.State getSkillState(CategoryConfig category, SkillConfig skill, SkillDefinitionConfig definition) {
                var level = unlockedSkills.getOrDefault(skill.id(), 0);
-               var total = countUnlocked(category, definition.id());
-               if (total >= definition.maxLevels()) {
-                       return level > 0 ? Skill.State.UNLOCKED : Skill.State.LOCKED;
-               }
                if (level >= definition.maxLevels()) {
                        return Skill.State.UNLOCKED;
                }

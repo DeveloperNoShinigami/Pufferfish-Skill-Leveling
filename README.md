@@ -7,9 +7,8 @@ This mod provides an API to create skill trees via datapacks. Categories and ski
 Skill definitions describe how a skill looks and what it grants. Datapacks may now define stackable skills with extra fields:
 
 - `type` – identifier of the skill type. Defaults to `puffish_skills:default`.
-- `max_levels` – how many times the skill can be unlocked. This value defines
-  the maximum level a stackable skill can reach and determines how many times
-  its rewards can be obtained.
+- `max_skill_level` – how many times the skill can be unlocked. This value defines
+  the maximum level a skill can reach.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
 - `merge_description` – when `true`, descriptions and extra descriptions start accumulating from level 2 onward instead of replacing them. The first level's tooltip is shown on its own for smoother progression. Defaults to `false` when omitted.
@@ -23,35 +22,58 @@ A basic skill definition might look like this:
 
 ```json
 {
-  "my_skill": {
-    "type": "puffish_skills:stackable", //allows a new type that lets you utlize level based skill types and standard rewards.
-    "max_levels": 5,
-    "title": "Master Miner",
-    "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
-    "frame": { /* your frame config */ },
-    "size": 1.0,
-    "descriptions": [ 
-      "Current: +5% mining speed",
-      "Current: +10% mining speed",
-      "Current: +15% mining speed",
-      "Current: +20% mining speed",
-      "Current: +25% mining speed"
-    ],
-    "extra_descriptions": [
-      "Next: +10% mining speed",
-      "Next: +15% mining speed",
-      "Next: +20% mining speed",
-      "Next: +25% mining speed",
-      "— MAXED OUT —"
-    ],
-    "cost": 1,
-    "required_skills": 0,
-    "required_points": 0,
-    "required_spent_points": 0,
-    "required_exclusions": 0,
-    "rewards": [
-      "puffish_skills:attribute/mining_speed_i"
-    ]
+  "stacked_power": {
+      "type": "puffish_skills:stackable",
+      "title": "Master Miner",
+      "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
+      "size": 1.0,
+      "required_points": 3,
+      "merge_description": false,
+      "descriptions": [
+          "Current: +1 melee damage",
+          "Current: +10% mining speed",
+          "Current: +15% mining speed"
+      ],
+      "extra_descriptions": [
+          "Next: +10% mining speed",
+          "Next: +15% mining speed",
+          "— MAXED OUT —"
+      ],
+      "rewards": [
+          {
+              "type": "puffish_skills:per_level_rewards",
+              "data": {
+
+                    "skill_id": "19aazycn9ii0lfh1", 
+                    "max_skill_level": 3,
+                    "points_per_level": 1,
+                    "levels": {
+                        "1": [
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.attack_damage",
+                                        "value": 10,
+                                        "operation": "addition" } }
+                        ],
+                        "2": [
+                            {"type": "puffish_skills:command",
+                              "data": { "command": "give @p minecraft:experience_bottle 1" } 
+                            }
+                        ],
+                        "3": [
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.max_health",
+                                        "value": 2,
+                                        "operation": "addition" } }
+                        ]
+                    }
+                }
+          },
+          { 
+              "type": "puffish_skills:command",
+              "data": { "command": "give @p minecraft:experience_bottle 1" }
+          }
+      ],
+      "metadata": { "icon": "74sqblu8lgizj777" }
   }
 }
 ```
@@ -69,7 +91,7 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
     "points_per_level": 1,
     "levels": {
       "1": [ { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 1, "operation": "addition" } } ],
-      "2": [ { "type": "puffish_skills:effect", "data": { "effect": "speed", "amplifier": 0, "duration": 200 } } ],
+      "2": [ { "type": "puffish_skills:command", "data": {"command": "give @p minecraft:experience_bottle 1"} } ],
       "3": [ { "type": "puffish_skills:attribute", "data": { "attribute": "generic.max_health", "value": 2, "operation": "addition" } } ]
     }
   }

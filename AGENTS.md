@@ -21,7 +21,14 @@ This document summarizes best practices for automating Minecraft mod development
 ## Build and Testing
 - Use `./gradlew build` to compile all modules.
 - Execute `./gradlew test` to run unit tests.
+- Run `./gradlew check` to perform code style analysis using Checkstyle. The rules
+  come from `config/checkstyle/checkstyle.xml` and are applied to each module.
 - Generated artifacts are found under `build/libs` for each platform.
+
+## Continuous Integration
+Set up a CI workflow (for example with GitHub Actions) that runs `./gradlew build`
+and `./gradlew test` on every push. This catches compilation or test failures
+early and ensures the codebase follows the Checkstyle rules.
 
 ## Mod Development Methods
 - Leverage Mixin to modify vanilla code when necessary.

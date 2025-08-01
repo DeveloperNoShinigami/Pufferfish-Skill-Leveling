@@ -340,26 +340,45 @@ public class SkillsMod {
                return getCategory(categoryId).map(category -> {
                        var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
                        return category.skills().getById(skillId).map(skill -> {
-                               int prevLevel = categoryData.getSkillLevel(skillId);
+                               var refundSkillId = skillId;
+                               var refundSkill = skill;
+                               int prevLevel = categoryData.getSkillLevel(refundSkillId);
+
                                if (prevLevel <= 0) {
-                                       return false;
+                                       var definitionId = skill.definitionId();
+                                       for (var otherSkill : category.skills().getAll()) {
+                                               if (otherSkill.definitionId().equals(definitionId)) {
+                                                       int level = categoryData.getSkillLevel(otherSkill.id());
+                                                       if (level > 0) {
+                                                               refundSkillId = otherSkill.id();
+                                                               refundSkill = otherSkill;
+                                                               prevLevel = level;
+                                                               break;
+                                                       }
+                                               }
+                                       }
+                                       if (prevLevel <= 0) {
+                                               return false;
+                                       }
                                }
+
                                int amount = all ? prevLevel : 1;
+                               var finalSkillId = refundSkillId;
                                watchNewPoints(player, category, categoryData, false, () -> {
                                        boolean stillUnlocked;
                                        if (all) {
-                                               categoryData.lockSkill(skillId);
+                                               categoryData.lockSkill(finalSkillId);
                                                stillUnlocked = false;
                                        } else {
-                                               stillUnlocked = categoryData.refundSkill(skillId);
+                                               stillUnlocked = categoryData.refundSkill(finalSkillId);
                                        }
-                                       packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, stillUnlocked));
+                                       packetSender.send(player, new SkillUpdateOutPacket(categoryId, finalSkillId, stillUnlocked));
                                        syncPoints(player, category, categoryData);
                                });
                                if (all || prevLevel - amount <= 0) {
-                                       SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
+                                       SKILL_LOCK.invoker().onSkillLock(categoryId, refundSkillId);
                                }
-                               updateSkillRewards(player, category, categoryData, skill, -amount);
+                               updateSkillRewards(player, category, categoryData, refundSkill, -amount);
                                return true;
                        }).orElse(false);
                }).orElse(false);

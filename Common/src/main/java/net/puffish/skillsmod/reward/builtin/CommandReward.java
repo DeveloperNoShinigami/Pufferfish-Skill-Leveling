@@ -109,22 +109,25 @@ public class CommandReward implements Reward {
 			executeCommand(player, command);
 		}
 
-		counts.compute(player.getUuid(), (uuid, count) -> {
-			if (count == null) {
-				count = 0;
-			}
+                counts.compute(player.getUuid(), (uuid, count) -> {
+                        if (count == null) {
+                                // initialize without executing commands to avoid
+                                // running unlock actions again when the player
+                                // rejoins the world
+                                return context.getCount();
+                        }
 
-			while (context.getCount() > count) {
-				executeCommand(player, unlockCommand);
-				count++;
-			}
-			while (context.getCount() < count) {
-				executeCommand(player, lockCommand);
-				count--;
-			}
+                        while (context.getCount() > count) {
+                                executeCommand(player, unlockCommand);
+                                count++;
+                        }
+                        while (context.getCount() < count) {
+                                executeCommand(player, lockCommand);
+                                count--;
+                        }
 
-			return count;
-		});
+                        return count;
+                });
 	}
 
 	@Override

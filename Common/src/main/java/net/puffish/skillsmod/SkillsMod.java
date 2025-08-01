@@ -336,7 +336,7 @@ public class SkillsMod {
                 });
         }
 
-       public boolean refundSkill(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean all) {
+       public boolean refundSkill(ServerPlayerEntity player, Identifier categoryId, String skillId) {
                return getCategory(categoryId).map(category -> {
                        var categoryData = getPlayerData(player).getOrCreateCategoryData(category);
                        return category.skills().getById(skillId).map(skill -> {
@@ -362,23 +362,16 @@ public class SkillsMod {
                                        }
                                }
 
-                               int amount = all ? prevLevel : 1;
                                var finalSkillId = refundSkillId;
                                watchNewPoints(player, category, categoryData, false, () -> {
-                                       boolean stillUnlocked;
-                                       if (all) {
-                                               categoryData.lockSkill(finalSkillId);
-                                               stillUnlocked = false;
-                                       } else {
-                                               stillUnlocked = categoryData.refundSkill(finalSkillId);
-                                       }
+                                       boolean stillUnlocked = categoryData.refundSkill(finalSkillId);
                                        packetSender.send(player, new SkillUpdateOutPacket(categoryId, finalSkillId, stillUnlocked));
                                        syncPoints(player, category, categoryData);
                                });
-                               if (all || prevLevel - amount <= 0) {
+                               if (prevLevel - 1 <= 0) {
                                        SKILL_LOCK.invoker().onSkillLock(categoryId, refundSkillId);
                                }
-                               updateSkillRewards(player, category, categoryData, refundSkill, -amount);
+                               updateSkillRewards(player, category, categoryData, refundSkill, -1);
                                return true;
                        }).orElse(false);
                }).orElse(false);

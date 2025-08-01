@@ -119,7 +119,7 @@ The `example-skill-level-template.zip` file contains a datapack demonstrating a 
 Administrators can refund skill levels using `/puffish_skills skills refund`.
 
 ```
-/puffish_skills skills refund <players> <category> <skill> [all]
+/puffish_skills skills refund <players> <category> <skill>
 ```
 
-Running without `all` refunds a single level. Adding `all` removes every level of the chosen skill. The command can be repeated as needed and reports an error if none of the selected players have any levels to refund.
+This command refunds a single level of the chosen skill. It can be repeated as needed and reports an error if none of the selected players have any levels to refund.

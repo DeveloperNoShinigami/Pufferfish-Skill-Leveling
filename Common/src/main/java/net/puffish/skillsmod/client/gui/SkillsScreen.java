@@ -668,19 +668,21 @@ public class SkillsScreen extends Screen {
 				var lines = new ArrayList<OrderedText>();
 				lines.add(definition.title().asOrderedText());
 
-				var level = activeCategoryData.countUnlocked(definition.id());
-				lines.add(SkillsMod.createTranslatable(
-						"tooltip",
-						"skill_level",
-						level,
-						definition.maxLevels()
-				).asOrderedText());
+                                var level = activeCategoryData.countUnlocked(definition.id());
+                                lines.add(SkillsMod.createTranslatable(
+                                                "tooltip",
+                                                "skill_level",
+                                                level,
+                                                definition.maxLevels()
+                                ).asOrderedText());
                                 var descIndex = Math.min(level, definition.descriptions().size() - 1);
                                 MutableText desc = Text.empty();
                                 if (!definition.descriptions().isEmpty()) {
                                         if (definition.mergeDescription()) {
-                                                for (int i = 0; i <= descIndex; i++) {
-                                                        if (i > 0) {
+                                                int start = (level <= 1) ? descIndex : 1;
+                                                start = Math.min(start, descIndex);
+                                                for (int i = start; i <= descIndex; i++) {
+                                                        if (i > start) {
                                                                 desc.append(Text.literal("\n"));
                                                         }
                                                         desc.append(definition.descriptions().get(i).copy());
@@ -698,8 +700,10 @@ public class SkillsScreen extends Screen {
                                         MutableText extraDesc = Text.empty();
                                         if (!definition.extraDescriptions().isEmpty()) {
                                                 if (definition.mergeDescription()) {
-                                                        for (int i = 0; i <= extraIndex; i++) {
-                                                                if (i > 0) {
+                                                        int startExtra = (level <= 1) ? extraIndex : 1;
+                                                        startExtra = Math.min(startExtra, extraIndex);
+                                                        for (int i = startExtra; i <= extraIndex; i++) {
+                                                                if (i > startExtra) {
                                                                         extraDesc.append(Text.literal("\n"));
                                                                 }
                                                                 extraDesc.append(definition.extraDescriptions().get(i).copy());

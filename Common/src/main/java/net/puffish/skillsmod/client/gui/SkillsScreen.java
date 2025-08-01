@@ -698,7 +698,7 @@ public class SkillsScreen extends Screen {
                                 if (Screen.hasShiftDown()) {
                                         var extraIndex = Math.min(level, definition.extraDescriptions().size() - 1);
                                         MutableText extraDesc = Text.empty();
-                                        if (!definition.extraDescriptions().isEmpty()) {
+                                        if (!definition.extraDescriptions().isEmpty()) {                                      
                                                 if (definition.mergeDescription()) {
                                                         int startExtra = (level <= 1) ? extraIndex : 1;
                                                         startExtra = Math.min(startExtra, extraIndex);

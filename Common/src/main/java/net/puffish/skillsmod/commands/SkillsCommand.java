@@ -106,21 +106,33 @@ public class SkillsCommand {
                 return players.size();
         }
 
-        private static int refund(CommandContext<ServerCommandSource> context, boolean all) throws CommandSyntaxException {
-                var players = EntityArgumentType.getPlayers(context, "players");
-                var category = CategoryArgumentType.getCategory(context, "category");
-                var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
+       private static int refund(CommandContext<ServerCommandSource> context, boolean all) throws CommandSyntaxException {
+               var players = EntityArgumentType.getPlayers(context, "players");
+               var category = CategoryArgumentType.getCategory(context, "category");
+               var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
-                for (var player : players) {
-                        SkillsMod.getInstance().refundSkill(player, category.getId(), skill.getId(), all);
-                }
-                CommandUtils.sendSuccess(
-                                context,
-                                players,
-                                all ? "skills.refund_all" : "skills.refund",
-                                category.getId(),
-                                skill.getId()
-                );
-                return players.size();
-        }
+               var refunded = false;
+               for (var player : players) {
+                       refunded |= SkillsMod.getInstance().refundSkill(player, category.getId(), skill.getId(), all);
+               }
+
+               if (refunded) {
+                       CommandUtils.sendSuccess(
+                                       context,
+                                       players,
+                                       all ? "skills.refund_all" : "skills.refund",
+                                       category.getId(),
+                                       skill.getId()
+                       );
+                       return players.size();
+               } else {
+                       context.getSource().sendError(SkillsMod.createTranslatable(
+                                       "command",
+                                       "skills.refund.no_levels",
+                                       category.getId(),
+                                       skill.getId()
+                       ));
+                       return 0;
+               }
+       }
 }

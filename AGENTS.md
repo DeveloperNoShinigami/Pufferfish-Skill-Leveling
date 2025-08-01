@@ -6,6 +6,7 @@ This document summarizes best practices for automating Minecraft mod development
 - Install a modern JDK (17 or higher) and ensure `JAVA_HOME` is configured.
 - Use Gradle for builds. The provided `gradlew` wrapper handles versioning.
 - For cross-platform mods, rely on Architectury or similar projects to share code.
+- Import the project in an IDE such as IntelliJ IDEA for full Gradle integration and Mixins support.
 
 ## Project Structure
 - Keep platform neutral logic in the `Common` module.
@@ -21,7 +22,22 @@ This document summarizes best practices for automating Minecraft mod development
 ## Build and Testing
 - Use `./gradlew build` to compile all modules.
 - Execute `./gradlew test` to run unit tests.
+- Run `./gradlew check` to perform code style analysis using Checkstyle. The rules
+  come from `config/checkstyle/checkstyle.xml` and are applied to each module.
 - Generated artifacts are found under `build/libs` for each platform.
+- Launch a modded client locally with `./gradlew :Fabric:runClient` or
+  `./gradlew :Forge:runClient` for quick testing.
+- Use `./gradlew clean` when encountering unexpected build issues to reset outputs.
+
+## Continuous Integration
+Set up a CI workflow (for example with GitHub Actions) that runs `./gradlew build`
+and `./gradlew test` on every push. This catches compilation or test failures
+early and ensures the codebase follows the Checkstyle rules.
+
+## Source Control
+- Keep build outputs and IDE files out of version control by respecting `.gitignore`.
+- Write concise commit messages that describe the change.
+- Create feature branches for larger work and keep the `main` branch stable.
 
 ## Mod Development Methods
 - Leverage Mixin to modify vanilla code when necessary.
@@ -29,9 +45,23 @@ This document summarizes best practices for automating Minecraft mod development
 - Use datapacks or KubeJS scripts to configure behavior without rebuilding.
 - Document commands, config options, and datapack formats in README files.
 
+## Automation Tips
+- Reuse Gradle tasks between modules to avoid duplication.
+- Script dependency updates and testing so agents can keep the project current.
+- Validate generated resources to ensure cross-loader consistency.
+
 ## Publishing
 - Deploy releases to a Maven repository or hosting platform like Modrinth or CurseForge.
 - Provide a changelog and update compatibility notes for each Minecraft version.
+
+## Troubleshooting
+- Run `./gradlew --stacktrace` to obtain detailed error logs when a build fails.
+- Delete the `.gradle` directory or execute `./gradlew clean` if tasks behave unexpectedly.
+- Confirm your IDE is using the same JDK version defined for the project.
+
+## Additional Tools
+- Generate documentation with `./gradlew javadoc` to help maintain APIs.
+- Publish artifacts to your local Maven repo using `./gradlew publishToMavenLocal` for downstream testing.
 
 ## Converting Mods to Addons
 When a project should rely on an existing mod's jar rather than bundling all of

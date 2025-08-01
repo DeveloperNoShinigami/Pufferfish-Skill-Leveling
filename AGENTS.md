@@ -33,4 +33,21 @@ This document summarizes best practices for automating Minecraft mod development
 - Deploy releases to a Maven repository or hosting platform like Modrinth or CurseForge.
 - Provide a changelog and update compatibility notes for each Minecraft version.
 
+## Converting Mods to Addons
+When a project should rely on an existing mod's jar rather than bundling all of
+its code, treat it as an addon. The basic steps are:
+
+1. Create a new project that declares the target mod as a Gradle dependency
+   (using `modImplementation`, `compileOnly`, or `runtimeOnly` depending on the
+   loader).
+2. Access the mod's API or classes directly instead of copying code. Extend or
+   implement its interfaces where appropriate.
+3. Use Mixins or Forge patches to update or override methods in the base mod
+   when additional behavior is required.
+4. Keep the addon’s resources and registration logic separate so the jar can be
+   loaded alongside the original mod.
+5. Distribute the addon as its own jar and note the dependency on the base mod
+   in the documentation.
+
+
 This overview provides a starting point for building or scripting an automated agent to assist with Minecraft modding tasks.

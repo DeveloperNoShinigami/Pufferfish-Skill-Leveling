@@ -5,13 +5,14 @@ import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
 
-public record SkillUpdateOutPacket(Identifier categoryId, String skillId, boolean unlocked) implements OutPacket {
+public record SkillUpdateOutPacket(Identifier categoryId, String skillId, boolean unlocked, int level) implements OutPacket {
 	@Override
 	public void write(PacketByteBuf buf) {
 		buf.writeIdentifier(categoryId);
 		buf.writeString(skillId);
-		buf.writeBoolean(unlocked);
-	}
+                buf.writeBoolean(unlocked);
+                buf.writeInt(level);
+        }
 
 	@Override
 	public Identifier getId() {

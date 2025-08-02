@@ -309,9 +309,9 @@ public class SkillsMod {
 			category.skills().getById(skillId).ifPresent(skill -> {
 				if (categoryData.canUnlockSkill(category, skill, force)) {
 					watchNewPoints(player, category, categoryData, false, () -> {
-						categoryData.unlockSkill(skillId);
-						packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true));
-						syncPoints(player, category, categoryData);
+                                                categoryData.unlockSkill(skillId);
+                                                packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true, categoryData.getSkillLevel(skillId)));
+                                                syncPoints(player, category, categoryData);
 					});
                                         SKILL_UNLOCK.invoker().onSkillUnlock(categoryId, skillId);
                                         updateSkillRewards(player, category, categoryData, skill, 1);
@@ -327,7 +327,7 @@ public class SkillsMod {
                                 int prevLevel = categoryData.getSkillLevel(skillId);
                                 watchNewPoints(player, category, categoryData, false, () -> {
                                         categoryData.lockSkill(skillId);
-                                        packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false));
+                                        packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false, 0));
                                         syncPoints(player, category, categoryData);
                                 });
                                 SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
@@ -365,7 +365,7 @@ public class SkillsMod {
                                var finalSkillId = refundSkillId;
                                watchNewPoints(player, category, categoryData, false, () -> {
                                        boolean stillUnlocked = categoryData.refundSkill(finalSkillId);
-                                       packetSender.send(player, new SkillUpdateOutPacket(categoryId, finalSkillId, stillUnlocked));
+                                       packetSender.send(player, new SkillUpdateOutPacket(categoryId, finalSkillId, stillUnlocked, categoryData.getSkillLevel(finalSkillId)));
                                        syncPoints(player, category, categoryData);
                                });
 

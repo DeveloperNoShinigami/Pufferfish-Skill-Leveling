@@ -21,6 +21,7 @@ import net.puffish.skillsmod.common.FrameType;
 import net.puffish.skillsmod.common.IconType;
 import net.puffish.skillsmod.network.InPacket;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ShowCategoryInPacket implements InPacket {
@@ -36,7 +37,7 @@ public class ShowCategoryInPacket implements InPacket {
 		return new ShowCategoryInPacket(category);
 	}
 
-	public static ClientCategoryData readCategory(PacketByteBuf buf) {
+        public static ClientCategoryData readCategory(PacketByteBuf buf) {
 		var id = buf.readIdentifier();
 
 		var title = buf.readText();
@@ -57,13 +58,21 @@ public class ShowCategoryInPacket implements InPacket {
 		var normalConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
 		var exclusiveConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
 
-		var skillsStates = buf.readMap(
-				PacketByteBuf::readString,
-				buf1 -> buf1.readEnumConstant(Skill.State.class)
-		);
+                var skillsInfo = buf.readMap(
+                                PacketByteBuf::readString,
+                                buf1 -> new SkillInfo(
+                                                buf1.readEnumConstant(Skill.State.class),
+                                                buf1.readInt()
+                                )
+                );
 
-		var spentPoints = buf.readInt();
-		var earnedPoints = buf.readInt();
+                var skillsStates = skillsInfo.entrySet().stream()
+                                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().state()));
+                var skillLevels = skillsInfo.entrySet().stream()
+                                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().level()));
+
+                var spentPoints = buf.readInt();
+                var earnedPoints = buf.readInt();
 
 		var levelLimit = Integer.MAX_VALUE;
 		var currentLevel = Integer.MIN_VALUE;
@@ -91,18 +100,21 @@ public class ShowCategoryInPacket implements InPacket {
 				exclusiveConnections
 		);
 
-		return new ClientCategoryData(
-				category,
-				skillsStates,
-				spentPoints,
-				earnedPoints,
-				currentLevel,
-				currentExperience,
-				requiredExperience
-		);
-	}
+                return new ClientCategoryData(
+                                category,
+                                skillsStates,
+                                skillLevels,
+                                spentPoints,
+                                earnedPoints,
+                                currentLevel,
+                                currentExperience,
+                                requiredExperience
+                );
+        }
 
-	public static ClientSkillDefinitionConfig readDefinition(PacketByteBuf buf) {
+        private record SkillInfo(Skill.State state, int level) { }
+
+        public static ClientSkillDefinitionConfig readDefinition(PacketByteBuf buf) {
 		var id = buf.readString();
 		var type = buf.readIdentifier();
 		var maxLevels = buf.readInt();
@@ -117,7 +129,8 @@ public class ShowCategoryInPacket implements InPacket {
 		var requiredSkills = buf.readInt();
 		var requiredPoints = buf.readInt();
 		var requiredSpentPoints = buf.readInt();
-		var requiredExclusions = buf.readInt();
+                var requiredExclusions = buf.readInt();
+                var hasLevelRewards = buf.readBoolean();
 
                 return new ClientSkillDefinitionConfig(
                         id,
@@ -132,12 +145,13 @@ public class ShowCategoryInPacket implements InPacket {
                         mergeDescription,
                         cost,
 
-				requiredSkills,
-				requiredPoints,
-				requiredSpentPoints,
-				requiredExclusions
-		);
-	}
+                                requiredSkills,
+                                requiredPoints,
+                                requiredSpentPoints,
+                                requiredExclusions,
+                                hasLevelRewards
+                );
+        }
 
 	public static ClientIconConfig readSkillIcon(PacketByteBuf buf) {
 		var type = buf.readEnumConstant(IconType.class);

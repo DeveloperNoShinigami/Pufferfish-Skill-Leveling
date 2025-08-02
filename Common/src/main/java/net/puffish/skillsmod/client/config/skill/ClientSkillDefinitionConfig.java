@@ -18,7 +18,8 @@ public record ClientSkillDefinitionConfig(
                 boolean mergeDescription,
                 int cost,
 		int requiredSkills,
-		int requiredPoints,
-		int requiredSpentPoints,
-		int requiredExclusions
+                int requiredPoints,
+                int requiredSpentPoints,
+                int requiredExclusions,
+                boolean hasLevelRewards
 ) { }

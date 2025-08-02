@@ -14,8 +14,9 @@ import java.util.Optional;
 
 public class ClientCategoryData {
 	private final ClientCategoryConfig config;
-	private final Map<String, Skill.State> skillStates;
-	private final Map<ClientSkillConnectionConfig, ClientSkillConnectionData> connectionStates;
+        private final Map<String, Skill.State> skillStates;
+        private final Map<String, Integer> skillLevels;
+        private final Map<ClientSkillConnectionConfig, ClientSkillConnectionData> connectionStates;
 
 	private int spentPoints;
 	private int earnedPoints;
@@ -33,21 +34,23 @@ public class ClientCategoryData {
 
 	public ClientCategoryData(
 			ClientCategoryConfig config,
-			Map<String, Skill.State> skillStates,
-			int spentPoints,
-			int earnedPoints,
-			int currentLevel,
-			int currentExperience,
-			int requiredExperience
-	) {
-		this.config = config;
-		this.skillStates = skillStates;
-		this.spentPoints = spentPoints;
-		this.earnedPoints = earnedPoints;
-		this.currentLevel = currentLevel;
-		this.currentExperience = currentExperience;
-		this.requiredExperience = requiredExperience;
-		this.connectionStates = new HashMap<>();
+                        Map<String, Skill.State> skillStates,
+                        Map<String, Integer> skillLevels,
+                        int spentPoints,
+                        int earnedPoints,
+                        int currentLevel,
+                        int currentExperience,
+                        int requiredExperience
+        ) {
+                this.config = config;
+                this.skillStates = skillStates;
+                this.skillLevels = new HashMap<>(skillLevels);
+                this.spentPoints = spentPoints;
+                this.earnedPoints = earnedPoints;
+                this.currentLevel = currentLevel;
+                this.currentExperience = currentExperience;
+                this.requiredExperience = requiredExperience;
+                this.connectionStates = new HashMap<>();
 
 		for (var connection : config.normalConnections()) {
 			var skillA = config.skills().get(connection.skillAId());
@@ -98,23 +101,28 @@ public class ClientCategoryData {
 		return skillStates.get(skill.id());
 	}
 
-	public int countUnlocked(String definitionId) {
-		return (int) config.skills()
-				.values()
-				.stream()
-				.filter(skill -> skill.definitionId().equals(definitionId))
-				.filter(skill -> getSkillState(skill) == Skill.State.UNLOCKED)
-				.count();
-	}
+        public int countUnlocked(String definitionId) {
+                return config.skills()
+                                .values()
+                                .stream()
+                                .filter(skill -> skill.definitionId().equals(definitionId))
+                                .mapToInt(skill -> skillLevels.getOrDefault(skill.id(), 0))
+                                .sum();
+        }
 
-	public void unlock(String skillId) {
-		var skill = config.skills().get(skillId);
-		if (skill == null) {
-			return;
-		}
-		updateSkillState(skill, Skill.State.UNLOCKED);
-		if (skill.isRoot() && config.exclusiveRoot()) {
-			config.skills()
+        public int getSkillLevel(String skillId) {
+                return skillLevels.getOrDefault(skillId, 0);
+        }
+
+        public void unlock(String skillId, int level) {
+                var skill = config.skills().get(skillId);
+                if (skill == null) {
+                        return;
+                }
+                skillLevels.put(skillId, level);
+                updateSkillState(skill, Skill.State.UNLOCKED);
+                if (skill.isRoot() && config.exclusiveRoot()) {
+                        config.skills()
 					.values()
 					.stream()
 					.filter(ClientSkillConfig::isRoot)
@@ -158,14 +166,15 @@ public class ClientCategoryData {
 		}
 	}
 
-	public void lock(String skillId) {
-		var skill = config.skills().get(skillId);
-		if (skill == null) {
-			return;
-		}
-		if (isExcluded(skill)) {
-			updateSkillState(skill, Skill.State.EXCLUDED);
-		} else if (isAvailable(skill)) {
+        public void lock(String skillId) {
+                var skill = config.skills().get(skillId);
+                if (skill == null) {
+                        return;
+                }
+                skillLevels.remove(skillId);
+                if (isExcluded(skill)) {
+                        updateSkillState(skill, Skill.State.EXCLUDED);
+                } else if (isAvailable(skill)) {
 			if (isAffordable(skill)) {
 				updateSkillState(skill, Skill.State.AFFORDABLE);
 			} else {

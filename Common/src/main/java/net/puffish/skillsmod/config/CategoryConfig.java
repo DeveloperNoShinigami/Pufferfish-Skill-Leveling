@@ -12,6 +12,7 @@ import net.puffish.skillsmod.config.skill.SkillsConfig;
 import net.puffish.skillsmod.util.DisposeContext;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -56,25 +57,40 @@ public record CategoryConfig(
 						.getSuccess()
 		);
 
-		var optConnections = optSkills.flatMap(
-				skills -> SkillConnectionsConfig.parse(connectionsElement, skills, context)
-						.ifFailure(problems::add)
-						.getSuccess()
-		);
+                var optConnections = optSkills.flatMap(
+                                skills -> SkillConnectionsConfig.parse(connectionsElement, skills, context)
+                                                .ifFailure(problems::add)
+                                                .getSuccess()
+                );
 
-		if (problems.isEmpty()) {
-			return Result.success(new CategoryConfig(
-					id,
-					optGeneral.orElseThrow(),
-					optDefinitions.orElseThrow(),
-					optSkills.orElseThrow(),
-					optConnections.orElseThrow(),
-					optExperience
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+                if (problems.isEmpty()) {
+                        var definitionsCfg = optDefinitions.orElseThrow();
+                        var skillsCfg = optSkills.orElseThrow();
+
+                        var usedDefinitions = new HashSet<String>();
+                        skillsCfg.getAll().forEach(skill -> {
+                                if (!usedDefinitions.add(skill.definitionId())) {
+                                        problems.add(Problem.message("Skills must not share definitions"));
+                                }
+                        });
+                        definitionsCfg.getAll().forEach(definition -> {
+                                if (!usedDefinitions.contains(definition.id())) {
+                                        problems.add(Problem.message("Definition '" + definition.id() + "' is not used by any skill"));
+                                }
+                        });
+                        if (problems.isEmpty()) {
+                                return Result.success(new CategoryConfig(
+                                                id,
+                                                optGeneral.orElseThrow(),
+                                                definitionsCfg,
+                                                skillsCfg,
+                                                optConnections.orElseThrow(),
+                                                optExperience
+                                ));
+                        }
+                }
+                return Result.failure(Problem.combine(problems));
+        }
 
 	public void dispose(DisposeContext context) {
 		definitions.dispose(context);

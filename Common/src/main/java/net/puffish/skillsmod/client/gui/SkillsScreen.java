@@ -668,13 +668,15 @@ public class SkillsScreen extends Screen {
 				var lines = new ArrayList<OrderedText>();
 				lines.add(definition.title().asOrderedText());
 
-                                var level = activeCategoryData.countUnlocked(definition.id());
-                                lines.add(SkillsMod.createTranslatable(
-                                                "tooltip",
-                                                "skill_level",
-                                                level,
-                                                definition.maxLevels()
-                                ).asOrderedText());
+                                var level = activeCategoryData.getSkillLevel(hoveredSkill.id());
+                                if (definition.hasLevelRewards()) {
+                                        lines.add(SkillsMod.createTranslatable(
+                                                        "tooltip",
+                                                        "skill_level",
+                                                        level,
+                                                        definition.maxLevels()
+                                        ).asOrderedText());
+                                }
                                 var descIndex = Math.min(Math.max(level - 1, 0), definition.descriptions().size() - 1);
                                 MutableText desc = Text.empty();
                                 if (!definition.descriptions().isEmpty()) {

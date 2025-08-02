@@ -34,12 +34,12 @@ public class SkillDefinitionConfigTest {
 {
   \"title\": \"Test\",
   \"icon\": { \"type\": \"texture\", \"data\": { \"texture\": \"minecraft:stone\" } },
+  \"points_per_level\": 0,
   \"rewards\": [
     {
       \"type\": \"puffish_skills:per_level_rewards\",
       \"data\": {
         \"skill_id\": \"skill\",
-        \"points_per_level\": 0,
         \"levels\": { \"1\": [], \"2\": [], \"3\": [] }
       }
     }
@@ -57,6 +57,7 @@ public class SkillDefinitionConfigTest {
 {
   \"title\": \"Test\",
   \"icon\": { \"type\": \"texture\", \"data\": { \"texture\": \"minecraft:stone\" } },
+  \"points_per_level\": 0,
   \"max_skill_level\": 1,
   \"rewards\": [
     {
@@ -64,7 +65,6 @@ public class SkillDefinitionConfigTest {
       \"data\": {
         \"skill_id\": \"skill\",
         \"max_skill_level\": 3,
-        \"points_per_level\": 0,
         \"levels\": { \"1\": [], \"2\": [], \"3\": [] }
       }
     }

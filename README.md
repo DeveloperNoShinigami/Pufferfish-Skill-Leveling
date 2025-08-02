@@ -14,6 +14,7 @@ Supported root fields:
 - `frame` – frame style for the icon.
 - `size` – size of the icon.
 - `max_skill_level` / `max_levels` – how many times the skill can be unlocked. This value defines the maximum level a skill can reach. When omitted and the skill uses `puffish_skills:per_level_rewards`, the highest level is inferred from that reward.
+- `points_per_level` – category points consumed for each level when using `puffish_skills:per_level_rewards`.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
 - `merge_description` – when `true`, descriptions and extra descriptions accumulate from previous levels starting when level 2 is reached. The tooltip for the very first level is shown on its own. Defaults to `false` when omitted.
@@ -35,7 +36,8 @@ A basic skill definition using per-level rewards might look like this:
       "title": "Master Miner",
       "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
       "size": 1.0,
-      "max_levels": 3,
+      "max_skill_level": 3,
+      "points_per_level": 1,
       "merge_description": false,
       "descriptions": [
           "Current: +1 melee damage",
@@ -52,8 +54,6 @@ A basic skill definition using per-level rewards might look like this:
               "type": "puffish_skills:per_level_rewards",
               "data": {
                     "skill_id": "19aazycn9ii0lfh1",
-                    "max_skill_level": 3,
-                    "points_per_level": 1,
                     "levels": {
                         "1": [
                             { "type": "puffish_skills:attribute",
@@ -90,7 +90,8 @@ Use the `puffish_skills:stackable` skill type when you want to combine standard 
       "title": "Master Miner",
       "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
       "size": 1.0,
-      "max_levels": 3,
+      "max_skill_level": 3,
+      "points_per_level": 1,
       "required_points": 3,
       "merge_description": false,
       "descriptions": [
@@ -107,10 +108,7 @@ Use the `puffish_skills:stackable` skill type when you want to combine standard 
           {
               "type": "puffish_skills:per_level_rewards",
               "data": {
-
-                    "skill_id": "19aazycn9ii0lfh1", 
-                    "max_skill_level": 3,
-                    "points_per_level": 1,
+                    "skill_id": "19aazycn9ii0lfh1",
                     "levels": {
                         "1": [
                             { "type": "puffish_skills:attribute",
@@ -149,8 +147,6 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 Supported fields:
 
 - `skill_id` – ID of the skill being leveled.
-- `max_skill_level` – highest level obtainable through the reward.
-- `points_per_level` – category points consumed for each level.
 - `levels` – maps level numbers to arrays of nested rewards.
 
 ```json
@@ -158,8 +154,6 @@ Supported fields:
   "type": "puffish_skills:per_level_rewards", // Skill levels can provide different rewards.
   "data": {
     "skill_id": "19aazycn9ii0lfh1",
-    "max_skill_level": 3,
-    "points_per_level": 1,
     "levels": {
       "1": [ { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 1, "operation": "addition" } } ],
       "2": [ { "type": "puffish_skills:command", "data": {"command": "give @p minecraft:experience_bottle 1"} } ],
@@ -171,7 +165,7 @@ Supported fields:
 
 Each nested reward behaves as if it were a normal reward, but is only active when the player's skill level is at least the specified level.
 
-The fields `skill_id`, `max_skill_level` and `points_per_level` are used only by `puffish_skills:per_level_rewards`. They define which skill is leveled, the highest level obtainable through the reward, and how many category points are spent per level instead of the skill's `required_points` value. If the skill definition omits `max_levels`/`max_skill_level`, this field also determines the skill's maximum level.
+The `skill_id` field is used only by `puffish_skills:per_level_rewards` to specify which skill is leveled. The skill's `max_skill_level` and `points_per_level` are defined in the root skill definition. If the skill omits `max_levels`/`max_skill_level`, the highest level is inferred from the reward's `levels`.
 
 All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration. When a level is unlocked the category loses `points_per_level` points. A player cannot level beyond `max_skill_level` unless they have enough points to pay for the additional levels.
 

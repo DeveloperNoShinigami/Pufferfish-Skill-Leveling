@@ -49,9 +49,11 @@ public class PerLevelRewardsRewardTest {
 
         @Test
         public void testLevelsInferMaxLevel() {
-            String json = "{\"skill_id\":\"s\",\"points_per_level\":0,\"levels\":{\"1\":[],\"2\":[]}}";
+            String json = "{\"skill_id\":\"s\",\"levels\":{\"1\":[],\"2\":[]}}";
             var result = parse(json);
-            Assertions.assertEquals(2, result.getSuccess().orElseThrow().getMaxLevel());
+            var reward = result.getSuccess().orElseThrow();
+            Assertions.assertEquals(2, reward.getMaxLevel());
+            Assertions.assertEquals(0, reward.getPointsPerLevel());
         }
 
 	@Test

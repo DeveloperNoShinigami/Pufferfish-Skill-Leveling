@@ -119,12 +119,40 @@ public record SkillDefinitionConfig(
                                 )
                                 .orElse(false);
 
+                var optPointsPerLevelTmp = rootObject.get("points_per_level")
+                                .getSuccess() // ignore failure because this property is optional
+                                .flatMap(element -> element.getAsInt()
+                                                .ifFailure(problems::add)
+                                                .getSuccess());
+                optPointsPerLevelTmp.ifPresent(points -> {
+                        if (points < 0) {
+                                problems.add(rootObject.getPath().getObject("points_per_level")
+                                                .createProblem("Expected a value \u2265 0"));
+                        }
+                });
+                int pointsPerLevel = optPointsPerLevelTmp.orElse(0);
+
                 var rewards = rootObject.getArray("rewards")
                                 .getSuccess() // ignore failure because this property is optional
-                                .flatMap(array -> array.getAsList((i, element) -> SkillRewardConfig.parse(element, context))
-                                                .mapFailure(Problem::combine)
-                                                .ifFailure(problems::add)
-                                                .getSuccess())
+                                .flatMap(array -> {
+                                        for (com.google.gson.JsonElement rewardElement : array.getJson()) {
+                                                if (rewardElement.isJsonObject()) {
+                                                        var obj = rewardElement.getAsJsonObject();
+                                                        var typeElement = obj.get("type");
+                                                        if (typeElement != null && typeElement.isJsonPrimitive()
+                                                                        && typeElement.getAsString().equals("puffish_skills:per_level_rewards")) {
+                                                                var data = obj.getAsJsonObject("data");
+                                                                if (data != null && !data.has("points_per_level")) {
+                                                                        data.addProperty("points_per_level", pointsPerLevel);
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                        return array.getAsList((i, element) -> SkillRewardConfig.parse(element, context))
+                                                        .mapFailure(Problem::combine)
+                                                        .ifFailure(problems::add)
+                                                        .getSuccess();
+                                })
                                 .orElseGet(List::of);
 
                var maxLevelsElement = rootObject.get("max_skill_level").getSuccess()

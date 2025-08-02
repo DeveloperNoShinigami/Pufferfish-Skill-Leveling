@@ -7,20 +7,23 @@ base.archivesName.set("${project.properties["archives_base_name"]}")
 version = "${project.properties["mod_version"]}-${project.properties["minecraft_version"]}-forge"
 group = "${project.properties["maven_group"]}"
 
-evaluationDependsOn(":Common")
-
 java {
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+        mavenLocal()
+        mavenCentral()
 }
 
 dependencies {
 	minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
 	mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
-	forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
+        forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
 
-	implementation(project(path = ":Common", configuration = "namedElements"))
+        implementation("net.puffish.skillsmod:puffish_skills:${project.properties["puffish_skills_dependency_version"]}")
 }
 
 loom {
@@ -28,28 +31,14 @@ loom {
 	forge.mixinConfig("puffish_skills.mixins.json")
 }
 
-tasks.test {
-	dependsOn(project(":Common").tasks.test)
-}
-
-tasks.check {
-	dependsOn(project(":Common").tasks.check)
-}
-
 tasks.jar {
-	from(project.rootDir.resolve("LICENSE.txt"))
-	from(project.rootDir.resolve("LICENSE-RESOURCES.txt"))
+        from(project.rootDir.resolve("LICENSE.txt"))
+        from(project.rootDir.resolve("LICENSE-RESOURCES.txt"))
 }
 
 tasks.processResources {
-	from(project(":Common").sourceSets.main.get().resources)
-
-	inputs.property("version", project.properties["mod_version"])
-	filesMatching("META-INF/mods.toml") {
-		expand(mapOf("version" to project.properties["mod_version"]))
-	}
-}
-
-tasks.compileJava {
-	source(project(":Common").sourceSets.main.get().java)
+        inputs.property("version", project.properties["mod_version"])
+        filesMatching("META-INF/mods.toml") {
+                expand(mapOf("version" to project.properties["mod_version"], "puffish_skills_dependency_version" to project.properties["puffish_skills_dependency_version"]))
+        }
 }

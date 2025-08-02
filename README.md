@@ -18,17 +18,14 @@ Skill definitions describe how a skill looks and what it grants. Datapacks may n
 
 - `title`, `icon`, `frame`, `size`, and `rewards` work as before.
 
-A basic skill definition might look like this:
+A basic skill definition using per-level rewards might look like this:
 
 ```json
 {
   "stacked_power": {
-      "type": "puffish_skills:stackable",
       "title": "Master Miner",
       "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
       "size": 1.0,
-      "required_points": 3,
-      "merge_description": false,
       "descriptions": [
           "Current: +1 melee damage",
           "Current: +10% mining speed",
@@ -43,8 +40,7 @@ A basic skill definition might look like this:
           {
               "type": "puffish_skills:per_level_rewards",
               "data": {
-
-                    "skill_id": "19aazycn9ii0lfh1", 
+                    "skill_id": "19aazycn9ii0lfh1",
                     "max_skill_level": 3,
                     "points_per_level": 1,
                     "levels": {
@@ -56,7 +52,7 @@ A basic skill definition might look like this:
                         ],
                         "2": [
                             {"type": "puffish_skills:command",
-                              "data": { "command": "give @p minecraft:experience_bottle 1" } 
+                              "data": { "command": "give @p minecraft:experience_bottle 1" }
                             }
                         ],
                         "3": [
@@ -67,10 +63,6 @@ A basic skill definition might look like this:
                         ]
                     }
                 }
-          },
-          { 
-              "type": "puffish_skills:command",
-              "data": { "command": "give @p minecraft:experience_bottle 1" }
           }
       ],
       "metadata": { "icon": "74sqblu8lgizj777" }
@@ -103,7 +95,7 @@ Each nested reward behaves as if it were a normal reward, but is only active whe
 The fields `skill_id`, `max_skill_level` and `points_per_level` are used only by
 `puffish_skills:per_level_rewards`. They define which skill is leveled, the
 highest level obtainable through the reward, and how many category points are
-spent per level.
+spent per level instead of the skill's `required_points` value.
 
 All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration. When a level is unlocked the category loses `points_per_level` points. A player cannot level beyond `max_skill_level` unless they have enough points to pay for the additional levels.
 

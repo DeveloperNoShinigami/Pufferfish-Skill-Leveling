@@ -56,6 +56,8 @@
 
         "command.puffish_skills.skills.refund.success.single": "Refunded one level of %s skill in category %s for %s",
         "command.puffish_skills.skills.refund.success.multiple": "Refunded one level of %s skill in category %s for %s players",
+        "command.puffish_skills.skills.refund_many.success.single": "Refunded %s levels of %s skill in category %s for %s",
+        "command.puffish_skills.skills.refund_many.success.multiple": "Refunded %s levels of %s skill in category %s for %s players",
         "command.puffish_skills.skills.refund_all.success.single": "Refunded all levels of %s skill in category %s for %s",
         "command.puffish_skills.skills.refund_all.success.multiple": "Refunded all levels of %s skill in category %s for %s players",
         "command.puffish_skills.skills.refund.no_levels": "None of the selected players had any levels of %s skill in category %s to refund.",

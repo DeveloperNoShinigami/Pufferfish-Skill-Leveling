@@ -4,23 +4,27 @@ This mod provides an API to create skill trees via datapacks. Categories and ski
 
 ## Player skill definitions
 
-Skill definitions describe how a skill looks and what it grants. Datapacks may now define stackable skills with extra fields:
+Skill definitions describe how a skill looks, how it unlocks, and what it grants.
 
-- `type` – identifier of the skill type. Defaults to `puffish_skills:default`.
-- `stackable` - Allows the user to use basic rewards along side skill level rewards.
-- `per_level_rewards` -Enables the new skill type that gives levels to rewards.
-- `levels` - A new  key field that nests the rewards per level, check out the examples below.
- - `max_skill_level` – how many times the skill can be unlocked. This value defines
-   the maximum level a skill can reach. When omitted and the skill uses
-   `puffish_skills:per_level_rewards`, the highest level is inferred from that reward.
+Supported root fields:
+
+- `type` – identifier of the skill type. Defaults to `puffish_skills:default`. Use `puffish_skills:stackable` to mix normal and per-level rewards.
+- `title` – display name of the skill.
+- `icon` – icon descriptor shown on the tree.
+- `frame` – frame style for the icon.
+- `size` – size of the icon.
+- `max_skill_level` / `max_levels` – how many times the skill can be unlocked. This value defines the maximum level a skill can reach. When omitted and the skill uses `puffish_skills:per_level_rewards`, the highest level is inferred from that reward.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
 - `merge_description` – when `true`, descriptions and extra descriptions accumulate from previous levels starting when level 2 is reached. The tooltip for the very first level is shown on its own. Defaults to `false` when omitted.
-- Tooltip lines automatically adjust based on how many times the skill has been unlocked. When hovering a skill, the
-  entry matching the player's current level is shown, and holding Shift displays the line for the next level (or a final
-  message if the skill is maxed).
+- `rewards` – array of reward objects granted when the skill or its levels are unlocked. Include `puffish_skills:per_level_rewards` entries to define level-specific rewards.
+- `cost` – category points spent to unlock the skill.
+- `required_skills` – list of other skills that must be unlocked first.
+- `required_points` – minimum unspent points needed in the category.
+- `required_spent_points` – minimum points already spent in the category.
+- `required_exclusions` – list of skill IDs that must remain locked.
 
-- `title`, `icon`, `frame`, `size`, and `rewards` work as before.
+Tooltip lines automatically adjust based on how many times the skill has been unlocked. When hovering a skill, the entry matching the player's current level is shown, and holding Shift displays the line for the next level (or a final message if the skill is maxed).
 
 A basic skill definition using per-level rewards might look like this:
 
@@ -31,7 +35,8 @@ A basic skill definition using per-level rewards might look like this:
       "title": "Master Miner",
       "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
       "size": 1.0,
-      "merge_descriptions": false,
+      "max_levels": 3,
+      "merge_description": false,
       "descriptions": [
           "Current: +1 melee damage",
           "Current: +10% mining speed",
@@ -77,7 +82,7 @@ A basic skill definition using per-level rewards might look like this:
 ```
 
 ### Stackable Rewards
-Here is an example of using another new type called puffish_skills:stackable if you wanted to include standard rewards along side level rewards, this is good if u wanted to run commands or other rewards but dont want to include them in level rewards
+Use the `puffish_skills:stackable` skill type when you want to combine standard rewards with per-level rewards. This lets you run commands or grant other bonuses without adding them to the per-level configuration.
 ```js
 {
   "stacked_power": {
@@ -85,6 +90,7 @@ Here is an example of using another new type called puffish_skills:stackable if 
       "title": "Master Miner",
       "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
       "size": 1.0,
+      "max_levels": 3,
       "required_points": 3,
       "merge_description": false,
       "descriptions": [
@@ -138,7 +144,14 @@ Here is an example of using another new type called puffish_skills:stackable if 
 
 ## Per level rewards
 
-The reward registry includes `puffish_skills:per_level_rewards` which lets you specify rewards that depend on the skill's level. The `levels` object maps level numbers to arrays of nested rewards.
+The reward registry includes `puffish_skills:per_level_rewards` which lets you specify rewards that depend on the skill's level.
+
+Supported fields:
+
+- `skill_id` – ID of the skill being leveled.
+- `max_skill_level` – highest level obtainable through the reward.
+- `points_per_level` – category points consumed for each level.
+- `levels` – maps level numbers to arrays of nested rewards.
 
 ```json
 {
@@ -158,12 +171,7 @@ The reward registry includes `puffish_skills:per_level_rewards` which lets you s
 
 Each nested reward behaves as if it were a normal reward, but is only active when the player's skill level is at least the specified level.
 
-The fields `skill_id`, `max_skill_level` and `points_per_level` are used only by
-`puffish_skills:per_level_rewards`. They define which skill is leveled, the
-highest level obtainable through the reward, and how many category points are
-spent per level instead of the skill's `required_points` value. If the skill
-definition omits `max_skill_level`, this field also determines the skill's
-maximum level.
+The fields `skill_id`, `max_skill_level` and `points_per_level` are used only by `puffish_skills:per_level_rewards`. They define which skill is leveled, the highest level obtainable through the reward, and how many category points are spent per level instead of the skill's `required_points` value. If the skill definition omits `max_levels`/`max_skill_level`, this field also determines the skill's maximum level.
 
 All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration. When a level is unlocked the category loses `points_per_level` points. A player cannot level beyond `max_skill_level` unless they have enough points to pay for the additional levels.
 

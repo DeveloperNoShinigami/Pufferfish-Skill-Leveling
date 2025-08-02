@@ -22,6 +22,7 @@ import net.puffish.skillsmod.config.skill.SkillDefinitionsConfig;
 import net.puffish.skillsmod.config.skill.SkillsConfig;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
+import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
 import net.puffish.skillsmod.server.data.CategoryData;
 
 public record ShowCategoryOutPacket(CategoryConfig category, CategoryData categoryData) implements OutPacket {
@@ -33,17 +34,20 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		write(buf, category.definitions());
 		write(buf, category.skills());
 		write(buf, category.connections());
-		buf.writeMap(
-				category.skills().getMap(),
-				PacketByteBuf::writeString,
-				(buf1, skill) -> buf1.writeEnumConstant(
-						categoryData.getSkillState(
-								category,
-								skill,
-								category.definitions().getById(skill.definitionId()).orElseThrow()
-						)
-				)
-		);
+                buf.writeMap(
+                                category.skills().getMap(),
+                                PacketByteBuf::writeString,
+                                (buf1, skill) -> {
+                                        buf1.writeEnumConstant(
+                                                        categoryData.getSkillState(
+                                                                        category,
+                                                                        skill,
+                                                                        category.definitions().getById(skill.definitionId()).orElseThrow()
+                                                        )
+                                        );
+                                        buf1.writeInt(categoryData.getSkillLevel(skill.id()));
+                                }
+                );
 		buf.writeInt(categoryData.getSpentPoints(category));
 		buf.writeInt(categoryData.getPointsTotal());
 		category.experience().ifPresentOrElse(experience -> {
@@ -85,7 +89,8 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeInt(definition.requiredSkills());
 		buf.writeInt(definition.requiredPoints());
 		buf.writeInt(definition.requiredSpentPoints());
-		buf.writeInt(definition.requiredExclusions());
+                buf.writeInt(definition.requiredExclusions());
+                buf.writeBoolean(definition.rewards().stream().anyMatch(reward -> reward.type().equals(PerLevelRewardsReward.ID)));
 	}
 
 	public void write(PacketByteBuf buf, SkillsConfig skills) {

@@ -82,3 +82,29 @@ its code, treat it as an addon. The basic steps are:
 
 
 This overview provides a starting point for building or scripting an automated agent to assist with Minecraft modding tasks.
+
+## Addon Project Checklist
+When preparing a new addon for Pufferfish's Skills or a similar base mod:
+
+1. **Establish unique identity** – pick a distinct mod ID and `archives_base_name`.  
+   Update `fabric.mod.json`, `mods.toml`, Gradle properties, and any API constants.
+2. **Declare the base mod as a dependency** – add `modImplementation`/`implementation`
+   entries in each platform module and include the Maven repository that hosts the
+   base mod. Avoid copying source from the dependency.
+3. **Separate shared and loader code** – put common logic in `Common`, with
+   Fabric-specific and Forge-specific hooks in their respective modules. Resources
+   live under `src/main/resources` using the addon’s mod ID as the namespace.
+4. **Leverage the base mod API** – use provided interfaces and events, adding Mixins
+   only when behaviour cannot be achieved through public APIs.
+5. **Test regularly** – run `./gradlew build`, `./gradlew test`, and
+   `./gradlew check`. Launch the game with `:Fabric:runClient` or
+   `:Forge:runClient` to verify the addon loads alongside the base mod.
+
+### Resources and Tools
+- JDK 17+, Gradle (via `./gradlew`)
+- Fabric API / Forge and Architectury Loom
+- Base mod jars from <https://maven.puffish.net>
+- Testing tools: JUnit, Checkstyle, and the in-game runClient tasks
+
+Following this checklist gives future agents a reproducible starting point from
+basic setup through advanced addon customisation.

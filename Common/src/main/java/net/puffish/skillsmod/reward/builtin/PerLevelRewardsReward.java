@@ -86,6 +86,7 @@ public class PerLevelRewardsReward implements Reward {
                 }
             }
         });
+        int definedMaxLevel = levelRewards.keySet().stream().max(Integer::compareTo).orElse(0);
 
         // Access optional fields and validate values
         var optSkillId = rootObject.getString("skill_id")
@@ -106,7 +107,6 @@ public class PerLevelRewardsReward implements Reward {
                 problems.add(path.createProblem("Expected a value \u2265 1"));
             }
         });
-        int optMaxLevel = optMaxLevelTmp.orElse(Integer.MAX_VALUE);
 
         var optPointsPerLevelTmp = rootObject.get("points_per_level")
                 .getSuccess() // optional
@@ -124,7 +124,7 @@ public class PerLevelRewardsReward implements Reward {
         if (problems.isEmpty()) {
             return Result.success(new PerLevelRewardsReward(levelRewards,
                             optSkillId.orElse(null),
-                            optMaxLevel,
+                            optMaxLevelTmp.orElse(Math.max(1, definedMaxLevel)),
                             optPointsPerLevel));
         } else {
             return Result.failure(Problem.combine(problems));

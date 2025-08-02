@@ -7,8 +7,9 @@ This mod provides an API to create skill trees via datapacks. Categories and ski
 Skill definitions describe how a skill looks and what it grants. Datapacks may now define stackable skills with extra fields:
 
 - `type` – identifier of the skill type. Defaults to `puffish_skills:default`.
-- `max_skill_level` – how many times the skill can be unlocked. This value defines
-  the maximum level a skill can reach.
+ - `max_skill_level` – how many times the skill can be unlocked. This value defines
+   the maximum level a skill can reach. When omitted and the skill uses
+   `puffish_skills:per_level_rewards`, the highest level is inferred from that reward.
 - `descriptions` – list of tooltip lines shown for each level.
 - `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
 - `merge_description` – when `true`, descriptions and extra descriptions accumulate from previous levels starting when level 2 is reached. The tooltip for the very first level is shown on its own. Defaults to `false` when omitted.
@@ -95,7 +96,9 @@ Each nested reward behaves as if it were a normal reward, but is only active whe
 The fields `skill_id`, `max_skill_level` and `points_per_level` are used only by
 `puffish_skills:per_level_rewards`. They define which skill is leveled, the
 highest level obtainable through the reward, and how many category points are
-spent per level instead of the skill's `required_points` value.
+spent per level instead of the skill's `required_points` value. If the skill
+definition omits `max_skill_level`, this field also determines the skill's
+maximum level.
 
 All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration. When a level is unlocked the category loses `points_per_level` points. A player cannot level beyond `max_skill_level` unless they have enough points to pay for the additional levels.
 

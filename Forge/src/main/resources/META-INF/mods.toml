@@ -3,22 +3,29 @@ loaderVersion="[46,)"
 license="All Rights Reserved"
 
 [[mods]]
-modId="puffish_skills"
+modId="puffish_skills_leveling"
 version="${version}"
-displayName="Pufferfish's Skills"
+displayName="Pufferfish's Skills Leveling"
 authors="Pufferfish"
-description="Adds a fully configurable skill system to the game."
+description="Adds leveling support as an addon for Pufferfish's Skills."
 
-[[dependencies.puffish_skills]]
+[[dependencies.puffish_skills_leveling]]
 modId="forge"
 mandatory=true
 versionRange="[46,)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.puffish_skills]]
+[[dependencies.puffish_skills_leveling]]
 modId="minecraft"
 mandatory=true
 versionRange="[1.20,1.21)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.puffish_skills_leveling]]
+modId="puffish_skills"
+mandatory=true
+versionRange="[${puffish_skills_dependency_version},)"
 ordering="NONE"
 side="BOTH"

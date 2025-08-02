@@ -40,13 +40,19 @@ public class PerLevelRewardsRewardTest {
 	    return PerLevelRewardsReward.parse(new DummyContext(element));
 	}
 
-	@Test
-	public void testValidValues() {
+        @Test
+        public void testValidValues() {
             String json = "{\"skill_id\":\"s\",\"max_skill_level\":1,\"points_per_level\":0,\"levels\":{\"1\":[]}}";
-	    var result = parse(json);
-	    Assertions.assertTrue(result.getSuccess().isPresent(),
-	            result.getFailure().map(Object::toString).orElse("Unexpected failure"));
-	}
+            var result = parse(json);
+            Assertions.assertEquals(1, result.getSuccess().orElseThrow().getMaxLevel());
+        }
+
+        @Test
+        public void testLevelsInferMaxLevel() {
+            String json = "{\"skill_id\":\"s\",\"points_per_level\":0,\"levels\":{\"1\":[],\"2\":[]}}";
+            var result = parse(json);
+            Assertions.assertEquals(2, result.getSuccess().orElseThrow().getMaxLevel());
+        }
 
 	@Test
 	public void testInvalidMaxLevel() {

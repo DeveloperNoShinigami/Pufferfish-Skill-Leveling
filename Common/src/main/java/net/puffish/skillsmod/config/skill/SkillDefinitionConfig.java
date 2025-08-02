@@ -15,6 +15,7 @@ import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
 
 public record SkillDefinitionConfig(
 
@@ -53,21 +54,12 @@ public record SkillDefinitionConfig(
                                 .getSuccess();
 
 
-		var type = rootObject.get("type")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(element -> BuiltinJson.parseIdentifier(element)
-						.ifFailure(problems::add)
-						.getSuccess())
-				.orElse(Identifier.of("puffish_skills", "default"));
-
-		var maxLevelsElement = rootObject.get("max_skill_level").getSuccess()
-                                .or(() -> rootObject.get("max_levels").getSuccess());
-
-                var maxLevels = maxLevelsElement
-                                .flatMap(element -> element.getAsInt()
+                var type = rootObject.get("type")
+                                .getSuccess() // ignore failure because this property is optional
+                                .flatMap(element -> BuiltinJson.parseIdentifier(element)
                                                 .ifFailure(problems::add)
                                                 .getSuccess())
-                                .orElse(1);
+                                .orElse(Identifier.of("puffish_skills", "default"));
 
 		var descriptions = rootObject.getArray("descriptions")
 				.getSuccess() // ignore failure because this property is optional
@@ -127,12 +119,29 @@ public record SkillDefinitionConfig(
                                 )
                                 .orElse(false);
 
-		var rewards = rootObject.getArray("rewards")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(array -> array.getAsList((i, element) -> SkillRewardConfig.parse(element, context)).mapFailure(Problem::combine)
-						.ifFailure(problems::add)
-						.getSuccess())
-				.orElseGet(List::of);
+                var rewards = rootObject.getArray("rewards")
+                                .getSuccess() // ignore failure because this property is optional
+                                .flatMap(array -> array.getAsList((i, element) -> SkillRewardConfig.parse(element, context))
+                                                .mapFailure(Problem::combine)
+                                                .ifFailure(problems::add)
+                                                .getSuccess())
+                                .orElseGet(List::of);
+
+                var maxLevelsElement = rootObject.get("max_skill_level").getSuccess()
+                                .or(() -> rootObject.get("max_levels").getSuccess());
+
+                var maxLevels = maxLevelsElement
+                                .flatMap(element -> element.getAsInt()
+                                                .ifFailure(problems::add)
+                                                .getSuccess())
+                                .orElseGet(() -> rewards.stream()
+                                                .map(SkillRewardConfig::instance)
+                                                .filter(PerLevelRewardsReward.class::isInstance)
+                                                .map(PerLevelRewardsReward.class::cast)
+                                                .filter(reward -> reward.getSkillId() == null || reward.getSkillId().equals(id))
+                                                .mapToInt(PerLevelRewardsReward::getMaxLevel)
+                                                .max()
+                                                .orElse(1));
 
 		var cost = rootObject.get("cost")
 				.getSuccess() // ignore failure because this property is optional

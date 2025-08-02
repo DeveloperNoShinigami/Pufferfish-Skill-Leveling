@@ -7,6 +7,7 @@ This mod provides an API to create skill trees via datapacks. Categories and ski
 Skill definitions describe how a skill looks and what it grants. Datapacks may now define stackable skills with extra fields:
 
 - `type` – identifier of the skill type. Defaults to `puffish_skills:default`.
+- `stackable` - Allows the user to use basic rewards along side skill level rewards.
  - `max_skill_level` – how many times the skill can be unlocked. This value defines
    the maximum level a skill can reach. When omitted and the skill uses
    `puffish_skills:per_level_rewards`, the highest level is inferred from that reward.
@@ -21,12 +22,14 @@ Skill definitions describe how a skill looks and what it grants. Datapacks may n
 
 A basic skill definition using per-level rewards might look like this:
 
+### Basic skill Definition
 ```json
 {
   "stacked_power": {
       "title": "Master Miner",
       "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
       "size": 1.0,
+      "merge_descriptions": false,
       "descriptions": [
           "Current: +1 melee damage",
           "Current: +10% mining speed",
@@ -64,6 +67,66 @@ A basic skill definition using per-level rewards might look like this:
                         ]
                     }
                 }
+          }
+      ],
+      "metadata": { "icon": "74sqblu8lgizj777" }
+  }
+}
+```
+
+### Stackable Rewards
+Here is an example of using another new type called puffish_skills:stackable if you wanted to include standard rewards along side level rewards, this is good if u wanted to run commands or other rewards but dont want to include them in level rewards
+```js
+{
+  "stacked_power": {
+      "type": "puffish_skills:stackable",
+      "title": "Master Miner",
+      "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
+      "size": 1.0,
+      "required_points": 3,
+      "merge_description": false,
+      "descriptions": [
+          "Current: +1 melee damage",
+          "Current: +10% mining speed",
+          "Current: +15% mining speed"
+      ],
+      "extra_descriptions": [
+          "Next: +10% mining speed",
+          "Next: +15% mining speed",
+          "— MAXED OUT —"
+      ],
+      "rewards": [
+          {
+              "type": "puffish_skills:per_level_rewards",
+              "data": {
+
+                    "skill_id": "19aazycn9ii0lfh1", 
+                    "max_skill_level": 3,
+                    "points_per_level": 1,
+                    "levels": {
+                        "1": [
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.attack_damage",
+                                        "value": 10,
+                                        "operation": "addition" } }
+                        ],
+                        "2": [
+                            {"type": "puffish_skills:command",
+                              "data": { "command": "give @p minecraft:experience_bottle 1" } 
+                            }
+                        ],
+                        "3": [
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.max_health",
+                                        "value": 2,
+                                        "operation": "addition" } }
+                        ]
+                    }
+                }
+          },
+          { 
+              "type": "puffish_skills:command",
+              "data": { "command": "give @p minecraft:experience_bottle 1" }
           }
       ],
       "metadata": { "icon": "74sqblu8lgizj777" }

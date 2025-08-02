@@ -9,6 +9,11 @@ group = "${project.properties["maven_group"]}"
 
 evaluationDependsOn(":Common")
 
+repositories {
+    maven("https://maven.puffish.net")
+    mavenCentral()
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -21,11 +26,13 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}")
 
+    modImplementation("net.puffish:skillsmod:${project.properties["puffish_skills_dependency_version"]}:fabric@jar")
+
     implementation(project(path = ":Common", configuration = "namedElements"))
 }
 
 loom {
-    mixin.defaultRefmapName.set("puffish_skills-refmap.json")
+    mixin.defaultRefmapName.set("puffish_skills_leveling-refmap.json")
 }
 
 tasks.test {

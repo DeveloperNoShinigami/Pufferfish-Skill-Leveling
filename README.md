@@ -8,6 +8,8 @@ Skill definitions describe how a skill looks and what it grants. Datapacks may n
 
 - `type` – identifier of the skill type. Defaults to `puffish_skills:default`.
 - `stackable` - Allows the user to use basic rewards along side skill level rewards.
+- `per_level_rewards` -Enables the new skill type that gives levels to rewards.
+- `levels` - A new  key field that nests the rewards per level, check out the examples below.
  - `max_skill_level` – how many times the skill can be unlocked. This value defines
    the maximum level a skill can reach. When omitted and the skill uses
    `puffish_skills:per_level_rewards`, the highest level is inferred from that reward.

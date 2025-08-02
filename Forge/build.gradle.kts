@@ -1,6 +1,6 @@
 plugins {
-	id("dev.architectury.loom")
-	id("checkstyle")
+        id("dev.architectury.loom")
+        id("checkstyle")
 }
 
 base.archivesName.set("${project.properties["archives_base_name"]}")
@@ -13,22 +13,22 @@ java {
 }
 
 repositories {
-        mavenLocal()
+        maven("https://maven.puffish.net")
         mavenCentral()
 }
 
 dependencies {
-	minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
-	mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
+        minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
+        mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
         forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
 
-        implementation("net.puffish.skillsmod:puffish_skills:${project.properties["puffish_skills_dependency_version"]}")
+        modImplementation("net.puffish.skillsmod:puffish_skills:${project.properties["puffish_skills_dependency_version"]}")
 }
 
 loom {
-	mixin.defaultRefmapName.set("puffish_skills-refmap.json")
-	forge.mixinConfig("puffish_skills.mixins.json")
+        mixin.defaultRefmapName.set("puffish_skills-refmap.json")
+        forge.mixinConfig("puffish_skills.mixins.json")
 }
 
 tasks.jar {
@@ -39,6 +39,11 @@ tasks.jar {
 tasks.processResources {
         inputs.property("version", project.properties["mod_version"])
         filesMatching("META-INF/mods.toml") {
-                expand(mapOf("version" to project.properties["mod_version"], "puffish_skills_dependency_version" to project.properties["puffish_skills_dependency_version"]))
+                expand(
+                        mapOf(
+                                "version" to project.properties["mod_version"],
+                                "puffish_skills_dependency_version" to project.properties["puffish_skills_dependency_version"]
+                        )
+                )
         }
 }

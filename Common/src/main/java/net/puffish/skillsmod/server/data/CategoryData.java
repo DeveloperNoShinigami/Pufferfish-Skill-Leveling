@@ -11,6 +11,7 @@ import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.GeneralConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
+import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
 import net.puffish.skillsmod.util.PointSources;
 
 import java.util.HashMap;
@@ -97,9 +98,20 @@ public class CategoryData {
 		return nbt;
 	}
 
-	public Skill.State getSkillState(CategoryConfig category, SkillConfig skill, SkillDefinitionConfig definition) {
+        public Skill.State getSkillState(CategoryConfig category, SkillConfig skill, SkillDefinitionConfig definition) {
                var level = unlockedSkills.getOrDefault(skill.id(), 0);
-               if (level >= definition.maxLevels()) {
+               int maxLevels = definition.maxLevels();
+
+               for (var reward : definition.rewards()) {
+                       var inst = reward.instance();
+                       if (inst instanceof PerLevelRewardsReward plr) {
+                               if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
+                                       maxLevels = Math.max(maxLevels, plr.getMaxLevel());
+                               }
+                       }
+               }
+
+               if (level >= maxLevels) {
                        return Skill.State.UNLOCKED;
                }
 
@@ -112,14 +124,14 @@ public class CategoryData {
 			return Skill.State.EXCLUDED;
 		}
 
-		if (category.connections()
-				.normal()
-				.getNeighborsFor(skill.id())
+                if (category.connections()
+                                .normal()
+                                .getNeighborsFor(skill.id())
                                .map(neighbors -> neighbors.stream().filter(unlockedSkills::containsKey).count())
-				.orElse(0L) >= definition.requiredSkills()
-		) {
-			return canAfford(category, definition) ? Skill.State.AFFORDABLE : Skill.State.AVAILABLE;
-		}
+                                .orElse(0L) >= definition.requiredSkills()
+                ) {
+                        return canAfford(category, skill, definition) ? Skill.State.AFFORDABLE : Skill.State.AVAILABLE;
+                }
 
 		if (skill.isRoot()) {
                        if (category.general().exclusiveRoot() && unlockedSkills.keySet().stream()
@@ -129,16 +141,26 @@ public class CategoryData {
 				return Skill.State.LOCKED;
 			}
 
-			return canAfford(category, definition) ? Skill.State.AFFORDABLE : Skill.State.AVAILABLE;
-		}
+                        return canAfford(category, skill, definition) ? Skill.State.AFFORDABLE : Skill.State.AVAILABLE;
+                }
 
 		return Skill.State.LOCKED;
 	}
 
-	private boolean canAfford(CategoryConfig category, SkillDefinitionConfig definition) {
-		return getPointsLeft(category) >= Math.max(definition.requiredPoints(), definition.cost())
-				&& getSpentPoints(category) >= definition.requiredSpentPoints();
-	}
+        private boolean canAfford(CategoryConfig category, SkillConfig skill, SkillDefinitionConfig definition) {
+                int cost = definition.cost();
+                for (var reward : definition.rewards()) {
+                        var inst = reward.instance();
+                        if (inst instanceof PerLevelRewardsReward plr) {
+                                if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
+                                        cost = Math.max(cost, plr.getPointsPerLevel());
+                                }
+                        }
+                }
+
+                return getPointsLeft(category) >= Math.max(definition.requiredPoints(), cost)
+                                && getSpentPoints(category) >= definition.requiredSpentPoints();
+        }
 
 	public boolean canUnlockSkill(CategoryConfig category, SkillConfig skill, boolean force) {
 		var definitionId = skill.definitionId();

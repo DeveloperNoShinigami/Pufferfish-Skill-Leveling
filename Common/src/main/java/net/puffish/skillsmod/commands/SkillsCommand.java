@@ -3,6 +3,7 @@ package net.puffish.skillsmod.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -45,6 +46,12 @@ public class SkillsCommand {
                                                                 .then(CommandManager.argument("category", CategoryArgumentType.category())
                                                                                 .then(CommandManager.argument("skill", SkillArgumentType.skillFromCategory("category"))
                                                                                                 .executes(SkillsCommand::refund)
+                                                                                                .then(CommandManager.argument("count", IntegerArgumentType.integer(1))
+                                                                                                                .executes(SkillsCommand::refundCount)
+                                                                                                )
+                                                                                                .then(CommandManager.literal("all")
+                                                                                                                .executes(SkillsCommand::refundAll)
+                                                                                                )
                                                                                 )
                                                                 )
                                                 )
@@ -104,30 +111,87 @@ public class SkillsCommand {
         }
 
        private static int refund(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+               return refund(context, 1);
+       }
+
+       private static int refund(CommandContext<ServerCommandSource> context, int count) throws CommandSyntaxException {
                var players = EntityArgumentType.getPlayers(context, "players");
                var category = CategoryArgumentType.getCategory(context, "category");
                var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
                var refunded = false;
                for (var player : players) {
-                       refunded |= SkillsMod.getInstance().refundSkill(player, category.getId(), skill.getId());
+                       for (var i = 0; i < count; i++) {
+                               if (!SkillsMod.getInstance().refundSkill(player, category.getId(), skill.getId())) {
+                                       break;
+                               }
+                               refunded = true;
+                       }
+               }
+
+               if (refunded) {
+                       if (count == 1) {
+                               CommandUtils.sendSuccess(
+                                               context,
+                                               players,
+                                               "skills.refund",
+                                               skill.getId(),
+                                               category.getId()
+                               );
+                       } else {
+                               CommandUtils.sendSuccess(
+                                               context,
+                                               players,
+                                               "skills.refund_many",
+                                               count,
+                                               skill.getId(),
+                                               category.getId()
+                               );
+                       }
+                       return players.size();
+               } else {
+                       context.getSource().sendError(SkillsMod.createTranslatable(
+                                       "command",
+                                       "skills.refund.no_levels",
+                                       skill.getId(),
+                                       category.getId()
+                       ));
+                       return 0;
+               }
+       }
+
+       private static int refundCount(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+               var count = IntegerArgumentType.getInteger(context, "count");
+               return refund(context, count);
+       }
+
+       private static int refundAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+               var players = EntityArgumentType.getPlayers(context, "players");
+               var category = CategoryArgumentType.getCategory(context, "category");
+               var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
+
+               var refunded = false;
+               for (var player : players) {
+                       while (SkillsMod.getInstance().refundSkill(player, category.getId(), skill.getId())) {
+                               refunded = true;
+                       }
                }
 
                if (refunded) {
                        CommandUtils.sendSuccess(
                                        context,
                                        players,
-                                       "skills.refund",
-                                       category.getId(),
-                                       skill.getId()
+                                       "skills.refund_all",
+                                       skill.getId(),
+                                       category.getId()
                        );
                        return players.size();
                } else {
                        context.getSource().sendError(SkillsMod.createTranslatable(
                                        "command",
                                        "skills.refund.no_levels",
-                                       category.getId(),
-                                       skill.getId()
+                                       skill.getId(),
+                                       category.getId()
                        ));
                        return 0;
                }

@@ -127,21 +127,34 @@ public record SkillDefinitionConfig(
                                                 .getSuccess())
                                 .orElseGet(List::of);
 
-                var maxLevelsElement = rootObject.get("max_skill_level").getSuccess()
-                                .or(() -> rootObject.get("max_levels").getSuccess());
+               var maxLevelsElement = rootObject.get("max_skill_level").getSuccess()
+                               .or(() -> rootObject.get("max_levels").getSuccess());
 
-                var maxLevels = maxLevelsElement
-                                .flatMap(element -> element.getAsInt()
-                                                .ifFailure(problems::add)
-                                                .getSuccess())
-                                .orElseGet(() -> rewards.stream()
-                                                .map(SkillRewardConfig::instance)
-                                                .filter(PerLevelRewardsReward.class::isInstance)
-                                                .map(PerLevelRewardsReward.class::cast)
-                                                .filter(reward -> reward.getSkillId() == null || reward.getSkillId().equals(id))
-                                                .mapToInt(PerLevelRewardsReward::getMaxLevel)
-                                                .max()
-                                                .orElse(1));
+               var optMaxLevels = maxLevelsElement
+                               .flatMap(element -> element.getAsInt()
+                                               .ifFailure(problems::add)
+                                               .getSuccess());
+
+               optMaxLevels.ifPresent(maxLevel -> {
+                       if (maxLevel < 1) {
+                               var path = rootObject.getPath().getObject(
+                                               rootObject.getJson().has("max_skill_level")
+                                                               ? "max_skill_level"
+                                                               : "max_levels");
+                               problems.add(path.createProblem("Expected a value \u2265 1"));
+                       }
+               });
+
+               int rewardMaxLevel = rewards.stream()
+                               .map(SkillRewardConfig::instance)
+                               .filter(PerLevelRewardsReward.class::isInstance)
+                               .map(PerLevelRewardsReward.class::cast)
+                               .filter(reward -> reward.getSkillId() == null || reward.getSkillId().equals(id))
+                               .mapToInt(PerLevelRewardsReward::getMaxLevel)
+                               .max()
+                               .orElse(1);
+
+               var maxLevels = Math.max(optMaxLevels.orElse(0), rewardMaxLevel);
 
 		var cost = rootObject.get("cost")
 				.getSuccess() // ignore failure because this property is optional

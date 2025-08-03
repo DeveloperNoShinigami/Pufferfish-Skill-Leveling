@@ -23,7 +23,7 @@ dependencies {
 
         forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
 
-        implementation("net.puffish:skillsmod:${project.properties["puffish_skills_dependency_version"]}:forge@jar")
+        implementation("net.puffish:skillsmod:${project.properties["puffish_skills_dependency_version"]}:forge")
 }
 
 loom {

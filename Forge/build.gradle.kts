@@ -7,6 +7,8 @@ base.archivesName.set("${project.properties["archives_base_name"]}")
 version = "${project.properties["mod_version"]}-${project.properties["minecraft_version"]}-forge"
 group = "${project.properties["maven_group"]}"
 
+evaluationDependsOn(":Common")
+
 java {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -24,11 +26,20 @@ dependencies {
         forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
 
         implementation("net.puffish:skillsmod:${project.properties["puffish_skills_dependency_version"]}:forge")
+        implementation(project(path = ":Common", configuration = "namedElements"))
 }
 
 loom {
         mixin.defaultRefmapName.set("puffish_skills_leveling-refmap.json")
         forge.mixinConfig("puffish_skills_leveling.mixins.json")
+}
+
+tasks.test {
+        dependsOn(project(":Common").tasks.test)
+}
+
+tasks.check {
+        dependsOn(project(":Common").tasks.check)
 }
 
 tasks.jar {
@@ -37,6 +48,8 @@ tasks.jar {
 }
 
 tasks.processResources {
+        from(project(":Common").sourceSets.main.get().resources)
+
         inputs.property("version", project.properties["mod_version"])
         filesMatching("META-INF/mods.toml") {
                 expand(
@@ -46,4 +59,8 @@ tasks.processResources {
                         )
                 )
         }
+}
+
+tasks.compileJava {
+        source(project(":Common").sourceSets.main.get().java)
 }

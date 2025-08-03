@@ -14,4 +14,4 @@ plugins {
 
 rootProject.name = "Pufferfish's Skills"
 
-include("Forge")
+include("Common", "Forge")

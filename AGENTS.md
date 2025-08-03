@@ -13,6 +13,38 @@ This document summarizes best practices for automating Minecraft mod development
 - Put Fabric specific code inside the `Fabric` module and Forge code inside the `Forge` module.
 - Resources belong under `src/main/resources` and Java sources under `src/main/java`.
 
+## Loader Configurations
+
+When targeting both loaders, the project is split into three modules:
+
+- **Common** holds platform-agnostic code and resources shared by all builds.
+- **Fabric** adds Fabric API integrations and packages its jar together with the `Common` module.
+- **Forge** contains Forge-specific hooks and is combined with `Common` when producing the Forge jar.
+
+To convert a multi-loader setup to **Forge-only**:
+
+1. Keep the `Common` and `Forge` modules.
+2. Remove the `Fabric` module and its references from `settings.gradle.kts` and build scripts.
+
+To convert to **Fabric-only**:
+
+1. Retain the `Common` and `Fabric` modules.
+2. Remove the `Forge` module and its entries from Gradle settings and scripts.
+
+Packaging:
+
+- Run `./gradlew :Fabric:build` to create a Fabric jar that bundles `Common`.
+- Run `./gradlew :Forge:build` to create a Forge jar that bundles `Common`.
+
+Forge builds must rely on Mojang mappings and Forge APIs, replacing any Fabric or Yarn classes with their Forge equivalents.
+
+**Checklist when switching loader targets**
+
+- Update module includes in `settings.gradle.kts`.
+- Adjust mapping configuration to Mojang mappings for Forge or Yarn for Fabric.
+- Replace loader-specific APIs in sources and resources.
+- Modify packaging scripts or CI workflows to produce only the desired loader's jar.
+
 ## Coding Practices
 - Follow Java best practices and the repository's style conventions.
 - Prefer composition over inheritance for complex systems.

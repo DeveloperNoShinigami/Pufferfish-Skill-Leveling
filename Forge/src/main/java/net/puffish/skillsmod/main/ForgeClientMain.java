@@ -1,11 +1,11 @@
 package net.puffish.skillsmod.main;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -30,7 +30,7 @@ import java.util.function.Function;
 
 public class ForgeClientMain {
 	private final List<ClientEventListener> clientListeners = new ArrayList<>();
-	private final List<KeyBindingWithHandler> keyBindings = new ArrayList<>();
+        private final List<KeyBindingWithHandler> keyBindings = new ArrayList<>();
 
 	public ForgeClientMain() {
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
@@ -53,18 +53,18 @@ public class ForgeClientMain {
 
         private void onInputKey(InputEvent.Key event) {
                 for (var keyBinding : keyBindings) {
-                        if (keyBinding.keyBinding.consumeClick()) {
+                        if (keyBinding.keyBinding.wasPressed()) {
                                 keyBinding.handler.handle();
                         }
                 }
         }
 
-        private record KeyBindingWithHandler(KeyMapping keyBinding, KeyBindingHandler handler) {
+        private record KeyBindingWithHandler(KeyBinding keyBinding, KeyBindingHandler handler) {
         }
 
 	private static class ClientRegistrarImpl implements ClientRegistrar {
 		@Override
-                public <T extends InPacket> void registerInPacket(ResourceLocation identifier, Function<FriendlyByteBuf, T> reader, ClientPacketHandler<T> handler) {
+                public <T extends InPacket> void registerInPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
 			var channel = NetworkRegistry.newEventChannel(
 					identifier,
 					() -> "1",
@@ -85,7 +85,7 @@ public class ForgeClientMain {
 		}
 
 		@Override
-                public void registerOutPacket(ResourceLocation id) { }
+                public void registerOutPacket(Identifier id) { }
 	}
 
 	private class ClientEventReceiverImpl implements ClientEventReceiver {
@@ -95,22 +95,22 @@ public class ForgeClientMain {
 		}
 	}
 
-	private class KeyBindingReceiverImpl implements KeyBindingReceiver {
-		@Override
-                public void registerKeyBinding(KeyMapping keyBinding, KeyBindingHandler handler) {
+        private class KeyBindingReceiverImpl implements KeyBindingReceiver {
+                @Override
+                public void registerKeyBinding(KeyBinding keyBinding, KeyBindingHandler handler) {
                         keyBindings.add(new KeyBindingWithHandler(keyBinding, handler));
-                        var options = Minecraft.getInstance().options;
-                        options.keyMappings = ArrayUtils.add(options.keyMappings, keyBinding);
+                        var options = MinecraftClient.getInstance().options;
+                        options.allKeys = ArrayUtils.add(options.allKeys, keyBinding);
                 }
         }
 
         private static class ClientPacketSenderImpl implements ClientPacketSender {
                 @Override
                 public void send(OutPacket packet) {
-                        var buf = new FriendlyByteBuf(Unpooled.buffer());
+                        var buf = new PacketByteBuf(Unpooled.buffer());
                         packet.write(buf);
-                        Objects.requireNonNull(Minecraft.getInstance().getConnection())
-                                        .send(new ServerboundCustomPayloadPacket(packet.getId(), buf));
+                        Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler())
+                                        .sendPacket(new CustomPayloadC2SPacket(packet.getId(), buf));
                 }
         }
 }

@@ -4,12 +4,12 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import io.netty.buffer.Unpooled;
 import net.minecraft.command.argument.ArgumentTypes;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -65,21 +65,21 @@ public class ForgeMain {
 		);
 	}
 
-	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
-			for (var listener : serverListeners) {
-				listener.onPlayerJoin(serverPlayer);
-			}
-		}
-	}
+        private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+                if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+                        for (var listener : serverListeners) {
+                                listener.onPlayerJoin(serverPlayer);
+                        }
+                }
+        }
 
-	private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-		if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
-			for (var listener : serverListeners) {
-				listener.onPlayerLeave(serverPlayer);
-			}
-		}
-	}
+        private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+                if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+                        for (var listener : serverListeners) {
+                                listener.onPlayerLeave(serverPlayer);
+                        }
+                }
+        }
 
 	private void onServerStarting(ServerStartingEvent event) {
 		var server = event.getServer();
@@ -110,11 +110,11 @@ public class ForgeMain {
 
 	private static class ServerRegistrarImpl implements ServerRegistrar {
 		@Override
-		public <V, T extends V> void register(Registry<V> registry, Identifier id, T entry) {
-			var deferredRegister = DeferredRegister.create(registry.getKey(), id.getNamespace());
-			deferredRegister.register(id.getPath(), () -> entry);
-			deferredRegister.register(FMLJavaModLoadingContext.get().getModEventBus());
-		}
+                public <V, T extends V> void register(Registry<V> registry, ResourceLocation id, T entry) {
+                        var deferredRegister = DeferredRegister.create(registry.getKey(), id.getNamespace());
+                        deferredRegister.register(id.getPath(), () -> entry);
+                        deferredRegister.register(FMLJavaModLoadingContext.get().getModEventBus());
+                }
 
 		@Override
 		public <T extends GameRules.Rule<T>> void registerGameRule(GameRules.Key<T> key, GameRules.Type<T> type) {
@@ -122,20 +122,20 @@ public class ForgeMain {
 		}
 
 		@Override
-		public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
-			var deferredRegister = DeferredRegister.create(RegistryKeys.COMMAND_ARGUMENT_TYPE, id.getNamespace());
-			deferredRegister.register(id.getPath(), () -> serializer);
-			deferredRegister.register(FMLJavaModLoadingContext.get().getModEventBus());
-			ArgumentTypes.registerByClass(clazz, serializer);
-		}
+                public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(ResourceLocation id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
+                        var deferredRegister = DeferredRegister.create(RegistryKeys.COMMAND_ARGUMENT_TYPE, id.getNamespace());
+                        deferredRegister.register(id.getPath(), () -> serializer);
+                        deferredRegister.register(FMLJavaModLoadingContext.get().getModEventBus());
+                        ArgumentTypes.registerByClass(clazz, serializer);
+                }
 
 		@Override
-		public <T extends InPacket> void registerInPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ServerPacketHandler<T> handler) {
-			var channel = NetworkRegistry.newEventChannel(
-					identifier,
-					() -> "1",
-					version -> true,
-					version -> true
+                public <T extends InPacket> void registerInPacket(ResourceLocation identifier, Function<FriendlyByteBuf, T> reader, ServerPacketHandler<T> handler) {
+                        var channel = NetworkRegistry.newEventChannel(
+                                        identifier,
+                                        () -> "1",
+                                        version -> true,
+                                        version -> true
 			);
 			channel.addListener(networkEvent -> {
 				var context = networkEvent.getSource().get();
@@ -143,15 +143,15 @@ public class ForgeMain {
 					return;
 				}
 				if (networkEvent instanceof NetworkEvent.ClientCustomPayloadEvent serverNetworkEvent) {
-					var packet = reader.apply(serverNetworkEvent.getPayload());
-					context.enqueueWork(() -> handler.handle(context.getSender(), packet));
-					context.setPacketHandled(true);
-				}
-			});
-		}
+                                        var packet = reader.apply(serverNetworkEvent.getPayload());
+                                        context.enqueueWork(() -> handler.handle(context.getSender(), packet));
+                                        context.setPacketHandled(true);
+                                }
+                        });
+                }
 
 		@Override
-		public void registerOutPacket(Identifier id) { }
+                public void registerOutPacket(ResourceLocation id) { }
 	}
 
 	private class ServerEventReceiverImpl implements ServerEventReceiver {
@@ -163,18 +163,18 @@ public class ForgeMain {
 
 	private static class ServerPacketSenderImpl implements ServerPacketSender {
 		@Override
-		public void send(ServerPlayerEntity player, OutPacket packet) {
-			var buf = new PacketByteBuf(Unpooled.buffer());
-			packet.write(buf);
-			player.networkHandler.sendPacket(new CustomPayloadS2CPacket(packet.getId(), buf));
-		}
-	}
+                public void send(ServerPlayer player, OutPacket packet) {
+                        var buf = new FriendlyByteBuf(Unpooled.buffer());
+                        packet.write(buf);
+                        player.connection.send(new ClientboundCustomPayloadPacket(packet.getId(), buf));
+                }
+        }
 
 	private static class ServerPlatformImpl implements ServerPlatform {
 		@Override
-		public boolean isFakePlayer(ServerPlayerEntity player) {
-			return player instanceof FakePlayer;
-		}
-	}
+                public boolean isFakePlayer(ServerPlayer player) {
+                        return player instanceof FakePlayer;
+                }
+        }
 
 }

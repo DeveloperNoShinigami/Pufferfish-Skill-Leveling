@@ -6,8 +6,9 @@
 	"tooltip.puffish_skills.experience_progress": "경험치: %s/%s (%s%%)",
 	"tooltip.puffish_skills.to_next_level": "다음 레벨까지: %s",
 	"tooltip.puffish_skills.earned_points": "받은 포인트: %s",
-	"tooltip.puffish_skills.spent_points": "사용한 포인트: %s",
+        "tooltip.puffish_skills.spent_points": "사용한 포인트: %s",
         "tooltip.puffish_skills.skill_level": "Level: %s/%s",
+        "skill_type.stackable.description": "Allows mixing normal rewards with per-level rewards that stack with each level.",
 
 	"category.puffish_skills.skills": "스킬",
 	"key.puffish_skills.open": "스킬트리 열기",

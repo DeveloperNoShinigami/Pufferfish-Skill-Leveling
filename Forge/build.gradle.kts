@@ -25,13 +25,13 @@ dependencies {
 
         forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
 
-        implementation("net.puffish:skillsmod:${project.properties["puffish_skills_dependency_version"]}:forge")
+        compileOnly("net.puffish:skillsmod:${project.properties["puffish_skills_dependency_version"]}:forge")
         implementation(project(path = ":Common", configuration = "namedElements"))
 }
 
 loom {
-        mixin.defaultRefmapName.set("puffish_skills_leveling-refmap.json")
-        forge.mixinConfig("puffish_skills_leveling.mixins.json")
+        mixin.defaultRefmapName.set("puffish_skill_leveling-refmap.json")
+        forge.mixinConfig("puffish_skill_leveling.mixins.json")
 }
 
 tasks.test {

@@ -19,8 +19,6 @@ dependencies {
     mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
     compileOnly("net.fabricmc:sponge-mixin:${project.properties["mixin_version"]}")
-    // Provide EnvType and other loader classes used by the mapped Mojang sources
-    compileOnly("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
 }

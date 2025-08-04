@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 public final class SkillsAPI {
 	private SkillsAPI() { }
 	
-        public static final String MOD_ID = "puffish_skills_leveling";
+        public static final String MOD_ID = "puffish_skill_leveling";
 
 	public static void registerSkillUnlockEvent(Events.SkillUnlock event) {
 		SkillsMod.SKILL_UNLOCK.register(event);

@@ -25,6 +25,7 @@ dependencies {
 
     compileOnly("net.fabricmc:sponge-mixin:${project.properties["mixin_version"]}")
     compileOnly("net.puffish:skillsmod:${project.properties["puffish_skills_dependency_version"]}:forge")
+    compileOnly("org.apache.commons:commons-lang3:${project.properties["commons_lang_version"]}")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
 }

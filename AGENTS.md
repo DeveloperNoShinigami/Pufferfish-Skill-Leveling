@@ -140,3 +140,12 @@ When preparing a new addon for Pufferfish's Skills or a similar base mod:
 
 Following this checklist gives future agents a reproducible starting point from
 basic setup through advanced addon customisation.
+## Forge-only Skillsmod Integration Steps
+
+When refactoring this repository to rely on the external `skillsmod` library while targeting Forge only:
+
+1. Remove or relocate all classes under `Common/src/main/java/net/puffish/skillsmod/impl/**` and any copied `net.puffish.skillsmod.api` stubs.
+2. In `Forge/build.gradle.kts`, declare the `skillsmod` dependency using `compileOnly` so the API is available at compile time but not bundled.
+3. Rename the mod ID to `puffish_skill_leveling` and move source files and resources to the `net.bluelotuscoding.puffishskillleveling` namespace.
+4. Update affected classes to extend or wrap the official `skillsmod` classes using the new names to avoid conflicts with the base mod.
+5. Run `./gradlew :Forge:runClient` and inspect the produced jar to confirm that no `net/puffish/skillsmod` implementation packages remain and the client starts without `ResolutionException`.

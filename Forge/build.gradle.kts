@@ -21,10 +21,9 @@ repositories {
 
 dependencies {
         minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
-        mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
+        mappings(loom.officialMojangMappings())
 
         forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
-
         compileOnly("net.puffish:skillsmod:${project.properties["puffish_skills_dependency_version"]}:forge")
         implementation(project(path = ":Common", configuration = "namedElements"))
 }

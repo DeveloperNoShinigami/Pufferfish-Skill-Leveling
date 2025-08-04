@@ -4,7 +4,9 @@
         "package": "net.bluelotuscoding.puffishskillleveling.mixin",
         "compatibilityLevel": "JAVA_17",
         "mixins": [],
-        "client": [],
+        "client": [
+                "MinecraftMixin"
+        ],
         "injectors": {
                 "defaultRequire": 1
         },

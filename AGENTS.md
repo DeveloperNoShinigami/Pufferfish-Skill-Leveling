@@ -132,6 +132,12 @@ When preparing a new addon for Pufferfish's Skills or a similar base mod:
    `./gradlew check`. Launch the game with `:Fabric:runClient` or
    `:Forge:runClient` to verify the addon loads alongside the base mod.
 
+### Feature Parity with the Base Mod
+- Inspect the core mod's repository and commit history to see which features already exist.
+- Diff addon branches against upstream to identify truly new behavior.
+- Port only the new features while leveraging the base mod's commands and APIs.
+- Update translations, README documentation, and command registrations to reflect the addon's scope.
+
 ### Resources and Tools
 - JDK 17+, Gradle (via `./gradlew`)
 - Fabric API / Forge and Architectury Loom

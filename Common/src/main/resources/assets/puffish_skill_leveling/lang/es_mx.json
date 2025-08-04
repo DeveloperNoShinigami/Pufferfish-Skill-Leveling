@@ -6,8 +6,9 @@
 	"tooltip.puffish_skills.experience_progress": "Experiencia: %s/%s (%s%%)",
 	"tooltip.puffish_skills.to_next_level": "Para el próximo nivel: %s",
 	"tooltip.puffish_skills.earned_points": "Puntos ganados: %s",
-	"tooltip.puffish_skills.spent_points": "Puntos gastados: %s",
+        "tooltip.puffish_skills.spent_points": "Puntos gastados: %s",
         "tooltip.puffish_skills.skill_level": "Level: %s/%s",
+        "skill_type.stackable.description": "Allows mixing normal rewards with per-level rewards that stack with each level.",
 
 	"category.puffish_skills.skills": "Habilidades",
 	"key.puffish_skills.open": "Abrir Árbol de Habilidades",

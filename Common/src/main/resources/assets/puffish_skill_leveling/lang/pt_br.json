@@ -6,8 +6,9 @@
 	"tooltip.puffish_skills.experience_progress": "Experiência: %s/%s (%s%%)",
 	"tooltip.puffish_skills.to_next_level": "Para o próximo nível: %s",
 	"tooltip.puffish_skills.earned_points": "Pontos ganhos: %s",
-	"tooltip.puffish_skills.spent_points": "Pontos gastos: %s",
+        "tooltip.puffish_skills.spent_points": "Pontos gastos: %s",
         "tooltip.puffish_skills.skill_level": "Level: %s/%s",
+        "skill_type.stackable.description": "Allows mixing normal rewards with per-level rewards that stack with each level.",
 
 	"category.puffish_skills.skills": "Habilidades",
 	"key.puffish_skills.open": "Abrir Árvore de talentos",

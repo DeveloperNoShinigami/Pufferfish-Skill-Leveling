@@ -1,6 +1,7 @@
 package net.bluelotuscoding.puffishskillleveling;
 
 import net.bluelotuscoding.puffishskillleveling.reward.PerLevelRewardsReward;
+import net.bluelotuscoding.puffishskillleveling.skill.StackableSkillType;
 
 /**
  * Common entry point for registering addon features.
@@ -13,6 +14,7 @@ public final class PuffishSkillLeveling {
      */
     public static void init() {
         PerLevelRewardsReward.register();
+        StackableSkillType.register();
     }
 
     private PuffishSkillLeveling() {

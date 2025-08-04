@@ -9,5 +9,6 @@
 
 	"toast.puffish_skills.invalid_config.description": "Ungültige Konfiguration, prüfe die Logdatei.",
 
-	"gamerule.puffish_skills:announceNewPoints": "Neue Fertigkeitspunkte bekannt geben"
+        "gamerule.puffish_skills:announceNewPoints": "Neue Fertigkeitspunkte bekannt geben",
+        "skill_type.stackable.description": "Allows mixing normal rewards with per-level rewards that stack with each level."
 }

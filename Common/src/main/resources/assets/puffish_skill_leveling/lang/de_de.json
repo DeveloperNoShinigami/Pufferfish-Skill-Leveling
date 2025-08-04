@@ -1,13 +1,20 @@
 {
-	"text.puffish_skills.skills": "Fertigkeiten",
-	"text.puffish_skills.points_left": "Verbleibende Punkte: ",
-
-	"category.puffish_skills.skills": "Fertigkeiten",
-	"key.puffish_skills.open": "Fertigkeitsbaum öffnen",
-
-	"chat.puffish_skills.new_point": "Du hast einen neuen Fertigkeitspunkt. Drücke %s, um den Fertigkeitsbaum zu öffnen.",
-
-	"toast.puffish_skills.invalid_config.description": "Ungültige Konfiguration, prüfe die Logdatei.",
-
-	"gamerule.puffish_skills:announceNewPoints": "Neue Fertigkeitspunkte bekannt geben"
+  "category.puffish_skills.skills": "Fertigkeiten",
+  "chat.puffish_skills.new_point": "Du hast einen neuen Fertigkeitspunkt. Drücke %s, um den Fertigkeitsbaum zu öffnen.",
+  "command.puffish_skills.no_experience": "Für diese Kategorie ist keine Erfahrung aktiviert",
+  "command.puffish_skills.no_such_category": "Es gibt keine Kategorie mit der ID %s",
+  "command.puffish_skills.no_such_skill": "Es gibt keine Fertigkeit mit der ID %s",
+  "command.puffish_skills.skills.refund.no_levels": "Keiner der ausgewählten Spieler hatte irgendeine Stufe der %s-Fertigkeit in Kategorie %s zum Zurückerstatten.",
+  "command.puffish_skills.skills.refund.success.multiple": "Eine Stufe der %s-Fertigkeit in Kategorie %s für %s Spieler zurückerstattet",
+  "command.puffish_skills.skills.refund.success.single": "Eine Stufe der %s-Fertigkeit in Kategorie %s für %s zurückerstattet",
+  "command.puffish_skills.skills.refund_all.success.multiple": "Alle Stufen der %s-Fertigkeit in Kategorie %s für %s Spieler zurückerstattet",
+  "command.puffish_skills.skills.refund_all.success.single": "Alle Stufen der %s-Fertigkeit in Kategorie %s für %s zurückerstattet",
+  "command.puffish_skills.skills.refund_many.success.multiple": "%s Stufen der %s-Fertigkeit in Kategorie %s für %s Spieler zurückerstattet",
+  "command.puffish_skills.skills.refund_many.success.single": "%s Stufen der %s-Fertigkeit in Kategorie %s für %s zurückerstattet",
+  "gamerule.puffish_skills:announceNewPoints": "Neue Fertigkeitspunkte bekannt geben",
+  "key.puffish_skills.open": "Fertigkeitsbaum öffnen",
+  "skill_type.puffish_skills.stackable": "Stapelfähig",
+  "text.puffish_skills.points_left": "Verbleibende Punkte: ",
+  "text.puffish_skills.skills": "Fertigkeiten",
+  "toast.puffish_skills.invalid_config.description": "Ungültige Konfiguration, prüfe die Logdatei."
 }

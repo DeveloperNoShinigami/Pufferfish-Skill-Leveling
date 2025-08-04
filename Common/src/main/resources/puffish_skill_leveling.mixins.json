@@ -1,28 +1,10 @@
 {
-	"required": true,
-	"minVersion": "0.8",
-	"package": "net.puffish.skillsmod.mixin",
-	"compatibilityLevel": "JAVA_17",
-        "mixins": [
-                "BlockMixin",
-                "BooleanRuleInvoker",
-                "ConsumeItemCriterionMixin",
-                "DamageSourceMixin",
-                "EnchantedItemCriterionMixin",
-                "FishingRodHookedCriterionMixin",
-                "GameRulesAccessor",
-                "ItemStackMixin",
-                "LivingEntityMixin",
-                "PlayerEntityMixin",
-                "ServerPlayerEntityMixin",
-                "WorldChunkMixin"
-        ],
-        "client": [
-                "BufferRendererMixin",
-                "BuiltBufferMixin",
-                "MinecraftClientMixin",
-                "RenderLayerMixin"
-        ],
+        "required": true,
+        "minVersion": "0.8",
+        "package": "net.bluelotuscoding.puffishskillleveling.mixin",
+        "compatibilityLevel": "JAVA_17",
+        "mixins": [],
+        "client": [],
         "injectors": {
                 "defaultRequire": 1
         },

@@ -125,15 +125,15 @@ public class SkillsClientMod {
 		screenData.removeCategory(packet.getCategoryId());
 	}
 
-	private void onSkillUpdatePacket(SkillUpdateInPacket packet) {
-                screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
-                        if (packet.isUnlocked()) {
-                                category.unlock(packet.getSkillId(), packet.getLevel());
-                        } else {
-                                category.lock(packet.getSkillId());
-                        }
-                });
-        }
+       private void onSkillUpdatePacket(SkillUpdateInPacket packet) {
+               screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
+                       if (packet.getLevel() > 0) {
+                               category.unlock(packet.getSkillId(), packet.getLevel());
+                       } else {
+                               category.lock(packet.getSkillId());
+                       }
+               });
+       }
 
 	private void onExperienceUpdatePacket(ExperienceUpdateInPacket packet) {
 		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {

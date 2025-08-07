@@ -1,6 +1,5 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -15,13 +14,7 @@ import net.puffish.skillsmod.api.experience.source.ExperienceSourceConfigContext
 import net.puffish.skillsmod.api.experience.source.ExperienceSourceDisposeContext;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import net.puffish.skillsmod.calculation.LegacyBuiltinPrototypes;
 import net.puffish.skillsmod.calculation.LegacyCalculation;
-import net.puffish.skillsmod.calculation.operation.LegacyOperationRegistry;
-import net.puffish.skillsmod.calculation.operation.builtin.AttributeOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 
 public class EatFoodExperienceSource implements ExperienceSource {
 	private static final Identifier ID = SkillsMod.createIdentifier("eat_food");
@@ -73,62 +66,4 @@ public class EatFoodExperienceSource implements ExperienceSource {
 		// Nothing to do.
 	}
 
-	static {
-
-
-		// Backwards compatibility.
-		var legacy = new LegacyOperationRegistry<>(PROTOTYPE);
-		legacy.registerBooleanFunction(
-				"item",
-				ItemStackCondition::parse,
-				Data::itemStack
-		);
-		legacy.registerBooleanFunction(
-				"item_nbt",
-				ItemStackCondition::parse,
-				Data::itemStack
-		);
-		legacy.registerBooleanFunction(
-				"item_tag",
-				LegacyItemTagCondition::parse,
-				Data::itemStack
-		);
-		legacy.registerNumberFunction(
-				"player_effect",
-				effect -> (double) (effect.getAmplifier() + 1),
-				EffectOperation::parse,
-				Data::player
-		);
-		legacy.registerNumberFunction(
-				"player_attribute",
-				EntityAttributeInstance::getValue,
-				AttributeOperation::parse,
-				Data::player
-		);
-		legacy.registerNumberFunction(
-				"food_hunger",
-				data -> {
-					var fc = data.itemStack().getItem().getFoodComponent();
-					return fc == null ? 0.0 : fc.getHunger();
-				}
-		);
-		legacy.registerNumberFunction(
-				"food_saturation",
-				data -> {
-					var fc = data.itemStack().getItem().getFoodComponent();
-					return fc == null ? 0.0 : fc.getSaturationModifier();
-				}
-		);
-
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("player"),
-				SkillsMod.createIdentifier("get_player")
-		);
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("eaten_item_stack"),
-				SkillsMod.createIdentifier("get_eaten_item_stack")
-		);
-	}
 }

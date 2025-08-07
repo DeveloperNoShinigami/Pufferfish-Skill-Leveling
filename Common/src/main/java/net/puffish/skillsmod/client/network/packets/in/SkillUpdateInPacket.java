@@ -5,44 +5,36 @@ import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.network.InPacket;
 
 public class SkillUpdateInPacket implements InPacket {
-	private final Identifier categoryId;
-	private final String skillId;
-        private final boolean unlocked;
-        private final int level;
+       private final Identifier categoryId;
+       private final String skillId;
+       private final int level;
 
-        private SkillUpdateInPacket(Identifier categoryId, String skillId, boolean unlocked, int level) {
-                this.categoryId = categoryId;
-                this.skillId = skillId;
-                this.unlocked = unlocked;
-                this.level = level;
-        }
+       private SkillUpdateInPacket(Identifier categoryId, String skillId, int level) {
+               this.categoryId = categoryId;
+               this.skillId = skillId;
+               this.level = level;
+       }
 
-        public static SkillUpdateInPacket read(PacketByteBuf buf) {
-                var categoryId = buf.readIdentifier();
-                var skillId = buf.readString();
-                var unlocked = buf.readBoolean();
-                var level = buf.readInt();
-                return new SkillUpdateInPacket(
-                                categoryId,
-                                skillId,
-                                unlocked,
-                                level
-                );
-        }
+       public static SkillUpdateInPacket read(PacketByteBuf buf) {
+               var categoryId = buf.readIdentifier();
+               var skillId = buf.readString();
+               var level = buf.readInt();
+               return new SkillUpdateInPacket(
+                               categoryId,
+                               skillId,
+                               level
+               );
+       }
 
 	public Identifier getCategoryId() {
 		return categoryId;
 	}
 
-	public String getSkillId() {
-		return skillId;
-	}
+       public String getSkillId() {
+               return skillId;
+       }
 
-        public boolean isUnlocked() {
-                return unlocked;
-        }
-
-        public int getLevel() {
-                return level;
-        }
+       public int getLevel() {
+               return level;
+       }
 }

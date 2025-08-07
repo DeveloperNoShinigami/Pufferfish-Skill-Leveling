@@ -33,9 +33,9 @@ public class CategoryDataTest {
     @Test
     public void testPerLevelRewardExtendsMaxLevel() throws Exception {
         Map<Integer, List<SkillRewardConfig>> levelRewards = new HashMap<>();
-        Constructor<PerLevelRewardsReward> ctor = PerLevelRewardsReward.class.getDeclaredConstructor(Map.class, String.class, int.class, int.class);
+        Constructor<PerLevelRewardsReward> ctor = PerLevelRewardsReward.class.getDeclaredConstructor(Map.class, int.class, int.class);
         ctor.setAccessible(true);
-        PerLevelRewardsReward plr = ctor.newInstance(levelRewards, "skill", 3, 0);
+        PerLevelRewardsReward plr = ctor.newInstance(levelRewards, 3, 0);
         SkillRewardConfig rewardConfig = new SkillRewardConfig(PerLevelRewardsReward.ID, plr);
 
         SkillDefinitionConfig definition = new SkillDefinitionConfig(
@@ -90,9 +90,9 @@ public class CategoryDataTest {
     @Test
     public void testPerLevelRewardCostsPointsPerLevel() throws Exception {
         Map<Integer, List<SkillRewardConfig>> levelRewards = new HashMap<>();
-        Constructor<PerLevelRewardsReward> ctor = PerLevelRewardsReward.class.getDeclaredConstructor(Map.class, String.class, int.class, int.class);
+        Constructor<PerLevelRewardsReward> ctor = PerLevelRewardsReward.class.getDeclaredConstructor(Map.class, int.class, int.class);
         ctor.setAccessible(true);
-        PerLevelRewardsReward plr = ctor.newInstance(levelRewards, "skill", 1, 2);
+        PerLevelRewardsReward plr = ctor.newInstance(levelRewards, 1, 2);
         SkillRewardConfig rewardConfig = new SkillRewardConfig(PerLevelRewardsReward.ID, plr);
 
         SkillDefinitionConfig definition = new SkillDefinitionConfig(

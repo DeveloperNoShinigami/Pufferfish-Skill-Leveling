@@ -1,7 +1,5 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -17,15 +15,7 @@ import net.puffish.skillsmod.api.experience.source.ExperienceSourceConfigContext
 import net.puffish.skillsmod.api.experience.source.ExperienceSourceDisposeContext;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import net.puffish.skillsmod.calculation.LegacyBuiltinPrototypes;
 import net.puffish.skillsmod.calculation.LegacyCalculation;
-import net.puffish.skillsmod.calculation.operation.LegacyOperationRegistry;
-import net.puffish.skillsmod.calculation.operation.builtin.AttributeOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.DamageTypeCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.EntityTypeCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyDamageTypeTagCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyEntityTypeTagCondition;
 
 import java.util.Optional;
 
@@ -89,70 +79,4 @@ public class TakeDamageExperienceSource implements ExperienceSource {
 		// Nothing to do.
 	}
 
-	static {
-		// Backwards compatibility.
-		var legacy = new LegacyOperationRegistry<>(PROTOTYPE);
-		legacy.registerBooleanFunction(
-				"damage_type",
-				DamageTypeCondition::parse,
-				data -> data.damageSource().getType()
-		);
-		legacy.registerBooleanFunction(
-				"damage_type_tag",
-				LegacyDamageTypeTagCondition::parse,
-				data -> data.damageSource().getType()
-		);
-		legacy.registerOptionalBooleanFunction(
-				"attacker",
-				EntityTypeCondition::parse,
-				data -> Optional.ofNullable(data.damageSource().getAttacker()).map(Entity::getType)
-		);
-		legacy.registerOptionalBooleanFunction(
-				"attacker_tag",
-				LegacyEntityTypeTagCondition::parse,
-				data -> Optional.ofNullable(data.damageSource().getAttacker()).map(Entity::getType)
-		);
-		legacy.registerOptionalBooleanFunction(
-				"source",
-				EntityTypeCondition::parse,
-				data -> Optional.ofNullable(data.damageSource().getSource()).map(Entity::getType)
-		);
-		legacy.registerOptionalBooleanFunction(
-				"source_tag",
-				LegacyEntityTypeTagCondition::parse,
-				data -> Optional.ofNullable(data.damageSource().getSource()).map(Entity::getType)
-		);
-		legacy.registerNumberFunction(
-				"player_effect",
-				effect -> (double) (effect.getAmplifier() + 1),
-				EffectOperation::parse,
-				Data::player
-		);
-		legacy.registerNumberFunction(
-				"player_attribute",
-				EntityAttributeInstance::getValue,
-				AttributeOperation::parse,
-				Data::player
-		);
-		legacy.registerNumberFunction(
-				"damage",
-				data -> (double) data.damage()
-		);
-
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("player"),
-				SkillsMod.createIdentifier("get_player")
-		);
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("damage_source"),
-				SkillsMod.createIdentifier("get_damage_source")
-		);
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("damage"),
-				SkillsMod.createIdentifier("get_taken_damage")
-		);
-	}
 }

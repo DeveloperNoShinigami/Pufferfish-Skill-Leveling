@@ -11,65 +11,112 @@ import net.puffish.skillsmod.client.setup.ClientRegistrar;
 import net.puffish.skillsmod.network.Packets;
 
 public class SkillsClientMod {
-        private static SkillsClientMod instance;
+	public static final KeyBinding OPEN_KEY_BINDING = new KeyBinding(
+                        "key.puffish_skill_leveling.open",
+			InputUtil.Type.KEYSYM,
+			GLFW.GLFW_KEY_K,
+                        "category.puffish_skill_leveling.skills"
+	);
 
-        private final ClientSkillScreenData screenData = new ClientSkillScreenData();
+	private static SkillsClientMod instance;
 
-        private final ClientPacketSender packetSender;
+	private final ClientSkillScreenData screenData = new ClientSkillScreenData();
 
-        private SkillsClientMod(ClientPacketSender packetSender) {
-                this.packetSender = packetSender;
-        }
+	private final ClientPacketSender packetSender;
 
-        public static SkillsClientMod getInstance() {
-                return instance;
-        }
+	private SkillsClientMod(ClientPacketSender packetSender) {
+		this.packetSender = packetSender;
+	}
 
-        public static void setup(
-                        ClientRegistrar registrar,
-                        ClientPacketSender packetSender
-        ) {
-                instance = new SkillsClientMod(packetSender);
+	public static SkillsClientMod getInstance() {
+		return instance;
+	}
 
-                registrar.registerInPacket(
-                                Packets.SHOW_CATEGORY,
-                                ShowCategoryInPacket::read,
-                                instance::onShowCategory
-                );
+	public static void setup(
+			ClientRegistrar registrar,
+			ClientEventReceiver eventReceiver,
+			KeyBindingReceiver keyBindingReceiver,
+			ClientPacketSender packetSender
+	) {
+		instance = new SkillsClientMod(packetSender);
 
-                registrar.registerInPacket(
-                                Packets.SKILL_UPDATE,
-                                SkillUpdateInPacket::read,
-                                instance::onSkillUpdatePacket
-                );
+		keyBindingReceiver.registerKeyBinding(OPEN_KEY_BINDING, instance::onOpenKeyPress);
 
-                registrar.registerInPacket(
-                                Packets.POINTS_UPDATE,
-                                PointsUpdateInPacket::read,
-                                instance::onPointsUpdatePacket
-                );
+		registrar.registerInPacket(
+				Packets.SHOW_CATEGORY,
+				ShowCategoryInPacket::read,
+				instance::onShowCategory
+		);
 
-                registrar.registerInPacket(
-                                Packets.EXPERIENCE_UPDATE,
-                                ExperienceUpdateInPacket::read,
-                                instance::onExperienceUpdatePacket
-                );
-        }
+		registrar.registerInPacket(
+				Packets.HIDE_CATEGORY,
+				HideCategoryInPacket::read,
+				instance::onHideCategory
+		);
 
-        private void onShowCategory(ShowCategoryInPacket packet) {
-                var category = packet.getCategory();
-                screenData.putCategory(category.getConfig().id(), category);
-        }
+		registrar.registerInPacket(
+				Packets.SKILL_UPDATE,
+				SkillUpdateInPacket::read,
+				instance::onSkillUpdatePacket
+		);
 
-        private void onSkillUpdatePacket(SkillUpdateInPacket packet) {
-                screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
-                        if (packet.isUnlocked()) {
-                                category.unlock(packet.getSkillId(), packet.getLevel());
-                        } else {
-                                category.lock(packet.getSkillId());
-                        }
-                });
-        }
+		registrar.registerInPacket(
+				Packets.POINTS_UPDATE,
+				PointsUpdateInPacket::read,
+				instance::onPointsUpdatePacket
+		);
+
+		registrar.registerInPacket(
+				Packets.EXPERIENCE_UPDATE,
+				ExperienceUpdateInPacket::read,
+				instance::onExperienceUpdatePacket
+		);
+
+		registrar.registerInPacket(
+				Packets.SHOW_TOAST,
+				ShowToastInPacket::read,
+				instance::onShowToast
+		);
+
+		registrar.registerInPacket(
+				Packets.OPEN_SCREEN,
+				OpenScreenInPacket::read,
+				instance::onOpenScreenPacket
+		);
+
+		registrar.registerInPacket(
+				Packets.NEW_POINT,
+				NewPointInPacket::read,
+				instance::onNewPointPacket
+		);
+
+		registrar.registerOutPacket(Packets.SKILL_CLICK);
+
+		eventReceiver.registerListener(instance.new EventListener());
+	}
+
+	private void onOpenKeyPress() {
+		openScreen(Optional.empty());
+	}
+
+	private void onShowCategory(ShowCategoryInPacket packet) {
+		var category = packet.getCategory();
+		screenData.putCategory(category.getConfig().id(), category);
+	}
+
+	private void onHideCategory(HideCategoryInPacket packet) {
+		screenData.removeCategory(packet.getCategoryId());
+	}
+
+       private void onSkillUpdatePacket(SkillUpdateInPacket packet) {
+               screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
+                       if (packet.getLevel() > 0) {
+                               category.unlock(packet.getSkillId(), packet.getLevel());
+                       } else {
+                               category.lock(packet.getSkillId());
+                       }
+               });
+       }
 
         private void onExperienceUpdatePacket(ExperienceUpdateInPacket packet) {
                 screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {

@@ -8,7 +8,7 @@ import net.puffish.skillsmod.calculation.operation.builtin.DamageTypeCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.EntityTypeCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.ItemCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.ItemStackNbtCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.ScoreboardOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.StatCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.StatTypeCondition;
@@ -16,10 +16,6 @@ import net.puffish.skillsmod.calculation.operation.builtin.StatValueOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.SwitchOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.TagCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.WorldCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyBlockTagCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyDamageTypeTagCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyEntityTypeTagCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 
 public class BuiltinOperations {
 	public static void register() {
@@ -31,18 +27,13 @@ public class BuiltinOperations {
 		EffectOperation.register();
 		EntityTypeCondition.register();
 		ItemCondition.register();
-		ItemStackCondition.register();
+                ItemStackNbtCondition.register();
 		ScoreboardOperation.register();
 		StatCondition.register();
 		StatTypeCondition.register();
 		StatValueOperation.register();
 		SwitchOperation.register();
-		TagCondition.register();
-		WorldCondition.register();
-
-		LegacyBlockTagCondition.register();
-		LegacyDamageTypeTagCondition.register();
-		LegacyEntityTypeTagCondition.register();
-		LegacyItemTagCondition.register();
-	}
+                TagCondition.register();
+                WorldCondition.register();
+        }
 }

@@ -21,27 +21,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public class PerLevelRewardsReward implements Reward {
 	public static final Identifier ID = SkillsMod.createIdentifier("per_level_rewards");
 
     private final Map<Integer, List<SkillRewardConfig>> levelRewards;
-    private final String skillId;
     private final int maxLevel;
     private final int pointsPerLevel;
     private final Map<UUID, Integer> counts = new HashMap<>();
 
-    private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards, String skillId, int maxLevel, int pointsPerLevel) {
+    private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards, int maxLevel, int pointsPerLevel) {
         this.levelRewards = levelRewards;
-        this.skillId = skillId;
         this.maxLevel = maxLevel;
         this.pointsPerLevel = pointsPerLevel;
-    }
-
-    public String getSkillId() {
-        return skillId;
     }
 
     public int getMaxLevel() {
@@ -89,10 +82,6 @@ public class PerLevelRewardsReward implements Reward {
         int definedMaxLevel = levelRewards.keySet().stream().max(Integer::compareTo).orElse(0);
 
         // Access optional fields and validate values
-        var optSkillId = rootObject.getString("skill_id")
-                .ifFailure(problems::add)
-                .getSuccess();
-
         var optMaxLevelTmp = rootObject.get("max_skill_level")
                 .getSuccess()
                 .flatMap(element -> element.getAsInt()
@@ -120,7 +109,6 @@ public class PerLevelRewardsReward implements Reward {
 
         if (problems.isEmpty()) {
             return Result.success(new PerLevelRewardsReward(levelRewards,
-                            optSkillId.orElse(null),
                             optMaxLevelTmp.orElse(Math.max(1, definedMaxLevel)),
                             optPointsPerLevel));
         } else {

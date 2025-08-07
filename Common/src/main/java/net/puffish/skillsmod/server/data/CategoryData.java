@@ -1,7 +1,6 @@
 package net.puffish.skillsmod.server.data;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.util.Identifier;
@@ -19,38 +18,55 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public class CategoryData {
-    private final Map<String, Integer> unlockedSkills;
-    private final Map<Identifier, Integer> points;
+       private final Map<String, Integer> unlockedSkills;
+	private final Map<Identifier, Integer> points;
+	private boolean unlocked;
+	private int experience;
 
-    private CategoryData(Map<String, Integer> unlockedSkills, Map<Identifier, Integer> points) {
-        this.unlockedSkills = unlockedSkills;
-        this.points = points;
-    }
+       private CategoryData(Map<String, Integer> unlockedSkills, Map<Identifier, Integer> points, boolean unlocked, int experience) {
+               this.unlockedSkills = unlockedSkills;
+		this.points = points;
+		this.unlocked = unlocked;
+		this.experience = experience;
+	}
 
-    public static CategoryData create(GeneralConfig general) {
-        var points = new HashMap<Identifier, Integer>();
-        points.put(PointSources.STARTING, general.startingPoints());
+       public static CategoryData create(GeneralConfig general) {
+               var points = new HashMap<Identifier, Integer>();
+               points.put(PointSources.STARTING, general.startingPoints());
 
-        return new CategoryData(
-                new HashMap<>(),
-                points
-        );
-    }
+               return new CategoryData(
+                               new HashMap<>(),
+                               points,
+                               general.unlockedByDefault(),
+                               0
+               );
+       }
 
-public static CategoryData read(NbtCompound nbt) {
-var unlockedSkills = new HashMap<String, Integer>();
-var unlockedNbt = nbt.get("unlocked_skills");
-if (unlockedNbt instanceof NbtList unlockedList) {
-for (var elementNbt : unlockedList) {
-if (elementNbt instanceof NbtString stringNbt) {
-unlockedSkills.put(stringNbt.asString(), 1);
-}
-}
-} else if (unlockedNbt instanceof NbtCompound unlockedCompound) {
-for (var key : unlockedCompound.getKeys()) {
-unlockedSkills.put(key, unlockedCompound.getInt(key));
-}
-}
+	public static CategoryData read(NbtCompound nbt) {
+		var unlocked = nbt.getBoolean("unlocked");
+		var experience = nbt.getInt("experience");
+
+               var unlockedSkills = new HashMap<String, Integer>();
+               var unlockedNbt = nbt.get("unlocked_skills");
+               if (unlockedNbt instanceof NbtList unlockedList) {
+                       for (var elementNbt : unlockedList) {
+                               if (elementNbt instanceof NbtString stringNbt) {
+                                       unlockedSkills.put(stringNbt.asString(), 1);
+                               }
+                       }
+               } else if (unlockedNbt instanceof NbtCompound unlockedCompound) {
+                       for (var key : unlockedCompound.getKeys()) {
+                               unlockedSkills.put(key, unlockedCompound.getInt(key));
+                       }
+               }
+
+               var points = new HashMap<Identifier, Integer>();
+               var pointsNbt = nbt.get("points");
+               if (pointsNbt instanceof NbtCompound pointsNbtCompound) {
+                       for (var key : pointsNbtCompound.getKeys()) {
+                               points.put(new Identifier(key), pointsNbtCompound.getInt(key));
+                       }
+               }
 
 var points = new HashMap<Identifier, Integer>();
 var pointsNbt = nbt.get("points");

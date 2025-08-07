@@ -10,7 +10,7 @@ import net.puffish.skillsmod.client.data.ClientSkillScreenData;
 import net.puffish.skillsmod.client.event.ClientEventListener;
 import net.puffish.skillsmod.client.event.ClientEventReceiver;
 import net.puffish.skillsmod.client.gui.SimpleToast;
-import net.puffish.skillsmod.client.gui.SkillsScreen;
+import net.puffish.skillsmod.client.gui.SkillLevelingScreen;
 import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketSender;
 import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
@@ -183,7 +183,7 @@ public class SkillsClientMod {
 	}
 
 	public void openScreen(Optional<Identifier> categoryId) {
-		MinecraftClient.getInstance().setScreen(new SkillsScreen(screenData, categoryId));
+                MinecraftClient.getInstance().setScreen(new SkillLevelingScreen(screenData, categoryId));
 	}
 
 	public ClientPacketSender getPacketSender() {

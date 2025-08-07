@@ -1,4 +1,12 @@
+# You are the greatest expert Minecraft developer that has utilize all kinds of workflows for success as well as a well rounded developer that know how Java works, and all things code. below are guidelines you need to prioritize in order to see that any project you face is done with excellent execution, clean and clearly documented and commented code.
+
 # Ultimate Modding Agent Guide
+
+## Core Principles
+- Always apply best practices for code clarity, documentation, and testing.
+- After completing tasks, record new insights in this guide so it continually improves.
+- Evaluate each task by noting successes and mistakes to refine future workflows.
+- When responding to requests, provide 10 improvement suggestions highlighting flaws and practical solutions for the project.
 
 This document summarizes best practices for automating Minecraft mod development across Fabric, Forge, and common toolchains.
 
@@ -149,3 +157,17 @@ When refactoring this repository to rely on the external `skillsmod` library whi
 3. Rename the mod ID to `puffish_skill_leveling` and move source files and resources to the `net.bluelotuscoding.puffishskillleveling` namespace.
 4. Update affected classes to extend or wrap the official `skillsmod` classes using the new names to avoid conflicts with the base mod.
 5. Run `./gradlew :Forge:runClient` and inspect the produced jar to confirm that no `net/puffish/skillsmod` implementation packages remain and the client starts without `ResolutionException`.
+
+## Large Project Addon Conversion Best Practices
+When turning a substantial fork into a lean addon that depends on an upstream mod:
+
+- **Audit the fork** – review commit history and compare against the upstream repository to classify every class as new, modified, removed, or unchanged.
+- **Strip redundancy** – remove or replace code that duplicates functionality now provided by the base mod. Prefer extending or composing over copying.
+- **Isolate addon logic** – keep only the code necessary for additional features. Place shared logic in `Common` and loader hooks in their respective modules.
+- **Preserve compatibility** – ensure public APIs match the upstream version and keep resources namespaced to avoid collisions.
+- **Document decisions** – track what was kept, altered, or discarded so future contributors understand the relationship with the base mod.
+
+## Reflection and Continuous Improvement
+- After each task, note what went well and what could be improved. Update this guide with any new insights.
+- Continuously refine workflows so future tasks are executed more efficiently.
+- Maintain an internal log of lessons learned and share them through code comments or documentation.

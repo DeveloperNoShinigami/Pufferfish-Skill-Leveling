@@ -9,6 +9,10 @@ group = "${project.properties["maven_group"]}"
 
 evaluationDependsOn(":Common")
 
+repositories {
+        maven("https://maven.puffish.net")
+}
+
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
 	targetCompatibility = JavaVersion.VERSION_17
@@ -16,11 +20,13 @@ java {
 
 dependencies {
 	minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
-	mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
+        mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
-	forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
+        forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
 
-	implementation(project(path = ":Common", configuration = "namedElements"))
+        modImplementation("net.puffish:skillsmod:${project.properties["skillsmod_version"]}:forge")
+
+        implementation(project(path = ":Common", configuration = "namedElements"))
 }
 
 loom {

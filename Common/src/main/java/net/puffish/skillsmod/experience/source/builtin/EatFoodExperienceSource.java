@@ -1,6 +1,5 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -15,14 +14,7 @@ import net.puffish.skillsmod.api.experience.source.ExperienceSourceConfigContext
 import net.puffish.skillsmod.api.experience.source.ExperienceSourceDisposeContext;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import net.puffish.skillsmod.calculation.LegacyBuiltinPrototypes;
 import net.puffish.skillsmod.calculation.LegacyCalculation;
-import net.puffish.skillsmod.calculation.operation.LegacyOperationRegistry;
-import net.puffish.skillsmod.calculation.operation.builtin.AttributeOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemStackNbtCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 
 public class EatFoodExperienceSource implements ExperienceSource {
 	private static final Identifier ID = SkillsMod.createIdentifier("eat_food");

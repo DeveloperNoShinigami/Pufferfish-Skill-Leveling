@@ -1,7 +1,6 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,18 +19,7 @@ import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import net.puffish.skillsmod.calculation.LegacyBuiltinPrototypes;
 import net.puffish.skillsmod.calculation.LegacyCalculation;
-import net.puffish.skillsmod.calculation.operation.LegacyOperationRegistry;
-import net.puffish.skillsmod.calculation.operation.builtin.AttributeOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.DamageTypeCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.EntityTypeCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemStackNbtCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyDamageTypeTagCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyEntityTypeTagCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 import net.puffish.skillsmod.experience.source.builtin.util.AntiFarmingPerChunk;
 import net.puffish.skillsmod.util.LegacyUtils;
 
@@ -131,93 +119,5 @@ public class KillEntityExperienceSource implements ExperienceSource {
 	@Override
 	public void dispose(ExperienceSourceDisposeContext context) {
 		// Nothing to do.
-	}
-
-	static {
-
-
-		// Backwards compatibility.
-		var legacy = new LegacyOperationRegistry<>(PROTOTYPE);
-		legacy.registerBooleanFunction(
-				"entity",
-				EntityTypeCondition::parse,
-				data -> data.entity().getType()
-		);
-		legacy.registerBooleanFunction(
-				"entity_tag",
-				LegacyEntityTypeTagCondition::parse,
-				data -> data.entity().getType()
-		);
-                legacy.registerBooleanFunction(
-                                "weapon",
-                                ItemCondition::parse,
-                                data -> data.weapon().getItem()
-                );
-                legacy.registerBooleanFunction(
-                                "weapon_nbt",
-                                ItemStackNbtCondition::parse,
-                                Data::weapon
-                );
-		legacy.registerBooleanFunction(
-				"weapon_tag",
-				LegacyItemTagCondition::parse,
-				Data::weapon
-		);
-		legacy.registerBooleanFunction(
-				"damage_type",
-				DamageTypeCondition::parse,
-				data -> data.damageSource().getType()
-		);
-		legacy.registerBooleanFunction(
-				"damage_type_tag",
-				LegacyDamageTypeTagCondition::parse,
-				data -> data.damageSource().getType()
-		);
-		legacy.registerNumberFunction(
-				"player_effect",
-				effect -> (double) (effect.getAmplifier() + 1),
-				EffectOperation::parse,
-				Data::player
-		);
-		legacy.registerNumberFunction(
-				"player_attribute",
-				EntityAttributeInstance::getValue,
-				AttributeOperation::parse,
-				Data::player
-		);
-		legacy.registerNumberFunction(
-				"entity_dropped_experience",
-				Data::entityDroppedXp
-		);
-		legacy.registerNumberFunction(
-				"entity_max_health",
-				data -> (double) data.entity().getMaxHealth()
-		);
-
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("player"),
-				SkillsMod.createIdentifier("get_player")
-		);
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("weapon_item_stack"),
-				SkillsMod.createIdentifier("get_weapon_item_stack")
-		);
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("killed_living_entity"),
-				SkillsMod.createIdentifier("get_killed_living_entity")
-		);
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("damage_source"),
-				SkillsMod.createIdentifier("get_damage_source")
-		);
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("dropped_experience"),
-				SkillsMod.createIdentifier("get_dropped_experience")
-		);
 	}
 }

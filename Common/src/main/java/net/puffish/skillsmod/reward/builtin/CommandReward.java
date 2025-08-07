@@ -21,85 +21,96 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class CommandReward implements Reward {
-	public static final Identifier ID = SkillsMod.createIdentifier("command");
+        public static final Identifier ID = SkillsMod.createIdentifier("command");
 
-	private final Map<UUID, Integer> counts = new HashMap<>();
+        @FunctionalInterface
+        public interface Executor {
+                void execute(ServerPlayerEntity player, String command);
+        }
 
-	private final String command;
-	private final String unlockCommand;
-	private final String lockCommand;
+        private final Map<UUID, Integer> counts = new HashMap<>();
 
-	private CommandReward(String command, String unlockCommand, String lockCommand) {
-		this.command = command;
-		this.unlockCommand = unlockCommand;
-		this.lockCommand = lockCommand;
-	}
+        private final String command;
+        private final String unlockCommand;
+        private final String lockCommand;
+        private final Executor executor;
 
-	public static void register() {
-		SkillsAPI.registerReward(
-				ID,
-				CommandReward::parse
-		);
-	}
+        private CommandReward(String command, String unlockCommand, String lockCommand, Executor executor) {
+                this.command = command;
+                this.unlockCommand = unlockCommand;
+                this.lockCommand = lockCommand;
+                this.executor = executor;
+        }
 
-	private static Result<CommandReward, Problem> parse(RewardConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(CommandReward::parse, context));
-	}
+        public static void register() {
+                SkillsAPI.registerReward(
+                                ID,
+                                context -> parse(context, CommandReward::executeAsPlayer)
+                );
+        }
 
-	private static Result<CommandReward, Problem> parse(JsonObject rootObject) {
-		var problems = new ArrayList<Problem>();
+        public static Result<CommandReward, Problem> parse(RewardConfigContext context, Executor executor) {
+                return context.getData()
+                                .andThen(JsonElement::getAsObject)
+                                .andThen(LegacyUtils.wrapNoUnused(obj -> parse(obj, executor), context));
+        }
 
-		var command = rootObject.get("command")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(jsonElement -> jsonElement.getAsString()
-						.ifFailure(problems::add)
-						.getSuccess()
-				)
-				.orElse("");
+        private static Result<CommandReward, Problem> parse(JsonObject rootObject, Executor executor) {
+                var problems = new ArrayList<Problem>();
 
-		var unlockCommand = rootObject.get("unlock_command")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(jsonElement -> jsonElement.getAsString()
-						.ifFailure(problems::add)
-						.getSuccess()
-				)
-				.orElse("");
+                var command = rootObject.get("command")
+                                .getSuccess() // ignore failure because this property is optional
+                                .flatMap(jsonElement -> jsonElement.getAsString()
+                                                .ifFailure(problems::add)
+                                                .getSuccess()
+                                )
+                                .orElse("");
 
-		var lockCommand = rootObject.get("lock_command")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(jsonElement -> jsonElement.getAsString()
-						.ifFailure(problems::add)
-						.getSuccess()
-				)
-				.orElse("");
+                var unlockCommand = rootObject.get("unlock_command")
+                                .getSuccess() // ignore failure because this property is optional
+                                .flatMap(jsonElement -> jsonElement.getAsString()
+                                                .ifFailure(problems::add)
+                                                .getSuccess()
+                                )
+                                .orElse("");
 
-		if (problems.isEmpty()) {
-			return Result.success(new CommandReward(
-					command,
-					unlockCommand,
-					lockCommand
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+                var lockCommand = rootObject.get("lock_command")
+                                .getSuccess() // ignore failure because this property is optional
+                                .flatMap(jsonElement -> jsonElement.getAsString()
+                                                .ifFailure(problems::add)
+                                                .getSuccess()
+                                )
+                                .orElse("");
 
-	private void executeCommand(ServerPlayerEntity player, String command) {
-		if (command.isBlank()) {
-			return;
-		}
+                if (problems.isEmpty()) {
+                        return Result.success(new CommandReward(
+                                        command,
+                                        unlockCommand,
+                                        lockCommand,
+                                        executor
+                        ));
+                } else {
+                        return Result.failure(Problem.combine(problems));
+                }
+        }
 
-		var server = Objects.requireNonNull(player.getServer());
+        private static void executeAsPlayer(ServerPlayerEntity player, String command) {
+                var server = Objects.requireNonNull(player.getServer());
 
-		server.getCommandManager().executeWithPrefix(
-				player.getCommandSource()
-						.withSilent()
-						.withLevel(server.getFunctionPermissionLevel()),
-				command
-		);
-	}
+                server.getCommandManager().executeWithPrefix(
+                                player.getCommandSource()
+                                                .withSilent()
+                                                .withLevel(server.getFunctionPermissionLevel()),
+                                command
+                );
+        }
+
+        private void executeCommand(ServerPlayerEntity player, String command) {
+                if (command.isBlank()) {
+                        return;
+                }
+                executor.execute(player, command);
+        }
 
 	@Override
 	public void update(RewardUpdateContext context) {

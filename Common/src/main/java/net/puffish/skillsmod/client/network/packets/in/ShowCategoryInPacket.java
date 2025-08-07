@@ -1,8 +1,11 @@
 package net.puffish.skillsmod.client.network.packets.in;
 
 import net.minecraft.advancement.AdvancementFrame;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.client.config.ClientBackgroundConfig;
 import net.puffish.skillsmod.client.config.ClientCategoryConfig;
@@ -17,10 +20,9 @@ import net.puffish.skillsmod.client.config.skill.ClientSkillConnectionConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillDefinitionConfig;
 import net.puffish.skillsmod.client.data.ClientCategoryData;
 import net.puffish.skillsmod.common.BackgroundPosition;
-import net.puffish.skillsmod.common.FrameType;
-import net.puffish.skillsmod.common.IconType;
 import net.puffish.skillsmod.network.InPacket;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -38,18 +40,18 @@ public class ShowCategoryInPacket implements InPacket {
 	}
 
         public static ClientCategoryData readCategory(PacketByteBuf buf) {
-		var id = buf.readIdentifier();
+               var id = buf.readIdentifier();
+               var exclusiveRoot = buf.readBoolean();
+               var spentPointsLimit = buf.readInt();
 
-		var title = buf.readText();
-		var icon = readSkillIcon(buf);
-		var background = readBackground(buf);
-		var colors = readColors(buf);
-		var exclusiveRoot = buf.readBoolean();
-		var spentPointsLimit = buf.readInt();
+               var title = Text.empty();
+               var icon = new ClientIconConfig.ItemIconConfig(new ItemStack(Items.AIR));
+               var background = defaultBackground();
+               var colors = defaultColors();
 
-		var definitions = buf.readList(ShowCategoryInPacket::readDefinition)
-				.stream()
-				.collect(Collectors.toMap(ClientSkillDefinitionConfig::id, definition -> definition));
+               var definitions = buf.readList(ShowCategoryInPacket::readDefinition)
+                                .stream()
+                                .collect(Collectors.toMap(ClientSkillDefinitionConfig::id, definition -> definition));
 
 		var skills = buf.readList(ShowCategoryInPacket::readSkill)
 				.stream()
@@ -114,125 +116,58 @@ public class ShowCategoryInPacket implements InPacket {
 
         private record SkillInfo(Skill.State state, int level) { }
 
-        public static ClientSkillDefinitionConfig readDefinition(PacketByteBuf buf) {
-		var id = buf.readString();
-		var type = buf.readIdentifier();
-		var maxLevels = buf.readInt();
-		var descriptions = buf.readList(PacketByteBuf::readText);
-		var extraDescriptions = buf.readList(PacketByteBuf::readText);
-		var title = buf.readText();
-		var frame = readFrameIcon(buf);
-                var icon = readSkillIcon(buf);
-                var size = buf.readFloat();
-                var mergeDescription = buf.readBoolean();
-                var cost = buf.readInt();
-		var requiredSkills = buf.readInt();
-		var requiredPoints = buf.readInt();
-		var requiredSpentPoints = buf.readInt();
-                var requiredExclusions = buf.readInt();
-                var hasLevelRewards = buf.readBoolean();
+       public static ClientSkillDefinitionConfig readDefinition(PacketByteBuf buf) {
+               var id = buf.readString();
+               var type = buf.readIdentifier();
+               var maxLevels = buf.readInt();
+               var cost = buf.readInt();
+               var requiredSkills = buf.readInt();
+               var requiredPoints = buf.readInt();
+               var requiredSpentPoints = buf.readInt();
+               var requiredExclusions = buf.readInt();
+               var hasLevelRewards = buf.readBoolean();
 
-                return new ClientSkillDefinitionConfig(
-                        id,
-                        type,
-                        maxLevels,
-                        descriptions,
-                        extraDescriptions,
-                        title,
-                        icon,
-                        frame,
-                        size,
-                        mergeDescription,
-                        cost,
+               return new ClientSkillDefinitionConfig(
+                               id,
+                               type,
+                               maxLevels,
+                               List.of(),
+                               List.of(),
+                               Text.empty(),
+                               new ClientIconConfig.ItemIconConfig(new ItemStack(Items.AIR)),
+                               new ClientFrameConfig.AdvancementFrameConfig(AdvancementFrame.TASK),
+                               1f,
+                               false,
+                               cost,
+                               requiredSkills,
+                               requiredPoints,
+                               requiredSpentPoints,
+                               requiredExclusions,
+                               hasLevelRewards
+               );
+       }
 
-                                requiredSkills,
-                                requiredPoints,
-                                requiredSpentPoints,
-                                requiredExclusions,
-                                hasLevelRewards
-                );
-        }
+       private static ClientBackgroundConfig defaultBackground() {
+               return ClientBackgroundConfig.create(
+                               new Identifier("minecraft", "textures/gui/options_background.png"),
+                               256,
+                               256,
+                               BackgroundPosition.NONE
+               );
+       }
 
-	public static ClientIconConfig readSkillIcon(PacketByteBuf buf) {
-		var type = buf.readEnumConstant(IconType.class);
-		return switch (type) {
-			case EFFECT -> {
-				var effect = buf.readIdentifier();
-				yield new ClientIconConfig.EffectIconConfig(Registries.STATUS_EFFECT.get(effect));
-			}
-			case ITEM -> {
-				var itemStack = buf.readItemStack();
-				yield new ClientIconConfig.ItemIconConfig(itemStack);
-			}
-			case TEXTURE -> {
-				var texture = buf.readIdentifier();
-				yield new ClientIconConfig.TextureIconConfig(texture);
-			}
-		};
-	}
-
-	public static ClientFrameConfig readFrameIcon(PacketByteBuf buf) {
-		var type = buf.readEnumConstant(FrameType.class);
-		return switch (type) {
-			case ADVANCEMENT -> {
-				var advancementFrame = buf.readEnumConstant(AdvancementFrame.class);
-				yield new ClientFrameConfig.AdvancementFrameConfig(advancementFrame);
-			}
-			case TEXTURE -> {
-				var lockedTexture = buf.readOptional(PacketByteBuf::readIdentifier);
-				var availableTexture = buf.readIdentifier();
-				var affordableTexture = buf.readOptional(PacketByteBuf::readIdentifier);
-				var unlockedTexture = buf.readIdentifier();
-				var excludedTexture = buf.readOptional(PacketByteBuf::readIdentifier);
-				yield new ClientFrameConfig.TextureFrameConfig(
-						lockedTexture,
-						availableTexture,
-						affordableTexture,
-						unlockedTexture,
-						excludedTexture
-				);
-			}
-		};
-	}
-
-	public static ClientBackgroundConfig readBackground(PacketByteBuf buf) {
-		var texture = buf.readIdentifier();
-		var width = buf.readInt();
-		var height = buf.readInt();
-		var position = buf.readEnumConstant(BackgroundPosition.class);
-
-		return ClientBackgroundConfig.create(texture, width, height, position);
-	}
-
-	public static ClientColorsConfig readColors(PacketByteBuf buf) {
-		var connections = readConnectionsColors(buf);
-		var points = readFillStrokeColors(buf);
-
-		return new ClientColorsConfig(connections, points);
-	}
-
-	public static ClientConnectionsColorsConfig readConnectionsColors(PacketByteBuf buf) {
-		var locked = readFillStrokeColors(buf);
-		var available = readFillStrokeColors(buf);
-		var affordable = readFillStrokeColors(buf);
-		var unlocked = readFillStrokeColors(buf);
-		var excluded = readFillStrokeColors(buf);
-
-		return new ClientConnectionsColorsConfig(locked, available, affordable, unlocked, excluded);
-	}
-
-	public static ClientFillStrokeColorsConfig readFillStrokeColors(PacketByteBuf buf) {
-		var fill = readColor(buf);
-		var stroke = readColor(buf);
-
-		return new ClientFillStrokeColorsConfig(fill, stroke);
-	}
-
-	public static ClientColorConfig readColor(PacketByteBuf buf) {
-		var argb = buf.readInt();
-
-		return new ClientColorConfig(argb);
-	}
+       private static ClientColorsConfig defaultColors() {
+               var zero = new ClientColorConfig(0);
+               var fillStroke = new ClientFillStrokeColorsConfig(zero, zero);
+               var connections = new ClientConnectionsColorsConfig(
+                               fillStroke,
+                               fillStroke,
+                               fillStroke,
+                               fillStroke,
+                               fillStroke
+               );
+               return new ClientColorsConfig(connections, fillStroke);
+       }
 
 	public static ClientSkillConfig readSkill(PacketByteBuf buf) {
 		var id = buf.readString();

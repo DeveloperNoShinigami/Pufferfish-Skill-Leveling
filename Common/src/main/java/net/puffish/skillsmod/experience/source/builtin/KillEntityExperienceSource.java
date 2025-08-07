@@ -27,7 +27,8 @@ import net.puffish.skillsmod.calculation.operation.builtin.AttributeOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.DamageTypeCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.EntityTypeCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.ItemCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.ItemStackNbtCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyDamageTypeTagCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyEntityTypeTagCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
@@ -147,16 +148,16 @@ public class KillEntityExperienceSource implements ExperienceSource {
 				LegacyEntityTypeTagCondition::parse,
 				data -> data.entity().getType()
 		);
-		legacy.registerBooleanFunction(
-				"weapon",
-				ItemStackCondition::parse,
-				Data::weapon
-		);
-		legacy.registerBooleanFunction(
-				"weapon_nbt",
-				ItemStackCondition::parse,
-				Data::weapon
-		);
+                legacy.registerBooleanFunction(
+                                "weapon",
+                                ItemCondition::parse,
+                                data -> data.weapon().getItem()
+                );
+                legacy.registerBooleanFunction(
+                                "weapon_nbt",
+                                ItemStackNbtCondition::parse,
+                                Data::weapon
+                );
 		legacy.registerBooleanFunction(
 				"weapon_tag",
 				LegacyItemTagCondition::parse,

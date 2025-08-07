@@ -20,7 +20,8 @@ import net.puffish.skillsmod.calculation.LegacyCalculation;
 import net.puffish.skillsmod.calculation.operation.LegacyOperationRegistry;
 import net.puffish.skillsmod.calculation.operation.builtin.AttributeOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.ItemCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.ItemStackNbtCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 
 public class CraftItemExperienceSource implements ExperienceSource {
@@ -78,16 +79,16 @@ public class CraftItemExperienceSource implements ExperienceSource {
 
 		// Backwards compatibility.
 		var legacy = new LegacyOperationRegistry<>(PROTOTYPE);
-		legacy.registerBooleanFunction(
-				"item",
-				ItemStackCondition::parse,
-				Data::itemStack
-		);
-		legacy.registerBooleanFunction(
-				"item_nbt",
-				ItemStackCondition::parse,
-				Data::itemStack
-		);
+                legacy.registerBooleanFunction(
+                                "item",
+                                ItemCondition::parse,
+                                data -> data.itemStack().getItem()
+                );
+                legacy.registerBooleanFunction(
+                                "item_nbt",
+                                ItemStackNbtCondition::parse,
+                                Data::itemStack
+                );
 		legacy.registerBooleanFunction(
 				"item_tag",
 				LegacyItemTagCondition::parse,

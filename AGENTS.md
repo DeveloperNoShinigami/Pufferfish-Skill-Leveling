@@ -108,9 +108,10 @@ early and ensures the codebase follows the Checkstyle rules.
 When a project should rely on an existing mod's jar rather than bundling all of
 its code, treat it as an addon. The basic steps are:
 
-1. Create a new project that declares the target mod as a Gradle dependency
-   (using `modImplementation`, `compileOnly`, or `runtimeOnly` depending on the
-   loader).
+1. Create a new project that declares the target mod as a Gradle dependency.
+   In an Architectury setup (Common, Fabric, Forge), use `modImplementation`
+   so the dependency is present at both compile time and runtime. Reserve
+   `compileOnly` or `runtimeOnly` for optional or loader-specific cases.
 2. Access the mod's API or classes directly instead of copying code. Extend or
    implement its interfaces where appropriate.
 3. Use Mixins or Forge patches to update or override methods in the base mod
@@ -128,9 +129,11 @@ When preparing a new addon for Pufferfish's Skills or a similar base mod:
 
 1. **Establish unique identity** – pick a distinct mod ID and `archives_base_name`.  
    Update `fabric.mod.json`, `mods.toml`, Gradle properties, and any API constants.
-2. **Declare the base mod as a dependency** – add `modImplementation`/`implementation`
-   entries in each platform module and include the Maven repository that hosts the
-   base mod. Avoid copying source from the dependency.
+2. **Declare the base mod as a dependency** – in a multi-loader Architectury
+   project, add `modImplementation` entries in each platform module so the base
+   mod is available at runtime. Include the Maven repository that hosts the
+   dependency. Avoid copying source from the dependency and use `compileOnly`
+   only for truly optional APIs.
 3. **Separate shared and loader code** – put common logic in `Common`, with
    Fabric-specific and Forge-specific hooks in their respective modules. Resources
    live under `src/main/resources` using the addon’s mod ID as the namespace.
@@ -153,7 +156,7 @@ basic setup through advanced addon customisation.
 When refactoring this repository to rely on the external `skillsmod` library while targeting Forge only:
 
 1. Remove or relocate all classes under `Common/src/main/java/net/puffish/skillsmod/impl/**` and any copied `net.puffish.skillsmod.api` stubs.
-2. In `Forge/build.gradle.kts`, declare the `skillsmod` dependency using `compileOnly` so the API is available at compile time but not bundled.
+2. In `Forge/build.gradle.kts`, declare the `skillsmod` dependency using `modImplementation` so the library is on the compile and runtime classpaths. `compileOnly` would omit the mod at runtime in this hybrid setup.
 3. Rename the mod ID to `puffish_skill_leveling` and move source files and resources to the `net.bluelotuscoding.puffishskillleveling` namespace.
 4. Update affected classes to extend or wrap the official `skillsmod` classes using the new names to avoid conflicts with the base mod.
 5. Run `./gradlew :Forge:runClient` and inspect the produced jar to confirm that no `net/puffish/skillsmod` implementation packages remain and the client starts without `ResolutionException`.

@@ -1,31 +1,14 @@
 package net.puffish.skillsmod.client;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.client.data.ClientSkillScreenData;
-import net.puffish.skillsmod.client.event.ClientEventListener;
-import net.puffish.skillsmod.client.event.ClientEventReceiver;
-import net.puffish.skillsmod.client.gui.SimpleToast;
-import net.puffish.skillsmod.client.gui.SkillsScreen;
-import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketSender;
 import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
-import net.puffish.skillsmod.client.network.packets.in.HideCategoryInPacket;
-import net.puffish.skillsmod.client.network.packets.in.NewPointInPacket;
-import net.puffish.skillsmod.client.network.packets.in.OpenScreenInPacket;
 import net.puffish.skillsmod.client.network.packets.in.PointsUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.ShowCategoryInPacket;
-import net.puffish.skillsmod.client.network.packets.in.ShowToastInPacket;
 import net.puffish.skillsmod.client.network.packets.in.SkillUpdateInPacket;
 import net.puffish.skillsmod.client.setup.ClientRegistrar;
 import net.puffish.skillsmod.network.Packets;
-import org.lwjgl.glfw.GLFW;
-
-import java.util.Optional;
 
 public class SkillsClientMod {
 	public static final KeyBinding OPEN_KEY_BINDING = new KeyBinding(
@@ -135,65 +118,24 @@ public class SkillsClientMod {
                });
        }
 
-	private void onExperienceUpdatePacket(ExperienceUpdateInPacket packet) {
-		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
-			category.setCurrentLevel(packet.getCurrentLevel());
-			category.setCurrentExperience(packet.getCurrentExperience());
-			category.setRequiredExperience(packet.getRequiredExperience());
-		});
-	}
+        private void onExperienceUpdatePacket(ExperienceUpdateInPacket packet) {
+                screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
+                        category.setCurrentLevel(packet.getCurrentLevel());
+                        category.setCurrentExperience(packet.getCurrentExperience());
+                        category.setRequiredExperience(packet.getRequiredExperience());
+                });
+        }
 
-	private void onPointsUpdatePacket(PointsUpdateInPacket packet) {
-		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
-			category.updatePoints(
-					packet.getSpentPoints(),
-					packet.getEarnedPoints()
-			);
-		});
-	}
+        private void onPointsUpdatePacket(PointsUpdateInPacket packet) {
+                screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
+                        category.updatePoints(
+                                        packet.getSpentPoints(),
+                                        packet.getEarnedPoints()
+                        );
+                });
+        }
 
-	private void onNewPointPacket(NewPointInPacket packet) {
-		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
-			if (category.hasAnySkillLeft()) {
-				MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
-						SkillsMod.createTranslatable(
-								"chat",
-								"new_point",
-								OPEN_KEY_BINDING.getBoundKeyLocalizedText()
-						)
-				);
-			}
-		});
-	}
-
-	private void onOpenScreenPacket(OpenScreenInPacket packet) {
-		openScreen(packet.getCategoryId());
-	}
-
-	private void onShowToast(ShowToastInPacket packet) {
-		var client = MinecraftClient.getInstance();
-		client.getToastManager().add(SimpleToast.create(
-				client,
-				Text.literal("Pufferfish's Skills"),
-				SkillsMod.createTranslatable("toast", switch (packet.getToastType()) {
-					case INVALID_CONFIG -> "invalid_config";
-					case MISSING_CONFIG -> "missing_config";
-				} + ".description")
-		));
-	}
-
-	public void openScreen(Optional<Identifier> categoryId) {
-		MinecraftClient.getInstance().setScreen(new SkillsScreen(screenData, categoryId));
-	}
-
-	public ClientPacketSender getPacketSender() {
-		return packetSender;
-	}
-
-	private class EventListener implements ClientEventListener {
-		@Override
-		public void onPlayerJoin() {
-			screenData.clearCategories();
-		}
-	}
+        public ClientPacketSender getPacketSender() {
+                return packetSender;
+        }
 }

@@ -105,9 +105,7 @@ public class CategoryData {
                for (var reward : definition.rewards()) {
                        var inst = reward.instance();
                        if (inst instanceof PerLevelRewardsReward plr) {
-                               if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
-                                       maxLevels = Math.max(maxLevels, plr.getMaxLevel());
-                               }
+                               maxLevels = Math.max(maxLevels, plr.getMaxLevel());
                        }
                }
 
@@ -152,9 +150,7 @@ public class CategoryData {
                 for (var reward : definition.rewards()) {
                         var inst = reward.instance();
                         if (inst instanceof PerLevelRewardsReward plr) {
-                                if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
-                                        cost = Math.max(cost, plr.getPointsPerLevel());
-                                }
+                                cost = Math.max(cost, plr.getPointsPerLevel());
                         }
                 }
 

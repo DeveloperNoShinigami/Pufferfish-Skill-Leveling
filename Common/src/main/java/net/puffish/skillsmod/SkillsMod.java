@@ -18,10 +18,7 @@ import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.calculation.LegacyBuiltinPrototypes;
 import net.puffish.skillsmod.calculation.operation.BuiltinOperations;
-import net.puffish.skillsmod.commands.CategoryCommand;
-import net.puffish.skillsmod.commands.ExperienceCommand;
-import net.puffish.skillsmod.commands.OpenCommand;
-import net.puffish.skillsmod.commands.PointsCommand;
+import net.puffish.skillsmod.commands.RefundCommandExtension;
 import net.puffish.skillsmod.commands.SkillsCommand;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.Config;
@@ -154,12 +151,14 @@ public class SkillsMod {
 		SkillsGameRules.register(registrar);
 		SkillsArgumentTypes.register(registrar);
 
-		BuiltinRewards.register();
-		BuiltinOperations.register();
-		BuiltinExperienceSources.register();
+                BuiltinRewards.register();
+                BuiltinOperations.register();
+                BuiltinExperienceSources.register();
 
-		LegacyBuiltinPrototypes.register();
-	}
+                RefundCommandExtension.register();
+
+                LegacyBuiltinPrototypes.register();
+        }
 
 	public static Identifier createIdentifier(String path) {
 		return new Identifier(SkillsAPI.MOD_ID, path);
@@ -908,13 +907,9 @@ public class SkillsMod {
 
 		@Override
 		public void onCommandsRegister(CommandDispatcher<ServerCommandSource> dispatcher) {
-			dispatcher.register(CommandManager.literal(SkillsAPI.MOD_ID)
-					.then(CategoryCommand.create())
-					.then(SkillsCommand.create())
-					.then(PointsCommand.create())
-					.then(ExperienceCommand.create())
-					.then(OpenCommand.create())
-			);
+                        dispatcher.register(CommandManager.literal(SkillsAPI.MOD_ID)
+                                        .then(SkillsCommand.create())
+                        );
 		}
 	}
 }

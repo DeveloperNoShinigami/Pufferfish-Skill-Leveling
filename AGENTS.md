@@ -149,3 +149,11 @@ When refactoring this repository to rely on the external `skillsmod` library whi
 3. Rename the mod ID to `puffish_skill_leveling` and move source files and resources to the `net.bluelotuscoding.puffishskillleveling` namespace.
 4. Update affected classes to extend or wrap the official `skillsmod` classes using the new names to avoid conflicts with the base mod.
 5. Run `./gradlew :Forge:runClient` and inspect the produced jar to confirm that no `net/puffish/skillsmod` implementation packages remain and the client starts without `ResolutionException`.
+## Fork Audit
+
+Track deviations from the upstream repository with `docs/fork_audit.csv`. Regenerate it after syncing with upstream using:
+
+```
+git diff --name-status upstream/1.20...HEAD > docs/fork_audit.csv
+```
+

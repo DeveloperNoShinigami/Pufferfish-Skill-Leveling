@@ -9,6 +9,10 @@ group = "${project.properties["maven_group"]}"
 
 evaluationDependsOn(":Common")
 
+repositories {
+    maven("https://maven.puffish.net")
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -20,6 +24,7 @@ dependencies {
 
     modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}")
+    modImplementation("net.puffish:skillsmod:${project.properties["skillsmod_version"]}:fabric")
 
     implementation(project(path = ":Common", configuration = "namedElements"))
 }

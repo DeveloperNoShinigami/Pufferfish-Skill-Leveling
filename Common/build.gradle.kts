@@ -7,6 +7,10 @@ base.archivesName.set("${project.properties["archives_base_name"]}")
 version = "${project.properties["mod_version"]}-${project.properties["minecraft_version"]}-common"
 group = "${project.properties["maven_group"]}"
 
+repositories {
+    maven("https://maven.puffish.net")
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17

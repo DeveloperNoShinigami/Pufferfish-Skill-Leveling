@@ -8,7 +8,7 @@ import net.puffish.skillsmod.calculation.operation.builtin.DamageTypeCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.EntityTypeCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.ItemCondition;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.ItemStackNbtCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.ScoreboardOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.StatCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.StatTypeCondition;
@@ -31,7 +31,7 @@ public class BuiltinOperations {
 		EffectOperation.register();
 		EntityTypeCondition.register();
 		ItemCondition.register();
-		ItemStackCondition.register();
+                ItemStackNbtCondition.register();
 		ScoreboardOperation.register();
 		StatCondition.register();
 		StatTypeCondition.register();

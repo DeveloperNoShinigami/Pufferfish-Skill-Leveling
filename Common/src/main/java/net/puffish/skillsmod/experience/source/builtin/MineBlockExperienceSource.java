@@ -22,7 +22,8 @@ import net.puffish.skillsmod.calculation.operation.LegacyOperationRegistry;
 import net.puffish.skillsmod.calculation.operation.builtin.AttributeOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.BlockStateCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.ItemCondition;
+import net.puffish.skillsmod.calculation.operation.builtin.ItemStackNbtCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyBlockTagCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 
@@ -99,16 +100,16 @@ public class MineBlockExperienceSource implements ExperienceSource {
 				LegacyBlockTagCondition::parse,
 				Data::blockState
 		);
-		legacy.registerBooleanFunction(
-				"tool",
-				ItemStackCondition::parse,
-				Data::tool
-		);
-		legacy.registerBooleanFunction(
-				"tool_nbt",
-				ItemStackCondition::parse,
-				Data::tool
-		);
+                legacy.registerBooleanFunction(
+                                "tool",
+                                ItemCondition::parse,
+                                data -> data.tool().getItem()
+                );
+                legacy.registerBooleanFunction(
+                                "tool_nbt",
+                                ItemStackNbtCondition::parse,
+                                Data::tool
+                );
 		legacy.registerBooleanFunction(
 				"tool_tag",
 				LegacyItemTagCondition::parse,

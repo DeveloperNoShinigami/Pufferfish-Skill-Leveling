@@ -817,17 +817,11 @@ public class SkillsMod {
 	}
 
 	private void updatePoints(CategoryConfig category, CategoryData categoryData) {
-		categoryData.setPoints(PointSources.STARTING, category.general().startingPoints());
-		category.experience().ifPresent(experience -> {
-			categoryData.setPoints(PointSources.EXPERIENCE, experience.curve().getProgress(categoryData.getExperience()).currentLevel());
-		});
-
-		var legacy = categoryData.getPoints(PointSources.LEGACY);
-		if (legacy != 0) {
-			categoryData.setPoints(PointSources.LEGACY, 0);
-			categoryData.setPoints(PointSources.COMMANDS, legacy - category.general().startingPoints());
-		}
-	}
+                categoryData.setPoints(PointSources.STARTING, category.general().startingPoints());
+                category.experience().ifPresent(experience -> {
+                        categoryData.setPoints(PointSources.EXPERIENCE, experience.curve().getProgress(categoryData.getExperience()).currentLevel());
+                });
+        }
 
 	private void updateCategory(ServerPlayerEntity player, CategoryConfig category) {
 		getCategoryDataIfUnlocked(player, category).ifPresentOrElse(

@@ -45,14 +45,5 @@ public interface Category {
 
 	int getPointsTotal(ServerPlayerEntity player);
 
-	int getPointsLeft(ServerPlayerEntity player);
-
-	@Deprecated
-	int getExtraPoints(ServerPlayerEntity player);
-
-	@Deprecated
-	void setExtraPoints(ServerPlayerEntity player, int count);
-
-	@Deprecated
-	void addExtraPoints(ServerPlayerEntity player, int count);
+        int getPointsLeft(ServerPlayerEntity player);
 }

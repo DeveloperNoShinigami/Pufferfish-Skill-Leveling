@@ -6,7 +6,6 @@ import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.Category;
 import net.puffish.skillsmod.api.Experience;
 import net.puffish.skillsmod.api.Skill;
-import net.puffish.skillsmod.util.PointSources;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -130,22 +129,7 @@ public class CategoryImpl implements Category {
 	}
 
 	@Override
-	public int getPointsLeft(ServerPlayerEntity player) {
-		return SkillsMod.getInstance().getPointsLeft(player, categoryId).orElseThrow();
-	}
-
-	@Override
-	public int getExtraPoints(ServerPlayerEntity player) {
-		return getPointsTotal(player);
-	}
-
-	@Override
-	public void setExtraPoints(ServerPlayerEntity player, int count) {
-		addExtraPoints(player, count - getExtraPoints(player));
-	}
-
-	@Override
-	public void addExtraPoints(ServerPlayerEntity player, int count) {
-		addPoints(player, PointSources.COMMANDS, count);
-	}
+        public int getPointsLeft(ServerPlayerEntity player) {
+                return SkillsMod.getInstance().getPointsLeft(player, categoryId).orElseThrow();
+        }
 }

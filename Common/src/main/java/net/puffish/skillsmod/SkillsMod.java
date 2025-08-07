@@ -765,13 +765,11 @@ public class SkillsMod {
                 for (var reward : definition.rewards()) {
                     var inst = reward.instance();
                     if (inst instanceof PerLevelRewardsReward plr) {
-                        if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
-                            int newLevel = Math.min(count, plr.getMaxLevel());
-                            int oldLevel = Math.min(prev, plr.getMaxLevel());
-                            int diff = newLevel - oldLevel;
-                            if (diff != 0 && plr.getPointsPerLevel() > 0) {
-                                addPoints(player, category, categoryData, PointSources.LEVEL_REWARDS, -plr.getPointsPerLevel() * diff, true);
-                            }
+                        int newLevel = Math.min(count, plr.getMaxLevel());
+                        int oldLevel = Math.min(prev, plr.getMaxLevel());
+                        int diff = newLevel - oldLevel;
+                        if (diff != 0 && plr.getPointsPerLevel() > 0) {
+                            addPoints(player, category, categoryData, PointSources.LEVEL_REWARDS, -plr.getPointsPerLevel() * diff, true);
                         }
                     }
                 }

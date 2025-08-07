@@ -1,7 +1,6 @@
 package net.puffish.skillsmod.server.data;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
@@ -20,83 +19,71 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public class CategoryData {
-       private final Map<String, Integer> unlockedSkills;
-	private final Map<Identifier, Integer> points;
-	private boolean unlocked;
-	private int experience;
+    private final Map<String, Integer> unlockedSkills;
+    private final Map<Identifier, Integer> points;
 
-       private CategoryData(Map<String, Integer> unlockedSkills, Map<Identifier, Integer> points, boolean unlocked, int experience) {
-               this.unlockedSkills = unlockedSkills;
-		this.points = points;
-		this.unlocked = unlocked;
-		this.experience = experience;
-	}
+    private CategoryData(Map<String, Integer> unlockedSkills, Map<Identifier, Integer> points) {
+        this.unlockedSkills = unlockedSkills;
+        this.points = points;
+    }
 
-       public static CategoryData create(GeneralConfig general) {
-               var points = new HashMap<Identifier, Integer>();
-               points.put(PointSources.STARTING, general.startingPoints());
+    public static CategoryData create(GeneralConfig general) {
+        var points = new HashMap<Identifier, Integer>();
+        points.put(PointSources.STARTING, general.startingPoints());
 
-               return new CategoryData(
-                               new HashMap<>(),
-                               points,
-                               general.unlockedByDefault(),
-                               0
-               );
-       }
+        return new CategoryData(
+                new HashMap<>(),
+                points
+        );
+    }
 
-	public static CategoryData read(NbtCompound nbt) {
-		var unlocked = nbt.getBoolean("unlocked");
-		var experience = nbt.getInt("experience");
+public static CategoryData read(NbtCompound nbt) {
+var unlockedSkills = new HashMap<String, Integer>();
+var unlockedNbt = nbt.get("unlocked_skills");
+if (unlockedNbt instanceof NbtList unlockedList) {
+for (var elementNbt : unlockedList) {
+if (elementNbt instanceof NbtString stringNbt) {
+unlockedSkills.put(stringNbt.asString(), 1);
+}
+}
+} else if (unlockedNbt instanceof NbtCompound unlockedCompound) {
+for (var key : unlockedCompound.getKeys()) {
+unlockedSkills.put(key, unlockedCompound.getInt(key));
+}
+}
 
-               var unlockedSkills = new HashMap<String, Integer>();
-               var unlockedNbt = nbt.get("unlocked_skills");
-               if (unlockedNbt instanceof NbtList unlockedList) {
-                       for (var elementNbt : unlockedList) {
-                               if (elementNbt instanceof NbtString stringNbt) {
-                                       unlockedSkills.put(stringNbt.asString(), 1);
-                               }
-                       }
-               } else if (unlockedNbt instanceof NbtCompound unlockedCompound) {
-                       for (var key : unlockedCompound.getKeys()) {
-                               unlockedSkills.put(key, unlockedCompound.getInt(key));
-                       }
-               }
+var points = new HashMap<Identifier, Integer>();
+var pointsNbt = nbt.get("points");
+if (pointsNbt instanceof NbtInt pointsNbtInt) {
+points.put(PointSources.LEGACY, pointsNbtInt.intValue());
+} else if (pointsNbt instanceof NbtCompound pointsNbtCompound) {
+for (var key : pointsNbtCompound.getKeys()) {
+points.put(new Identifier(key), pointsNbtCompound.getInt(key));
+}
+}
 
-		var points = new HashMap<Identifier, Integer>();
-		var pointsNbt = nbt.get("points");
-		if (pointsNbt instanceof NbtInt pointsNbtInt) {
-			points.put(PointSources.LEGACY, pointsNbtInt.intValue());
-		} else if (pointsNbt instanceof NbtCompound pointsNbtCompound) {
-			for (var key : pointsNbtCompound.getKeys()) {
-				points.put(new Identifier(key), pointsNbtCompound.getInt(key));
-			}
-		}
+return new CategoryData(unlockedSkills, points);
+}
 
-		return new CategoryData(unlockedSkills, points, unlocked, experience);
-	}
+public NbtCompound writeNbt(NbtCompound nbt) {
+var unlockedNbt = new NbtCompound();
+for (var entry : unlockedSkills.entrySet()) {
+if (entry.getValue() > 0) {
+unlockedNbt.putInt(entry.getKey(), entry.getValue());
+}
+}
+nbt.put("unlocked_skills", unlockedNbt);
 
-	public NbtCompound writeNbt(NbtCompound nbt) {
-		nbt.putBoolean("unlocked", unlocked);
-		nbt.putInt("experience", experience);
+var pointsNbt = new NbtCompound();
+for (var entry : points.entrySet()) {
+if (entry.getValue() != 0) {
+pointsNbt.putInt(entry.getKey().toString(), entry.getValue());
+}
+}
+nbt.put("points", pointsNbt);
 
-               var unlockedNbt = new NbtCompound();
-               for (var entry : unlockedSkills.entrySet()) {
-                       if (entry.getValue() > 0) {
-                               unlockedNbt.putInt(entry.getKey(), entry.getValue());
-                       }
-               }
-               nbt.put("unlocked_skills", unlockedNbt);
-
-		var pointsNbt = new NbtCompound();
-		for (var entry : points.entrySet()) {
-			if (entry.getValue() != 0) {
-				pointsNbt.putInt(entry.getKey().toString(), entry.getValue());
-			}
-		}
-		nbt.put("points", pointsNbt);
-
-		return nbt;
-	}
+return nbt;
+}
 
         public Skill.State getSkillState(CategoryConfig category, SkillConfig skill, SkillDefinitionConfig definition) {
                var level = unlockedSkills.getOrDefault(skill.id(), 0);
@@ -217,15 +204,7 @@ public class CategoryData {
                return unlockedSkills.keySet();
        }
 
-	public int getExperience() {
-		return experience;
-	}
-
-	public void setExperience(int earnedExperience) {
-		this.experience = earnedExperience;
-	}
-
-	public int getSpentPoints(CategoryConfig category) {
+       public int getSpentPoints(CategoryConfig category) {
                return unlockedSkills.keySet().stream()
 				.flatMap(skillId -> category.skills()
 						.getById(skillId)
@@ -260,15 +239,23 @@ public class CategoryData {
 		return this.points.entrySet().stream().filter(e -> e.getValue() != 0).map(Map.Entry::getKey);
 	}
 
-	public boolean isUnlocked() {
-		return unlocked;
-	}
+       public int getExperience() {
+               return 0;
+       }
 
-	public void unlock() {
-		unlocked = true;
-	}
+       public void setExperience(int earnedExperience) {
+               // no-op
+       }
 
-	public void lock() {
-		unlocked = false;
-	}
+       public boolean isUnlocked() {
+               return true;
+       }
+
+       public void unlock() {
+               // no-op
+       }
+
+       public void lock() {
+               // no-op
+       }
 }

@@ -7,6 +7,7 @@
 - After completing tasks, record new insights in this guide so it continually improves.
 - Evaluate each task by noting successes and mistakes to refine future workflows.
 - When responding to requests, provide 10 improvement suggestions highlighting flaws and practical solutions for the project.
+- When tackling large-scale tasks, split them into independent subtasks that can run concurrently without causing merge conflicts.
 
 This document summarizes best practices for automating Minecraft mod development across Fabric, Forge, and common toolchains.
 
@@ -174,7 +175,14 @@ When turning a substantial fork into a lean addon that depends on an upstream mo
 - After each task, note what went well and what could be improved. Update this guide with any new insights.
 - Continuously refine workflows so future tasks are executed more efficiently.
 - Maintain an internal log of lessons learned and share them through code comments or documentation.
-- 
+
+## Large-Scale Refactoring Workflow
+1. Generate or update `docs/fork_audit.csv` with `git diff --name-status upstream/1.20...HEAD` to classify files as added, modified, or deleted.
+2. Verify "unchanged" files by inspecting commit history and removing any misclassified entries from the audit.
+3. Break the refactor into smaller tasks so work on new features, tests, and documentation can proceed in parallel.
+4. After each subtask, re-run builds and tests and regenerate the fork audit to keep the log accurate.
+5. Document lessons learned in `docs/reflections/` and update this guide to refine future workflows.
+
 ## Fork Audit
 Track deviations from the upstream repository with `docs/fork_audit.csv`. Regenerate it after syncing with upstream using:
 ```

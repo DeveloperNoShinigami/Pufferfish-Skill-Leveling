@@ -171,3 +171,20 @@ When turning a substantial fork into a lean addon that depends on an upstream mo
 - After each task, note what went well and what could be improved. Update this guide with any new insights.
 - Continuously refine workflows so future tasks are executed more efficiently.
 - Maintain an internal log of lessons learned and share them through code comments or documentation.
+- 
+## Fork Audit
+Track deviations from the upstream repository with `docs/fork_audit.csv`. Regenerate it after syncing with upstream using:
+```
+git diff --name-status upstream/1.20...HEAD > docs/fork_audit.csv
+
+## Task Reflection Template
+
+Store task reflection notes in [docs/reflections/](docs/reflections/) using the following template:
+
+```
+Goal:
+Outcome:
+What went well:
+What went wrong:
+Improvements:
+```

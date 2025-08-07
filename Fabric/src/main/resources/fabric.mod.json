@@ -11,10 +11,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"client": [
-			"net.puffish.skillsmod.main.FabricClientMain"
+			"net.bluelotuscoding.puffishskillleveling.main.FabricClientMain"
 		],
 		"main": [
-			"net.puffish.skillsmod.main.FabricMain"
+			"net.bluelotuscoding.puffishskillleveling.main.FabricMain"
 		]
 	},
 	"mixins": [

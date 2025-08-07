@@ -37,7 +37,7 @@ public class SkillDefinitionConfigTest {
   \"points_per_level\": 0,
   \"rewards\": [
     {
-      \"type\": \"puffish_skills:per_level_rewards\",
+      \"type\": \"puffish_skill_leveling:per_level_rewards\",
       \"data\": {
         \"skill_id\": \"skill\",
         \"levels\": { \"1\": [], \"2\": [], \"3\": [] }
@@ -61,7 +61,7 @@ public class SkillDefinitionConfigTest {
   \"max_skill_level\": 1,
   \"rewards\": [
     {
-      \"type\": \"puffish_skills:per_level_rewards\",
+      \"type\": \"puffish_skill_leveling:per_level_rewards\",
       \"data\": {
         \"skill_id\": \"skill\",
         \"max_skill_level\": 3,

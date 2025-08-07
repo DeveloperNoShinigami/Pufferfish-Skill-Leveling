@@ -1,0 +1,13 @@
+{
+	"text.puffish_skill_leveling.skills": "Fertigkeiten",
+	"text.puffish_skill_leveling.points_left": "Verbleibende Punkte: ",
+
+	"category.puffish_skill_leveling.skills": "Fertigkeiten",
+	"key.puffish_skill_leveling.open": "Fertigkeitsbaum öffnen",
+
+	"chat.puffish_skill_leveling.new_point": "Du hast einen neuen Fertigkeitspunkt. Drücke %s, um den Fertigkeitsbaum zu öffnen.",
+
+	"toast.puffish_skill_leveling.invalid_config.description": "Ungültige Konfiguration, prüfe die Logdatei.",
+
+	"gamerule.puffish_skill_leveling:announceNewPoints": "Neue Fertigkeitspunkte bekannt geben"
+}

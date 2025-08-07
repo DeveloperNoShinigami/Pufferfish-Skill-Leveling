@@ -40,7 +40,7 @@ public class CategoryDataTest {
 
         SkillDefinitionConfig definition = new SkillDefinitionConfig(
                 "def",
-                Identifier.of("puffish_skills", "default"),
+                Identifier.of("puffish_skill_leveling", "default"),
                 1,
                 List.of(),
                 List.of(),
@@ -97,7 +97,7 @@ public class CategoryDataTest {
 
         SkillDefinitionConfig definition = new SkillDefinitionConfig(
                 "def",
-                Identifier.of("puffish_skills", "default"),
+                Identifier.of("puffish_skill_leveling", "default"),
                 1,
                 List.of(),
                 List.of(),

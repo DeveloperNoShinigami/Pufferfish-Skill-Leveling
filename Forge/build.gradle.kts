@@ -7,6 +7,11 @@ base.archivesName.set("${project.properties["archives_base_name"]}")
 version = "${project.properties["mod_version"]}-${project.properties["minecraft_version"]}-forge"
 group = "${project.properties["maven_group"]}"
 
+repositories {
+        mavenCentral()
+        maven(url = "https://maven.puffish.net")
+}
+
 evaluationDependsOn(":Common")
 
 java {
@@ -18,9 +23,11 @@ dependencies {
 	minecraft("com.mojang:minecraft:${project.properties["minecraft_version"]}")
 	mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
-	forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
+        forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
 
-	implementation(project(path = ":Common", configuration = "namedElements"))
+        compileOnly("net.puffish:skillsmod:${project.properties["skillsmod_version"]}")
+
+        implementation(project(path = ":Common", configuration = "namedElements"))
 }
 
 loom {

@@ -7,6 +7,11 @@ base.archivesName.set("${project.properties["archives_base_name"]}")
 version = "${project.properties["mod_version"]}-${project.properties["minecraft_version"]}-fabric"
 group = "${project.properties["maven_group"]}"
 
+repositories {
+    mavenCentral()
+    maven(url = "https://maven.puffish.net")
+}
+
 evaluationDependsOn(":Common")
 
 java {
@@ -20,6 +25,8 @@ dependencies {
 
     modImplementation("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_api_version"]}")
+
+    modCompileOnly("net.puffish:skillsmod:${project.properties["skillsmod_version"]}")
 
     implementation(project(path = ":Common", configuration = "namedElements"))
 }

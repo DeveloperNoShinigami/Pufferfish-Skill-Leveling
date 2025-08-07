@@ -66,4 +66,62 @@ public class EatFoodExperienceSource implements ExperienceSource {
 		// Nothing to do.
 	}
 
+	static {
+
+
+		// Backwards compatibility.
+		var legacy = new LegacyOperationRegistry<>(PROTOTYPE);
+                legacy.registerBooleanFunction(
+                                "item",
+                                ItemCondition::parse,
+                                data -> data.itemStack().getItem()
+                );
+                legacy.registerBooleanFunction(
+                                "item_nbt",
+                                ItemStackNbtCondition::parse,
+                                Data::itemStack
+                );
+		legacy.registerBooleanFunction(
+				"item_tag",
+				LegacyItemTagCondition::parse,
+				Data::itemStack
+		);
+		legacy.registerNumberFunction(
+				"player_effect",
+				effect -> (double) (effect.getAmplifier() + 1),
+				EffectOperation::parse,
+				Data::player
+		);
+		legacy.registerNumberFunction(
+				"player_attribute",
+				EntityAttributeInstance::getValue,
+				AttributeOperation::parse,
+				Data::player
+		);
+		legacy.registerNumberFunction(
+				"food_hunger",
+				data -> {
+					var fc = data.itemStack().getItem().getFoodComponent();
+					return fc == null ? 0.0 : fc.getHunger();
+				}
+		);
+		legacy.registerNumberFunction(
+				"food_saturation",
+				data -> {
+					var fc = data.itemStack().getItem().getFoodComponent();
+					return fc == null ? 0.0 : fc.getSaturationModifier();
+				}
+		);
+
+		LegacyBuiltinPrototypes.registerAlias(
+				PROTOTYPE,
+				SkillsMod.createIdentifier("player"),
+				SkillsMod.createIdentifier("get_player")
+		);
+		LegacyBuiltinPrototypes.registerAlias(
+				PROTOTYPE,
+				SkillsMod.createIdentifier("eaten_item_stack"),
+				SkillsMod.createIdentifier("get_eaten_item_stack")
+		);
+	}
 }

@@ -65,5 +65,4 @@ public class CraftItemExperienceSource implements ExperienceSource {
 	public void dispose(ExperienceSourceDisposeContext context) {
 		// Nothing to do.
 	}
-
 }

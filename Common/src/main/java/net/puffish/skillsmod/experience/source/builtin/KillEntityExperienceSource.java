@@ -120,5 +120,4 @@ public class KillEntityExperienceSource implements ExperienceSource {
 	public void dispose(ExperienceSourceDisposeContext context) {
 		// Nothing to do.
 	}
-
 }

@@ -71,5 +71,4 @@ public class MineBlockExperienceSource implements ExperienceSource {
 	public void dispose(ExperienceSourceDisposeContext context) {
 		// Nothing to do.
 	}
-
 }

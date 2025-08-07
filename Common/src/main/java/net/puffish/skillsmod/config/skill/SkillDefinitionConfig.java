@@ -59,7 +59,7 @@ public record SkillDefinitionConfig(
                                 .flatMap(element -> BuiltinJson.parseIdentifier(element)
                                                 .ifFailure(problems::add)
                                                 .getSuccess())
-                                .orElse(Identifier.of("puffish_skills", "default"));
+                                .orElse(Identifier.of("puffish_skill_leveling", "default"));
 
 		var descriptions = rootObject.getArray("descriptions")
 				.getSuccess() // ignore failure because this property is optional
@@ -140,7 +140,7 @@ public record SkillDefinitionConfig(
                                                         var obj = rewardElement.getAsJsonObject();
                                                         var typeElement = obj.get("type");
                                                         if (typeElement != null && typeElement.isJsonPrimitive()
-                                                                        && typeElement.getAsString().equals("puffish_skills:per_level_rewards")) {
+                                                                        && typeElement.getAsString().equals("puffish_skill_leveling:per_level_rewards")) {
                                                                 var data = obj.getAsJsonObject("data");
                                                                 if (data != null && !data.has("points_per_level")) {
                                                                         data.addProperty("points_per_level", pointsPerLevel);

@@ -29,10 +29,10 @@ import java.util.Optional;
 
 public class SkillsClientMod {
 	public static final KeyBinding OPEN_KEY_BINDING = new KeyBinding(
-			"key.puffish_skills.open",
+                        "key.puffish_skill_leveling.open",
 			InputUtil.Type.KEYSYM,
 			GLFW.GLFW_KEY_K,
-			"category.puffish_skills.skills"
+                        "category.puffish_skill_leveling.skills"
 	);
 
 	private static SkillsClientMod instance;

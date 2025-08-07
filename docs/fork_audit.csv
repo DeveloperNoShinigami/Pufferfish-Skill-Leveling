@@ -71,6 +71,9 @@ M	Forge/src/main/java/net/puffish/skillsmod/main/ForgeClientMain.java
 M	Forge/src/main/resources/META-INF/mods.toml
 A	README.md
 M	config/checkstyle/checkstyle.xml
+A	docs/fork_audit.csv
+A	docs/reflections/README.md
+A	docs/reflections/fork_audit_update.md
 A	example-skill-level-template_new.zip
 M	gradle.properties
 A	tool-versions.txt

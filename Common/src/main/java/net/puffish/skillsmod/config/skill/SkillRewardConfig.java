@@ -7,10 +7,10 @@ import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.json.JsonPath;
 import net.puffish.skillsmod.api.reward.Reward;
+import net.puffish.skillsmod.api.reward.RewardConfigContext;
+import net.puffish.skillsmod.api.reward.RewardDisposeContext;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import net.puffish.skillsmod.impl.rewards.RewardConfigContextImpl;
-import net.puffish.skillsmod.impl.rewards.RewardDisposeContextImpl;
 import net.puffish.skillsmod.reward.RewardRegistry;
 import net.puffish.skillsmod.reward.builtin.DummyReward;
 import net.puffish.skillsmod.util.DisposeContext;
@@ -72,16 +72,34 @@ public record SkillRewardConfig(
 	}
 
 	private static Result<SkillRewardConfig, Problem> build(Identifier type, Result<JsonElement, Problem> maybeDataElement, JsonPath typePath, ConfigContext context) {
-		return RewardRegistry.getFactory(type)
-				.map(factory -> factory.create(new RewardConfigContextImpl(context, maybeDataElement))
-						.mapSuccess(instance -> new SkillRewardConfig(type, instance))
-				)
-				.orElseGet(() -> Result.failure(typePath.createProblem("Expected a valid reward type")));
-	}
+                return RewardRegistry.getFactory(type)
+                                .map(factory -> factory.create(new RewardConfigContext() {
+                                        @Override
+                                        public net.minecraft.server.MinecraftServer getServer() {
+                                                return context.getServer();
+                                        }
 
-	public void dispose(DisposeContext context) {
-		this.instance.dispose(new RewardDisposeContextImpl(context));
-	}
+                                        @Override
+                                        public void emitWarning(String message) {
+                                                context.emitWarning(message);
+                                        }
+
+                                        @Override
+                                        public Result<JsonElement, Problem> getData() {
+                                                return maybeDataElement;
+                                        }
+                                }).mapSuccess(instance -> new SkillRewardConfig(type, instance)))
+                                .orElseGet(() -> Result.failure(typePath.createProblem("Expected a valid reward type")));
+        }
+
+        public void dispose(DisposeContext context) {
+                this.instance.dispose(new RewardDisposeContext() {
+                        @Override
+                        public net.minecraft.server.MinecraftServer getServer() {
+                                return context.server();
+                        }
+                });
+        }
 
 
 }

@@ -1,18 +1,31 @@
 package net.puffish.skillsmod.commands;
 
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.puffish.skillsmod.commands.arguments.CategoryArgumentType;
 import net.puffish.skillsmod.commands.arguments.SkillArgumentType;
 import net.puffish.skillsmod.util.CommandUtils;
+import net.puffish.skillsmod.util.Event;
 import net.puffish.skillsmod.SkillsMod;
 
 public class SkillsCommand {
+       public interface RefundExtension {
+               void register(ArgumentBuilder<ServerCommandSource, ?> builder);
+       }
+
+       public static final Event<RefundExtension> REFUND_EXTENSION = Event.create(
+               listeners -> builder -> listeners.forEach(listener -> listener.register(builder))
+       );
+
+       private static ArgumentBuilder<ServerCommandSource, ?> addRefundExtensions(ArgumentBuilder<ServerCommandSource, ?> builder) {
+               REFUND_EXTENSION.invoker().register(builder);
+               return builder;
+       }
 	public static LiteralArgumentBuilder<ServerCommandSource> create() {
 		return CommandManager.literal("skills")
 				.requires(source -> source.hasPermissionLevel(2))
@@ -44,15 +57,8 @@ public class SkillsCommand {
                                 .then(CommandManager.literal("refund")
                                                 .then(CommandManager.argument("players", EntityArgumentType.players())
                                                                 .then(CommandManager.argument("category", CategoryArgumentType.category())
-                                                                                .then(CommandManager.argument("skill", SkillArgumentType.skillFromCategory("category"))
-                                                                                                .executes(SkillsCommand::refund)
-                                                                                                .then(CommandManager.argument("count", IntegerArgumentType.integer(1))
-                                                                                                                .executes(SkillsCommand::refundCount)
-                                                                                                )
-                                                                                                .then(CommandManager.literal("all")
-                                                                                                                .executes(SkillsCommand::refundAll)
-                                                                                                )
-                                                                                )
+                                                                                .then(addRefundExtensions(CommandManager.argument("skill", SkillArgumentType.skillFromCategory("category"))
+                                                                                                .executes(SkillsCommand::refund)))
                                                                 )
                                                 )
                                 );
@@ -110,11 +116,11 @@ public class SkillsCommand {
                 return players.size();
         }
 
-       private static int refund(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+       static int refund(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
                return refund(context, 1);
        }
 
-       private static int refund(CommandContext<ServerCommandSource> context, int count) throws CommandSyntaxException {
+       static int refund(CommandContext<ServerCommandSource> context, int count) throws CommandSyntaxException {
                var players = EntityArgumentType.getPlayers(context, "players");
                var category = CategoryArgumentType.getCategory(context, "category");
                var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
@@ -160,12 +166,7 @@ public class SkillsCommand {
                }
        }
 
-       private static int refundCount(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-               var count = IntegerArgumentType.getInteger(context, "count");
-               return refund(context, count);
-       }
-
-       private static int refundAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+       static int refundAll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
                var players = EntityArgumentType.getPlayers(context, "players");
                var category = CategoryArgumentType.getCategory(context, "category");
                var skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);

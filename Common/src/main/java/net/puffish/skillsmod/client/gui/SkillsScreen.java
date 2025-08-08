@@ -47,18 +47,18 @@ public class SkillsScreen extends Screen {
 	private static final Identifier TABS_TEXTURE = new Identifier("textures/gui/advancements/tabs.png");
 	private static final Identifier WINDOW_TEXTURE = new Identifier("textures/gui/advancements/window.png");
 	private static final Identifier WIDGETS_TEXTURE = new Identifier("textures/gui/advancements/widgets.png");
-	private static final Identifier ICONS_TEXTURE = new Identifier("textures/gui/icons.png");
-	private static final Identifier RECIPE_BOOK_TEXTURE = new Identifier("textures/gui/recipe_book.png");
+        protected static final Identifier ICONS_TEXTURE = new Identifier("textures/gui/icons.png");
+        private static final Identifier RECIPE_BOOK_TEXTURE = new Identifier("textures/gui/recipe_book.png");
 
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
 	private static final int FRAME_WIDTH = 252;
 	private static final int FRAME_HEIGHT = 140;
-	private static final int FRAME_PADDING = 8;
+        protected static final int FRAME_PADDING = 8;
 	private static final int FRAME_CUT = 16;
 	private static final int FRAME_EXPAND = 24;
 	private static final int CONTENT_GROW = 32;
-	private static final int TABS_HEIGHT = 28;
+        protected static final int TABS_HEIGHT = 28;
 	private static final int HALF_FRAME_WIDTH = FRAME_WIDTH / 2;
 	private static final int HALF_FRAME_HEIGHT = FRAME_HEIGHT / 2;
 
@@ -67,7 +67,7 @@ public class SkillsScreen extends Screen {
 
 	private final ClientSkillScreenData data;
 
-	private Optional<ClientCategoryData> optActiveCategoryData = Optional.empty();
+        protected Optional<ClientCategoryData> optActiveCategoryData = Optional.empty();
 
 	private Optional<Identifier> optActiveCategoryId;
 
@@ -83,7 +83,7 @@ public class SkillsScreen extends Screen {
 	private boolean canDrag = false;
 
 	private Bounds2i bounds = Bounds2i.zero();
-	private boolean small = false;
+        protected boolean small = false;
 
 	private int contentPaddingTop = 0;
 	private int contentPaddingLeft = 0;
@@ -185,10 +185,6 @@ public class SkillsScreen extends Screen {
 
 	private boolean isInsideContent(Vector2i mouse) {
 		return mouse.x >= contentPaddingLeft && mouse.y >= contentPaddingTop && mouse.x < width - contentPaddingRight && mouse.y < height - contentPaddingBottom;
-	}
-
-	private boolean isInsideExperience(Vector2i mouse, int x, int y) {
-		return mouse.x >= x && mouse.y >= y && mouse.x < x + 182 && mouse.y < y + 5;
 	}
 
 	private boolean isInsideArea(Vector2i mouse, int x1, int y1, int x2, int y2) {
@@ -1071,7 +1067,7 @@ public class SkillsScreen extends Screen {
 		);
 	}
 
-	private void drawWindowWithCategory(DrawContext context, double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
+       protected void drawWindowWithCategory(DrawContext context, double mouseX, double mouseY, ClientCategoryData activeCategoryData) {
 		var mouse = getMousePos(mouseX, mouseY);
 		var activeCategory = activeCategoryData.getConfig();
 
@@ -1124,44 +1120,6 @@ public class SkillsScreen extends Screen {
 			setTooltip(lines);
 		}
 
-		if (activeCategoryData.hasExperience()) {
-			if (small) {
-				tmpX = this.width - FRAME_PADDING - 8 - 182;
-				tmpY = TABS_HEIGHT + 25;
-			} else {
-				tmpX = (this.width - 182) / 2;
-				tmpY = TABS_HEIGHT + 15;
-			}
-
-			context.drawTexture(ICONS_TEXTURE, tmpX, tmpY, 0, 64, 182, 5);
-			var width = Math.min(182, (int) (activeCategoryData.getExperienceProgress() * 183f));
-			if (width > 0) {
-				context.drawTexture(ICONS_TEXTURE, tmpX, tmpY, 0, 69, width, 5);
-			}
-
-			if (isInsideExperience(mouse, tmpX, tmpY)) {
-				var lines = new ArrayList<OrderedText>();
-				lines.add(SkillsMod.createTranslatable(
-						"tooltip",
-						"current_level",
-						activeCategoryData.getCurrentLevel()
-								+ (activeCategory.levelLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.levelLimit())
-				).asOrderedText());
-				lines.add(SkillsMod.createTranslatable(
-						"tooltip",
-						"experience_progress",
-						activeCategoryData.getCurrentExperience(),
-						activeCategoryData.getRequiredExperience(),
-						MathHelper.floor(activeCategoryData.getExperienceProgress() * 100f)
-				).asOrderedText());
-				lines.add(SkillsMod.createTranslatable(
-						"tooltip",
-						"to_next_level",
-						activeCategoryData.getExperienceToNextLevel()
-				).asOrderedText());
-				setTooltip(lines);
-			}
-		}
 	}
 
 }

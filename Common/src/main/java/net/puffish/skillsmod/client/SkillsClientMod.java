@@ -2,6 +2,11 @@ package net.puffish.skillsmod.client;
 
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.client.data.ClientSkillScreenData;
+import net.puffish.skillsmod.client.event.ClientEventListener;
+import net.puffish.skillsmod.client.event.ClientEventReceiver;
+import net.puffish.skillsmod.client.gui.SimpleToast;
+import net.puffish.skillsmod.client.gui.SkillLevelingScreen;
+import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
 import net.puffish.skillsmod.client.network.ClientPacketSender;
 import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
 import net.puffish.skillsmod.client.network.packets.in.PointsUpdateInPacket;
@@ -126,14 +131,60 @@ public class SkillsClientMod {
                 });
         }
 
-        private void onPointsUpdatePacket(PointsUpdateInPacket packet) {
-                screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
-                        category.updatePoints(
-                                        packet.getSpentPoints(),
-                                        packet.getEarnedPoints()
-                        );
-                });
-        }
+	private void onExperienceUpdatePacket(ExperienceUpdateInPacket packet) {
+		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
+			category.setCurrentLevel(packet.getCurrentLevel());
+			category.setCurrentExperience(packet.getCurrentExperience());
+			category.setRequiredExperience(packet.getRequiredExperience());
+		});
+	}
+
+	private void onPointsUpdatePacket(PointsUpdateInPacket packet) {
+		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
+			category.updatePoints(
+					packet.getSpentPoints(),
+					packet.getEarnedPoints()
+			);
+		});
+	}
+
+	private void onNewPointPacket(NewPointInPacket packet) {
+		screenData.getCategory(packet.getCategoryId()).ifPresent(category -> {
+			if (category.hasAnySkillLeft()) {
+				MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
+						SkillsMod.createTranslatable(
+								"chat",
+								"new_point",
+								OPEN_KEY_BINDING.getBoundKeyLocalizedText()
+						)
+				);
+			}
+		});
+	}
+
+	private void onOpenScreenPacket(OpenScreenInPacket packet) {
+		openScreen(packet.getCategoryId());
+	}
+
+	private void onShowToast(ShowToastInPacket packet) {
+		var client = MinecraftClient.getInstance();
+		client.getToastManager().add(SimpleToast.create(
+				client,
+				Text.literal("Pufferfish's Skills"),
+				SkillsMod.createTranslatable("toast", switch (packet.getToastType()) {
+					case INVALID_CONFIG -> "invalid_config";
+					case MISSING_CONFIG -> "missing_config";
+				} + ".description")
+		));
+	}
+
+	public void openScreen(Optional<Identifier> categoryId) {
+                MinecraftClient.getInstance().setScreen(new SkillLevelingScreen(screenData, categoryId));
+	}
+
+	public ClientPacketSender getPacketSender() {
+		return packetSender;
+	}
 
         public ClientPacketSender getPacketSender() {
                 return packetSender;

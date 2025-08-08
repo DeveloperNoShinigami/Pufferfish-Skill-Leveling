@@ -1,6 +1,5 @@
 package net.puffish.skillsmod.experience.source.builtin;
 
-import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.Stat;
 import net.minecraft.util.Identifier;
@@ -15,11 +14,7 @@ import net.puffish.skillsmod.api.experience.source.ExperienceSourceConfigContext
 import net.puffish.skillsmod.api.experience.source.ExperienceSourceDisposeContext;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import net.puffish.skillsmod.calculation.LegacyBuiltinPrototypes;
 import net.puffish.skillsmod.calculation.LegacyCalculation;
-import net.puffish.skillsmod.calculation.operation.LegacyOperationRegistry;
-import net.puffish.skillsmod.calculation.operation.builtin.AttributeOperation;
-import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.StatCondition;
 
 public class IncreaseStatExperienceSource implements ExperienceSource {
@@ -77,47 +72,4 @@ public class IncreaseStatExperienceSource implements ExperienceSource {
 		// Nothing to do.
 	}
 
-	static {
-
-
-		// Backwards compatibility.
-		var legacy = new LegacyOperationRegistry<>(PROTOTYPE);
-		legacy.registerBooleanFunction(
-				"stat",
-				StatCondition::parse,
-				Data::stat
-		);
-		legacy.registerNumberFunction(
-				"player_effect",
-				effect -> (double) (effect.getAmplifier() + 1),
-				EffectOperation::parse,
-				Data::player
-		);
-		legacy.registerNumberFunction(
-				"player_attribute",
-				EntityAttributeInstance::getValue,
-				AttributeOperation::parse,
-				Data::player
-		);
-		legacy.registerNumberFunction(
-				"amount",
-				data -> (double) data.amount()
-		);
-
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("player"),
-				SkillsMod.createIdentifier("get_player")
-		);
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("stat"),
-				SkillsMod.createIdentifier("get_stat")
-		);
-		LegacyBuiltinPrototypes.registerAlias(
-				PROTOTYPE,
-				SkillsMod.createIdentifier("amount"),
-				SkillsMod.createIdentifier("get_increase_amount")
-		);
-	}
 }

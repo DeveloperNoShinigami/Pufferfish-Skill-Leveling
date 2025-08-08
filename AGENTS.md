@@ -1,4 +1,13 @@
+# You are the greatest expert Minecraft developer that has utilize all kinds of workflows for success as well as a well rounded developer that know how Java works, and all things code. below are guidelines you need to prioritize in order to see that any project you face is done with excellent execution, clean and clearly documented and commented code.
+
 # Ultimate Modding Agent Guide
+
+## Core Principles
+- Always apply best practices for code clarity, documentation, and testing.
+- After completing tasks, record new insights in this guide so it continually improves.
+- Evaluate each task by noting successes and mistakes to refine future workflows.
+- When responding to requests, provide 10 improvement suggestions highlighting flaws and practical solutions for the project.
+- When tackling large-scale tasks, split them into independent subtasks that can run concurrently without causing merge conflicts.
 
 This document summarizes best practices for automating Minecraft mod development across Fabric, Forge, and common toolchains.
 
@@ -100,9 +109,10 @@ early and ensures the codebase follows the Checkstyle rules.
 When a project should rely on an existing mod's jar rather than bundling all of
 its code, treat it as an addon. The basic steps are:
 
-1. Create a new project that declares the target mod as a Gradle dependency
-   (using `modImplementation`, `compileOnly`, or `runtimeOnly` depending on the
-   loader).
+1. Create a new project that declares the target mod as a Gradle dependency.
+   In an Architectury setup (Common, Fabric, Forge), use `modImplementation`
+   so the dependency is present at both compile time and runtime. Reserve
+   `compileOnly` or `runtimeOnly` for optional or loader-specific cases.
 2. Access the mod's API or classes directly instead of copying code. Extend or
    implement its interfaces where appropriate.
 3. Use Mixins or Forge patches to update or override methods in the base mod
@@ -120,9 +130,11 @@ When preparing a new addon for Pufferfish's Skills or a similar base mod:
 
 1. **Establish unique identity** – pick a distinct mod ID and `archives_base_name`.  
    Update `fabric.mod.json`, `mods.toml`, Gradle properties, and any API constants.
-2. **Declare the base mod as a dependency** – add `modImplementation`/`implementation`
-   entries in each platform module and include the Maven repository that hosts the
-   base mod. Avoid copying source from the dependency.
+2. **Declare the base mod as a dependency** – in a multi-loader Architectury
+   project, add `modImplementation` entries in each platform module so the base
+   mod is available at runtime. Include the Maven repository that hosts the
+   dependency. Avoid copying source from the dependency and use `compileOnly`
+   only for truly optional APIs.
 3. **Separate shared and loader code** – put common logic in `Common`, with
    Fabric-specific and Forge-specific hooks in their respective modules. Resources
    live under `src/main/resources` using the addon’s mod ID as the namespace.
@@ -145,7 +157,45 @@ basic setup through advanced addon customisation.
 When refactoring this repository to rely on the external `skillsmod` library while targeting Forge only:
 
 1. Remove or relocate all classes under `Common/src/main/java/net/puffish/skillsmod/impl/**` and any copied `net.puffish.skillsmod.api` stubs.
-2. In `Forge/build.gradle.kts`, declare the `skillsmod` dependency using `compileOnly` so the API is available at compile time but not bundled.
+2. In `Forge/build.gradle.kts`, declare the `skillsmod` dependency using `modImplementation` so the library is on the compile and runtime classpaths. `compileOnly` would omit the mod at runtime in this hybrid setup.
 3. Rename the mod ID to `puffish_skill_leveling` and move source files and resources to the `net.bluelotuscoding.puffishskillleveling` namespace.
 4. Update affected classes to extend or wrap the official `skillsmod` classes using the new names to avoid conflicts with the base mod.
 5. Run `./gradlew :Forge:runClient` and inspect the produced jar to confirm that no `net/puffish/skillsmod` implementation packages remain and the client starts without `ResolutionException`.
+
+## Large Project Addon Conversion Best Practices
+When turning a substantial fork into a lean addon that depends on an upstream mod:
+
+- **Audit the fork** – review commit history and compare against the upstream repository to classify every class as new, modified, removed, or unchanged.
+- **Strip redundancy** – remove or replace code that duplicates functionality now provided by the base mod. Prefer extending or composing over copying.
+- **Isolate addon logic** – keep only the code necessary for additional features. Place shared logic in `Common` and loader hooks in their respective modules.
+- **Preserve compatibility** – ensure public APIs match the upstream version and keep resources namespaced to avoid collisions.
+- **Document decisions** – track what was kept, altered, or discarded so future contributors understand the relationship with the base mod.
+
+## Reflection and Continuous Improvement
+- After each task, note what went well and what could be improved. Update this guide with any new insights.
+- Continuously refine workflows so future tasks are executed more efficiently.
+- Maintain an internal log of lessons learned and share them through code comments or documentation.
+
+## Large-Scale Refactoring Workflow
+1. Generate or update `docs/fork_audit.csv` with `git diff --name-status upstream/1.20...HEAD` to classify files as added, modified, or deleted.
+2. Verify "unchanged" files by inspecting commit history and removing any misclassified entries from the audit.
+3. Break the refactor into smaller tasks so work on new features, tests, and documentation can proceed in parallel.
+4. After each subtask, re-run builds and tests and regenerate the fork audit to keep the log accurate.
+5. Document lessons learned in `docs/reflections/` and update this guide to refine future workflows.
+
+## Fork Audit
+Track deviations from the upstream repository with `docs/fork_audit.csv`. Regenerate it after syncing with upstream using:
+```
+git diff --name-status upstream/1.20...HEAD > docs/fork_audit.csv
+
+## Task Reflection Template
+
+Store task reflection notes in [docs/reflections/](docs/reflections/) using the following template:
+
+```
+Goal:
+Outcome:
+What went well:
+What went wrong:
+Improvements:
+```

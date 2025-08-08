@@ -312,18 +312,9 @@ public class SkillsScreen extends Screen {
                 }
         }
 
-	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (SkillsClientMod.OPEN_KEY_BINDING.matchesKey(keyCode, scanCode)) {
-			this.close();
-			return true;
-		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
-	}
-
-	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.syncCategory();
+        @Override
+        public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+                this.syncCategory();
 
 		this.renderBackground(context);
 		this.drawContent(context, mouseX, mouseY);

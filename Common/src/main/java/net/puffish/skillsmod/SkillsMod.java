@@ -18,10 +18,7 @@ import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.calculation.LegacyBuiltinPrototypes;
 import net.puffish.skillsmod.calculation.operation.BuiltinOperations;
-import net.puffish.skillsmod.commands.CategoryCommand;
-import net.puffish.skillsmod.commands.ExperienceCommand;
-import net.puffish.skillsmod.commands.OpenCommand;
-import net.puffish.skillsmod.commands.PointsCommand;
+import net.puffish.skillsmod.commands.RefundCommandExtension;
 import net.puffish.skillsmod.commands.SkillsCommand;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.Config;
@@ -154,12 +151,14 @@ public class SkillsMod {
 		SkillsGameRules.register(registrar);
 		SkillsArgumentTypes.register(registrar);
 
-		BuiltinRewards.register();
-		BuiltinOperations.register();
-		BuiltinExperienceSources.register();
+                BuiltinRewards.register();
+                BuiltinOperations.register();
+                BuiltinExperienceSources.register();
 
-		LegacyBuiltinPrototypes.register();
-	}
+                RefundCommandExtension.register();
+
+                LegacyBuiltinPrototypes.register();
+        }
 
 	public static Identifier createIdentifier(String path) {
 		return new Identifier(SkillsAPI.MOD_ID, path);
@@ -310,7 +309,7 @@ public class SkillsMod {
 				if (categoryData.canUnlockSkill(category, skill, force)) {
 					watchNewPoints(player, category, categoryData, false, () -> {
                                                 categoryData.unlockSkill(skillId);
-                                                packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, true, categoryData.getSkillLevel(skillId)));
+                                               packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, categoryData.getSkillLevel(skillId)));
                                                 syncPoints(player, category, categoryData);
 					});
                                         SKILL_UNLOCK.invoker().onSkillUnlock(categoryId, skillId);
@@ -327,7 +326,7 @@ public class SkillsMod {
                                 int prevLevel = categoryData.getSkillLevel(skillId);
                                 watchNewPoints(player, category, categoryData, false, () -> {
                                         categoryData.lockSkill(skillId);
-                                        packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, false, 0));
+                                       packetSender.send(player, new SkillUpdateOutPacket(categoryId, skillId, 0));
                                         syncPoints(player, category, categoryData);
                                 });
                                 SKILL_LOCK.invoker().onSkillLock(categoryId, skillId);
@@ -365,7 +364,7 @@ public class SkillsMod {
                                var finalSkillId = refundSkillId;
                                watchNewPoints(player, category, categoryData, false, () -> {
                                        boolean stillUnlocked = categoryData.refundSkill(finalSkillId);
-                                       packetSender.send(player, new SkillUpdateOutPacket(categoryId, finalSkillId, stillUnlocked, categoryData.getSkillLevel(finalSkillId)));
+                                      packetSender.send(player, new SkillUpdateOutPacket(categoryId, finalSkillId, categoryData.getSkillLevel(finalSkillId)));
                                        syncPoints(player, category, categoryData);
                                });
 
@@ -765,13 +764,11 @@ public class SkillsMod {
                 for (var reward : definition.rewards()) {
                     var inst = reward.instance();
                     if (inst instanceof PerLevelRewardsReward plr) {
-                        if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
-                            int newLevel = Math.min(count, plr.getMaxLevel());
-                            int oldLevel = Math.min(prev, plr.getMaxLevel());
-                            int diff = newLevel - oldLevel;
-                            if (diff != 0 && plr.getPointsPerLevel() > 0) {
-                                addPoints(player, category, categoryData, PointSources.LEVEL_REWARDS, -plr.getPointsPerLevel() * diff, true);
-                            }
+                        int newLevel = Math.min(count, plr.getMaxLevel());
+                        int oldLevel = Math.min(prev, plr.getMaxLevel());
+                        int diff = newLevel - oldLevel;
+                        if (diff != 0 && plr.getPointsPerLevel() > 0) {
+                            addPoints(player, category, categoryData, PointSources.LEVEL_REWARDS, -plr.getPointsPerLevel() * diff, true);
                         }
                     }
                 }
@@ -817,17 +814,11 @@ public class SkillsMod {
 	}
 
 	private void updatePoints(CategoryConfig category, CategoryData categoryData) {
-		categoryData.setPoints(PointSources.STARTING, category.general().startingPoints());
-		category.experience().ifPresent(experience -> {
-			categoryData.setPoints(PointSources.EXPERIENCE, experience.curve().getProgress(categoryData.getExperience()).currentLevel());
-		});
-
-		var legacy = categoryData.getPoints(PointSources.LEGACY);
-		if (legacy != 0) {
-			categoryData.setPoints(PointSources.LEGACY, 0);
-			categoryData.setPoints(PointSources.COMMANDS, legacy - category.general().startingPoints());
-		}
-	}
+                categoryData.setPoints(PointSources.STARTING, category.general().startingPoints());
+                category.experience().ifPresent(experience -> {
+                        categoryData.setPoints(PointSources.EXPERIENCE, experience.curve().getProgress(categoryData.getExperience()).currentLevel());
+                });
+        }
 
 	private void updateCategory(ServerPlayerEntity player, CategoryConfig category) {
 		getCategoryDataIfUnlocked(player, category).ifPresentOrElse(
@@ -916,13 +907,9 @@ public class SkillsMod {
 
 		@Override
 		public void onCommandsRegister(CommandDispatcher<ServerCommandSource> dispatcher) {
-			dispatcher.register(CommandManager.literal(SkillsAPI.MOD_ID)
-					.then(CategoryCommand.create())
-					.then(SkillsCommand.create())
-					.then(PointsCommand.create())
-					.then(ExperienceCommand.create())
-					.then(OpenCommand.create())
-			);
+                        dispatcher.register(CommandManager.literal(SkillsAPI.MOD_ID)
+                                        .then(SkillsCommand.create())
+                        );
 		}
 	}
 }

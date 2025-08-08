@@ -1,8 +1,6 @@
 package net.puffish.skillsmod.server.data;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.util.Identifier;
@@ -62,41 +60,46 @@ public class CategoryData {
                        }
                }
 
-		var points = new HashMap<Identifier, Integer>();
-		var pointsNbt = nbt.get("points");
-		if (pointsNbt instanceof NbtInt pointsNbtInt) {
-			points.put(PointSources.LEGACY, pointsNbtInt.intValue());
-		} else if (pointsNbt instanceof NbtCompound pointsNbtCompound) {
-			for (var key : pointsNbtCompound.getKeys()) {
-				points.put(new Identifier(key), pointsNbtCompound.getInt(key));
-			}
-		}
-
-		return new CategoryData(unlockedSkills, points, unlocked, experience);
-	}
-
-	public NbtCompound writeNbt(NbtCompound nbt) {
-		nbt.putBoolean("unlocked", unlocked);
-		nbt.putInt("experience", experience);
-
-               var unlockedNbt = new NbtCompound();
-               for (var entry : unlockedSkills.entrySet()) {
-                       if (entry.getValue() > 0) {
-                               unlockedNbt.putInt(entry.getKey(), entry.getValue());
+               var points = new HashMap<Identifier, Integer>();
+               var pointsNbt = nbt.get("points");
+               if (pointsNbt instanceof NbtCompound pointsNbtCompound) {
+                       for (var key : pointsNbtCompound.getKeys()) {
+                               points.put(new Identifier(key), pointsNbtCompound.getInt(key));
                        }
                }
-               nbt.put("unlocked_skills", unlockedNbt);
 
-		var pointsNbt = new NbtCompound();
-		for (var entry : points.entrySet()) {
-			if (entry.getValue() != 0) {
-				pointsNbt.putInt(entry.getKey().toString(), entry.getValue());
-			}
-		}
-		nbt.put("points", pointsNbt);
+var points = new HashMap<Identifier, Integer>();
+var pointsNbt = nbt.get("points");
+if (pointsNbt instanceof NbtInt pointsNbtInt) {
+points.put(PointSources.LEGACY, pointsNbtInt.intValue());
+} else if (pointsNbt instanceof NbtCompound pointsNbtCompound) {
+for (var key : pointsNbtCompound.getKeys()) {
+points.put(new Identifier(key), pointsNbtCompound.getInt(key));
+}
+}
 
-		return nbt;
-	}
+return new CategoryData(unlockedSkills, points);
+}
+
+public NbtCompound writeNbt(NbtCompound nbt) {
+var unlockedNbt = new NbtCompound();
+for (var entry : unlockedSkills.entrySet()) {
+if (entry.getValue() > 0) {
+unlockedNbt.putInt(entry.getKey(), entry.getValue());
+}
+}
+nbt.put("unlocked_skills", unlockedNbt);
+
+var pointsNbt = new NbtCompound();
+for (var entry : points.entrySet()) {
+if (entry.getValue() != 0) {
+pointsNbt.putInt(entry.getKey().toString(), entry.getValue());
+}
+}
+nbt.put("points", pointsNbt);
+
+return nbt;
+}
 
         public Skill.State getSkillState(CategoryConfig category, SkillConfig skill, SkillDefinitionConfig definition) {
                var level = unlockedSkills.getOrDefault(skill.id(), 0);
@@ -105,9 +108,7 @@ public class CategoryData {
                for (var reward : definition.rewards()) {
                        var inst = reward.instance();
                        if (inst instanceof PerLevelRewardsReward plr) {
-                               if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
-                                       maxLevels = Math.max(maxLevels, plr.getMaxLevel());
-                               }
+                               maxLevels = Math.max(maxLevels, plr.getMaxLevel());
                        }
                }
 
@@ -152,9 +153,7 @@ public class CategoryData {
                 for (var reward : definition.rewards()) {
                         var inst = reward.instance();
                         if (inst instanceof PerLevelRewardsReward plr) {
-                                if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
-                                        cost = Math.max(cost, plr.getPointsPerLevel());
-                                }
+                                cost = Math.max(cost, plr.getPointsPerLevel());
                         }
                 }
 
@@ -217,15 +216,7 @@ public class CategoryData {
                return unlockedSkills.keySet();
        }
 
-	public int getExperience() {
-		return experience;
-	}
-
-	public void setExperience(int earnedExperience) {
-		this.experience = earnedExperience;
-	}
-
-	public int getSpentPoints(CategoryConfig category) {
+       public int getSpentPoints(CategoryConfig category) {
                return unlockedSkills.keySet().stream()
 				.flatMap(skillId -> category.skills()
 						.getById(skillId)
@@ -260,15 +251,23 @@ public class CategoryData {
 		return this.points.entrySet().stream().filter(e -> e.getValue() != 0).map(Map.Entry::getKey);
 	}
 
-	public boolean isUnlocked() {
-		return unlocked;
-	}
+       public int getExperience() {
+               return 0;
+       }
 
-	public void unlock() {
-		unlocked = true;
-	}
+       public void setExperience(int earnedExperience) {
+               // no-op
+       }
 
-	public void lock() {
-		unlocked = false;
-	}
+       public boolean isUnlocked() {
+               return true;
+       }
+
+       public void unlock() {
+               // no-op
+       }
+
+       public void lock() {
+               // no-op
+       }
 }

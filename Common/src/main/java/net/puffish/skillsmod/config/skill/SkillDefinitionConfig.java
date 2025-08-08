@@ -177,7 +177,6 @@ public record SkillDefinitionConfig(
                                .map(SkillRewardConfig::instance)
                                .filter(PerLevelRewardsReward.class::isInstance)
                                .map(PerLevelRewardsReward.class::cast)
-                               .filter(reward -> reward.getSkillId() == null || reward.getSkillId().equals(id))
                                .mapToInt(PerLevelRewardsReward::getMaxLevel)
                                .max()
                                .orElse(1);

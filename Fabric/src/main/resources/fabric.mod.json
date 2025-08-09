@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-        "id": "puffish_skill_leveling",
-	"version": "${version}",
-	"name": "Pufferfish's Skills",
+        "id": "puffish_skill_leveling_agent",
+        "version": "${version}",
+        "name": "Pufferfish Skill Leveling",
 	"description": "Adds a fully configurable skill system to the game.",
 	"authors": [
 		"Pufferfish"

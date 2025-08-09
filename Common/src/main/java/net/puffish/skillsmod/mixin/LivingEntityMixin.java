@@ -2,7 +2,6 @@ package net.puffish.skillsmod.mixin;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.access.DamageSourceAccess;
@@ -50,8 +49,8 @@ public abstract class LivingEntityMixin {
 
 	@Inject(method = "applyDamage", at = @At("TAIL"))
 	private void injectAtApplyDamage(DamageSource source, float damage, CallbackInfo ci) {
-		var entity = ((LivingEntity) (Object) this);
-		var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
+                var entity = ((LivingEntity) (Object) this);
+                var weapon = ((DamageSourceAccess) source).getWeapon();
 
 		if (source.getAttacker() instanceof ServerPlayerEntity player) {
 			damageShare.compute(player, (key, value) -> {
@@ -82,8 +81,8 @@ public abstract class LivingEntityMixin {
 	@Inject(method = "drop", at = @At("TAIL"))
 	private void injectAtDrop(DamageSource source, CallbackInfo ci) {
 		if (source.getAttacker() instanceof ServerPlayerEntity player) {
-			var entity = ((LivingEntity) (Object) this);
-			var weapon = ((DamageSourceAccess) source).getWeapon().orElse(ItemStack.EMPTY);
+                        var entity = ((LivingEntity) (Object) this);
+                        var weapon = ((DamageSourceAccess) source).getWeapon();
 
 			var antiFarmingData = ((WorldChunkAccess) entity.getWorld()
 					.getWorldChunk(entity.getBlockPos()))

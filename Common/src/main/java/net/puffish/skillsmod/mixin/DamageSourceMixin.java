@@ -14,12 +14,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Optional;
-
 @Mixin(DamageSource.class)
 public class DamageSourceMixin implements DamageSourceAccess {
-	@Unique
-	private ItemStack weapon;
+        @Unique
+        private ItemStack weapon = ItemStack.EMPTY;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void injectAtInit(RegistryEntry<DamageType> type, Entity source, Entity attacker, Vec3d position, CallbackInfo ci) {
@@ -28,9 +26,9 @@ public class DamageSourceMixin implements DamageSourceAccess {
 		}
 	}
 
-	@Override
-	@Unique
-	public Optional<ItemStack> getWeapon() {
-		return Optional.ofNullable(weapon);
-	}
+        @Override
+        @Unique
+        public ItemStack getWeapon() {
+                return weapon;
+        }
 }

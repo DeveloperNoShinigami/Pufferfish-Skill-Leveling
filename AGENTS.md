@@ -199,3 +199,6 @@ What went well:
 What went wrong:
 Improvements:
 ```
+
+## Recent Insights
+- 2025-08-09: Upgraded Architectury Loom plugin to 1.7.414 and validated with Gradle build, test, and check to ensure plugin API compatibility.

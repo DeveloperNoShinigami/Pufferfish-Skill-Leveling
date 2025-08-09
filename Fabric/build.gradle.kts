@@ -30,7 +30,10 @@ dependencies {
 }
 
 loom {
-    mixin.defaultRefmapName.set("puffish_skill_leveling-refmap.json")
+    mixin {
+        useLegacyMixinAp.set(true)
+        defaultRefmapName.set("puffish_skill_leveling-refmap.json")
+    }
 }
 
 tasks.test {

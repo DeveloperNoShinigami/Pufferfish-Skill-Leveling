@@ -188,6 +188,8 @@ Track deviations from the upstream repository with `docs/fork_audit.csv`. Regene
 ```
 git diff --name-status upstream/1.20...HEAD > docs/fork_audit.csv
 
+```
+
 ## Task Reflection Template
 
 Store task reflection notes in [docs/reflections/](docs/reflections/) using the following template:
@@ -199,3 +201,6 @@ What went well:
 What went wrong:
 Improvements:
 ```
+
+## Additional Insights
+- Document external dependencies in `README.md` with minimum versions and warn that addons will not start without their base mods.

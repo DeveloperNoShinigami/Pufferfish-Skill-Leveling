@@ -2,6 +2,25 @@
 
 This mod provides an API to create skill trees via datapacks. Categories and skills can unlock rewards and gain experience.
 
+## Dependencies
+
+Pufferfish Skill Leveling is an addon for the base [skillsmod](https://maven.puffish.net) mod.
+
+- Requires **skillsmod 0.16.0+1.20** or newer.
+- Download from [Modrinth](https://modrinth.com/mod/skillsmod) or include via Maven:
+
+```kotlin
+repositories {
+    maven("https://maven.puffish.net/releases")
+}
+
+dependencies {
+    modImplementation("net.puffish.skillsmod:skillsmod:0.16.0+1.20")
+}
+```
+
+This addon will not start without the base mod installed.
+
 ## Player skill definitions
 
 Skill definitions describe how a skill looks, how it unlocks, and what it grants.

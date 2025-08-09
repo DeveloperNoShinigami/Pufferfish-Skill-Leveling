@@ -1,0 +1,75 @@
+package net.bluelotuscoding.puffishskillleveling.experience.source.builtin;
+
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.stat.Stat;
+import net.minecraft.util.Identifier;
+import net.bluelotuscoding.puffishskillleveling.SkillsMod;
+import net.bluelotuscoding.puffishskillleveling.api.SkillsAPI;
+import net.bluelotuscoding.puffishskillleveling.api.calculation.Calculation;
+import net.bluelotuscoding.puffishskillleveling.api.calculation.operation.OperationFactory;
+import net.bluelotuscoding.puffishskillleveling.api.calculation.prototype.BuiltinPrototypes;
+import net.bluelotuscoding.puffishskillleveling.api.calculation.prototype.Prototype;
+import net.bluelotuscoding.puffishskillleveling.api.experience.source.ExperienceSource;
+import net.bluelotuscoding.puffishskillleveling.api.experience.source.ExperienceSourceConfigContext;
+import net.bluelotuscoding.puffishskillleveling.api.experience.source.ExperienceSourceDisposeContext;
+import net.bluelotuscoding.puffishskillleveling.api.util.Problem;
+import net.bluelotuscoding.puffishskillleveling.api.util.Result;
+import net.bluelotuscoding.puffishskillleveling.calculation.LegacyCalculation;
+import net.bluelotuscoding.puffishskillleveling.calculation.operation.builtin.StatCondition;
+
+public class IncreaseStatExperienceSource implements ExperienceSource {
+	private static final Identifier ID = SkillsMod.createIdentifier("increase_stat");
+	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+
+	static {
+		PROTOTYPE.registerOperation(
+				SkillsMod.createIdentifier("get_player"),
+				BuiltinPrototypes.PLAYER,
+				OperationFactory.create(Data::player)
+		);
+		PROTOTYPE.registerOperation(
+				SkillsMod.createIdentifier("get_stat"),
+				BuiltinPrototypes.STAT,
+				OperationFactory.create(Data::stat)
+		);
+		PROTOTYPE.registerOperation(
+				SkillsMod.createIdentifier("get_increase_amount"),
+				BuiltinPrototypes.NUMBER,
+				OperationFactory.create(data -> (double) data.amount())
+		);
+	}
+
+	private final Calculation<Data> calculation;
+
+	private IncreaseStatExperienceSource(Calculation<Data> calculation) {
+		this.calculation = calculation;
+	}
+
+	public static void register() {
+		SkillsAPI.registerExperienceSource(
+				ID,
+				IncreaseStatExperienceSource::parse
+		);
+	}
+
+	private static Result<IncreaseStatExperienceSource, Problem> parse(ExperienceSourceConfigContext context) {
+		return context.getData().andThen(rootElement ->
+				LegacyCalculation.parse(rootElement, PROTOTYPE, context)
+						.mapSuccess(IncreaseStatExperienceSource::new)
+		);
+	}
+
+	private record Data(ServerPlayerEntity player, Stat<?> stat, int amount) { }
+
+	public int getValue(ServerPlayerEntity player, Stat<?> stat, int amount) {
+		return (int) Math.round(calculation.evaluate(
+				new Data(player, stat, amount)
+		));
+	}
+
+	@Override
+	public void dispose(ExperienceSourceDisposeContext context) {
+		// Nothing to do.
+	}
+
+}

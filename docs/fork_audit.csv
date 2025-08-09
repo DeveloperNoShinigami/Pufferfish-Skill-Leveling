@@ -1,44 +1,284 @@
-A	AGENTS.md
+M	AGENTS.md
 M	Common/build.gradle.kts
-M	Common/src/main/java/net/puffish/skillsmod/SkillsMod.java
-M	Common/src/main/java/net/puffish/skillsmod/api/Category.java
-M	Common/src/main/java/net/puffish/skillsmod/api/SkillsAPI.java
-M	Common/src/main/java/net/puffish/skillsmod/calculation/operation/BuiltinOperations.java
+R084	Common/src/main/java/net/puffish/skillsmod/SkillsMod.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/SkillsMod.java
+R073	Common/src/main/java/net/puffish/skillsmod/access/BuiltBufferAccess.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/access/BuiltBufferAccess.java
+R071	Common/src/main/java/net/puffish/skillsmod/access/DamageSourceAccess.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/access/DamageSourceAccess.java
+R071	Common/src/main/java/net/puffish/skillsmod/access/MinecraftClientAccess.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/access/MinecraftClientAccess.java
+R069	Common/src/main/java/net/puffish/skillsmod/access/RenderLayerAccess.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/access/RenderLayerAccess.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/access/WorldChunkAccess.java
+R080	Common/src/main/java/net/puffish/skillsmod/api/Category.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/Category.java
+R082	Common/src/main/java/net/puffish/skillsmod/api/Events.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/Events.java
+R093	Common/src/main/java/net/puffish/skillsmod/api/Experience.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/Experience.java
+R086	Common/src/main/java/net/puffish/skillsmod/api/Skill.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/Skill.java
+R079	Common/src/main/java/net/puffish/skillsmod/api/SkillsAPI.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/SkillsAPI.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/calculation/Calculation.java
+R062	Common/src/main/java/net/puffish/skillsmod/api/calculation/Variables.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/calculation/Variables.java
+R064	Common/src/main/java/net/puffish/skillsmod/api/calculation/operation/Operation.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/calculation/operation/Operation.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/calculation/operation/OperationConfigContext.java
+R082	Common/src/main/java/net/puffish/skillsmod/api/calculation/operation/OperationFactory.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/calculation/operation/OperationFactory.java
+R096	Common/src/main/java/net/puffish/skillsmod/api/calculation/prototype/BuiltinPrototypes.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/calculation/prototype/BuiltinPrototypes.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/calculation/prototype/Prototype.java
+R051	Common/src/main/java/net/puffish/skillsmod/api/calculation/prototype/PrototypeOperation.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/calculation/prototype/PrototypeOperation.java
+R070	Common/src/main/java/net/puffish/skillsmod/api/config/ConfigContext.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/config/ConfigContext.java
+R056	Common/src/main/java/net/puffish/skillsmod/api/experience/source/ExperienceSource.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/experience/source/ExperienceSource.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/experience/source/ExperienceSourceConfigContext.java
+R064	Common/src/main/java/net/puffish/skillsmod/api/experience/source/ExperienceSourceDisposeContext.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/experience/source/ExperienceSourceDisposeContext.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/experience/source/ExperienceSourceFactory.java
+R097	Common/src/main/java/net/puffish/skillsmod/api/json/BuiltinJson.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/json/BuiltinJson.java
+R074	Common/src/main/java/net/puffish/skillsmod/api/json/JsonArray.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/json/JsonArray.java
+R084	Common/src/main/java/net/puffish/skillsmod/api/json/JsonElement.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/json/JsonElement.java
+R082	Common/src/main/java/net/puffish/skillsmod/api/json/JsonObject.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/json/JsonObject.java
+R064	Common/src/main/java/net/puffish/skillsmod/api/json/JsonPath.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/json/JsonPath.java
+R065	Common/src/main/java/net/puffish/skillsmod/api/reward/Reward.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/reward/Reward.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/reward/RewardConfigContext.java
+R066	Common/src/main/java/net/puffish/skillsmod/api/reward/RewardDisposeContext.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/reward/RewardDisposeContext.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/reward/RewardFactory.java
+R073	Common/src/main/java/net/puffish/skillsmod/api/reward/RewardUpdateContext.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/reward/RewardUpdateContext.java
+R073	Common/src/main/java/net/puffish/skillsmod/api/util/Problem.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/util/Problem.java
+R098	Common/src/main/java/net/puffish/skillsmod/api/util/Result.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/api/util/Result.java
+R081	Common/src/main/java/net/puffish/skillsmod/calculation/CalculationCase.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/CalculationCase.java
+R091	Common/src/main/java/net/puffish/skillsmod/calculation/LegacyBuiltinPrototypes.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/LegacyBuiltinPrototypes.java
+R066	Common/src/main/java/net/puffish/skillsmod/calculation/LegacyCalculation.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/LegacyCalculation.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/BuiltinOperations.java
+R076	Common/src/main/java/net/puffish/skillsmod/calculation/operation/LegacyOperationRegistry.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/LegacyOperationRegistry.java
+R065	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/AttributeOperation.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/AttributeOperation.java
+R063	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/BlockCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/BlockCondition.java
+R071	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/BlockStateCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/BlockStateCondition.java
+R083	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/DamageSourceClassification.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/DamageSourceClassification.java
+R066	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/DamageTypeCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/DamageTypeCondition.java
+R064	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/EffectOperation.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/EffectOperation.java
+R067	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/EntityTypeCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/EntityTypeCondition.java
+R062	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/ItemCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/ItemCondition.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/ItemStackNbtCondition.java
+R067	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/ScoreboardOperation.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/ScoreboardOperation.java
+R060	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/StatCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/StatCondition.java
+R064	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/StatTypeCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/StatTypeCondition.java
+R062	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/StatValueOperation.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/StatValueOperation.java
+R065	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/SwitchOperation.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/SwitchOperation.java
+R061	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/TagCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/TagCondition.java
+R064	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/WorldCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/WorldCondition.java
+R065	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/legacy/LegacyBlockTagCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/legacy/LegacyBlockTagCondition.java
+R065	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/legacy/LegacyDamageTypeTagCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/legacy/LegacyDamageTypeTagCondition.java
+R066	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/legacy/LegacyEntityTypeTagCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/legacy/LegacyEntityTypeTagCondition.java
+R065	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/legacy/LegacyItemTagCondition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/calculation/operation/builtin/legacy/LegacyItemTagCondition.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/SkillsClientMod.java
+R091	Common/src/main/java/net/puffish/skillsmod/client/config/ClientBackgroundConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/ClientBackgroundConfig.java
+R087	Common/src/main/java/net/puffish/skillsmod/client/config/ClientCategoryConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/ClientCategoryConfig.java
+R090	Common/src/main/java/net/puffish/skillsmod/client/config/ClientFrameConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/ClientFrameConfig.java
+R088	Common/src/main/java/net/puffish/skillsmod/client/config/ClientIconConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/ClientIconConfig.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/colors/ClientColorConfig.java
+R063	Common/src/main/java/net/puffish/skillsmod/client/config/colors/ClientColorsConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/colors/ClientColorsConfig.java
+R076	Common/src/main/java/net/puffish/skillsmod/client/config/colors/ClientConnectionsColorsConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/colors/ClientConnectionsColorsConfig.java
+R059	Common/src/main/java/net/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/colors/ClientFillStrokeColorsConfig.java
+R061	Common/src/main/java/net/puffish/skillsmod/client/config/skill/ClientSkillConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/skill/ClientSkillConfig.java
+R061	Common/src/main/java/net/puffish/skillsmod/client/config/skill/ClientSkillConnectionConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/skill/ClientSkillConnectionConfig.java
+R072	Common/src/main/java/net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/config/skill/ClientSkillDefinitionConfig.java
+R095	Common/src/main/java/net/puffish/skillsmod/client/data/ClientCategoryData.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/data/ClientCategoryData.java
+R072	Common/src/main/java/net/puffish/skillsmod/client/data/ClientSkillConnectionData.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/data/ClientSkillConnectionData.java
+R093	Common/src/main/java/net/puffish/skillsmod/client/data/ClientSkillScreenData.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/data/ClientSkillScreenData.java
+R050	Common/src/main/java/net/puffish/skillsmod/client/event/ClientEventListener.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/event/ClientEventListener.java
+R061	Common/src/main/java/net/puffish/skillsmod/client/event/ClientEventReceiver.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/event/ClientEventReceiver.java
+R094	Common/src/main/java/net/puffish/skillsmod/client/gui/SimpleToast.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/gui/SimpleToast.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/gui/SkillLevelingScreen.java
+R091	Common/src/main/java/net/puffish/skillsmod/client/gui/SkillsScreen.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/gui/SkillsScreen.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/keybinding/KeyBindingHandler.java
+R070	Common/src/main/java/net/puffish/skillsmod/client/keybinding/KeyBindingReceiver.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/keybinding/KeyBindingReceiver.java
+R051	Common/src/main/java/net/puffish/skillsmod/client/network/ClientPacketHandler.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/ClientPacketHandler.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/ClientPacketSender.java
+R089	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/ExperienceUpdateInPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/packets/in/ExperienceUpdateInPacket.java
+R077	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/HideCategoryInPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/packets/in/HideCategoryInPacket.java
+R077	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/NewPointInPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/packets/in/NewPointInPacket.java
+R078	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/OpenScreenInPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/packets/in/OpenScreenInPacket.java
+R086	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/PointsUpdateInPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/packets/in/PointsUpdateInPacket.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/packets/in/ShowCategoryInPacket.java
+R065	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/ShowToastInPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/packets/in/ShowToastInPacket.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/packets/in/SkillUpdateInPacket.java
+R064	Common/src/main/java/net/puffish/skillsmod/client/network/packets/out/SkillClickOutPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/network/packets/out/SkillClickOutPacket.java
+R098	Common/src/main/java/net/puffish/skillsmod/client/rendering/ConnectionBatchedRenderer.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/rendering/ConnectionBatchedRenderer.java
+R092	Common/src/main/java/net/puffish/skillsmod/client/rendering/ItemBatchedRenderer.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/rendering/ItemBatchedRenderer.java
+R098	Common/src/main/java/net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/rendering/TextureBatchedRenderer.java
+R060	Common/src/main/java/net/puffish/skillsmod/client/setup/ClientRegistrar.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/client/setup/ClientRegistrar.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/commands/RefundCommandExtension.java
+R080	Common/src/main/java/net/puffish/skillsmod/commands/SkillsCommand.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/commands/SkillsCommand.java
+R092	Common/src/main/java/net/puffish/skillsmod/commands/arguments/CategoryArgumentType.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/commands/arguments/CategoryArgumentType.java
+R093	Common/src/main/java/net/puffish/skillsmod/commands/arguments/SkillArgumentType.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/commands/arguments/SkillArgumentType.java
+R059	Common/src/main/java/net/puffish/skillsmod/common/BackgroundPosition.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/common/BackgroundPosition.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/common/FrameType.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/common/IconType.java
+R087	Common/src/main/java/net/puffish/skillsmod/common/SkillConnection.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/common/SkillConnection.java
+R067	Common/src/main/java/net/puffish/skillsmod/common/SkillPair.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/common/SkillPair.java
+R077	Common/src/main/java/net/puffish/skillsmod/config/BackgroundConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/BackgroundConfig.java
+R082	Common/src/main/java/net/puffish/skillsmod/config/CategoryConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/CategoryConfig.java
+R063	Common/src/main/java/net/puffish/skillsmod/config/Config.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/Config.java
+R088	Common/src/main/java/net/puffish/skillsmod/config/FrameConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/FrameConfig.java
+R081	Common/src/main/java/net/puffish/skillsmod/config/GeneralConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/GeneralConfig.java
+R085	Common/src/main/java/net/puffish/skillsmod/config/IconConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/IconConfig.java
+R078	Common/src/main/java/net/puffish/skillsmod/config/ModConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/ModConfig.java
+R075	Common/src/main/java/net/puffish/skillsmod/config/PackConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/PackConfig.java
+R078	Common/src/main/java/net/puffish/skillsmod/config/colors/ColorConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/colors/ColorConfig.java
+R075	Common/src/main/java/net/puffish/skillsmod/config/colors/ColorsConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/colors/ColorsConfig.java
+R086	Common/src/main/java/net/puffish/skillsmod/config/colors/ConnectionsColorsConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/colors/ConnectionsColorsConfig.java
+R074	Common/src/main/java/net/puffish/skillsmod/config/colors/FillStrokeColorsConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/colors/FillStrokeColorsConfig.java
+R075	Common/src/main/java/net/puffish/skillsmod/config/experience/ExperienceConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/experience/ExperienceConfig.java
+R085	Common/src/main/java/net/puffish/skillsmod/config/experience/ExperiencePerLevelConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/experience/ExperiencePerLevelConfig.java
+R066	Common/src/main/java/net/puffish/skillsmod/config/experience/ExperienceSourceConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/experience/ExperienceSourceConfig.java
+R069	Common/src/main/java/net/puffish/skillsmod/config/experience/ExperienceTeamSharingConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/experience/ExperienceTeamSharingConfig.java
+R084	Common/src/main/java/net/puffish/skillsmod/config/reader/ConfigReader.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/reader/ConfigReader.java
+R061	Common/src/main/java/net/puffish/skillsmod/config/reader/FileConfigReader.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/reader/FileConfigReader.java
+R074	Common/src/main/java/net/puffish/skillsmod/config/reader/PackConfigReader.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/reader/PackConfigReader.java
+R078	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/skill/SkillConfig.java
+R078	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillConnectionConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/skill/SkillConnectionConfig.java
+R075	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillConnectionsConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/skill/SkillConnectionsConfig.java
+R085	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillConnectionsGroupConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/skill/SkillConnectionsGroupConfig.java
+R091	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillDefinitionConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/skill/SkillDefinitionConfig.java
+R072	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillDefinitionsConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/skill/SkillDefinitionsConfig.java
+R066	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillRewardConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/skill/SkillRewardConfig.java
+R072	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillsConfig.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/config/skill/SkillsConfig.java
+R097	Common/src/main/java/net/puffish/skillsmod/experience/ExperienceCurve.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/ExperienceCurve.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/BuiltinExperienceSources.java
+R079	Common/src/main/java/net/puffish/skillsmod/experience/source/ExperienceSourceRegistry.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/ExperienceSourceRegistry.java
+R070	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/BreakBlockExperienceSource.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/BreakBlockExperienceSource.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/CraftItemExperienceSource.java
+R074	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/DealDamageExperienceSource.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/DealDamageExperienceSource.java
+R056	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/EatFoodExperienceSource.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/EatFoodExperienceSource.java
+R069	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/EnchantItemExperienceSource.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/EnchantItemExperienceSource.java
+R068	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/FishItemExperienceSource.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/FishItemExperienceSource.java
+R067	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/HealExperienceSource.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/HealExperienceSource.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/IncreaseStatExperienceSource.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/KillEntityExperienceSource.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/MineBlockExperienceSource.java
+R074	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/SharedKillEntityExperienceSource.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/SharedKillEntityExperienceSource.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/TakeDamageExperienceSource.java
+R080	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/util/AntiFarmingPerChunk.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/util/AntiFarmingPerChunk.java
+R083	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/util/AntiFarmingPerEntity.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/experience/source/builtin/util/AntiFarmingPerEntity.java
+R091	Common/src/main/java/net/puffish/skillsmod/expression/BinaryOperator.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/expression/BinaryOperator.java
+R097	Common/src/main/java/net/puffish/skillsmod/expression/DefaultParser.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/expression/DefaultParser.java
+R060	Common/src/main/java/net/puffish/skillsmod/expression/Expression.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/expression/Expression.java
+R092	Common/src/main/java/net/puffish/skillsmod/expression/FunctionOperator.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/expression/FunctionOperator.java
+R076	Common/src/main/java/net/puffish/skillsmod/expression/GroupOperator.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/expression/GroupOperator.java
+R095	Common/src/main/java/net/puffish/skillsmod/expression/Lexer.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/expression/Lexer.java
+R095	Common/src/main/java/net/puffish/skillsmod/expression/Parser.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/expression/Parser.java
+R084	Common/src/main/java/net/puffish/skillsmod/expression/UnaryOperator.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/expression/UnaryOperator.java
+R081	Common/src/main/java/net/puffish/skillsmod/impl/CategoryImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/CategoryImpl.java
+R089	Common/src/main/java/net/puffish/skillsmod/impl/ExperienceImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/ExperienceImpl.java
+R078	Common/src/main/java/net/puffish/skillsmod/impl/SkillImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/SkillImpl.java
+R073	Common/src/main/java/net/puffish/skillsmod/impl/calculation/CalculationImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/calculation/CalculationImpl.java
+R085	Common/src/main/java/net/puffish/skillsmod/impl/calculation/VariablesImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/calculation/VariablesImpl.java
+R055	Common/src/main/java/net/puffish/skillsmod/impl/calculation/operation/OperationConfigContextImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/calculation/operation/OperationConfigContextImpl.java
+R078	Common/src/main/java/net/puffish/skillsmod/impl/calculation/prototype/PrototypeImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/calculation/prototype/PrototypeImpl.java
+R067	Common/src/main/java/net/puffish/skillsmod/impl/calculation/prototype/PrototypeOperationImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/calculation/prototype/PrototypeOperationImpl.java
+R076	Common/src/main/java/net/puffish/skillsmod/impl/config/ConfigContextImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/config/ConfigContextImpl.java
+R056	Common/src/main/java/net/puffish/skillsmod/impl/experience/source/ExperienceSourceConfigContextImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/experience/source/ExperienceSourceConfigContextImpl.java
+R050	Common/src/main/java/net/puffish/skillsmod/impl/experience/source/ExperienceSourceDisposeContextImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/experience/source/ExperienceSourceDisposeContextImpl.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/json/ForwardingJsonObject.java
+R079	Common/src/main/java/net/puffish/skillsmod/impl/json/JsonArrayImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/json/JsonArrayImpl.java
+R077	Common/src/main/java/net/puffish/skillsmod/impl/json/JsonElementImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/json/JsonElementImpl.java
+R087	Common/src/main/java/net/puffish/skillsmod/impl/json/JsonObjectImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/json/JsonObjectImpl.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/json/JsonObjectTrackingImpl.java
+R089	Common/src/main/java/net/puffish/skillsmod/impl/json/JsonPathImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/json/JsonPathImpl.java
+R057	Common/src/main/java/net/puffish/skillsmod/impl/rewards/RewardConfigContextImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/rewards/RewardConfigContextImpl.java
+R051	Common/src/main/java/net/puffish/skillsmod/impl/rewards/RewardDisposeContextImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/rewards/RewardDisposeContextImpl.java
+R072	Common/src/main/java/net/puffish/skillsmod/impl/rewards/RewardUpdateContextImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/rewards/RewardUpdateContextImpl.java
+R087	Common/src/main/java/net/puffish/skillsmod/impl/util/ProblemImpl.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/impl/util/ProblemImpl.java
+R083	Common/src/main/java/net/puffish/skillsmod/mixin/BlockMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/BlockMixin.java
+R085	Common/src/main/java/net/puffish/skillsmod/mixin/BooleanRuleInvoker.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/BooleanRuleInvoker.java
+R090	Common/src/main/java/net/puffish/skillsmod/mixin/BufferRendererMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/BufferRendererMixin.java
+R079	Common/src/main/java/net/puffish/skillsmod/mixin/BuiltBufferMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/BuiltBufferMixin.java
+R079	Common/src/main/java/net/puffish/skillsmod/mixin/ConsumeItemCriterionMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/ConsumeItemCriterionMixin.java
+R089	Common/src/main/java/net/puffish/skillsmod/mixin/DamageSourceMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/DamageSourceMixin.java
+R078	Common/src/main/java/net/puffish/skillsmod/mixin/EnchantedItemCriterionMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/EnchantedItemCriterionMixin.java
+R081	Common/src/main/java/net/puffish/skillsmod/mixin/FishingRodHookedCriterionMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/FishingRodHookedCriterionMixin.java
+R085	Common/src/main/java/net/puffish/skillsmod/mixin/GameRulesAccessor.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/GameRulesAccessor.java
+R080	Common/src/main/java/net/puffish/skillsmod/mixin/ItemStackMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/ItemStackMixin.java
+R084	Common/src/main/java/net/puffish/skillsmod/mixin/LivingEntityMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/LivingEntityMixin.java
+R078	Common/src/main/java/net/puffish/skillsmod/mixin/MinecraftClientMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/MinecraftClientMixin.java
+R079	Common/src/main/java/net/puffish/skillsmod/mixin/PlayerEntityMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/PlayerEntityMixin.java
+R082	Common/src/main/java/net/puffish/skillsmod/mixin/RenderLayerMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/RenderLayerMixin.java
+R075	Common/src/main/java/net/puffish/skillsmod/mixin/ServerPlayerEntityMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/ServerPlayerEntityMixin.java
+R064	Common/src/main/java/net/puffish/skillsmod/mixin/WorldChunkMixin.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/mixin/WorldChunkMixin.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/network/InPacket.java
+R074	Common/src/main/java/net/puffish/skillsmod/network/OutPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/network/OutPacket.java
+R088	Common/src/main/java/net/puffish/skillsmod/network/Packets.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/network/Packets.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/BuiltinRewards.java
+R081	Common/src/main/java/net/puffish/skillsmod/reward/RewardRegistry.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/RewardRegistry.java
+R078	Common/src/main/java/net/puffish/skillsmod/reward/builtin/AttributeReward.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/builtin/AttributeReward.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/builtin/CommandReward.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/builtin/DummyReward.java
+R080	Common/src/main/java/net/puffish/skillsmod/reward/builtin/PerLevelRewardsReward.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/builtin/PerLevelRewardsReward.java
+R076	Common/src/main/java/net/puffish/skillsmod/reward/builtin/PointsReward.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/builtin/PointsReward.java
+R066	Common/src/main/java/net/puffish/skillsmod/reward/builtin/ScoreboardReward.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/builtin/ScoreboardReward.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/builtin/ServerCommandReward.java
+R060	Common/src/main/java/net/puffish/skillsmod/reward/builtin/TagReward.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/reward/builtin/TagReward.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/data/CategoryData.java
+R089	Common/src/main/java/net/puffish/skillsmod/server/data/PlayerData.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/data/PlayerData.java
+R092	Common/src/main/java/net/puffish/skillsmod/server/data/ServerData.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/data/ServerData.java
+R089	Common/src/main/java/net/puffish/skillsmod/server/event/ServerEventListener.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/event/ServerEventListener.java
+R061	Common/src/main/java/net/puffish/skillsmod/server/event/ServerEventReceiver.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/event/ServerEventReceiver.java
+R070	Common/src/main/java/net/puffish/skillsmod/server/network/ServerPacketHandler.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/ServerPacketHandler.java
+R054	Common/src/main/java/net/puffish/skillsmod/server/network/ServerPacketSender.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/ServerPacketSender.java
+R080	Common/src/main/java/net/puffish/skillsmod/server/network/packets/in/SkillClickInPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/packets/in/SkillClickInPacket.java
+R070	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/ExperienceUpdateOutPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/packets/out/ExperienceUpdateOutPacket.java
+R061	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/HideCategoryOutPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/packets/out/HideCategoryOutPacket.java
+R060	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/NewPointOutPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/packets/out/NewPointOutPacket.java
+R065	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/OpenScreenOutPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/packets/out/OpenScreenOutPacket.java
+R067	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/PointsUpdateOutPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/packets/out/PointsUpdateOutPacket.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/packets/out/ShowCategoryOutPacket.java
+R053	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/ShowToastOutPacket.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/packets/out/ShowToastOutPacket.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/network/packets/out/SkillUpdateOutPacket.java
+R069	Common/src/main/java/net/puffish/skillsmod/server/setup/ServerPlatform.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/setup/ServerPlatform.java
+R080	Common/src/main/java/net/puffish/skillsmod/server/setup/ServerRegistrar.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/setup/ServerRegistrar.java
+R057	Common/src/main/java/net/puffish/skillsmod/server/setup/SkillsArgumentTypes.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/setup/SkillsArgumentTypes.java
+R073	Common/src/main/java/net/puffish/skillsmod/server/setup/SkillsGameRules.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/server/setup/SkillsGameRules.java
+R088	Common/src/main/java/net/puffish/skillsmod/util/Bounds2i.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/Bounds2i.java
+R085	Common/src/main/java/net/puffish/skillsmod/util/ChangeListener.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/ChangeListener.java
+R091	Common/src/main/java/net/puffish/skillsmod/util/CommandUtils.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/CommandUtils.java
+R065	Common/src/main/java/net/puffish/skillsmod/util/DisposeContext.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/DisposeContext.java
+R091	Common/src/main/java/net/puffish/skillsmod/util/Event.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/Event.java
+R060	Common/src/main/java/net/puffish/skillsmod/util/JsonPathFailure.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/JsonPathFailure.java
+R083	Common/src/main/java/net/puffish/skillsmod/util/LegacyUtils.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/LegacyUtils.java
+R088	Common/src/main/java/net/puffish/skillsmod/util/PathUtils.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/PathUtils.java
+A	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/PointSources.java
+R090	Common/src/main/java/net/puffish/skillsmod/util/PrefixedLogger.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/PrefixedLogger.java
+R050	Common/src/main/java/net/puffish/skillsmod/util/ToastType.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/ToastType.java
+R050	Common/src/main/java/net/puffish/skillsmod/util/VersionContext.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/VersionContext.java
+R075	Common/src/main/java/net/puffish/skillsmod/util/VersionedConfigContext.java	Common/src/main/java/net/bluelotuscoding/puffishskillleveling/util/VersionedConfigContext.java
+D	Common/src/main/java/net/puffish/skillsmod/access/WorldChunkAccess.java
+D	Common/src/main/java/net/puffish/skillsmod/api/calculation/Calculation.java
+D	Common/src/main/java/net/puffish/skillsmod/api/calculation/operation/OperationConfigContext.java
+D	Common/src/main/java/net/puffish/skillsmod/api/calculation/prototype/Prototype.java
+D	Common/src/main/java/net/puffish/skillsmod/api/experience/source/ExperienceSourceConfigContext.java
+D	Common/src/main/java/net/puffish/skillsmod/api/experience/source/ExperienceSourceFactory.java
+D	Common/src/main/java/net/puffish/skillsmod/api/reward/RewardConfigContext.java
+D	Common/src/main/java/net/puffish/skillsmod/api/reward/RewardFactory.java
+D	Common/src/main/java/net/puffish/skillsmod/calculation/operation/BuiltinOperations.java
 D	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/ItemStackCondition.java
-A	Common/src/main/java/net/puffish/skillsmod/calculation/operation/builtin/ItemStackNbtCondition.java
-M	Common/src/main/java/net/puffish/skillsmod/client/SkillsClientMod.java
-M	Common/src/main/java/net/puffish/skillsmod/client/config/ClientBackgroundConfig.java
-M	Common/src/main/java/net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.java
-M	Common/src/main/java/net/puffish/skillsmod/client/data/ClientCategoryData.java
-M	Common/src/main/java/net/puffish/skillsmod/client/gui/SkillsScreen.java
-M	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/ShowCategoryInPacket.java
-M	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/SkillUpdateInPacket.java
+D	Common/src/main/java/net/puffish/skillsmod/client/SkillsClientMod.java
+D	Common/src/main/java/net/puffish/skillsmod/client/config/colors/ClientColorConfig.java
+D	Common/src/main/java/net/puffish/skillsmod/client/keybinding/KeyBindingHandler.java
+D	Common/src/main/java/net/puffish/skillsmod/client/network/ClientPacketSender.java
+D	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/ShowCategoryInPacket.java
+D	Common/src/main/java/net/puffish/skillsmod/client/network/packets/in/SkillUpdateInPacket.java
 D	Common/src/main/java/net/puffish/skillsmod/commands/CategoryCommand.java
 D	Common/src/main/java/net/puffish/skillsmod/commands/ExperienceCommand.java
 D	Common/src/main/java/net/puffish/skillsmod/commands/OpenCommand.java
 D	Common/src/main/java/net/puffish/skillsmod/commands/PointsCommand.java
-A	Common/src/main/java/net/puffish/skillsmod/commands/RefundCommandExtension.java
-M	Common/src/main/java/net/puffish/skillsmod/commands/SkillsCommand.java
-M	Common/src/main/java/net/puffish/skillsmod/config/CategoryConfig.java
-M	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillDefinitionConfig.java
-M	Common/src/main/java/net/puffish/skillsmod/config/skill/SkillDefinitionsConfig.java
-M	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/CraftItemExperienceSource.java
-M	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/EatFoodExperienceSource.java
-M	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/IncreaseStatExperienceSource.java
-M	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/KillEntityExperienceSource.java
-M	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/MineBlockExperienceSource.java
-M	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/TakeDamageExperienceSource.java
-M	Common/src/main/java/net/puffish/skillsmod/impl/CategoryImpl.java
-A	Common/src/main/java/net/puffish/skillsmod/impl/json/ForwardingJsonObject.java
-M	Common/src/main/java/net/puffish/skillsmod/impl/json/JsonObjectTrackingImpl.java
-M	Common/src/main/java/net/puffish/skillsmod/reward/BuiltinRewards.java
-M	Common/src/main/java/net/puffish/skillsmod/reward/builtin/CommandReward.java
-A	Common/src/main/java/net/puffish/skillsmod/reward/builtin/PerLevelRewardsReward.java
-A	Common/src/main/java/net/puffish/skillsmod/reward/builtin/ServerCommandReward.java
-M	Common/src/main/java/net/puffish/skillsmod/server/data/CategoryData.java
-M	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/ShowCategoryOutPacket.java
-M	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/SkillUpdateOutPacket.java
-M	Common/src/main/java/net/puffish/skillsmod/util/PointSources.java
+D	Common/src/main/java/net/puffish/skillsmod/common/FrameType.java
+D	Common/src/main/java/net/puffish/skillsmod/common/IconType.java
+D	Common/src/main/java/net/puffish/skillsmod/experience/source/BuiltinExperienceSources.java
+D	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/CraftItemExperienceSource.java
+D	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/IncreaseStatExperienceSource.java
+D	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/KillEntityExperienceSource.java
+D	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/MineBlockExperienceSource.java
+D	Common/src/main/java/net/puffish/skillsmod/experience/source/builtin/TakeDamageExperienceSource.java
+D	Common/src/main/java/net/puffish/skillsmod/impl/json/JsonObjectTrackingImpl.java
+D	Common/src/main/java/net/puffish/skillsmod/network/InPacket.java
+D	Common/src/main/java/net/puffish/skillsmod/reward/BuiltinRewards.java
+D	Common/src/main/java/net/puffish/skillsmod/reward/builtin/CommandReward.java
+D	Common/src/main/java/net/puffish/skillsmod/reward/builtin/DummyReward.java
+D	Common/src/main/java/net/puffish/skillsmod/server/data/CategoryData.java
+D	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/ShowCategoryOutPacket.java
+D	Common/src/main/java/net/puffish/skillsmod/server/network/packets/out/SkillUpdateOutPacket.java
+D	Common/src/main/java/net/puffish/skillsmod/util/PointSources.java
 A	Common/src/main/resources/assets/puffish_skill_leveling/lang/de_de.json
 A	Common/src/main/resources/assets/puffish_skill_leveling/lang/en_us.json
 A	Common/src/main/resources/assets/puffish_skill_leveling/lang/es_mx.json
@@ -59,21 +299,25 @@ D	Common/src/main/resources/assets/puffish_skills/lang/pl_pl.json
 D	Common/src/main/resources/assets/puffish_skills/lang/pt_br.json
 D	Common/src/main/resources/assets/puffish_skills/lang/ru_ru.json
 D	Common/src/main/resources/assets/puffish_skills/lang/zh_cn.json
-R091	Common/src/main/resources/puffish_skills.mixins.json	Common/src/main/resources/puffish_skill_leveling.mixins.json
-A	Common/src/test/java/net/puffish/skillsmod/config/skill/SkillDefinitionConfigTest.java
-A	Common/src/test/java/net/puffish/skillsmod/reward/builtin/PerLevelRewardsRewardTest.java
-A	Common/src/test/java/net/puffish/skillsmod/server/data/CategoryDataTest.java
+R082	Common/src/main/resources/puffish_skills.mixins.json	Common/src/main/resources/puffish_skill_leveling.mixins.json
+R079	Common/src/test/java/net/puffish/skillsmod/config/skill/SkillDefinitionConfigTest.java	Common/src/test/java/net/bluelotuscoding/puffishskillleveling/config/skill/SkillDefinitionConfigTest.java
+R098	Common/src/test/java/net/puffish/skillsmod/experience/ExperienceCurveTest.java	Common/src/test/java/net/bluelotuscoding/puffishskillleveling/experience/ExperienceCurveTest.java
+R097	Common/src/test/java/net/puffish/skillsmod/expression/DefaultParserTest.java	Common/src/test/java/net/bluelotuscoding/puffishskillleveling/expression/DefaultParserTest.java
+R055	Common/src/test/java/net/puffish/skillsmod/reward/builtin/PerLevelRewardsRewardTest.java	Common/src/test/java/net/bluelotuscoding/puffishskillleveling/reward/builtin/PerLevelRewardsRewardTest.java
+R077	Common/src/test/java/net/puffish/skillsmod/server/data/CategoryDataTest.java	Common/src/test/java/net/bluelotuscoding/puffishskillleveling/server/data/CategoryDataTest.java
 M	Fabric/build.gradle.kts
-M	Fabric/src/main/java/net/puffish/skillsmod/main/FabricClientMain.java
+A	Fabric/src/main/java/net/bluelotuscoding/puffishskillleveling/main/FabricClientMain.java
+R081	Fabric/src/main/java/net/puffish/skillsmod/main/FabricMain.java	Fabric/src/main/java/net/bluelotuscoding/puffishskillleveling/main/FabricMain.java
+D	Fabric/src/main/java/net/puffish/skillsmod/main/FabricClientMain.java
 M	Fabric/src/main/resources/fabric.mod.json
 M	Forge/build.gradle.kts
-M	Forge/src/main/java/net/puffish/skillsmod/main/ForgeClientMain.java
+A	Forge/src/main/java/net/bluelotuscoding/puffishskillleveling/main/ForgeClientMain.java
+R087	Forge/src/main/java/net/puffish/skillsmod/main/ForgeMain.java	Forge/src/main/java/net/bluelotuscoding/puffishskillleveling/main/ForgeMain.java
+D	Forge/src/main/java/net/puffish/skillsmod/main/ForgeClientMain.java
 M	Forge/src/main/resources/META-INF/mods.toml
-A	README.md
-M	config/checkstyle/checkstyle.xml
+M	README.md
 A	docs/fork_audit.csv
 A	docs/reflections/README.md
 A	docs/reflections/fork_audit_update.md
-A	example-skill-level-template_new.zip
+A	docs/reflections/package_refactor.md
 M	gradle.properties
-A	tool-versions.txt

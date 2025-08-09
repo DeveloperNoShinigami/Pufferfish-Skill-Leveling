@@ -4,11 +4,14 @@
 		"https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
-	<property name="charset" value="UTF-8"/>
-	<property name="severity" value="error"/>
-	<property name="fileExtensions" value="java"/>
-	<module name="TreeWalker">
-		<module name="OuterTypeFilename"/>
+        <property name="charset" value="UTF-8"/>
+        <property name="severity" value="error"/>
+        <property name="fileExtensions" value="java"/>
+        <module name="Header">
+                <property name="headerFile" value="${config_loc}/license-header.txt"/>
+        </module>
+        <module name="TreeWalker">
+                <module name="OuterTypeFilename"/>
 		<module name="AvoidStarImport"/>
 		<module name="OneTopLevelClass"/>
 		<module name="EmptyBlock"/>

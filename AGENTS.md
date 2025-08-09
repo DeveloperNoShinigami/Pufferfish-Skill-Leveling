@@ -199,3 +199,10 @@ What went well:
 What went wrong:
 Improvements:
 ```
+
+## Task Reflection - License Header Enforcement
+
+- Goal: Add license headers to all Java files and enforce the header via Checkstyle.
+- Outcome: A script efficiently inserted the header across sources, and `${config_loc}` ensured Checkstyle located the header file.
+- Improvements: Integrate automatic header application (e.g., via Gradle plugin) to avoid manual scripting in future tasks.
+

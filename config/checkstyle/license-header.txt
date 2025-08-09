@@ -9,13 +9,3 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-package net.puffish.skillsmod.access;
-
-import org.joml.Matrix4f;
-
-import java.util.List;
-
-public interface RenderLayerAccess {
-	void setEmits(List<Matrix4f> emits);
-}

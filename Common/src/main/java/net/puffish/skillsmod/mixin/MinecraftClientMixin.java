@@ -9,12 +9,12 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin implements MinecraftClientAccess {
-	@Shadow
-	@Final
-	private BufferBuilderStorage bufferBuilders;
+    @Shadow
+    @Final
+    private BufferBuilderStorage bufferBuilders;
 
-	@Override
-	public BufferBuilderStorage getBufferBuilders() {
-		return bufferBuilders;
-	}
+    @Override
+    public BufferBuilderStorage getBufferBuilders() {
+        return bufferBuilders;
+    }
 }

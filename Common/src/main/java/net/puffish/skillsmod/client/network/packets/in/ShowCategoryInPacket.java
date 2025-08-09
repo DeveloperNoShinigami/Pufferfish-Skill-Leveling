@@ -27,17 +27,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ShowCategoryInPacket implements InPacket {
-	private final ClientCategoryData category;
+    private final ClientCategoryData category;
 
-	private ShowCategoryInPacket(ClientCategoryData category) {
-		this.category = category;
-	}
+    private ShowCategoryInPacket(ClientCategoryData category) {
+        this.category = category;
+    }
 
-	public static ShowCategoryInPacket read(PacketByteBuf buf) {
-		var category = readCategory(buf);
+    public static ShowCategoryInPacket read(PacketByteBuf buf) {
+        var category = readCategory(buf);
 
-		return new ShowCategoryInPacket(category);
-	}
+        return new ShowCategoryInPacket(category);
+    }
 
         public static ClientCategoryData readCategory(PacketByteBuf buf) {
                var id = buf.readIdentifier();
@@ -53,12 +53,12 @@ public class ShowCategoryInPacket implements InPacket {
                                 .stream()
                                 .collect(Collectors.toMap(ClientSkillDefinitionConfig::id, definition -> definition));
 
-		var skills = buf.readList(ShowCategoryInPacket::readSkill)
-				.stream()
-				.collect(Collectors.toMap(ClientSkillConfig::id, skill -> skill));
+        var skills = buf.readList(ShowCategoryInPacket::readSkill)
+                .stream()
+                .collect(Collectors.toMap(ClientSkillConfig::id, skill -> skill));
 
-		var normalConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
-		var exclusiveConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
+        var normalConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
+        var exclusiveConnections = buf.readList(ShowCategoryInPacket::readSkillConnection);
 
                 var skillsInfo = buf.readMap(
                                 PacketByteBuf::readString,
@@ -76,31 +76,31 @@ public class ShowCategoryInPacket implements InPacket {
                 var spentPoints = buf.readInt();
                 var earnedPoints = buf.readInt();
 
-		var levelLimit = Integer.MAX_VALUE;
-		var currentLevel = Integer.MIN_VALUE;
-		var currentExperience = Integer.MIN_VALUE;
-		var requiredExperience = Integer.MIN_VALUE;
-		if (buf.readBoolean()) {
-			levelLimit = buf.readInt();
-			currentLevel = buf.readInt();
-			currentExperience = buf.readInt();
-			requiredExperience = buf.readInt();
-		}
+        var levelLimit = Integer.MAX_VALUE;
+        var currentLevel = Integer.MIN_VALUE;
+        var currentExperience = Integer.MIN_VALUE;
+        var requiredExperience = Integer.MIN_VALUE;
+        if (buf.readBoolean()) {
+            levelLimit = buf.readInt();
+            currentLevel = buf.readInt();
+            currentExperience = buf.readInt();
+            requiredExperience = buf.readInt();
+        }
 
-		var category = new ClientCategoryConfig(
-				id,
-				title,
-				icon,
-				background,
-				colors,
-				exclusiveRoot,
-				spentPointsLimit,
-				levelLimit,
-				definitions,
-				skills,
-				normalConnections,
-				exclusiveConnections
-		);
+        var category = new ClientCategoryConfig(
+                id,
+                title,
+                icon,
+                background,
+                colors,
+                exclusiveRoot,
+                spentPointsLimit,
+                levelLimit,
+                definitions,
+                skills,
+                normalConnections,
+                exclusiveConnections
+        );
 
                 return new ClientCategoryData(
                                 category,
@@ -169,25 +169,25 @@ public class ShowCategoryInPacket implements InPacket {
                return new ClientColorsConfig(connections, fillStroke);
        }
 
-	public static ClientSkillConfig readSkill(PacketByteBuf buf) {
-		var id = buf.readString();
-		var x = buf.readInt();
-		var y = buf.readInt();
-		var definition = buf.readString();
-		var isRoot = buf.readBoolean();
+    public static ClientSkillConfig readSkill(PacketByteBuf buf) {
+        var id = buf.readString();
+        var x = buf.readInt();
+        var y = buf.readInt();
+        var definition = buf.readString();
+        var isRoot = buf.readBoolean();
 
-		return new ClientSkillConfig(id, x, y, definition, isRoot);
-	}
+        return new ClientSkillConfig(id, x, y, definition, isRoot);
+    }
 
-	public static ClientSkillConnectionConfig readSkillConnection(PacketByteBuf buf) {
-		var skillAId = buf.readString();
-		var skillBId = buf.readString();
-		var bidirectional = buf.readBoolean();
+    public static ClientSkillConnectionConfig readSkillConnection(PacketByteBuf buf) {
+        var skillAId = buf.readString();
+        var skillBId = buf.readString();
+        var bidirectional = buf.readBoolean();
 
-		return new ClientSkillConnectionConfig(skillAId, skillBId, bidirectional);
-	}
+        return new ClientSkillConnectionConfig(skillAId, skillBId, bidirectional);
+    }
 
-	public ClientCategoryData getCategory() {
-		return category;
-	}
+    public ClientCategoryData getCategory() {
+        return category;
+    }
 }

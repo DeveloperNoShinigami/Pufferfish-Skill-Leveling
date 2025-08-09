@@ -8,11 +8,11 @@ import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(WorldChunk.class)
 public abstract class WorldChunkMixin implements WorldChunkAccess {
-	@Unique
-	private final AntiFarmingPerChunk.Data antiFarmingData = new AntiFarmingPerChunk.Data();
+    @Unique
+    private final AntiFarmingPerChunk.Data antiFarmingData = new AntiFarmingPerChunk.Data();
 
-	@Override
-	public AntiFarmingPerChunk.Data getAntiFarmingData() {
-		return antiFarmingData;
-	}
+    @Override
+    public AntiFarmingPerChunk.Data getAntiFarmingData() {
+        return antiFarmingData;
+    }
 }

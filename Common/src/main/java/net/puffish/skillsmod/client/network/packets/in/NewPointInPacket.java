@@ -5,21 +5,21 @@ import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.network.InPacket;
 
 public class NewPointInPacket implements InPacket {
-	private final Identifier categoryId;
+    private final Identifier categoryId;
 
-	private NewPointInPacket(Identifier categoryId) {
-		this.categoryId = categoryId;
-	}
+    private NewPointInPacket(Identifier categoryId) {
+        this.categoryId = categoryId;
+    }
 
-	public static NewPointInPacket read(PacketByteBuf buf) {
-		var categoryId = buf.readIdentifier();
+    public static NewPointInPacket read(PacketByteBuf buf) {
+        var categoryId = buf.readIdentifier();
 
-		return new NewPointInPacket(
-				categoryId
-		);
-	}
+        return new NewPointInPacket(
+                categoryId
+        );
+    }
 
-	public Identifier getCategoryId() {
-		return categoryId;
-	}
+    public Identifier getCategoryId() {
+        return categoryId;
+    }
 }

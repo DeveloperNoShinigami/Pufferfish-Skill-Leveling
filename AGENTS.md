@@ -199,3 +199,11 @@ What went well:
 What went wrong:
 Improvements:
 ```
+
+## Recent Updates
+- Added `.editorconfig` enforcing UTF-8, LF line endings, and 4-space indentation for Java and Gradle files.
+- Established `CONTRIBUTING.md` with guidelines to run `./gradlew check` before submitting changes.
+
+## Task Reflections
+- Success: Used a Python script to apply repository-wide formatting and verified with `./gradlew check`.
+- Mistake: An early formatting attempt corrupted files; resetting the repo and reformatting carefully resolved the issue.

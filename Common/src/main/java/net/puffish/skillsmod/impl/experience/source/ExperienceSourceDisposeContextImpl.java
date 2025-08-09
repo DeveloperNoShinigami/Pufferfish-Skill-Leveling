@@ -5,8 +5,8 @@ import net.puffish.skillsmod.api.experience.source.ExperienceSourceDisposeContex
 import net.puffish.skillsmod.util.DisposeContext;
 
 public record ExperienceSourceDisposeContextImpl(DisposeContext context) implements ExperienceSourceDisposeContext {
-	@Override
-	public MinecraftServer getServer() {
-		return context.server();
-	}
+    @Override
+    public MinecraftServer getServer() {
+        return context.server();
+    }
 }

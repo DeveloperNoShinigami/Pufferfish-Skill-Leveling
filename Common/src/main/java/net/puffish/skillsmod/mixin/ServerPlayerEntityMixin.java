@@ -12,18 +12,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin {
-	@Inject(method = "<init>", at = @At("RETURN"))
-	private void injectAtInit(CallbackInfo ci) {
-		SkillsAPI.updateRewards((ServerPlayerEntity) (Object) this, AttributeReward.class);
-	}
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void injectAtInit(CallbackInfo ci) {
+        SkillsAPI.updateRewards((ServerPlayerEntity) (Object) this, AttributeReward.class);
+    }
 
-	@Inject(method = "increaseStat", at = @At("HEAD"))
-	private void injectAtIncreaseStat(Stat<?> stat, int amount, CallbackInfo ci) {
-		var player = (ServerPlayerEntity) (Object) this;
-		SkillsAPI.updateExperienceSources(
-				player,
-				IncreaseStatExperienceSource.class,
-				experienceSource -> experienceSource.getValue(player, stat, amount)
-		);
-	}
+    @Inject(method = "increaseStat", at = @At("HEAD"))
+    private void injectAtIncreaseStat(Stat<?> stat, int amount, CallbackInfo ci) {
+        var player = (ServerPlayerEntity) (Object) this;
+        SkillsAPI.updateExperienceSources(
+                player,
+                IncreaseStatExperienceSource.class,
+                experienceSource -> experienceSource.getValue(player, stat, amount)
+        );
+    }
 }

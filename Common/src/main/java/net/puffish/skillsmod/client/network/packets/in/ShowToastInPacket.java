@@ -6,17 +6,17 @@ import net.puffish.skillsmod.util.ToastType;
 
 public class ShowToastInPacket implements InPacket {
 
-	private final ToastType type;
+    private final ToastType type;
 
-	private ShowToastInPacket(ToastType type) {
-		this.type = type;
-	}
+    private ShowToastInPacket(ToastType type) {
+        this.type = type;
+    }
 
-	public static ShowToastInPacket read(PacketByteBuf buf) {
-		return new ShowToastInPacket(buf.readEnumConstant(ToastType.class));
-	}
+    public static ShowToastInPacket read(PacketByteBuf buf) {
+        return new ShowToastInPacket(buf.readEnumConstant(ToastType.class));
+    }
 
-	public ToastType getToastType() {
-		return type;
-	}
+    public ToastType getToastType() {
+        return type;
+    }
 }

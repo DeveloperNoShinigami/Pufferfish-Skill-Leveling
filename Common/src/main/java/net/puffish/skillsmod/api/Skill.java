@@ -3,21 +3,21 @@ package net.puffish.skillsmod.api;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public interface Skill {
-	Category getCategory();
+    Category getCategory();
 
-	String getId();
+    String getId();
 
-	State getState(ServerPlayerEntity player);
+    State getState(ServerPlayerEntity player);
 
-	void unlock(ServerPlayerEntity player);
+    void unlock(ServerPlayerEntity player);
 
-	void lock(ServerPlayerEntity player);
+    void lock(ServerPlayerEntity player);
 
-	enum State {
-		LOCKED,
-		AVAILABLE,
-		AFFORDABLE,
-		UNLOCKED,
-		EXCLUDED
-	}
+    enum State {
+        LOCKED,
+        AVAILABLE,
+        AFFORDABLE,
+        UNLOCKED,
+        EXCLUDED
+    }
 }

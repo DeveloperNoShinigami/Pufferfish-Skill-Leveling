@@ -14,25 +14,25 @@ import java.util.List;
 
 @Mixin(RenderLayer.class)
 public final class RenderLayerMixin implements RenderLayerAccess {
-	@Unique
-	private List<Matrix4f> emits;
+    @Unique
+    private List<Matrix4f> emits;
 
-	@Override
-	@Unique
-	public void setEmits(List<Matrix4f> emits) {
-		this.emits = emits;
-	}
+    @Override
+    @Unique
+    public void setEmits(List<Matrix4f> emits) {
+        this.emits = emits;
+    }
 
-	@ModifyArg(
-			method = "draw",
-			index = 0,
-			at = @At(
-					value = "INVOKE",
-					target = "Lnet/minecraft/client/render/BufferRenderer;drawWithGlobalProgram(Lnet/minecraft/client/render/BufferBuilder$BuiltBuffer;)V"
-			)
-	)
-	private BufferBuilder.BuiltBuffer modifyArgAtDrawWithGlobalProgram(BufferBuilder.BuiltBuffer builtBuffer) {
-		((BuiltBufferAccess) builtBuffer).setEmits(emits);
-		return builtBuffer;
-	}
+    @ModifyArg(
+            method = "draw",
+            index = 0,
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/render/BufferRenderer;drawWithGlobalProgram(Lnet/minecraft/client/render/BufferBuilder$BuiltBuffer;)V"
+            )
+    )
+    private BufferBuilder.BuiltBuffer modifyArgAtDrawWithGlobalProgram(BufferBuilder.BuiltBuffer builtBuffer) {
+        ((BuiltBufferAccess) builtBuffer).setEmits(emits);
+        return builtBuffer;
+    }
 }

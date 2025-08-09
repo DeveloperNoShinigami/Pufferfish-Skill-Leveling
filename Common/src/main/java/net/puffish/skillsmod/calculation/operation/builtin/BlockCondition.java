@@ -18,45 +18,45 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class BlockCondition implements Operation<Block, Boolean> {
-	private final RegistryEntryList<Block> blockEntries;
+    private final RegistryEntryList<Block> blockEntries;
 
-	private BlockCondition(RegistryEntryList<Block> blockEntries) {
-		this.blockEntries = blockEntries;
-	}
+    private BlockCondition(RegistryEntryList<Block> blockEntries) {
+        this.blockEntries = blockEntries;
+    }
 
-	public static void register() {
-		BuiltinPrototypes.BLOCK.registerOperation(
-				SkillsMod.createIdentifier("test"),
-				BuiltinPrototypes.BOOLEAN,
-				BlockCondition::parse
-		);
-	}
+    public static void register() {
+        BuiltinPrototypes.BLOCK.registerOperation(
+                SkillsMod.createIdentifier("test"),
+                BuiltinPrototypes.BOOLEAN,
+                BlockCondition::parse
+        );
+    }
 
-	public static Result<BlockCondition, Problem> parse(OperationConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(BlockCondition::parse, context));
-	}
+    public static Result<BlockCondition, Problem> parse(OperationConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyUtils.wrapNoUnused(BlockCondition::parse, context));
+    }
 
-	public static Result<BlockCondition, Problem> parse(JsonObject rootObject) {
-		var problems = new ArrayList<Problem>();
+    public static Result<BlockCondition, Problem> parse(JsonObject rootObject) {
+        var problems = new ArrayList<Problem>();
 
-		var optBlock = rootObject.get("block")
-				.andThen(BuiltinJson::parseBlockOrBlockTag)
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optBlock = rootObject.get("block")
+                .andThen(BuiltinJson::parseBlockOrBlockTag)
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new BlockCondition(
-					optBlock.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new BlockCondition(
+                    optBlock.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	@Override
-	public Optional<Boolean> apply(Block block) {
-		return Optional.of(blockEntries.contains(Registries.BLOCK.getEntry(block)));
-	}
+    @Override
+    public Optional<Boolean> apply(Block block) {
+        return Optional.of(blockEntries.contains(Registries.BLOCK.getEntry(block)));
+    }
 }

@@ -24,21 +24,21 @@ public class FabricClientMain implements ClientModInitializer {
                 );
         }
 
-	private static class ClientRegistrarImpl implements ClientRegistrar {
-		@Override
-		public <T extends InPacket> void registerInPacket(Identifier id, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
-			ClientPlayNetworking.registerGlobalReceiver(
-					id,
-					(client, handler2, buf, responseSender) -> {
-						var packet = reader.apply(buf);
-						client.execute(() -> handler.handle(packet));
-					}
-			);
-		}
+    private static class ClientRegistrarImpl implements ClientRegistrar {
+        @Override
+        public <T extends InPacket> void registerInPacket(Identifier id, Function<PacketByteBuf, T> reader, ClientPacketHandler<T> handler) {
+            ClientPlayNetworking.registerGlobalReceiver(
+                    id,
+                    (client, handler2, buf, responseSender) -> {
+                        var packet = reader.apply(buf);
+                        client.execute(() -> handler.handle(packet));
+                    }
+            );
+        }
 
-		@Override
-		public void registerOutPacket(Identifier id) { }
-	}
+        @Override
+        public void registerOutPacket(Identifier id) { }
+    }
 
         private static class ClientPacketSenderImpl implements ClientPacketSender {
                 @Override

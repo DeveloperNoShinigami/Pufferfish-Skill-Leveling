@@ -16,15 +16,15 @@ import java.util.Collection;
 @Mixin(FishingRodHookedCriterion.class)
 public class FishingRodHookedCriterionMixin {
 
-	@Inject(method = "trigger", at = @At("HEAD"))
-	private void injectAtInit(ServerPlayerEntity player, ItemStack rod, FishingBobberEntity bobber, Collection<ItemStack> fishingLoots, CallbackInfo ci) {
-		for (var fishedItem : fishingLoots) {
-			SkillsAPI.updateExperienceSources(
-					player,
-					FishItemExperienceSource.class,
-					fishItemExperienceSource -> fishItemExperienceSource.getValue(player, rod, fishedItem)
-			);
-		}
-	}
+    @Inject(method = "trigger", at = @At("HEAD"))
+    private void injectAtInit(ServerPlayerEntity player, ItemStack rod, FishingBobberEntity bobber, Collection<ItemStack> fishingLoots, CallbackInfo ci) {
+        for (var fishedItem : fishingLoots) {
+            SkillsAPI.updateExperienceSources(
+                    player,
+                    FishItemExperienceSource.class,
+                    fishItemExperienceSource -> fishItemExperienceSource.getValue(player, rod, fishedItem)
+            );
+        }
+    }
 
 }

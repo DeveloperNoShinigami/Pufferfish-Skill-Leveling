@@ -14,26 +14,26 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(BufferRenderer.class)
 public final class BufferRendererMixin {
-	@Inject(
-			method = "drawWithGlobalProgramInternal",
-			at = @At(
-					value = "INVOKE",
-					target = "Lnet/minecraft/client/gl/VertexBuffer;draw(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/gl/ShaderProgram;)V"
-			),
-			locals = LocalCapture.CAPTURE_FAILHARD,
-			cancellable = true
-	)
-	private static void injectBeforeDraw(BufferBuilder.BuiltBuffer builtBuffer, CallbackInfo ci, VertexBuffer vertexBuffer) {
-		var emits = ((BuiltBufferAccess) builtBuffer).getEmits();
-		if (emits != null) {
-			for (var emit : emits) {
-				vertexBuffer.draw(
-						new Matrix4f(RenderSystem.getModelViewMatrix()).mul(emit),
-						RenderSystem.getProjectionMatrix(),
-						RenderSystem.getShader()
-				);
-			}
-			ci.cancel();
-		}
-	}
+    @Inject(
+            method = "drawWithGlobalProgramInternal",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/gl/VertexBuffer;draw(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/gl/ShaderProgram;)V"
+            ),
+            locals = LocalCapture.CAPTURE_FAILHARD,
+            cancellable = true
+    )
+    private static void injectBeforeDraw(BufferBuilder.BuiltBuffer builtBuffer, CallbackInfo ci, VertexBuffer vertexBuffer) {
+        var emits = ((BuiltBufferAccess) builtBuffer).getEmits();
+        if (emits != null) {
+            for (var emit : emits) {
+                vertexBuffer.draw(
+                        new Matrix4f(RenderSystem.getModelViewMatrix()).mul(emit),
+                        RenderSystem.getProjectionMatrix(),
+                        RenderSystem.getShader()
+                );
+            }
+            ci.cancel();
+        }
+    }
 }

@@ -17,25 +17,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
 
-	@Inject(method = "onCraft", at = @At("HEAD"))
-	private void injectAtOnCraft(World world, PlayerEntity player, int amount, CallbackInfo ci) {
-		if (player instanceof ServerPlayerEntity serverPlayer) {
-			SkillsAPI.updateExperienceSources(
-					serverPlayer,
-					CraftItemExperienceSource.class,
-					experienceSource -> experienceSource.getValue(serverPlayer, (ItemStack) (Object) this) * amount
-			);
-		}
-	}
+    @Inject(method = "onCraft", at = @At("HEAD"))
+    private void injectAtOnCraft(World world, PlayerEntity player, int amount, CallbackInfo ci) {
+        if (player instanceof ServerPlayerEntity serverPlayer) {
+            SkillsAPI.updateExperienceSources(
+                    serverPlayer,
+                    CraftItemExperienceSource.class,
+                    experienceSource -> experienceSource.getValue(serverPlayer, (ItemStack) (Object) this) * amount
+            );
+        }
+    }
 
-	@Inject(method = "postMine", at = @At("HEAD"))
-	private void injectAtPostMine(World world, BlockState state, BlockPos pos, PlayerEntity player, CallbackInfo ci) {
-		if (player instanceof ServerPlayerEntity serverPlayer) {
-			SkillsAPI.updateExperienceSources(
-					serverPlayer,
-					BreakBlockExperienceSource.class,
-					experienceSource -> experienceSource.getValue(serverPlayer, state, (ItemStack) (Object) this)
-			);
-		}
-	}
+    @Inject(method = "postMine", at = @At("HEAD"))
+    private void injectAtPostMine(World world, BlockState state, BlockPos pos, PlayerEntity player, CallbackInfo ci) {
+        if (player instanceof ServerPlayerEntity serverPlayer) {
+            SkillsAPI.updateExperienceSources(
+                    serverPlayer,
+                    BreakBlockExperienceSource.class,
+                    experienceSource -> experienceSource.getValue(serverPlayer, state, (ItemStack) (Object) this)
+            );
+        }
+    }
 }

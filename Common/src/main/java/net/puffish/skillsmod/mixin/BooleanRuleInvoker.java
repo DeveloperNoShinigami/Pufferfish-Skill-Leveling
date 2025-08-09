@@ -6,8 +6,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(GameRules.BooleanRule.class)
 public interface BooleanRuleInvoker {
-	@Invoker("create")
-	static GameRules.Type<GameRules.BooleanRule> invokeCreate(boolean initialValue) {
-		throw new AssertionError();
-	}
+    @Invoker("create")
+    static GameRules.Type<GameRules.BooleanRule> invokeCreate(boolean initialValue) {
+        throw new AssertionError();
+    }
 }

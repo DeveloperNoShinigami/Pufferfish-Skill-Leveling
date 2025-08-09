@@ -9,29 +9,29 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class PathUtils {
-	public static boolean isDirectoryEmpty(Path path) {
-		try {
-			return FileUtils.isEmptyDirectory(path.toFile());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public static boolean isDirectoryEmpty(Path path) {
+        try {
+            return FileUtils.isEmptyDirectory(path.toFile());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public static void copyFileFromJar(Path source, Path target) {
-		try {
-			FileUtils.copyInputStreamToFile(Objects.requireNonNull(
-					SkillsMod.getInstance()
-							.getClass()
-							.getResourceAsStream("/" + pathToString(source))
-			), target.toFile());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public static void copyFileFromJar(Path source, Path target) {
+        try {
+            FileUtils.copyInputStreamToFile(Objects.requireNonNull(
+                    SkillsMod.getInstance()
+                            .getClass()
+                            .getResourceAsStream("/" + pathToString(source))
+            ), target.toFile());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public static String pathToString(Path path) {
-		return StreamSupport.stream(path.spliterator(), false)
-				.map(Path::toString)
-				.collect(Collectors.joining("/"));
-	}
+    public static String pathToString(Path path) {
+        return StreamSupport.stream(path.spliterator(), false)
+                .map(Path::toString)
+                .collect(Collectors.joining("/"));
+    }
 }

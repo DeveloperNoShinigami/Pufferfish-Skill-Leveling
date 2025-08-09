@@ -18,19 +18,19 @@ import java.util.Optional;
 
 @Mixin(DamageSource.class)
 public class DamageSourceMixin implements DamageSourceAccess {
-	@Unique
-	private ItemStack weapon;
+    @Unique
+    private ItemStack weapon;
 
-	@Inject(method = "<init>", at = @At("RETURN"))
-	private void injectAtInit(RegistryEntry<DamageType> type, Entity source, Entity attacker, Vec3d position, CallbackInfo ci) {
-		if (attacker instanceof LivingEntity livingEntity) {
-			weapon = livingEntity.getMainHandStack(); // not really correct
-		}
-	}
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void injectAtInit(RegistryEntry<DamageType> type, Entity source, Entity attacker, Vec3d position, CallbackInfo ci) {
+        if (attacker instanceof LivingEntity livingEntity) {
+            weapon = livingEntity.getMainHandStack(); // not really correct
+        }
+    }
 
-	@Override
-	@Unique
-	public Optional<ItemStack> getWeapon() {
-		return Optional.ofNullable(weapon);
-	}
+    @Override
+    @Unique
+    public Optional<ItemStack> getWeapon() {
+        return Optional.ofNullable(weapon);
+    }
 }

@@ -8,14 +8,14 @@ import net.puffish.skillsmod.impl.calculation.CalculationImpl;
 
 public interface Calculation<T> {
 
-	static <T> Result<Calculation<T>, Problem> parse(
-			JsonElement rootElement,
-			Variables<T, Double> variables,
-			ConfigContext context
-	) {
-		return CalculationImpl.create(rootElement, variables, context)
-				.mapSuccess(c -> c);
-	}
+    static <T> Result<Calculation<T>, Problem> parse(
+            JsonElement rootElement,
+            Variables<T, Double> variables,
+            ConfigContext context
+    ) {
+        return CalculationImpl.create(rootElement, variables, context)
+                .mapSuccess(c -> c);
+    }
 
-	double evaluate(T t);
+    double evaluate(T t);
 }

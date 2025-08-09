@@ -18,21 +18,21 @@ import net.puffish.skillsmod.calculation.operation.builtin.TagCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.WorldCondition;
 
 public class BuiltinOperations {
-	public static void register() {
-		AttributeOperation.register();
-		BlockCondition.register();
-		BlockStateCondition.register();
-		DamageSourceClassification.register();
-		DamageTypeCondition.register();
-		EffectOperation.register();
-		EntityTypeCondition.register();
-		ItemCondition.register();
+    public static void register() {
+        AttributeOperation.register();
+        BlockCondition.register();
+        BlockStateCondition.register();
+        DamageSourceClassification.register();
+        DamageTypeCondition.register();
+        EffectOperation.register();
+        EntityTypeCondition.register();
+        ItemCondition.register();
                 ItemStackNbtCondition.register();
-		ScoreboardOperation.register();
-		StatCondition.register();
-		StatTypeCondition.register();
-		StatValueOperation.register();
-		SwitchOperation.register();
+        ScoreboardOperation.register();
+        StatCondition.register();
+        StatTypeCondition.register();
+        StatValueOperation.register();
+        SwitchOperation.register();
                 TagCondition.register();
                 WorldCondition.register();
         }

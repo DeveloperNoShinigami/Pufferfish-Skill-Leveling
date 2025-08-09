@@ -7,11 +7,11 @@ import net.puffish.skillsmod.api.reward.RewardDisposeContext;
 import net.puffish.skillsmod.api.reward.RewardUpdateContext;
 
 public class DummyReward implements Reward {
-	public static final Identifier ID = SkillsMod.createIdentifier("dummy");
+    public static final Identifier ID = SkillsMod.createIdentifier("dummy");
 
-	@Override
-	public void update(RewardUpdateContext context) { }
+    @Override
+    public void update(RewardUpdateContext context) { }
 
-	@Override
-	public void dispose(RewardDisposeContext context) { }
+    @Override
+    public void dispose(RewardDisposeContext context) { }
 }

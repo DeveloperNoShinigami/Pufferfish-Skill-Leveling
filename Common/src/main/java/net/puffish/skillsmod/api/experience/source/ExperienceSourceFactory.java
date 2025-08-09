@@ -4,5 +4,5 @@ import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 
 public interface ExperienceSourceFactory {
-	Result<? extends ExperienceSource, Problem> create(ExperienceSourceConfigContext context);
+    Result<? extends ExperienceSource, Problem> create(ExperienceSourceConfigContext context);
 }

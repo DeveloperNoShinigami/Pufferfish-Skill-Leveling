@@ -26,9 +26,9 @@ public class SkillUpdateInPacket implements InPacket {
                );
        }
 
-	public Identifier getCategoryId() {
-		return categoryId;
-	}
+    public Identifier getCategoryId() {
+        return categoryId;
+    }
 
        public String getSkillId() {
                return skillId;

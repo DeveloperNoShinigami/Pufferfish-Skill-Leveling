@@ -16,8 +16,8 @@ import net.puffish.skillsmod.server.data.CategoryData;
 
 public record ShowCategoryOutPacket(CategoryConfig category, CategoryData categoryData) implements OutPacket {
 
-	@Override
-	public void write(PacketByteBuf buf) {
+    @Override
+    public void write(PacketByteBuf buf) {
                buf.writeIdentifier(category.id());
                buf.writeBoolean(category.general().exclusiveRoot());
                buf.writeInt(category.general().spentPointsLimit());
@@ -38,22 +38,22 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
                                         buf1.writeInt(categoryData.getSkillLevel(skill.id()));
                                 }
                 );
-		buf.writeInt(categoryData.getSpentPoints(category));
-		buf.writeInt(categoryData.getPointsTotal());
-		category.experience().ifPresentOrElse(experience -> {
-			buf.writeBoolean(true);
-			var curve = experience.curve();
-			buf.writeInt(curve.getLevelLimit());
-			var progress = curve.getProgress(categoryData.getExperience());
-			buf.writeInt(progress.currentLevel());
-			buf.writeInt(progress.currentExperience());
-			buf.writeInt(progress.requiredExperience());
-		}, () -> buf.writeBoolean(false));
-	}
+        buf.writeInt(categoryData.getSpentPoints(category));
+        buf.writeInt(categoryData.getPointsTotal());
+        category.experience().ifPresentOrElse(experience -> {
+            buf.writeBoolean(true);
+            var curve = experience.curve();
+            buf.writeInt(curve.getLevelLimit());
+            var progress = curve.getProgress(categoryData.getExperience());
+            buf.writeInt(progress.currentLevel());
+            buf.writeInt(progress.currentExperience());
+            buf.writeInt(progress.requiredExperience());
+        }, () -> buf.writeBoolean(false));
+    }
 
-	public void write(PacketByteBuf buf, SkillDefinitionsConfig definitions) {
-		buf.writeCollection(definitions.getAll(), (buf1, definition) -> write(buf, definition));
-	}
+    public void write(PacketByteBuf buf, SkillDefinitionsConfig definitions) {
+        buf.writeCollection(definitions.getAll(), (buf1, definition) -> write(buf, definition));
+    }
 
        public void write(PacketByteBuf buf, SkillDefinitionConfig definition) {
                buf.writeString(definition.id());
@@ -67,32 +67,32 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
                buf.writeBoolean(definition.rewards().stream().anyMatch(reward -> reward.type().equals(PerLevelRewardsReward.ID)));
        }
 
-	public void write(PacketByteBuf buf, SkillsConfig skills) {
-		buf.writeCollection(skills.getAll(), ShowCategoryOutPacket::write);
-	}
+    public void write(PacketByteBuf buf, SkillsConfig skills) {
+        buf.writeCollection(skills.getAll(), ShowCategoryOutPacket::write);
+    }
 
-	public void write(PacketByteBuf buf, SkillConnectionsConfig connections) {
-		buf.writeCollection(connections.normal().getAll(), ShowCategoryOutPacket::write);
-		buf.writeCollection(connections.exclusive().getAll(), ShowCategoryOutPacket::write);
-	}
+    public void write(PacketByteBuf buf, SkillConnectionsConfig connections) {
+        buf.writeCollection(connections.normal().getAll(), ShowCategoryOutPacket::write);
+        buf.writeCollection(connections.exclusive().getAll(), ShowCategoryOutPacket::write);
+    }
 
-	public static void write(PacketByteBuf buf, SkillConfig skill) {
-		buf.writeString(skill.id());
-		buf.writeInt(skill.x());
-		buf.writeInt(skill.y());
-		buf.writeString(skill.definitionId());
-		buf.writeBoolean(skill.isRoot());
-	}
+    public static void write(PacketByteBuf buf, SkillConfig skill) {
+        buf.writeString(skill.id());
+        buf.writeInt(skill.x());
+        buf.writeInt(skill.y());
+        buf.writeString(skill.definitionId());
+        buf.writeBoolean(skill.isRoot());
+    }
 
-	public static void write(PacketByteBuf buf, SkillConnection skill) {
-		buf.writeString(skill.skillAId());
-		buf.writeString(skill.skillBId());
-		buf.writeBoolean(skill.bidirectional());
-	}
+    public static void write(PacketByteBuf buf, SkillConnection skill) {
+        buf.writeString(skill.skillAId());
+        buf.writeString(skill.skillBId());
+        buf.writeBoolean(skill.bidirectional());
+    }
 
 
-	@Override
-	public Identifier getId() {
-		return Packets.SHOW_CATEGORY;
-	}
+    @Override
+    public Identifier getId() {
+        return Packets.SHOW_CATEGORY;
+    }
 }

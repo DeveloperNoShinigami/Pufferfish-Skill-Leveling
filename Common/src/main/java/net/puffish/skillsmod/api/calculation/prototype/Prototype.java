@@ -10,13 +10,13 @@ import net.puffish.skillsmod.impl.calculation.prototype.PrototypeImpl;
 import java.util.Optional;
 
 public interface Prototype<T> {
-	static <T> Prototype<T> create(Identifier id) {
-		return new PrototypeImpl<>(id);
-	}
+    static <T> Prototype<T> create(Identifier id) {
+        return new PrototypeImpl<>(id);
+    }
 
-	Identifier getId();
+    Identifier getId();
 
-	<R> void registerOperation(Identifier id, Prototype<R> prototype, OperationFactory<T, R> factory);
+    <R> void registerOperation(Identifier id, Prototype<R> prototype, OperationFactory<T, R> factory);
 
-	Optional<Result<PrototypeOperation<T, ?>, Problem>> getOperation(Identifier id, OperationConfigContext context);
+    Optional<Result<PrototypeOperation<T, ?>, Problem>> getOperation(Identifier id, OperationConfigContext context);
 }

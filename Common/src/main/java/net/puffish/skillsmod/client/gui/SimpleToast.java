@@ -8,33 +8,33 @@ import net.minecraft.client.toast.ToastManager;
 import net.minecraft.text.Text;
 
 public class SimpleToast implements Toast {
-	private final SystemToast toast;
+    private final SystemToast toast;
 
-	private SimpleToast(SystemToast toast) {
-		this.toast = toast;
-	}
+    private SimpleToast(SystemToast toast) {
+        this.toast = toast;
+    }
 
-	public static SimpleToast create(MinecraftClient client, Text title, Text description) {
-		return new SimpleToast(SystemToast.create(client, SystemToast.Type.PACK_LOAD_FAILURE, title, description));
-	}
+    public static SimpleToast create(MinecraftClient client, Text title, Text description) {
+        return new SimpleToast(SystemToast.create(client, SystemToast.Type.PACK_LOAD_FAILURE, title, description));
+    }
 
-	@Override
-	public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
-		return toast.draw(context, manager, startTime);
-	}
+    @Override
+    public Visibility draw(DrawContext context, ToastManager manager, long startTime) {
+        return toast.draw(context, manager, startTime);
+    }
 
-	@Override
-	public int getWidth() {
-		return toast.getWidth();
-	}
+    @Override
+    public int getWidth() {
+        return toast.getWidth();
+    }
 
-	@Override
-	public int getHeight() {
-		return toast.getHeight();
-	}
+    @Override
+    public int getHeight() {
+        return toast.getHeight();
+    }
 
-	@Override
-	public int getRequiredSpaceCount() {
-		return toast.getRequiredSpaceCount();
-	}
+    @Override
+    public int getRequiredSpaceCount() {
+        return toast.getRequiredSpaceCount();
+    }
 }

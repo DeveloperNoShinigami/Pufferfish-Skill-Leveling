@@ -23,85 +23,85 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class FishItemExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("fish_item");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+    private static final Identifier ID = SkillsMod.createIdentifier("fish_item");
+    private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
-	static {
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_player"),
-				BuiltinPrototypes.PLAYER,
-				OperationFactory.create(Data::player)
-		);
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_rod_item_stack"),
-				BuiltinPrototypes.ITEM_STACK,
-				OperationFactory.create(Data::rod)
-		);
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_fished_item_stack"),
-				BuiltinPrototypes.ITEM_STACK,
-				OperationFactory.create(Data::fished)
-		);
-	}
+    static {
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_player"),
+                BuiltinPrototypes.PLAYER,
+                OperationFactory.create(Data::player)
+        );
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_rod_item_stack"),
+                BuiltinPrototypes.ITEM_STACK,
+                OperationFactory.create(Data::rod)
+        );
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_fished_item_stack"),
+                BuiltinPrototypes.ITEM_STACK,
+                OperationFactory.create(Data::fished)
+        );
+    }
 
-	private final Calculation<Data> calculation;
+    private final Calculation<Data> calculation;
 
-	private FishItemExperienceSource(Calculation<Data> calculation) {
-		this.calculation = calculation;
-	}
+    private FishItemExperienceSource(Calculation<Data> calculation) {
+        this.calculation = calculation;
+    }
 
-	public static void register() {
-		SkillsAPI.registerExperienceSource(
-				ID,
-				FishItemExperienceSource::parse
-		);
-	}
+    public static void register() {
+        SkillsAPI.registerExperienceSource(
+                ID,
+                FishItemExperienceSource::parse
+        );
+    }
 
-	private static Result<FishItemExperienceSource, Problem> parse(ExperienceSourceConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
-	}
+    private static Result<FishItemExperienceSource, Problem> parse(ExperienceSourceConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
+    }
 
-	private static Result<FishItemExperienceSource, Problem> parse(JsonObject rootObject, ExperienceSourceConfigContext context) {
-		var problems = new ArrayList<Problem>();
+    private static Result<FishItemExperienceSource, Problem> parse(JsonObject rootObject, ExperienceSourceConfigContext context) {
+        var problems = new ArrayList<Problem>();
 
-		var variables = rootObject.get("variables")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(variablesElement -> Variables.parse(variablesElement, PROTOTYPE, context)
-						.ifFailure(problems::add)
-						.getSuccess()
-				)
-				.orElseGet(() -> Variables.create(Map.of()));
+        var variables = rootObject.get("variables")
+                .getSuccess() // ignore failure because this property is optional
+                .flatMap(variablesElement -> Variables.parse(variablesElement, PROTOTYPE, context)
+                        .ifFailure(problems::add)
+                        .getSuccess()
+                )
+                .orElseGet(() -> Variables.create(Map.of()));
 
-		var optCalculation = rootObject.get("experience")
-				.andThen(experienceElement -> Calculation.parse(
-						experienceElement,
-						variables,
-						context
-				))
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optCalculation = rootObject.get("experience")
+                .andThen(experienceElement -> Calculation.parse(
+                        experienceElement,
+                        variables,
+                        context
+                ))
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new FishItemExperienceSource(
-					optCalculation.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new FishItemExperienceSource(
+                    optCalculation.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	private record Data(ServerPlayerEntity player, ItemStack rod, ItemStack fished) { }
+    private record Data(ServerPlayerEntity player, ItemStack rod, ItemStack fished) { }
 
-	public int getValue(ServerPlayerEntity player, ItemStack rod, ItemStack fished) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, rod, fished)
-		));
-	}
+    public int getValue(ServerPlayerEntity player, ItemStack rod, ItemStack fished) {
+        return (int) Math.round(calculation.evaluate(
+                new Data(player, rod, fished)
+        ));
+    }
 
-	@Override
-	public void dispose(ExperienceSourceDisposeContext context) {
-		// Nothing to do.
-	}
+    @Override
+    public void dispose(ExperienceSourceDisposeContext context) {
+        // Nothing to do.
+    }
 }

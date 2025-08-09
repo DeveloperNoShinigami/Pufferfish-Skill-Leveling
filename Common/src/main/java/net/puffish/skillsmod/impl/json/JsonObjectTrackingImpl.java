@@ -17,12 +17,12 @@ public class JsonObjectTrackingImpl extends ForwardingJsonObject {
                 super(parent);
         }
 
-	public List<Problem> reportUnusedEntries() {
-		return parent.stream()
-				.filter(entry -> !usedKeys.contains(entry.getKey()))
-				.map(entry -> parent.getPath().createProblem("Unused field `" + entry.getKey() + "`"))
-				.toList();
-	}
+    public List<Problem> reportUnusedEntries() {
+        return parent.stream()
+                .filter(entry -> !usedKeys.contains(entry.getKey()))
+                .map(entry -> parent.getPath().createProblem("Unused field `" + entry.getKey() + "`"))
+                .toList();
+    }
 
         @Override
         public Result<JsonElement, Problem> get(String key) {

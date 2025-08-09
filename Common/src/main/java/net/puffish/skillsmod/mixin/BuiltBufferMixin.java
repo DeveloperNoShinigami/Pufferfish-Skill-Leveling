@@ -10,18 +10,18 @@ import java.util.List;
 
 @Mixin(BufferBuilder.BuiltBuffer.class)
 public class BuiltBufferMixin implements BuiltBufferAccess {
-	@Unique
-	private List<Matrix4f> emits;
+    @Unique
+    private List<Matrix4f> emits;
 
-	@Override
-	@Unique
-	public void setEmits(List<Matrix4f> emits) {
-		this.emits = emits;
-	}
+    @Override
+    @Unique
+    public void setEmits(List<Matrix4f> emits) {
+        this.emits = emits;
+    }
 
-	@Override
-	@Unique
-	public List<Matrix4f> getEmits() {
-		return emits;
-	}
+    @Override
+    @Unique
+    public List<Matrix4f> getEmits() {
+        return emits;
+    }
 }

@@ -7,17 +7,17 @@ import net.puffish.skillsmod.network.InPacket;
 import java.util.Optional;
 
 public class OpenScreenInPacket implements InPacket {
-	private final Optional<Identifier> categoryId;
+    private final Optional<Identifier> categoryId;
 
-	private OpenScreenInPacket(Optional<Identifier> categoryId) {
-		this.categoryId = categoryId;
-	}
+    private OpenScreenInPacket(Optional<Identifier> categoryId) {
+        this.categoryId = categoryId;
+    }
 
-	public static OpenScreenInPacket read(PacketByteBuf buf) {
-		return new OpenScreenInPacket(buf.readOptional(PacketByteBuf::readIdentifier));
-	}
+    public static OpenScreenInPacket read(PacketByteBuf buf) {
+        return new OpenScreenInPacket(buf.readOptional(PacketByteBuf::readIdentifier));
+    }
 
-	public Optional<Identifier> getCategoryId() {
-		return categoryId;
-	}
+    public Optional<Identifier> getCategoryId() {
+        return categoryId;
+    }
 }

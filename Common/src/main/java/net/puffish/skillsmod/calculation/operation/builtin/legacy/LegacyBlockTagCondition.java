@@ -17,45 +17,45 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class LegacyBlockTagCondition implements Operation<BlockState, Boolean> {
-	private final RegistryEntryList<Block> entries;
+    private final RegistryEntryList<Block> entries;
 
-	private LegacyBlockTagCondition(RegistryEntryList<Block> entries) {
-		this.entries = entries;
-	}
+    private LegacyBlockTagCondition(RegistryEntryList<Block> entries) {
+        this.entries = entries;
+    }
 
-	public static void register() {
-		BuiltinPrototypes.BLOCK_STATE.registerOperation(
-				SkillsMod.createIdentifier("legacy_block_tag"),
-				BuiltinPrototypes.BOOLEAN,
-				LegacyBlockTagCondition::parse
-		);
-	}
+    public static void register() {
+        BuiltinPrototypes.BLOCK_STATE.registerOperation(
+                SkillsMod.createIdentifier("legacy_block_tag"),
+                BuiltinPrototypes.BOOLEAN,
+                LegacyBlockTagCondition::parse
+        );
+    }
 
-	public static Result<LegacyBlockTagCondition, Problem> parse(OperationConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyBlockTagCondition::parse);
-	}
+    public static Result<LegacyBlockTagCondition, Problem> parse(OperationConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyBlockTagCondition::parse);
+    }
 
-	public static Result<LegacyBlockTagCondition, Problem> parse(JsonObject rootObject) {
-		var problems = new ArrayList<Problem>();
+    public static Result<LegacyBlockTagCondition, Problem> parse(JsonObject rootObject) {
+        var problems = new ArrayList<Problem>();
 
-		var optTag = rootObject.get("tag")
-				.andThen(BuiltinJson::parseBlockTag)
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optTag = rootObject.get("tag")
+                .andThen(BuiltinJson::parseBlockTag)
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new LegacyBlockTagCondition(
-					optTag.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new LegacyBlockTagCondition(
+                    optTag.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	@Override
-	public Optional<Boolean> apply(BlockState blockState) {
-		return Optional.of(blockState.isIn(entries));
-	}
+    @Override
+    public Optional<Boolean> apply(BlockState blockState) {
+        return Optional.of(blockState.isIn(entries));
+    }
 }

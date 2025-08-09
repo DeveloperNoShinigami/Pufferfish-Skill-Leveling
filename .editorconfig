@@ -1,0 +1,19 @@
+root = true
+
+[*.java]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+
+[*.gradle]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+
+[*.gradle.kts]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4

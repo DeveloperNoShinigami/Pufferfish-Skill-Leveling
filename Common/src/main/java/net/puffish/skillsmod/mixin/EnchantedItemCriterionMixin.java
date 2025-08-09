@@ -13,12 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EnchantedItemCriterion.class)
 public class EnchantedItemCriterionMixin {
 
-	@Inject(method = "trigger", at = @At("HEAD"))
-	private void injectAtTrigger(ServerPlayerEntity serverPlayer, ItemStack stack, int levels, CallbackInfo ci) {
-		SkillsAPI.updateExperienceSources(
-				serverPlayer,
-				EnchantItemExperienceSource.class,
-				experienceSource -> experienceSource.getValue(serverPlayer, stack, levels)
-		);
-	}
+    @Inject(method = "trigger", at = @At("HEAD"))
+    private void injectAtTrigger(ServerPlayerEntity serverPlayer, ItemStack stack, int levels, CallbackInfo ci) {
+        SkillsAPI.updateExperienceSources(
+                serverPlayer,
+                EnchantItemExperienceSource.class,
+                experienceSource -> experienceSource.getValue(serverPlayer, stack, levels)
+        );
+    }
 }

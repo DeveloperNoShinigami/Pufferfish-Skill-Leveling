@@ -19,45 +19,45 @@ import java.util.Optional;
 
 public class StatTypeCondition implements Operation<StatType<?>, Boolean> {
 
-	private final RegistryEntryList<StatType<?>> statTypeEntries;
+    private final RegistryEntryList<StatType<?>> statTypeEntries;
 
-	private StatTypeCondition(RegistryEntryList<StatType<?>> statTypeEntries) {
-		this.statTypeEntries = statTypeEntries;
-	}
+    private StatTypeCondition(RegistryEntryList<StatType<?>> statTypeEntries) {
+        this.statTypeEntries = statTypeEntries;
+    }
 
-	public static void register() {
-		BuiltinPrototypes.STAT_TYPE.registerOperation(
-				SkillsMod.createIdentifier("test"),
-				BuiltinPrototypes.BOOLEAN,
-				StatTypeCondition::parse
-		);
-	}
+    public static void register() {
+        BuiltinPrototypes.STAT_TYPE.registerOperation(
+                SkillsMod.createIdentifier("test"),
+                BuiltinPrototypes.BOOLEAN,
+                StatTypeCondition::parse
+        );
+    }
 
-	public static Result<StatTypeCondition, Problem> parse(OperationConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(StatTypeCondition::parse, context));
-	}
+    public static Result<StatTypeCondition, Problem> parse(OperationConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyUtils.wrapNoUnused(StatTypeCondition::parse, context));
+    }
 
-	public static Result<StatTypeCondition, Problem> parse(JsonObject rootObject) {
-		var problems = new ArrayList<Problem>();
+    public static Result<StatTypeCondition, Problem> parse(JsonObject rootObject) {
+        var problems = new ArrayList<Problem>();
 
-		var optStatType = rootObject.get("stat")
-				.andThen(BuiltinJson::parseStatTypeOrStatTypeTag)
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optStatType = rootObject.get("stat")
+                .andThen(BuiltinJson::parseStatTypeOrStatTypeTag)
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new StatTypeCondition(
-					optStatType.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new StatTypeCondition(
+                    optStatType.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	@Override
-	public Optional<Boolean> apply(StatType<?> statType) {
-		return Optional.of(statTypeEntries.contains(Registries.STAT_TYPE.getEntry(statType)));
-	}
+    @Override
+    public Optional<Boolean> apply(StatType<?> statType) {
+        return Optional.of(statTypeEntries.contains(Registries.STAT_TYPE.getEntry(statType)));
+    }
 }

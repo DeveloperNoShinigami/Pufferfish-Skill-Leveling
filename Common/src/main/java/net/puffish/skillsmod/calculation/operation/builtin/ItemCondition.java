@@ -18,45 +18,45 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class ItemCondition implements Operation<Item, Boolean> {
-	private final RegistryEntryList<Item> itemEntries;
+    private final RegistryEntryList<Item> itemEntries;
 
-	private ItemCondition(RegistryEntryList<Item> itemEntries) {
-		this.itemEntries = itemEntries;
-	}
+    private ItemCondition(RegistryEntryList<Item> itemEntries) {
+        this.itemEntries = itemEntries;
+    }
 
-	public static void register() {
-		BuiltinPrototypes.ITEM.registerOperation(
-				SkillsMod.createIdentifier("test"),
-				BuiltinPrototypes.BOOLEAN,
-				ItemCondition::parse
-		);
-	}
+    public static void register() {
+        BuiltinPrototypes.ITEM.registerOperation(
+                SkillsMod.createIdentifier("test"),
+                BuiltinPrototypes.BOOLEAN,
+                ItemCondition::parse
+        );
+    }
 
-	public static Result<ItemCondition, Problem> parse(OperationConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(ItemCondition::parse, context));
-	}
+    public static Result<ItemCondition, Problem> parse(OperationConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyUtils.wrapNoUnused(ItemCondition::parse, context));
+    }
 
-	public static Result<ItemCondition, Problem> parse(JsonObject rootObject) {
-		var problems = new ArrayList<Problem>();
+    public static Result<ItemCondition, Problem> parse(JsonObject rootObject) {
+        var problems = new ArrayList<Problem>();
 
-		var optItem = rootObject.get("item")
-				.andThen(BuiltinJson::parseItemOrItemTag)
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optItem = rootObject.get("item")
+                .andThen(BuiltinJson::parseItemOrItemTag)
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new ItemCondition(
-					optItem.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new ItemCondition(
+                    optItem.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	@Override
-	public Optional<Boolean> apply(Item item) {
-		return Optional.of(itemEntries.contains(Registries.ITEM.getEntry(item)));
-	}
+    @Override
+    public Optional<Boolean> apply(Item item) {
+        return Optional.of(itemEntries.contains(Registries.ITEM.getEntry(item)));
+    }
 }

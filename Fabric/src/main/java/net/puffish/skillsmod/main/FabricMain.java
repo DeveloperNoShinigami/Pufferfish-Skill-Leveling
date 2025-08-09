@@ -31,87 +31,87 @@ import java.util.function.Function;
 
 public class FabricMain implements ModInitializer {
 
-	@Override
-	public void onInitialize() {
-		SkillsMod.setup(
-				FabricLoader.getInstance().getConfigDir(),
-				new ServerRegistrarImpl(),
-				new ServerEventReceiverImpl(),
-				new ServerPacketSenderImpl(),
-				new ServerPlatformImpl()
-		);
+    @Override
+    public void onInitialize() {
+        SkillsMod.setup(
+                FabricLoader.getInstance().getConfigDir(),
+                new ServerRegistrarImpl(),
+                new ServerEventReceiverImpl(),
+                new ServerPacketSenderImpl(),
+                new ServerPlatformImpl()
+        );
 
-	}
+    }
 
-	private static class ServerRegistrarImpl implements ServerRegistrar {
-		@Override
-		public <V, T extends V> void register(Registry<V> registry, Identifier id, T entry) {
-			Registry.register(registry, id, entry);
-		}
+    private static class ServerRegistrarImpl implements ServerRegistrar {
+        @Override
+        public <V, T extends V> void register(Registry<V> registry, Identifier id, T entry) {
+            Registry.register(registry, id, entry);
+        }
 
-		@Override
-		public <T extends GameRules.Rule<T>> void registerGameRule(GameRules.Key<T> key, GameRules.Type<T> type) {
-			GameRulesAccessor.getRuleTypes().put(key, type);
-		}
+        @Override
+        public <T extends GameRules.Rule<T>> void registerGameRule(GameRules.Key<T> key, GameRules.Type<T> type) {
+            GameRulesAccessor.getRuleTypes().put(key, type);
+        }
 
-		@Override
-		public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
-			ArgumentTypeRegistry.registerArgumentType(id, clazz, serializer);
-		}
+        @Override
+        public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
+            ArgumentTypeRegistry.registerArgumentType(id, clazz, serializer);
+        }
 
-		@Override
-		public <T extends InPacket> void registerInPacket(Identifier id, Function<PacketByteBuf, T> reader, ServerPacketHandler<T> handler) {
-			ServerPlayNetworking.registerGlobalReceiver(
-					id,
-					(server, player, handler2, buf, responseSender) -> {
-						var packet = reader.apply(buf);
-						server.execute(
-								() -> handler.handle(player, packet)
-						);
-					}
-			);
-		}
+        @Override
+        public <T extends InPacket> void registerInPacket(Identifier id, Function<PacketByteBuf, T> reader, ServerPacketHandler<T> handler) {
+            ServerPlayNetworking.registerGlobalReceiver(
+                    id,
+                    (server, player, handler2, buf, responseSender) -> {
+                        var packet = reader.apply(buf);
+                        server.execute(
+                                () -> handler.handle(player, packet)
+                        );
+                    }
+            );
+        }
 
-		@Override
-		public void registerOutPacket(Identifier id) { }
-	}
+        @Override
+        public void registerOutPacket(Identifier id) { }
+    }
 
-	private static class ServerEventReceiverImpl implements ServerEventReceiver {
-		@Override
-		public void registerListener(ServerEventListener eventListener) {
-			ServerLifecycleEvents.SERVER_STARTING.register(eventListener::onServerStarting);
+    private static class ServerEventReceiverImpl implements ServerEventReceiver {
+        @Override
+        public void registerListener(ServerEventListener eventListener) {
+            ServerLifecycleEvents.SERVER_STARTING.register(eventListener::onServerStarting);
 
-			ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(
-					(server, resourceManager, success) -> eventListener.onServerReload(server)
-			);
+            ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(
+                    (server, resourceManager, success) -> eventListener.onServerReload(server)
+            );
 
-			ServerPlayConnectionEvents.JOIN.register(
-					(handler, sender, server) -> eventListener.onPlayerJoin(handler.player)
-			);
+            ServerPlayConnectionEvents.JOIN.register(
+                    (handler, sender, server) -> eventListener.onPlayerJoin(handler.player)
+            );
 
-			ServerPlayConnectionEvents.DISCONNECT.register(
-					(handler, server) -> eventListener.onPlayerLeave(handler.player)
-			);
+            ServerPlayConnectionEvents.DISCONNECT.register(
+                    (handler, server) -> eventListener.onPlayerLeave(handler.player)
+            );
 
-			CommandRegistrationCallback.EVENT.register(
-					(dispatcher, registryAccess, environment) -> eventListener.onCommandsRegister(dispatcher)
-			);
-		}
-	}
+            CommandRegistrationCallback.EVENT.register(
+                    (dispatcher, registryAccess, environment) -> eventListener.onCommandsRegister(dispatcher)
+            );
+        }
+    }
 
-	private static class ServerPacketSenderImpl implements ServerPacketSender {
-		@Override
-		public void send(ServerPlayerEntity player, OutPacket packet) {
-			var buf = new PacketByteBuf(Unpooled.buffer());
-			packet.write(buf);
-			ServerPlayNetworking.send(player, packet.getId(), buf);
-		}
-	}
+    private static class ServerPacketSenderImpl implements ServerPacketSender {
+        @Override
+        public void send(ServerPlayerEntity player, OutPacket packet) {
+            var buf = new PacketByteBuf(Unpooled.buffer());
+            packet.write(buf);
+            ServerPlayNetworking.send(player, packet.getId(), buf);
+        }
+    }
 
-	private static class ServerPlatformImpl implements ServerPlatform {
-		@Override
-		public boolean isFakePlayer(ServerPlayerEntity player) {
-			return player instanceof FakePlayer;
-		}
-	}
+    private static class ServerPlatformImpl implements ServerPlatform {
+        @Override
+        public boolean isFakePlayer(ServerPlayerEntity player) {
+            return player instanceof FakePlayer;
+        }
+    }
 }

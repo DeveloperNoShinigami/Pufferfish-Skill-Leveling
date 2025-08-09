@@ -11,34 +11,34 @@ import org.junit.jupiter.api.Test;
 
 public class PerLevelRewardsRewardTest {
 
-	private static class DummyContext implements RewardConfigContext {
-	    private final JsonElement data;
+    private static class DummyContext implements RewardConfigContext {
+        private final JsonElement data;
 
-	    private DummyContext(JsonElement data) {
-	        this.data = data;
-	    }
+        private DummyContext(JsonElement data) {
+            this.data = data;
+        }
 
-	    @Override
-	    public MinecraftServer getServer() {
-	        return null;
-	    }
+        @Override
+        public MinecraftServer getServer() {
+            return null;
+        }
 
-	    @Override
-	    public void emitWarning(String message) {
-	        // ignore
-	    }
+        @Override
+        public void emitWarning(String message) {
+            // ignore
+        }
 
-	    @Override
-	    public Result<JsonElement, Problem> getData() {
-	        return Result.success(data);
-	    }
-	}
+        @Override
+        public Result<JsonElement, Problem> getData() {
+            return Result.success(data);
+        }
+    }
 
-	private static Result<PerLevelRewardsReward, Problem> parse(String json) {
-	    var element = JsonElement.parseString(json, JsonPath.create("test"))
-	            .getSuccess().orElseThrow();
-	    return PerLevelRewardsReward.parse(new DummyContext(element));
-	}
+    private static Result<PerLevelRewardsReward, Problem> parse(String json) {
+        var element = JsonElement.parseString(json, JsonPath.create("test"))
+                .getSuccess().orElseThrow();
+        return PerLevelRewardsReward.parse(new DummyContext(element));
+    }
 
         @Test
         public void testValidValues() {

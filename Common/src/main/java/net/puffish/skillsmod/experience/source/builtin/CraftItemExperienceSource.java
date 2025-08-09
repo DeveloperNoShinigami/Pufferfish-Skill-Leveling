@@ -17,52 +17,52 @@ import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.calculation.LegacyCalculation;
 
 public class CraftItemExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("craft_item");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+    private static final Identifier ID = SkillsMod.createIdentifier("craft_item");
+    private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
-	static {
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_player"),
-				BuiltinPrototypes.PLAYER,
-				OperationFactory.create(Data::player)
-		);
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_crafted_item_stack"),
-				BuiltinPrototypes.ITEM_STACK,
-				OperationFactory.create(Data::itemStack)
-		);
-	}
+    static {
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_player"),
+                BuiltinPrototypes.PLAYER,
+                OperationFactory.create(Data::player)
+        );
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_crafted_item_stack"),
+                BuiltinPrototypes.ITEM_STACK,
+                OperationFactory.create(Data::itemStack)
+        );
+    }
 
-	private final Calculation<Data> calculation;
+    private final Calculation<Data> calculation;
 
-	private CraftItemExperienceSource(Calculation<Data> calculation) {
-		this.calculation = calculation;
-	}
+    private CraftItemExperienceSource(Calculation<Data> calculation) {
+        this.calculation = calculation;
+    }
 
-	public static void register() {
-		SkillsAPI.registerExperienceSource(
-				ID,
-				CraftItemExperienceSource::parse
-		);
-	}
+    public static void register() {
+        SkillsAPI.registerExperienceSource(
+                ID,
+                CraftItemExperienceSource::parse
+        );
+    }
 
-	private static Result<CraftItemExperienceSource, Problem> parse(ExperienceSourceConfigContext context) {
-		return context.getData().andThen(rootElement ->
-				LegacyCalculation.parse(rootElement, PROTOTYPE, context)
-						.mapSuccess(CraftItemExperienceSource::new)
-		);
-	}
+    private static Result<CraftItemExperienceSource, Problem> parse(ExperienceSourceConfigContext context) {
+        return context.getData().andThen(rootElement ->
+                LegacyCalculation.parse(rootElement, PROTOTYPE, context)
+                        .mapSuccess(CraftItemExperienceSource::new)
+        );
+    }
 
-	private record Data(ServerPlayerEntity player, ItemStack itemStack) { }
+    private record Data(ServerPlayerEntity player, ItemStack itemStack) { }
 
-	public int getValue(ServerPlayerEntity player, ItemStack itemStack) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, itemStack)
-		));
-	}
+    public int getValue(ServerPlayerEntity player, ItemStack itemStack) {
+        return (int) Math.round(calculation.evaluate(
+                new Data(player, itemStack)
+        ));
+    }
 
-	@Override
-	public void dispose(ExperienceSourceDisposeContext context) {
-		// Nothing to do.
-	}
+    @Override
+    public void dispose(ExperienceSourceDisposeContext context) {
+        // Nothing to do.
+    }
 }

@@ -16,45 +16,45 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class WorldCondition implements Operation<ServerWorld, Boolean> {
-	private final Identifier dimension;
+    private final Identifier dimension;
 
-	private WorldCondition(Identifier dimension) {
-		this.dimension = dimension;
-	}
+    private WorldCondition(Identifier dimension) {
+        this.dimension = dimension;
+    }
 
-	public static void register() {
-		BuiltinPrototypes.WORLD.registerOperation(
-				SkillsMod.createIdentifier("test"),
-				BuiltinPrototypes.BOOLEAN,
-				WorldCondition::parse
-		);
-	}
+    public static void register() {
+        BuiltinPrototypes.WORLD.registerOperation(
+                SkillsMod.createIdentifier("test"),
+                BuiltinPrototypes.BOOLEAN,
+                WorldCondition::parse
+        );
+    }
 
-	public static Result<WorldCondition, Problem> parse(OperationConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(rootObject -> rootObject.noUnused(WorldCondition::parse));
-	}
+    public static Result<WorldCondition, Problem> parse(OperationConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(rootObject -> rootObject.noUnused(WorldCondition::parse));
+    }
 
-	public static Result<WorldCondition, Problem> parse(JsonObject rootObject) {
-		var problems = new ArrayList<Problem>();
+    public static Result<WorldCondition, Problem> parse(JsonObject rootObject) {
+        var problems = new ArrayList<Problem>();
 
-		var optDimension = rootObject.get("dimension")
-				.andThen(BuiltinJson::parseIdentifier)
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optDimension = rootObject.get("dimension")
+                .andThen(BuiltinJson::parseIdentifier)
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new WorldCondition(
-					optDimension.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new WorldCondition(
+                    optDimension.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	@Override
-	public Optional<Boolean> apply(ServerWorld world) {
-		return Optional.of(world.getRegistryKey().getValue().equals(dimension));
-	}
+    @Override
+    public Optional<Boolean> apply(ServerWorld world) {
+        return Optional.of(world.getRegistryKey().getValue().equals(dimension));
+    }
 }

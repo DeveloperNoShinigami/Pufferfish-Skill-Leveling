@@ -4,7 +4,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
 public interface OutPacket {
-	Identifier getId();
+    Identifier getId();
 
-	void write(PacketByteBuf buf);
+    void write(PacketByteBuf buf);
 }

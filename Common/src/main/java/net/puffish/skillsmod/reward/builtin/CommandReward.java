@@ -112,13 +112,13 @@ public class CommandReward implements Reward {
                 executor.execute(player, command);
         }
 
-	@Override
-	public void update(RewardUpdateContext context) {
-		var player = context.getPlayer();
+    @Override
+    public void update(RewardUpdateContext context) {
+        var player = context.getPlayer();
 
-		if (context.isAction()) {
-			executeCommand(player, command);
-		}
+        if (context.isAction()) {
+            executeCommand(player, command);
+        }
 
                 counts.compute(player.getUuid(), (uuid, count) -> {
                         if (count == null) {
@@ -139,19 +139,19 @@ public class CommandReward implements Reward {
 
                         return count;
                 });
-	}
+    }
 
-	@Override
-	public void dispose(RewardDisposeContext context) {
-		for (var entry : counts.entrySet()) {
-			var player = context.getServer().getPlayerManager().getPlayer(entry.getKey());
-			if (player == null) {
-				continue;
-			}
-			for (var i = 0; i < entry.getValue(); i++) {
-				executeCommand(player, lockCommand);
-			}
-		}
-		counts.clear();
-	}
+    @Override
+    public void dispose(RewardDisposeContext context) {
+        for (var entry : counts.entrySet()) {
+            var player = context.getServer().getPlayerManager().getPlayer(entry.getKey());
+            if (player == null) {
+                continue;
+            }
+            for (var i = 0; i < entry.getValue(); i++) {
+                executeCommand(player, lockCommand);
+            }
+        }
+        counts.clear();
+    }
 }

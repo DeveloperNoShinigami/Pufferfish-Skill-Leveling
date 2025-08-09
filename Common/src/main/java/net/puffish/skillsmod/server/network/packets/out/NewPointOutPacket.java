@@ -6,13 +6,13 @@ import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
 
 public record NewPointOutPacket(Identifier categoryId) implements OutPacket {
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeIdentifier(categoryId);
-	}
+    @Override
+    public void write(PacketByteBuf buf) {
+        buf.writeIdentifier(categoryId);
+    }
 
-	@Override
-	public Identifier getId() {
-		return Packets.NEW_POINT;
-	}
+    @Override
+    public Identifier getId() {
+        return Packets.NEW_POINT;
+    }
 }

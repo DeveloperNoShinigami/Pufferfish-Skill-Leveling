@@ -16,50 +16,50 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class TagCondition implements Operation<Entity, Boolean> {
-	private final String tag;
+    private final String tag;
 
-	private TagCondition(String tag) {
-		this.tag = tag;
-	}
+    private TagCondition(String tag) {
+        this.tag = tag;
+    }
 
-	public static void register() {
-		BuiltinPrototypes.ENTITY.registerOperation(
-				SkillsMod.createIdentifier("has_tag"),
-				BuiltinPrototypes.BOOLEAN,
-				TagCondition::parse
-		);
+    public static void register() {
+        BuiltinPrototypes.ENTITY.registerOperation(
+                SkillsMod.createIdentifier("has_tag"),
+                BuiltinPrototypes.BOOLEAN,
+                TagCondition::parse
+        );
 
-		LegacyBuiltinPrototypes.registerAlias(
-				BuiltinPrototypes.ENTITY,
-				SkillsMod.createIdentifier("tag"),
-				SkillsMod.createIdentifier("has_tag")
-		);
-	}
+        LegacyBuiltinPrototypes.registerAlias(
+                BuiltinPrototypes.ENTITY,
+                SkillsMod.createIdentifier("tag"),
+                SkillsMod.createIdentifier("has_tag")
+        );
+    }
 
-	public static Result<TagCondition, Problem> parse(OperationConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(TagCondition::parse, context));
-	}
+    public static Result<TagCondition, Problem> parse(OperationConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyUtils.wrapNoUnused(TagCondition::parse, context));
+    }
 
-	public static Result<TagCondition, Problem> parse(JsonObject rootObject) {
-		var problems = new ArrayList<Problem>();
+    public static Result<TagCondition, Problem> parse(JsonObject rootObject) {
+        var problems = new ArrayList<Problem>();
 
-		var optTag = rootObject.getString("tag")
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optTag = rootObject.getString("tag")
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new TagCondition(
-					optTag.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new TagCondition(
+                    optTag.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	@Override
-	public Optional<Boolean> apply(Entity entity) {
-		return Optional.of(entity.getCommandTags().contains(tag));
-	}
+    @Override
+    public Optional<Boolean> apply(Entity entity) {
+        return Optional.of(entity.getCommandTags().contains(tag));
+    }
 }

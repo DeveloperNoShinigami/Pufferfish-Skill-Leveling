@@ -28,96 +28,96 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class KillEntityExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("kill_entity");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+    private static final Identifier ID = SkillsMod.createIdentifier("kill_entity");
+    private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
-	static {
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_player"),
-				BuiltinPrototypes.PLAYER,
-				OperationFactory.create(Data::player)
-		);
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_weapon_item_stack"),
-				BuiltinPrototypes.ITEM_STACK,
-				OperationFactory.create(Data::weapon)
-		);
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_killed_living_entity"),
-				BuiltinPrototypes.LIVING_ENTITY,
-				OperationFactory.create(Data::entity)
-		);
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_damage_source"),
-				BuiltinPrototypes.DAMAGE_SOURCE,
-				OperationFactory.create(Data::damageSource)
-		);
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_dropped_experience"),
-				BuiltinPrototypes.NUMBER,
-				OperationFactory.create(Data::entityDroppedXp)
-		);
-	}
+    static {
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_player"),
+                BuiltinPrototypes.PLAYER,
+                OperationFactory.create(Data::player)
+        );
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_weapon_item_stack"),
+                BuiltinPrototypes.ITEM_STACK,
+                OperationFactory.create(Data::weapon)
+        );
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_killed_living_entity"),
+                BuiltinPrototypes.LIVING_ENTITY,
+                OperationFactory.create(Data::entity)
+        );
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_damage_source"),
+                BuiltinPrototypes.DAMAGE_SOURCE,
+                OperationFactory.create(Data::damageSource)
+        );
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_dropped_experience"),
+                BuiltinPrototypes.NUMBER,
+                OperationFactory.create(Data::entityDroppedXp)
+        );
+    }
 
-	private final Calculation<Data> calculation;
-	private final Optional<AntiFarmingPerChunk> optAntiFarming;
+    private final Calculation<Data> calculation;
+    private final Optional<AntiFarmingPerChunk> optAntiFarming;
 
-	private KillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming) {
-		this.calculation = calculation;
-		this.optAntiFarming = optAntiFarming;
-	}
+    private KillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming) {
+        this.calculation = calculation;
+        this.optAntiFarming = optAntiFarming;
+    }
 
-	public static void register() {
-		SkillsAPI.registerExperienceSource(
-				ID,
-				KillEntityExperienceSource::parse
-		);
-	}
+    public static void register() {
+        SkillsAPI.registerExperienceSource(
+                ID,
+                KillEntityExperienceSource::parse
+        );
+    }
 
-	private static Result<KillEntityExperienceSource, Problem> parse(ExperienceSourceConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
-	}
-	private static Result<KillEntityExperienceSource, Problem> parse(JsonObject rootObject, ConfigContext context) {
-		var problems = new ArrayList<Problem>();
+    private static Result<KillEntityExperienceSource, Problem> parse(ExperienceSourceConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
+    }
+    private static Result<KillEntityExperienceSource, Problem> parse(JsonObject rootObject, ConfigContext context) {
+        var problems = new ArrayList<Problem>();
 
-		var optCalculation = LegacyCalculation.parse(rootObject, PROTOTYPE, context)
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optCalculation = LegacyCalculation.parse(rootObject, PROTOTYPE, context)
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		var optAntiFarming = rootObject.get("anti_farming")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(element -> AntiFarmingPerChunk.parse(element, context)
-						.ifFailure(problems::add)
-						.getSuccess()
-						.flatMap(Function.identity())
-				);
+        var optAntiFarming = rootObject.get("anti_farming")
+                .getSuccess() // ignore failure because this property is optional
+                .flatMap(element -> AntiFarmingPerChunk.parse(element, context)
+                        .ifFailure(problems::add)
+                        .getSuccess()
+                        .flatMap(Function.identity())
+                );
 
-		if (problems.isEmpty()) {
-			return Result.success(new KillEntityExperienceSource(
-					optCalculation.orElseThrow(),
-					optAntiFarming
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new KillEntityExperienceSource(
+                    optCalculation.orElseThrow(),
+                    optAntiFarming
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	private record Data(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource, double entityDroppedXp) { }
+    private record Data(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource, double entityDroppedXp) { }
 
-	public int getValue(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource, double entityDroppedXp) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, entity, weapon, damageSource, entityDroppedXp)
-		));
-	}
+    public int getValue(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource, double entityDroppedXp) {
+        return (int) Math.round(calculation.evaluate(
+                new Data(player, entity, weapon, damageSource, entityDroppedXp)
+        ));
+    }
 
-	public Optional<AntiFarmingPerChunk> getAntiFarming() {
-		return optAntiFarming;
-	}
+    public Optional<AntiFarmingPerChunk> getAntiFarming() {
+        return optAntiFarming;
+    }
 
-	@Override
-	public void dispose(ExperienceSourceDisposeContext context) {
-		// Nothing to do.
-	}
+    @Override
+    public void dispose(ExperienceSourceDisposeContext context) {
+        // Nothing to do.
+    }
 }

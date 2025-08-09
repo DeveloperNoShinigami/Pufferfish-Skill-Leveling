@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class PerLevelRewardsReward implements Reward {
-	public static final Identifier ID = SkillsMod.createIdentifier("per_level_rewards");
+    public static final Identifier ID = SkillsMod.createIdentifier("per_level_rewards");
 
     private final Map<Integer, List<SkillRewardConfig>> levelRewards;
     private final int maxLevel;
@@ -45,15 +45,15 @@ public class PerLevelRewardsReward implements Reward {
         return pointsPerLevel;
     }
 
-	public static void register() {
-	SkillsAPI.registerReward(ID, PerLevelRewardsReward::parse);
-	}
+    public static void register() {
+    SkillsAPI.registerReward(ID, PerLevelRewardsReward::parse);
+    }
 
         static Result<PerLevelRewardsReward, Problem> parse(RewardConfigContext context) {
-	return context.getData()
-		.andThen(JsonElement::getAsObject)
-		.andThen(LegacyUtils.wrapNoUnused(obj -> parse(obj, context), context));
-	}
+    return context.getData()
+        .andThen(JsonElement::getAsObject)
+        .andThen(LegacyUtils.wrapNoUnused(obj -> parse(obj, context), context));
+    }
 
         static Result<PerLevelRewardsReward, Problem> parse(JsonObject rootObject, ConfigContext context) {
         var problems = new ArrayList<Problem>();
@@ -116,7 +116,7 @@ public class PerLevelRewardsReward implements Reward {
         }
     }
 
-	@Override
+    @Override
     public void update(RewardUpdateContext context) {
         var player = context.getPlayer();
         var uuid = player.getUuid();
@@ -135,7 +135,7 @@ public class PerLevelRewardsReward implements Reward {
         }
     }
 
-	@Override
+    @Override
         public void dispose(RewardDisposeContext context) {
         var disposeContext = new DisposeContext(context.getServer());
         for (var rewardList : levelRewards.values()) {

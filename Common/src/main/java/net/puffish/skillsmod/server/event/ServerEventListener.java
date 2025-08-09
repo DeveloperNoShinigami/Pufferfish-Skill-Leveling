@@ -6,13 +6,13 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public interface ServerEventListener {
-	void onServerStarting(MinecraftServer server);
+    void onServerStarting(MinecraftServer server);
 
-	void onServerReload(MinecraftServer server);
+    void onServerReload(MinecraftServer server);
 
-	void onPlayerJoin(ServerPlayerEntity player);
+    void onPlayerJoin(ServerPlayerEntity player);
 
-	void onPlayerLeave(ServerPlayerEntity player);
+    void onPlayerLeave(ServerPlayerEntity player);
 
-	void onCommandsRegister(CommandDispatcher<ServerCommandSource> dispatcher);
+    void onCommandsRegister(CommandDispatcher<ServerCommandSource> dispatcher);
 }

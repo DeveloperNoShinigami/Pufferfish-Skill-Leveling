@@ -14,18 +14,18 @@ import net.puffish.skillsmod.experience.source.builtin.SharedKillEntityExperienc
 import net.puffish.skillsmod.experience.source.builtin.TakeDamageExperienceSource;
 
 public class BuiltinExperienceSources {
-	public static void register() {
-		BreakBlockExperienceSource.register();
-		CraftItemExperienceSource.register();
-		DealDamageExperienceSource.register();
-		EatFoodExperienceSource.register();
-		EnchantItemExperienceSource.register();
-		FishItemExperienceSource.register();
-		HealExperienceSource.register();
-		IncreaseStatExperienceSource.register();
-		KillEntityExperienceSource.register();
-		MineBlockExperienceSource.register();
-		SharedKillEntityExperienceSource.register();
-		TakeDamageExperienceSource.register();
-	}
+    public static void register() {
+        BreakBlockExperienceSource.register();
+        CraftItemExperienceSource.register();
+        DealDamageExperienceSource.register();
+        EatFoodExperienceSource.register();
+        EnchantItemExperienceSource.register();
+        FishItemExperienceSource.register();
+        HealExperienceSource.register();
+        IncreaseStatExperienceSource.register();
+        KillEntityExperienceSource.register();
+        MineBlockExperienceSource.register();
+        SharedKillEntityExperienceSource.register();
+        TakeDamageExperienceSource.register();
+    }
 }

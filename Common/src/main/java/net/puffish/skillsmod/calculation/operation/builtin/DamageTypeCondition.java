@@ -18,52 +18,52 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class DamageTypeCondition implements Operation<DamageType, Boolean> {
-	private final RegistryEntryList<DamageType> damageTypeEntries;
+    private final RegistryEntryList<DamageType> damageTypeEntries;
 
-	private DamageTypeCondition(RegistryEntryList<DamageType> damageTypeEntries) {
-		this.damageTypeEntries = damageTypeEntries;
-	}
+    private DamageTypeCondition(RegistryEntryList<DamageType> damageTypeEntries) {
+        this.damageTypeEntries = damageTypeEntries;
+    }
 
-	public static void register() {
-		BuiltinPrototypes.DAMAGE_TYPE.registerOperation(
-				SkillsMod.createIdentifier("test"),
-				BuiltinPrototypes.BOOLEAN,
-				DamageTypeCondition::parse
-		);
-	}
+    public static void register() {
+        BuiltinPrototypes.DAMAGE_TYPE.registerOperation(
+                SkillsMod.createIdentifier("test"),
+                BuiltinPrototypes.BOOLEAN,
+                DamageTypeCondition::parse
+        );
+    }
 
-	public static Result<DamageTypeCondition, Problem> parse(OperationConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
-	}
+    public static Result<DamageTypeCondition, Problem> parse(OperationConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
+    }
 
-	public static Result<DamageTypeCondition, Problem> parse(JsonObject rootObject, ConfigContext context) {
-		var problems = new ArrayList<Problem>();
+    public static Result<DamageTypeCondition, Problem> parse(JsonObject rootObject, ConfigContext context) {
+        var problems = new ArrayList<Problem>();
 
-		var optDamageType = rootObject.get("damage_type")
-				.orElse(LegacyUtils.wrapDeprecated(
-						() -> rootObject.get("damage"),
-						3,
-						context
-				))
-				.andThen(damageElement -> BuiltinJson.parseDamageTypeOrDamageTypeTag(damageElement, context.getServer().getRegistryManager()))
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optDamageType = rootObject.get("damage_type")
+                .orElse(LegacyUtils.wrapDeprecated(
+                        () -> rootObject.get("damage"),
+                        3,
+                        context
+                ))
+                .andThen(damageElement -> BuiltinJson.parseDamageTypeOrDamageTypeTag(damageElement, context.getServer().getRegistryManager()))
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new DamageTypeCondition(
-					optDamageType.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new DamageTypeCondition(
+                    optDamageType.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	@Override
-	public Optional<Boolean> apply(DamageType damageType) {
-		return Optional.of(
-				damageTypeEntries.stream().anyMatch(entry -> entry.value() == damageType)
-		);
-	}
+    @Override
+    public Optional<Boolean> apply(DamageType damageType) {
+        return Optional.of(
+                damageTypeEntries.stream().anyMatch(entry -> entry.value() == damageType)
+        );
+    }
 }

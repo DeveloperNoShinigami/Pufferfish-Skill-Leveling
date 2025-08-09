@@ -17,45 +17,45 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public record CategoryConfig(
-		Identifier id,
-		GeneralConfig general,
-		SkillDefinitionsConfig definitions,
-		SkillsConfig skills,
-		SkillConnectionsConfig connections,
-		Optional<ExperienceConfig> experience
+        Identifier id,
+        GeneralConfig general,
+        SkillDefinitionsConfig definitions,
+        SkillsConfig skills,
+        SkillConnectionsConfig connections,
+        Optional<ExperienceConfig> experience
 ) {
 
-	public static Result<CategoryConfig, Problem> parse(
-			Identifier id,
-			JsonElement generalElement,
-			JsonElement definitionsElement,
-			JsonElement skillsElement,
-			JsonElement connectionsElement,
-			Optional<JsonElement> optExperienceElement,
-			ConfigContext context
-	) {
-		var problems = new ArrayList<Problem>();
+    public static Result<CategoryConfig, Problem> parse(
+            Identifier id,
+            JsonElement generalElement,
+            JsonElement definitionsElement,
+            JsonElement skillsElement,
+            JsonElement connectionsElement,
+            Optional<JsonElement> optExperienceElement,
+            ConfigContext context
+    ) {
+        var problems = new ArrayList<Problem>();
 
-		var optGeneral = GeneralConfig.parse(generalElement, context)
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optGeneral = GeneralConfig.parse(generalElement, context)
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		var optExperience = optExperienceElement
-				.flatMap(experience -> ExperienceConfig.parse(experience, context)
-						.ifFailure(problems::add)
-						.getSuccess()
-						.flatMap(Function.identity())
-				);
+        var optExperience = optExperienceElement
+                .flatMap(experience -> ExperienceConfig.parse(experience, context)
+                        .ifFailure(problems::add)
+                        .getSuccess()
+                        .flatMap(Function.identity())
+                );
 
-		var optDefinitions = SkillDefinitionsConfig.parse(definitionsElement, context)
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optDefinitions = SkillDefinitionsConfig.parse(definitionsElement, context)
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		var optSkills = optDefinitions.flatMap(
-				definitions -> SkillsConfig.parse(skillsElement, definitions, context)
-						.ifFailure(problems::add)
-						.getSuccess()
-		);
+        var optSkills = optDefinitions.flatMap(
+                definitions -> SkillsConfig.parse(skillsElement, definitions, context)
+                        .ifFailure(problems::add)
+                        .getSuccess()
+        );
 
                 var optConnections = optSkills.flatMap(
                                 skills -> SkillConnectionsConfig.parse(connectionsElement, skills, context)
@@ -92,9 +92,9 @@ public record CategoryConfig(
                 return Result.failure(Problem.combine(problems));
         }
 
-	public void dispose(DisposeContext context) {
-		definitions.dispose(context);
-		experience.ifPresent(experience -> experience.dispose(context));
-	}
+    public void dispose(DisposeContext context) {
+        definitions.dispose(context);
+        experience.ifPresent(experience -> experience.dispose(context));
+    }
 
 }

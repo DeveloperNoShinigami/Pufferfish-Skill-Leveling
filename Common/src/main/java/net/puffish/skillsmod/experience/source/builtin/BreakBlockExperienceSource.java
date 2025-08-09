@@ -23,85 +23,85 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class BreakBlockExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("break_block");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+    private static final Identifier ID = SkillsMod.createIdentifier("break_block");
+    private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
-	static {
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_player"),
-				BuiltinPrototypes.PLAYER,
-				OperationFactory.create(Data::player)
-		);
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_broken_block_state"),
-				BuiltinPrototypes.BLOCK_STATE,
-				OperationFactory.create(Data::blockState)
-		);
-		PROTOTYPE.registerOperation(
-				SkillsMod.createIdentifier("get_tool_item_stack"),
-				BuiltinPrototypes.ITEM_STACK,
-				OperationFactory.create(Data::tool)
-		);
-	}
+    static {
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_player"),
+                BuiltinPrototypes.PLAYER,
+                OperationFactory.create(Data::player)
+        );
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_broken_block_state"),
+                BuiltinPrototypes.BLOCK_STATE,
+                OperationFactory.create(Data::blockState)
+        );
+        PROTOTYPE.registerOperation(
+                SkillsMod.createIdentifier("get_tool_item_stack"),
+                BuiltinPrototypes.ITEM_STACK,
+                OperationFactory.create(Data::tool)
+        );
+    }
 
-	private final Calculation<Data> calculation;
+    private final Calculation<Data> calculation;
 
-	private BreakBlockExperienceSource(Calculation<Data> calculation) {
-		this.calculation = calculation;
-	}
+    private BreakBlockExperienceSource(Calculation<Data> calculation) {
+        this.calculation = calculation;
+    }
 
-	public static void register() {
-		SkillsAPI.registerExperienceSource(
-				ID,
-				BreakBlockExperienceSource::parse
-		);
-	}
+    public static void register() {
+        SkillsAPI.registerExperienceSource(
+                ID,
+                BreakBlockExperienceSource::parse
+        );
+    }
 
-	private static Result<BreakBlockExperienceSource, Problem> parse(ExperienceSourceConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(rootObject -> rootObject.noUnused(o -> parse(o, context)));
-	}
+    private static Result<BreakBlockExperienceSource, Problem> parse(ExperienceSourceConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(rootObject -> rootObject.noUnused(o -> parse(o, context)));
+    }
 
-	private static Result<BreakBlockExperienceSource, Problem> parse(JsonObject rootObject, ExperienceSourceConfigContext context) {
-		var problems = new ArrayList<Problem>();
+    private static Result<BreakBlockExperienceSource, Problem> parse(JsonObject rootObject, ExperienceSourceConfigContext context) {
+        var problems = new ArrayList<Problem>();
 
-		var variables = rootObject.get("variables")
-				.getSuccess() // ignore failure because this property is optional
-				.flatMap(variablesElement -> Variables.parse(variablesElement, PROTOTYPE, context)
-						.ifFailure(problems::add)
-						.getSuccess()
-				)
-				.orElseGet(() -> Variables.create(Map.of()));
+        var variables = rootObject.get("variables")
+                .getSuccess() // ignore failure because this property is optional
+                .flatMap(variablesElement -> Variables.parse(variablesElement, PROTOTYPE, context)
+                        .ifFailure(problems::add)
+                        .getSuccess()
+                )
+                .orElseGet(() -> Variables.create(Map.of()));
 
-		var optCalculation = rootObject.get("experience")
-				.andThen(experienceElement -> Calculation.parse(
-						experienceElement,
-						variables,
-						context
-				))
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optCalculation = rootObject.get("experience")
+                .andThen(experienceElement -> Calculation.parse(
+                        experienceElement,
+                        variables,
+                        context
+                ))
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new BreakBlockExperienceSource(
-					optCalculation.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new BreakBlockExperienceSource(
+                    optCalculation.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	private record Data(ServerPlayerEntity player, BlockState blockState, ItemStack tool) { }
+    private record Data(ServerPlayerEntity player, BlockState blockState, ItemStack tool) { }
 
-	public int getValue(ServerPlayerEntity player, BlockState blockState, ItemStack tool) {
-		return (int) Math.round(calculation.evaluate(
-				new Data(player, blockState, tool)
-		));
-	}
+    public int getValue(ServerPlayerEntity player, BlockState blockState, ItemStack tool) {
+        return (int) Math.round(calculation.evaluate(
+                new Data(player, blockState, tool)
+        ));
+    }
 
-	@Override
-	public void dispose(ExperienceSourceDisposeContext context) {
-		// Nothing to do.
-	}
+    @Override
+    public void dispose(ExperienceSourceDisposeContext context) {
+        // Nothing to do.
+    }
 }

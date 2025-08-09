@@ -8,15 +8,15 @@ import java.util.stream.Stream;
 
 public interface JsonArray {
 
-	Stream<JsonElement> stream();
+    Stream<JsonElement> stream();
 
-	JsonElement getAsElement();
+    JsonElement getAsElement();
 
-	<S, F> Result<List<S>, List<F>> getAsList(BiFunction<Integer, JsonElement, Result<S, F>> function);
+    <S, F> Result<List<S>, List<F>> getAsList(BiFunction<Integer, JsonElement, Result<S, F>> function);
 
-	int getSize();
+    int getSize();
 
-	JsonPath getPath();
+    JsonPath getPath();
 
-	com.google.gson.JsonArray getJson();
+    com.google.gson.JsonArray getJson();
 }

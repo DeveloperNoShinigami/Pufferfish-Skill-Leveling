@@ -8,8 +8,8 @@ import java.util.Map;
 
 @Mixin(GameRules.class)
 public interface GameRulesAccessor {
-	@Accessor("RULE_TYPES")
-	static Map<GameRules.Key<?>, GameRules.Type<?>> getRuleTypes() {
-		throw new AssertionError();
-	}
+    @Accessor("RULE_TYPES")
+    static Map<GameRules.Key<?>, GameRules.Type<?>> getRuleTypes() {
+        throw new AssertionError();
+    }
 }

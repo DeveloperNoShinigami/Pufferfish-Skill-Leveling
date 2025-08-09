@@ -7,13 +7,13 @@ import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.util.ToastType;
 
 public record ShowToastOutPacket(ToastType type) implements OutPacket {
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeEnumConstant(type);
-	}
+    @Override
+    public void write(PacketByteBuf buf) {
+        buf.writeEnumConstant(type);
+    }
 
-	@Override
-	public Identifier getId() {
-		return Packets.SHOW_TOAST;
-	}
+    @Override
+    public Identifier getId() {
+        return Packets.SHOW_TOAST;
+    }
 }

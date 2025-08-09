@@ -5,8 +5,8 @@ import net.puffish.skillsmod.api.reward.RewardDisposeContext;
 import net.puffish.skillsmod.util.DisposeContext;
 
 public record RewardDisposeContextImpl(DisposeContext context) implements RewardDisposeContext {
-	@Override
-	public MinecraftServer getServer() {
-		return context.server();
-	}
+    @Override
+    public MinecraftServer getServer() {
+        return context.server();
+    }
 }

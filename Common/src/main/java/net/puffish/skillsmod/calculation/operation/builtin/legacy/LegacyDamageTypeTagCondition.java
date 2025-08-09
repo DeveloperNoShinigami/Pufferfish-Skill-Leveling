@@ -17,45 +17,45 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class LegacyDamageTypeTagCondition implements Operation<DamageType, Boolean> {
-	private final RegistryEntryList<DamageType> entries;
+    private final RegistryEntryList<DamageType> entries;
 
-	private LegacyDamageTypeTagCondition(RegistryEntryList<DamageType> entries) {
-		this.entries = entries;
-	}
+    private LegacyDamageTypeTagCondition(RegistryEntryList<DamageType> entries) {
+        this.entries = entries;
+    }
 
-	public static void register() {
-		BuiltinPrototypes.DAMAGE_TYPE.registerOperation(
-				SkillsMod.createIdentifier("legacy_damage_type_tag"),
-				BuiltinPrototypes.BOOLEAN,
-				LegacyDamageTypeTagCondition::parse
-		);
-	}
+    public static void register() {
+        BuiltinPrototypes.DAMAGE_TYPE.registerOperation(
+                SkillsMod.createIdentifier("legacy_damage_type_tag"),
+                BuiltinPrototypes.BOOLEAN,
+                LegacyDamageTypeTagCondition::parse
+        );
+    }
 
-	public static Result<LegacyDamageTypeTagCondition, Problem> parse(OperationConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(rootObject -> parse(rootObject, context));
-	}
+    public static Result<LegacyDamageTypeTagCondition, Problem> parse(OperationConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(rootObject -> parse(rootObject, context));
+    }
 
-	public static Result<LegacyDamageTypeTagCondition, Problem> parse(JsonObject rootObject, ConfigContext context) {
-		var problems = new ArrayList<Problem>();
+    public static Result<LegacyDamageTypeTagCondition, Problem> parse(JsonObject rootObject, ConfigContext context) {
+        var problems = new ArrayList<Problem>();
 
-		var optTag = rootObject.get("tag")
-				.andThen(element -> BuiltinJson.parseDamageTypeTag(element, context.getServer().getRegistryManager()))
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optTag = rootObject.get("tag")
+                .andThen(element -> BuiltinJson.parseDamageTypeTag(element, context.getServer().getRegistryManager()))
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new LegacyDamageTypeTagCondition(
-					optTag.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new LegacyDamageTypeTagCondition(
+                    optTag.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	@Override
-	public Optional<Boolean> apply(DamageType damageType) {
-		return Optional.of(entries.stream().anyMatch(entry -> entry.value() == damageType));
-	}
+    @Override
+    public Optional<Boolean> apply(DamageType damageType) {
+        return Optional.of(entries.stream().anyMatch(entry -> entry.value() == damageType));
+    }
 }

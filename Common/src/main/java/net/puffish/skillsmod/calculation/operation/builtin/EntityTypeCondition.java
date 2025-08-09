@@ -17,50 +17,50 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public final class EntityTypeCondition implements Operation<EntityType<?>, Boolean> {
-	private final RegistryEntryList<EntityType<?>> entityTypeEntries;
+    private final RegistryEntryList<EntityType<?>> entityTypeEntries;
 
-	private EntityTypeCondition(RegistryEntryList<EntityType<?>> entityTypeEntries) {
-		this.entityTypeEntries = entityTypeEntries;
-	}
+    private EntityTypeCondition(RegistryEntryList<EntityType<?>> entityTypeEntries) {
+        this.entityTypeEntries = entityTypeEntries;
+    }
 
-	public static void register() {
-		BuiltinPrototypes.ENTITY_TYPE.registerOperation(
-				SkillsMod.createIdentifier("test"),
-				BuiltinPrototypes.BOOLEAN,
-				EntityTypeCondition::parse
-		);
-	}
+    public static void register() {
+        BuiltinPrototypes.ENTITY_TYPE.registerOperation(
+                SkillsMod.createIdentifier("test"),
+                BuiltinPrototypes.BOOLEAN,
+                EntityTypeCondition::parse
+        );
+    }
 
-	public static Result<EntityTypeCondition, Problem> parse(OperationConfigContext context) {
-		return context.getData()
-				.andThen(JsonElement::getAsObject)
-				.andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
-	}
+    public static Result<EntityTypeCondition, Problem> parse(OperationConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context));
+    }
 
-	public static Result<EntityTypeCondition, Problem> parse(JsonObject rootObject, OperationConfigContext context) {
-		var problems = new ArrayList<Problem>();
+    public static Result<EntityTypeCondition, Problem> parse(JsonObject rootObject, OperationConfigContext context) {
+        var problems = new ArrayList<Problem>();
 
-		var optEntityType = rootObject.get("entity_type")
-				.orElse(LegacyUtils.wrapDeprecated(
-						() -> rootObject.get("entity"),
-						3,
-						context
-				))
-				.andThen(BuiltinJson::parseEntityTypeOrEntityTypeTag)
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optEntityType = rootObject.get("entity_type")
+                .orElse(LegacyUtils.wrapDeprecated(
+                        () -> rootObject.get("entity"),
+                        3,
+                        context
+                ))
+                .andThen(BuiltinJson::parseEntityTypeOrEntityTypeTag)
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			return Result.success(new EntityTypeCondition(
-					optEntityType.orElseThrow()
-			));
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            return Result.success(new EntityTypeCondition(
+                    optEntityType.orElseThrow()
+            ));
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	@Override
-	public Optional<Boolean> apply(EntityType<?> entityType) {
-		return Optional.of(entityTypeEntries.contains(entityType.getRegistryEntry()));
-	}
+    @Override
+    public Optional<Boolean> apply(EntityType<?> entityType) {
+        return Optional.of(entityTypeEntries.contains(entityType.getRegistryEntry()));
+    }
 }

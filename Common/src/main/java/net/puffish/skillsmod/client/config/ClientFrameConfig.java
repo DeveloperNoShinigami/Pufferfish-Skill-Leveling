@@ -7,14 +7,14 @@ import java.util.Optional;
 
 public sealed interface ClientFrameConfig permits ClientFrameConfig.AdvancementFrameConfig, ClientFrameConfig.TextureFrameConfig {
 
-	record AdvancementFrameConfig(AdvancementFrame frame) implements ClientFrameConfig { }
+    record AdvancementFrameConfig(AdvancementFrame frame) implements ClientFrameConfig { }
 
-	record TextureFrameConfig(
-			Optional<Identifier> lockedTexture,
-			Identifier availableTexture,
-			Optional<Identifier> affordableTexture,
-			Identifier unlockedTexture,
-			Optional<Identifier> excludedTexture
-	) implements ClientFrameConfig { }
+    record TextureFrameConfig(
+            Optional<Identifier> lockedTexture,
+            Identifier availableTexture,
+            Optional<Identifier> affordableTexture,
+            Identifier unlockedTexture,
+            Optional<Identifier> excludedTexture
+    ) implements ClientFrameConfig { }
 
 }

@@ -15,64 +15,64 @@ import java.util.Map;
 import java.util.Optional;
 
 public record AntiFarmingPerChunk(int limitPerChunk, int resetAfterSeconds) {
-	public static Result<Optional<AntiFarmingPerChunk>, Problem> parse(JsonElement rootElement, ConfigContext context) {
-		return rootElement.getAsObject().andThen(
-				LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context)
-		);
-	}
+    public static Result<Optional<AntiFarmingPerChunk>, Problem> parse(JsonElement rootElement, ConfigContext context) {
+        return rootElement.getAsObject().andThen(
+                LegacyUtils.wrapNoUnused(rootObject -> parse(rootObject, context), context)
+        );
+    }
 
-	private static Result<Optional<AntiFarmingPerChunk>, Problem> parse(JsonObject rootObject, ConfigContext context) {
-		var problems = new ArrayList<Problem>();
+    private static Result<Optional<AntiFarmingPerChunk>, Problem> parse(JsonObject rootObject, ConfigContext context) {
+        var problems = new ArrayList<Problem>();
 
-		var enabled = LegacyUtils.deprecated(
-				() -> rootObject.getBoolean("enabled"),
-		3,
-				context
-		).orElse(true);
+        var enabled = LegacyUtils.deprecated(
+                () -> rootObject.getBoolean("enabled"),
+        3,
+                context
+        ).orElse(true);
 
-		var optLimitPerChunk = rootObject.getInt("limit_per_chunk")
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optLimitPerChunk = rootObject.getInt("limit_per_chunk")
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		var optResetAfterSeconds = rootObject.getInt("reset_after_seconds")
-				.ifFailure(problems::add)
-				.getSuccess();
+        var optResetAfterSeconds = rootObject.getInt("reset_after_seconds")
+                .ifFailure(problems::add)
+                .getSuccess();
 
-		if (problems.isEmpty()) {
-			if (enabled) {
-				return Result.success(Optional.of(new AntiFarmingPerChunk(
-						optLimitPerChunk.orElseThrow(),
-						optResetAfterSeconds.orElseThrow()
-				)));
-			} else {
-				return Result.success(Optional.empty());
-			}
-		} else {
-			return Result.failure(Problem.combine(problems));
-		}
-	}
+        if (problems.isEmpty()) {
+            if (enabled) {
+                return Result.success(Optional.of(new AntiFarmingPerChunk(
+                        optLimitPerChunk.orElseThrow(),
+                        optResetAfterSeconds.orElseThrow()
+                )));
+            } else {
+                return Result.success(Optional.empty());
+            }
+        } else {
+            return Result.failure(Problem.combine(problems));
+        }
+    }
 
-	public static class Data {
-		private final Map<AntiFarmingPerChunk, LongList> antiFarmingData = new HashMap<>();
+    public static class Data {
+        private final Map<AntiFarmingPerChunk, LongList> antiFarmingData = new HashMap<>();
 
-		public boolean tryIncrement(AntiFarmingPerChunk antiFarming) {
-			var data = antiFarmingData.computeIfAbsent(antiFarming, key -> new LongArrayList());
+        public boolean tryIncrement(AntiFarmingPerChunk antiFarming) {
+            var data = antiFarmingData.computeIfAbsent(antiFarming, key -> new LongArrayList());
 
-			if (data.size() < antiFarming.limitPerChunk()) {
-				data.add(System.currentTimeMillis() + antiFarming.resetAfterSeconds() * 1000L);
-				return true;
-			}
+            if (data.size() < antiFarming.limitPerChunk()) {
+                data.add(System.currentTimeMillis() + antiFarming.resetAfterSeconds() * 1000L);
+                return true;
+            }
 
-			return false;
-		}
+            return false;
+        }
 
-		public void removeOutdated() {
-			var currentTime = System.currentTimeMillis();
+        public void removeOutdated() {
+            var currentTime = System.currentTimeMillis();
 
-			antiFarmingData.values().removeIf(data -> {
-				data.removeIf(time -> time < currentTime);
-				return data.isEmpty();
-			});
-		}
-	}
+            antiFarmingData.values().removeIf(data -> {
+                data.removeIf(time -> time < currentTime);
+                return data.isEmpty();
+            });
+        }
+    }
 }

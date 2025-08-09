@@ -36,3 +36,5 @@ replay_*.log
 
 # game
 run/
+# logs
+**/logs/

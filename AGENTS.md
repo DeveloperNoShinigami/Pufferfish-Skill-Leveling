@@ -75,6 +75,7 @@ Forge builds must rely on Mojang mappings and Forge APIs, replacing any Fabric o
 Set up a CI workflow (for example with GitHub Actions) that runs `./gradlew build`
 and `./gradlew test` on every push. This catches compilation or test failures
 early and ensures the codebase follows the Checkstyle rules.
+- The `.github/workflows/ci.yml` workflow runs `build`, `test`, and `check` for both Fabric and Forge and caches Gradle dependencies for faster verification.
 
 ## Source Control
 - Keep build outputs and IDE files out of version control by respecting `.gitignore`.

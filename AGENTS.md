@@ -199,3 +199,6 @@ What went well:
 What went wrong:
 Improvements:
 ```
+
+## New Insights
+- Clean up mixin configs and other resources that reference removed namespaces when stripping upstream code to prevent build issues.

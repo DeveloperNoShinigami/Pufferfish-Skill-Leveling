@@ -7,6 +7,7 @@ import net.puffish.skillsmod.api.reward.RewardConfigContext;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.util.VersionContext;
+import java.util.OptionalInt;
 
 public record RewardConfigContextImpl(
 		ConfigContext context,
@@ -28,11 +29,11 @@ public record RewardConfigContextImpl(
 		return maybeDataElement;
 	}
 
-	@Override
-	public int getVersion() {
-		if (context instanceof VersionContext versionContext) {
-			return versionContext.getVersion();
-		}
-		return Integer.MIN_VALUE;
-	}
+        @Override
+        public OptionalInt getVersion() {
+                if (context instanceof VersionContext versionContext) {
+                        return versionContext.getVersion();
+                }
+                return OptionalInt.empty();
+        }
 }

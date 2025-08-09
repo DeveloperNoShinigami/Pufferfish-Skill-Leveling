@@ -1,5 +1,7 @@
 package net.puffish.skillsmod.util;
 
+import java.util.OptionalInt;
+
 public interface VersionContext {
-	int getVersion();
+        OptionalInt getVersion();
 }

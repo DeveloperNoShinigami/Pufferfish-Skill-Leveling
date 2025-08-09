@@ -50,17 +50,20 @@ public class SkillLevelingScreen extends SkillsScreen {
             if (isInsideExperience(mouseX, mouseY, x, y)) {
                 List<OrderedText> lines = new ArrayList<>();
                 var activeCategory = activeCategoryData.getConfig();
+                var currentLevel = activeCategoryData.getCurrentLevel().orElse(0);
+                var currentExp = activeCategoryData.getCurrentExperience().orElse(0);
+                var requiredExp = activeCategoryData.getRequiredExperience().orElse(0);
                 lines.add(SkillsMod.createTranslatable(
                         "tooltip",
                         "current_level",
-                        activeCategoryData.getCurrentLevel()
+                        currentLevel
                                 + (activeCategory.levelLimit() == Integer.MAX_VALUE ? "" : "/" + activeCategory.levelLimit())
                 ).asOrderedText());
                 lines.add(SkillsMod.createTranslatable(
                         "tooltip",
                         "experience_progress",
-                        activeCategoryData.getCurrentExperience(),
-                        activeCategoryData.getRequiredExperience(),
+                        currentExp,
+                        requiredExp,
                         MathHelper.floor(activeCategoryData.getExperienceProgress() * 100f)
                 ).asOrderedText());
                 lines.add(SkillsMod.createTranslatable(

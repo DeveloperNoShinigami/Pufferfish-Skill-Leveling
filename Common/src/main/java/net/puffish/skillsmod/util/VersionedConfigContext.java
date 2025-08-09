@@ -2,10 +2,11 @@ package net.puffish.skillsmod.util;
 
 import net.minecraft.server.MinecraftServer;
 import net.puffish.skillsmod.api.config.ConfigContext;
+import java.util.OptionalInt;
 
 public record VersionedConfigContext(
 		ConfigContext context,
-		int version
+                int version
 ) implements ConfigContext, VersionContext {
 
 	@Override
@@ -18,8 +19,8 @@ public record VersionedConfigContext(
 		context.emitWarning(message);
 	}
 
-	@Override
-	public int getVersion() {
-		return version;
-	}
+        @Override
+        public OptionalInt getVersion() {
+                return OptionalInt.of(version);
+        }
 }

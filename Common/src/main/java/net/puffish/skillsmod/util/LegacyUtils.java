@@ -13,12 +13,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class LegacyUtils {
-	public static boolean isRemoved(int removalVersion, ConfigContext context) {
-		if (context instanceof VersionContext versionContext) {
-			return versionContext.getVersion() >= removalVersion;
-		}
-		return true;
-	}
+        public static boolean isRemoved(int removalVersion, ConfigContext context) {
+                if (context instanceof VersionContext versionContext) {
+                        var opt = versionContext.getVersion();
+                        return opt.isPresent() && opt.getAsInt() >= removalVersion;
+                }
+                return true;
+        }
 
 	public static <S, F> Optional<S> deprecated(Supplier<? extends Result<S, F>> supplier, int removalVersion, ConfigContext context) {
 		if (isRemoved(removalVersion, context)) {

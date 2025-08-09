@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 public class ClientCategoryData {
 	private final ClientCategoryConfig config;
@@ -21,9 +22,9 @@ public class ClientCategoryData {
 	private int spentPoints;
 	private int earnedPoints;
 
-	private int currentLevel;
-	private int currentExperience;
-	private int requiredExperience;
+        private OptionalInt currentLevel;
+        private OptionalInt currentExperience;
+        private OptionalInt requiredExperience;
 
 	private float scale = 1;
 
@@ -38,9 +39,9 @@ public class ClientCategoryData {
                         Map<String, Integer> skillLevels,
                         int spentPoints,
                         int earnedPoints,
-                        int currentLevel,
-                        int currentExperience,
-                        int requiredExperience
+                        OptionalInt currentLevel,
+                        OptionalInt currentExperience,
+                        OptionalInt requiredExperience
         ) {
                 this.config = config;
                 this.skillStates = skillStates;
@@ -381,41 +382,41 @@ public class ClientCategoryData {
 		return Math.max(config.spentPointsLimit() - spentPoints, 0);
 	}
 
-	public int getCurrentLevel() {
-		return currentLevel;
-	}
+        public OptionalInt getCurrentLevel() {
+                return currentLevel;
+        }
 
-	public boolean hasExperience() {
-		return currentLevel >= 0;
-	}
+        public boolean hasExperience() {
+                return currentLevel.isPresent();
+        }
 
-	public void setCurrentLevel(int currentLevel) {
-		this.currentLevel = currentLevel;
-	}
+        public void setCurrentLevel(int currentLevel) {
+                this.currentLevel = OptionalInt.of(currentLevel);
+        }
 
-	public int getCurrentExperience() {
-		return currentExperience;
-	}
+        public OptionalInt getCurrentExperience() {
+                return currentExperience;
+        }
 
-	public void setCurrentExperience(int currentExperience) {
-		this.currentExperience = currentExperience;
-	}
+        public void setCurrentExperience(int currentExperience) {
+                this.currentExperience = OptionalInt.of(currentExperience);
+        }
 
-	public int getRequiredExperience() {
-		return requiredExperience;
-	}
+        public OptionalInt getRequiredExperience() {
+                return requiredExperience;
+        }
 
-	public void setRequiredExperience(int requiredExperience) {
-		this.requiredExperience = requiredExperience;
-	}
+        public void setRequiredExperience(int requiredExperience) {
+                this.requiredExperience = OptionalInt.of(requiredExperience);
+        }
 
-	public float getExperienceProgress() {
-		return ((float) currentExperience) / ((float) requiredExperience);
-	}
+        public float getExperienceProgress() {
+                return ((float) currentExperience.orElse(0)) / ((float) requiredExperience.orElse(1));
+        }
 
-	public int getExperienceToNextLevel() {
-		return requiredExperience - currentExperience;
-	}
+        public int getExperienceToNextLevel() {
+                return requiredExperience.orElse(0) - currentExperience.orElse(0);
+        }
 
 	public float getScale() {
 		return scale;

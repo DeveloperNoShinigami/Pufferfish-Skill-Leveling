@@ -25,6 +25,7 @@ import net.puffish.skillsmod.network.InPacket;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.OptionalInt;
 
 public class ShowCategoryInPacket implements InPacket {
 	private final ClientCategoryData category;
@@ -76,16 +77,16 @@ public class ShowCategoryInPacket implements InPacket {
                 var spentPoints = buf.readInt();
                 var earnedPoints = buf.readInt();
 
-		var levelLimit = Integer.MAX_VALUE;
-		var currentLevel = Integer.MIN_VALUE;
-		var currentExperience = Integer.MIN_VALUE;
-		var requiredExperience = Integer.MIN_VALUE;
-		if (buf.readBoolean()) {
-			levelLimit = buf.readInt();
-			currentLevel = buf.readInt();
-			currentExperience = buf.readInt();
-			requiredExperience = buf.readInt();
-		}
+                var levelLimit = Integer.MAX_VALUE;
+                OptionalInt currentLevel = OptionalInt.empty();
+                OptionalInt currentExperience = OptionalInt.empty();
+                OptionalInt requiredExperience = OptionalInt.empty();
+                if (buf.readBoolean()) {
+                        levelLimit = buf.readInt();
+                        currentLevel = OptionalInt.of(buf.readInt());
+                        currentExperience = OptionalInt.of(buf.readInt());
+                        requiredExperience = OptionalInt.of(buf.readInt());
+                }
 
 		var category = new ClientCategoryConfig(
 				id,

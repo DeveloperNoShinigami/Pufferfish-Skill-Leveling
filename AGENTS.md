@@ -199,3 +199,6 @@ What went well:
 What went wrong:
 Improvements:
 ```
+
+## New Insights
+- Use `modImplementation` for required mod dependencies like SkillsMod so the Fabric and Forge jars bundle them. Verify with `./gradlew :Fabric:build` and `./gradlew :Forge:build` and inspect the jars to ensure inclusion.

@@ -26,6 +26,8 @@ dependencies {
     // Provide EnvType and other loader classes used by the mapped Mojang sources
     compileOnly("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
 
+    modImplementation("net.puffish:skillsmod:${project.properties["skillsmod_version"]}")
+
     testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
 }
 

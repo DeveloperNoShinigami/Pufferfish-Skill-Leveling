@@ -37,7 +37,7 @@ import net.puffish.skillsmod.experience.source.BuiltinExperienceSources;
 import net.puffish.skillsmod.impl.config.ConfigContextImpl;
 import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
 import net.puffish.skillsmod.network.Packets;
-import net.puffish.skillsmod.reward.BuiltinRewards;
+import net.puffish.skillsmod.reward.ExtendedBuiltinRewards;
 import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
 import net.puffish.skillsmod.reward.builtin.PointsReward;
 import net.puffish.skillsmod.server.data.CategoryData;
@@ -154,7 +154,7 @@ public class SkillsMod {
 		SkillsGameRules.register(registrar);
 		SkillsArgumentTypes.register(registrar);
 
-		BuiltinRewards.register();
+               ExtendedBuiltinRewards.register();
 		BuiltinOperations.register();
 		BuiltinExperienceSources.register();
 

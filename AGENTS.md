@@ -199,3 +199,6 @@ What went well:
 What went wrong:
 Improvements:
 ```
+
+### Recent Insights
+- Depending on the upstream `puffish_skills` module reduces duplicate code and simplifies maintenance.

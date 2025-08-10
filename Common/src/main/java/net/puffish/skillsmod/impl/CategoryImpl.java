@@ -3,7 +3,7 @@ package net.puffish.skillsmod.impl;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
-import net.puffish.skillsmod.api.Category;
+import net.puffish.skillsmod.api.ExtendedCategory;
 import net.puffish.skillsmod.api.Experience;
 import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.util.PointSources;
@@ -11,7 +11,7 @@ import net.puffish.skillsmod.util.PointSources;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class CategoryImpl implements Category {
+public class CategoryImpl implements ExtendedCategory {
 	private final Identifier categoryId;
 
 	public CategoryImpl(Identifier categoryId) {

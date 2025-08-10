@@ -95,7 +95,7 @@ public class SkillsMod {
 			c -> (categoryId, skillId) -> c.forEach(e -> e.onSkillLock(categoryId, skillId))
 	);
 
-	private static SkillsMod instance;
+        protected static SkillsMod instance;
 
 	private final PrefixedLogger logger = new PrefixedLogger(SkillsAPI.MOD_ID);
 
@@ -108,7 +108,7 @@ public class SkillsMod {
 			() -> { }
 	);
 
-	private SkillsMod(Path modConfigDir, ServerPacketSender packetSender, ServerPlatform platform) {
+        protected SkillsMod(Path modConfigDir, ServerPacketSender packetSender, ServerPlatform platform) {
 		this.modConfigDir = modConfigDir;
 		this.packetSender = packetSender;
 		this.platform = platform;
@@ -118,48 +118,51 @@ public class SkillsMod {
 		return instance;
 	}
 
-	public static void setup(
-			Path configDir,
-			ServerRegistrar registrar,
-			ServerEventReceiver eventReceiver,
-			ServerPacketSender packetSender,
-			ServerPlatform platform
-	) {
-		var modConfigDir = configDir.resolve(SkillsAPI.MOD_ID);
-		try {
-			Files.createDirectories(modConfigDir);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+        public static void setup(
+                        Path configDir,
+                        ServerRegistrar registrar,
+                        ServerEventReceiver eventReceiver,
+                        ServerPacketSender packetSender,
+                        ServerPlatform platform
+        ) {
+                setup(configDir, registrar, eventReceiver, packetSender, platform, SkillsMod::new);
+        }
 
-		instance = new SkillsMod(modConfigDir, packetSender, platform);
+        @FunctionalInterface
+        protected interface InstanceFactory {
+                SkillsMod create(Path modConfigDir, ServerPacketSender packetSender, ServerPlatform platform);
+        }
 
-		registrar.registerInPacket(
-				Packets.SKILL_CLICK,
-				SkillClickInPacket::read,
-				instance::onSkillClickPacket
-		);
+        protected static void setup(
+                        Path configDir,
+                        ServerRegistrar registrar,
+                        ServerEventReceiver eventReceiver,
+                        ServerPacketSender packetSender,
+                        ServerPlatform platform,
+                        InstanceFactory factory
+        ) {
+                var modConfigDir = configDir.resolve(SkillsAPI.MOD_ID);
+                try {
+                        Files.createDirectories(modConfigDir);
+                } catch (IOException e) {
+                        throw new RuntimeException(e);
+                }
 
-		registrar.registerOutPacket(Packets.SHOW_CATEGORY);
-		registrar.registerOutPacket(Packets.HIDE_CATEGORY);
-		registrar.registerOutPacket(Packets.SKILL_UPDATE);
-		registrar.registerOutPacket(Packets.POINTS_UPDATE);
-		registrar.registerOutPacket(Packets.EXPERIENCE_UPDATE);
-		registrar.registerOutPacket(Packets.SHOW_TOAST);
-		registrar.registerOutPacket(Packets.OPEN_SCREEN);
-		registrar.registerOutPacket(Packets.NEW_POINT);
+                instance = factory.create(modConfigDir, packetSender, platform);
 
-		eventReceiver.registerListener(instance.new EventListener());
+                instance.registerPackets(registrar);
 
-		SkillsGameRules.register(registrar);
-		SkillsArgumentTypes.register(registrar);
+                eventReceiver.registerListener(instance.new EventListener());
 
-		BuiltinRewards.register();
-		BuiltinOperations.register();
-		BuiltinExperienceSources.register();
+                SkillsGameRules.register(registrar);
+                SkillsArgumentTypes.register(registrar);
 
-		LegacyBuiltinPrototypes.register();
-	}
+                BuiltinRewards.register();
+                instance.registerBuiltinOperations();
+                BuiltinExperienceSources.register();
+
+                LegacyBuiltinPrototypes.register();
+        }
 
 	public static Identifier createIdentifier(String path) {
 		return new Identifier(SkillsAPI.MOD_ID, path);
@@ -176,18 +179,38 @@ public class SkillsMod {
 		return Text.translatable(Util.createTranslationKey(type, createIdentifier(path)), args);
 	}
 
-	public PrefixedLogger getLogger() {
-		return logger;
-	}
+        public PrefixedLogger getLogger() {
+                return logger;
+        }
 
-	private void copyConfigFromJar() {
-		PathUtils.copyFileFromJar(
-				Path.of("config", "config.json"),
-				modConfigDir.resolve("config.json")
-		);
-	}
+        protected void registerPackets(ServerRegistrar registrar) {
+                registrar.registerInPacket(
+                                Packets.SKILL_CLICK,
+                                SkillClickInPacket::read,
+                                this::onSkillClickPacket
+                );
 
-	private void loadModConfig(MinecraftServer server) {
+                registrar.registerOutPacket(Packets.SHOW_CATEGORY);
+                registrar.registerOutPacket(Packets.HIDE_CATEGORY);
+                registrar.registerOutPacket(Packets.SKILL_UPDATE);
+                registrar.registerOutPacket(Packets.POINTS_UPDATE);
+                registrar.registerOutPacket(Packets.EXPERIENCE_UPDATE);
+                registrar.registerOutPacket(Packets.SHOW_TOAST);
+                registrar.registerOutPacket(Packets.OPEN_SCREEN);
+        }
+
+        protected void registerBuiltinOperations() {
+                BuiltinOperations.register();
+        }
+
+        protected void copyConfigFromJar() {
+                PathUtils.copyFileFromJar(
+                                Path.of("config", "config.json"),
+                                modConfigDir.resolve("config.json")
+                );
+        }
+
+        protected void loadModConfig(MinecraftServer server) {
 		if (!Files.exists(modConfigDir) || PathUtils.isDirectoryEmpty(modConfigDir)) {
 			copyConfigFromJar();
 		}

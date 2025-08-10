@@ -152,6 +152,14 @@ When preparing a new addon for Pufferfish's Skills or a similar base mod:
 
 Following this checklist gives future agents a reproducible starting point from
 basic setup through advanced addon customisation.
+
+## Addon Development Guidelines
+
+- Declare a unique mod ID and `archives_base_name`, and depend on the base mod via `modImplementation`.
+- Keep shared logic in `Common` with loader-specific hooks in their own modules while reusing the base mod's API.
+- Prefix classes that extend base mod features with `Extended*` (e.g., `ExtendedSkill`).
+- Subclass base mod classes only when augmenting behaviour; otherwise, prefer composition.
+- Document each `Extended*` class with Javadoc and update README or other docs to explain new extension points.
 ## Forge-only Skillsmod Integration Steps
 
 When refactoring this repository to rely on the external `skillsmod` library while targeting Forge only:

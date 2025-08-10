@@ -25,15 +25,16 @@ public class CommandReward implements Reward {
 
 	private final Map<UUID, Integer> counts = new HashMap<>();
 
-	private final String command;
-	private final String unlockCommand;
-	private final String lockCommand;
+       private final String command;
+       private final String unlockCommand;
+       private final String lockCommand;
 
-	private CommandReward(String command, String unlockCommand, String lockCommand) {
-		this.command = command;
-		this.unlockCommand = unlockCommand;
-		this.lockCommand = lockCommand;
-	}
+       // Protected to allow extensions such as server command rewards
+       protected CommandReward(String command, String unlockCommand, String lockCommand) {
+               this.command = command;
+               this.unlockCommand = unlockCommand;
+               this.lockCommand = lockCommand;
+       }
 
 	public static void register() {
 		SkillsAPI.registerReward(
@@ -86,20 +87,21 @@ public class CommandReward implements Reward {
 		}
 	}
 
-	private void executeCommand(ServerPlayerEntity player, String command) {
-		if (command.isBlank()) {
-			return;
-		}
+       // Protected so subclasses can override command execution behaviour
+       protected void executeCommand(ServerPlayerEntity player, String command) {
+               if (command.isBlank()) {
+                       return;
+               }
 
-		var server = Objects.requireNonNull(player.getServer());
+               var server = Objects.requireNonNull(player.getServer());
 
-		server.getCommandManager().executeWithPrefix(
-				player.getCommandSource()
-						.withSilent()
-						.withLevel(server.getFunctionPermissionLevel()),
-				command
-		);
-	}
+               server.getCommandManager().executeWithPrefix(
+                               player.getCommandSource()
+                                               .withSilent()
+                                               .withLevel(server.getFunctionPermissionLevel()),
+                               command
+               );
+       }
 
 	@Override
 	public void update(RewardUpdateContext context) {

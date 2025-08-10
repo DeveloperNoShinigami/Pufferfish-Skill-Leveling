@@ -22,7 +22,7 @@ import net.puffish.skillsmod.commands.CategoryCommand;
 import net.puffish.skillsmod.commands.ExperienceCommand;
 import net.puffish.skillsmod.commands.OpenCommand;
 import net.puffish.skillsmod.commands.PointsCommand;
-import net.puffish.skillsmod.commands.SkillsCommand;
+import net.puffish.skillsmod.commands.ExtendedSkillsCommand;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.Config;
 import net.puffish.skillsmod.config.ModConfig;
@@ -918,7 +918,7 @@ public class SkillsMod {
 		public void onCommandsRegister(CommandDispatcher<ServerCommandSource> dispatcher) {
 			dispatcher.register(CommandManager.literal(SkillsAPI.MOD_ID)
 					.then(CategoryCommand.create())
-					.then(SkillsCommand.create())
+.then(ExtendedSkillsCommand.create())
 					.then(PointsCommand.create())
 					.then(ExperienceCommand.create())
 					.then(OpenCommand.create())

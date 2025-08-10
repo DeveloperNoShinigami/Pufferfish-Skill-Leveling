@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[46,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="puffish_skill_leveling"
+version="${version}"
+displayName="Pufferfish Skill Leveling"
+authors="Pufferfish"
+description="Adds a fully configurable skill system to the game."
+
+[[dependencies.puffish_skill_leveling]]
+modId="forge"
+mandatory=true
+versionRange="[46,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.puffish_skill_leveling]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20,1.21)"
+ordering="NONE"
+side="BOTH"

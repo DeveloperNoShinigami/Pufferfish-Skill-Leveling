@@ -1,0 +1,26 @@
+{
+        "schemaVersion": 1,
+        "id": "puffish_skill_leveling",
+        "version": "${version}",
+        "name": "Pufferfish Skill Leveling",
+        "description": "Adds a fully configurable skill system to the game.",
+        "authors": [
+                "Pufferfish"
+        ],
+        "license": "All Rights Reserved",
+        "environment": "*",
+        "entrypoints": {
+                "client": [
+                        "net.puffish.skillsmod.main.FabricClientMain"
+                ]
+        },
+        "mixins": [
+                "puffish_skill_leveling.mixins.json"
+        ],
+        "depends": {
+                "fabricloader": ">=0.14.21",
+                "fabric-api": "*",
+                "minecraft": "~1.20",
+                "java": ">=17"
+        }
+}

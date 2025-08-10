@@ -10,9 +10,9 @@
 	"license": "All Rights Reserved",
 	"environment": "*",
 	"entrypoints": {
-		"client": [
-			"net.puffish.skillsmod.main.FabricClientMain"
-		],
+                "client": [
+                        "net.puffish.skillsmod.main.ExtendedFabricClientMain"
+                ],
 		"main": [
 			"net.puffish.skillsmod.main.FabricMain"
 		]

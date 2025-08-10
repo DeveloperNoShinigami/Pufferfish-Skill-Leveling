@@ -199,3 +199,6 @@ What went well:
 What went wrong:
 Improvements:
 ```
+
+## Insights
+- Introduced extended client bootstrap classes for Fabric and Forge, providing a central hook for addon-specific packet and configuration registration.

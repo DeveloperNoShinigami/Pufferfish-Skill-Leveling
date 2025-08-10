@@ -47,7 +47,7 @@ public class ForgeMain {
 	private final List<ServerEventListener> serverListeners = new ArrayList<>();
 
 	public ForgeMain() {
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ForgeClientMain::new);
+                DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ExtendedForgeClientMain::new);
 
 		var forgeEventBus = MinecraftForge.EVENT_BUS;
 		forgeEventBus.addListener(this::onPlayerLoggedIn);

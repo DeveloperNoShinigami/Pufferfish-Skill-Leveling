@@ -23,8 +23,8 @@ import net.puffish.skillsmod.calculation.operation.builtin.EffectOperation;
 import net.puffish.skillsmod.calculation.operation.builtin.StatCondition;
 
 public class IncreaseStatExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("increase_stat");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+	protected static final Identifier ID = SkillsMod.createIdentifier("increase_stat");
+	protected static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
 	static {
 		PROTOTYPE.registerOperation(
@@ -44,9 +44,9 @@ public class IncreaseStatExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private final Calculation<Data> calculation;
+	protected final Calculation<Data> calculation;
 
-	private IncreaseStatExperienceSource(Calculation<Data> calculation) {
+	protected IncreaseStatExperienceSource(Calculation<Data> calculation) {
 		this.calculation = calculation;
 	}
 
@@ -64,7 +64,7 @@ public class IncreaseStatExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private record Data(ServerPlayerEntity player, Stat<?> stat, int amount) { }
+	protected record Data(ServerPlayerEntity player, Stat<?> stat, int amount) { }
 
 	public int getValue(ServerPlayerEntity player, Stat<?> stat, int amount) {
 		return (int) Math.round(calculation.evaluate(

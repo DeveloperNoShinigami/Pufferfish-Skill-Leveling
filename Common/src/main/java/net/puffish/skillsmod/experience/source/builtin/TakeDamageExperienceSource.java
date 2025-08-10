@@ -30,8 +30,8 @@ import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyEntityTy
 import java.util.Optional;
 
 public class TakeDamageExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("take_damage");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+	protected static final Identifier ID = SkillsMod.createIdentifier("take_damage");
+	protected static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
 	static {
 		PROTOTYPE.registerOperation(
@@ -56,9 +56,9 @@ public class TakeDamageExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private final Calculation<Data> calculation;
+	protected final Calculation<Data> calculation;
 
-	private TakeDamageExperienceSource(Calculation<Data> calculation) {
+	protected TakeDamageExperienceSource(Calculation<Data> calculation) {
 		this.calculation = calculation;
 	}
 
@@ -76,7 +76,7 @@ public class TakeDamageExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private record Data(ServerPlayerEntity player, ItemStack weapon, float damage, DamageSource damageSource) { }
+	protected record Data(ServerPlayerEntity player, ItemStack weapon, float damage, DamageSource damageSource) { }
 
 	public int getValue(ServerPlayerEntity player, ItemStack weapon, float damage, DamageSource damageSource) {
 		return (int) Math.round(calculation.evaluate(

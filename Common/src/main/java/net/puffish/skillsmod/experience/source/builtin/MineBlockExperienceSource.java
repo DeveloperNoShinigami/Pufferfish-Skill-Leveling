@@ -27,8 +27,8 @@ import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyBlockTag
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 
 public class MineBlockExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("mine_block");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+	protected static final Identifier ID = SkillsMod.createIdentifier("mine_block");
+	protected static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
 	static {
 		PROTOTYPE.registerOperation(
@@ -48,9 +48,9 @@ public class MineBlockExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private final Calculation<Data> calculation;
+	protected final Calculation<Data> calculation;
 
-	private MineBlockExperienceSource(Calculation<Data> calculation) {
+	protected MineBlockExperienceSource(Calculation<Data> calculation) {
 		this.calculation = calculation;
 	}
 
@@ -68,7 +68,7 @@ public class MineBlockExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private record Data(ServerPlayerEntity player, BlockState blockState, ItemStack tool) { }
+	protected record Data(ServerPlayerEntity player, BlockState blockState, ItemStack tool) { }
 
 	public int getValue(ServerPlayerEntity player, BlockState blockState, ItemStack tool) {
 		return (int) Math.round(calculation.evaluate(

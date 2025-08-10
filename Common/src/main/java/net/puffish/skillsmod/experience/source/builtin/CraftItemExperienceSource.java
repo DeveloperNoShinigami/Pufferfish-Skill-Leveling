@@ -24,8 +24,8 @@ import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 
 public class CraftItemExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("craft_item");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+	protected static final Identifier ID = SkillsMod.createIdentifier("craft_item");
+	protected static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
 	static {
 		PROTOTYPE.registerOperation(
@@ -40,9 +40,9 @@ public class CraftItemExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private final Calculation<Data> calculation;
+	protected final Calculation<Data> calculation;
 
-	private CraftItemExperienceSource(Calculation<Data> calculation) {
+	protected CraftItemExperienceSource(Calculation<Data> calculation) {
 		this.calculation = calculation;
 	}
 
@@ -60,7 +60,7 @@ public class CraftItemExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private record Data(ServerPlayerEntity player, ItemStack itemStack) { }
+	protected record Data(ServerPlayerEntity player, ItemStack itemStack) { }
 
 	public int getValue(ServerPlayerEntity player, ItemStack itemStack) {
 		return (int) Math.round(calculation.evaluate(

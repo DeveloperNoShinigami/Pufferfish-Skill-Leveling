@@ -24,8 +24,8 @@ import net.puffish.skillsmod.calculation.operation.builtin.ItemStackCondition;
 import net.puffish.skillsmod.calculation.operation.builtin.legacy.LegacyItemTagCondition;
 
 public class EatFoodExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("eat_food");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+	protected static final Identifier ID = SkillsMod.createIdentifier("eat_food");
+	protected static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
 	static {
 		PROTOTYPE.registerOperation(
@@ -40,9 +40,9 @@ public class EatFoodExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private final Calculation<Data> calculation;
+	protected final Calculation<Data> calculation;
 
-	private EatFoodExperienceSource(Calculation<Data> calculation) {
+	protected EatFoodExperienceSource(Calculation<Data> calculation) {
 		this.calculation = calculation;
 	}
 
@@ -60,7 +60,7 @@ public class EatFoodExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private record Data(ServerPlayerEntity player, ItemStack itemStack) { }
+	protected record Data(ServerPlayerEntity player, ItemStack itemStack) { }
 
 	public int getValue(ServerPlayerEntity player, ItemStack itemStack) {
 		return (int) Math.round(calculation.evaluate(

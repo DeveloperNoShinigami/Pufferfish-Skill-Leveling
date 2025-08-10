@@ -39,8 +39,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class KillEntityExperienceSource implements ExperienceSource {
-	private static final Identifier ID = SkillsMod.createIdentifier("kill_entity");
-	private static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
+	protected static final Identifier ID = SkillsMod.createIdentifier("kill_entity");
+	protected static final Prototype<Data> PROTOTYPE = Prototype.create(ID);
 
 	static {
 		PROTOTYPE.registerOperation(
@@ -70,10 +70,10 @@ public class KillEntityExperienceSource implements ExperienceSource {
 		);
 	}
 
-	private final Calculation<Data> calculation;
-	private final Optional<AntiFarmingPerChunk> optAntiFarming;
+	protected final Calculation<Data> calculation;
+	protected final Optional<AntiFarmingPerChunk> optAntiFarming;
 
-	private KillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming) {
+	protected KillEntityExperienceSource(Calculation<Data> calculation, Optional<AntiFarmingPerChunk> optAntiFarming) {
 		this.calculation = calculation;
 		this.optAntiFarming = optAntiFarming;
 	}
@@ -115,7 +115,7 @@ public class KillEntityExperienceSource implements ExperienceSource {
 		}
 	}
 
-	private record Data(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource, double entityDroppedXp) { }
+	protected record Data(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource, double entityDroppedXp) { }
 
 	public int getValue(ServerPlayerEntity player, LivingEntity entity, ItemStack weapon, DamageSource damageSource, double entityDroppedXp) {
 		return (int) Math.round(calculation.evaluate(

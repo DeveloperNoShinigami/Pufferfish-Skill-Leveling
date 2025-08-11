@@ -11,7 +11,7 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
-import net.puffish.skillsmod.client.SkillsClientMod;
+import net.puffish.skillsmod.client.AddonSkillsClientMod;
 import net.puffish.skillsmod.client.event.ClientEventListener;
 import net.puffish.skillsmod.client.event.ClientEventReceiver;
 import net.puffish.skillsmod.client.keybinding.KeyBindingHandler;
@@ -37,12 +37,12 @@ public class ForgeClientMain {
 		forgeEventBus.addListener(this::onPlayerLoggedIn);
 		forgeEventBus.addListener(this::onInputKey);
 
-		SkillsClientMod.setup(
-				new ClientRegistrarImpl(),
-				new ClientEventReceiverImpl(),
-				new KeyBindingReceiverImpl(),
-				new ClientPacketSenderImpl()
-		);
+                AddonSkillsClientMod.setup(
+                                new ClientRegistrarImpl(),
+                                new ClientEventReceiverImpl(),
+                                new KeyBindingReceiverImpl(),
+                                new ClientPacketSenderImpl()
+                );
 	}
 
 	private void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {

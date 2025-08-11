@@ -9,7 +9,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.client.SkillsClientMod;
+import net.puffish.skillsmod.client.AddonSkillsClientMod;
 import net.puffish.skillsmod.client.event.ClientEventListener;
 import net.puffish.skillsmod.client.event.ClientEventReceiver;
 import net.puffish.skillsmod.client.keybinding.KeyBindingHandler;
@@ -26,12 +26,12 @@ public class FabricClientMain implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		SkillsClientMod.setup(
-				new ClientRegistrarImpl(),
-				new ClientEventReceiverImpl(),
-				new KeyBindingReceiverImpl(),
-				new ClientPacketSenderImpl()
-		);
+                AddonSkillsClientMod.setup(
+                                new ClientRegistrarImpl(),
+                                new ClientEventReceiverImpl(),
+                                new KeyBindingReceiverImpl(),
+                                new ClientPacketSenderImpl()
+                );
 	}
 
 	private static class ClientRegistrarImpl implements ClientRegistrar {

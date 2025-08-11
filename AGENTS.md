@@ -13,6 +13,16 @@ This document summarizes best practices for automating Minecraft mod development
 - Put Fabric specific code inside the `Fabric` module and Forge code inside the `Forge` module.
 - Resources belong under `src/main/resources` and Java sources under `src/main/java`.
 
+## Architectury Project Overview
+
+Architectury projects are split into three Gradle modules that build together:
+
+- **Common** contains shared code and resources used by all builds.
+- **Fabric** depends on `Common` and adds Fabric API hooks; its jar bundles the `Common` module.
+- **Forge** also depends on `Common` and includes Forge-specific integrations; its jar packages `Common` as well.
+
+The platform modules compile against the shared API from `Common`, allowing most logic to live in one place while Fabric and Forge modules supply only loader-specific entry points and extensions.
+
 ## Loader Configurations
 
 When targeting both loaders, the project is split into three modules:
@@ -114,6 +124,16 @@ its code, treat it as an addon. The basic steps are:
 
 
 This overview provides a starting point for building or scripting an automated agent to assist with Minecraft modding tasks.
+
+## Addon Conversion Workflow
+
+When transforming a full mod into a lightweight addon that builds against the original project:
+
+1. **Diff against the original branch** – compare your fork to upstream to understand changes.
+2. **Prune unmodified files** – remove files unchanged from the base mod so only addon-specific code remains.
+3. **Extend core classes** – subclass or implement types from the base mod instead of copying code.
+4. **Add `modImplementation` dependencies** – declare the base mod in each module so the addon compiles against its API.
+5. **Update metadata** – adjust `fabric.mod.json`, `mods.toml`, and build properties to reflect the addon’s identity.
 
 ## Addon Project Checklist
 When preparing a new addon for Pufferfish's Skills or a similar base mod:

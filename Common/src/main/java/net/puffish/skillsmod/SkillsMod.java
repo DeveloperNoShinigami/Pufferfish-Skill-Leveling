@@ -38,7 +38,7 @@ import net.puffish.skillsmod.impl.config.ConfigContextImpl;
 import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
 import net.puffish.skillsmod.network.Packets;
 import net.puffish.skillsmod.reward.BuiltinRewards;
-import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
+import net.puffish.skillsmod.reward.builtin.AddonPerLevelReward;
 import net.puffish.skillsmod.reward.builtin.PointsReward;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.server.data.PlayerData;
@@ -764,7 +764,7 @@ public class SkillsMod {
             if (levelChange != 0) {
                 for (var reward : definition.rewards()) {
                     var inst = reward.instance();
-                    if (inst instanceof PerLevelRewardsReward plr) {
+                    if (inst instanceof AddonPerLevelReward plr) {
                         if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
                             int newLevel = Math.min(count, plr.getMaxLevel());
                             int oldLevel = Math.min(prev, plr.getMaxLevel());

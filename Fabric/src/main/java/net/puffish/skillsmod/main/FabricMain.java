@@ -17,6 +17,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.GameRules;
 import net.puffish.skillsmod.SkillsMod;
+import net.puffish.skillsmod.reward.builtin.AddonPerLevelReward;
 import net.puffish.skillsmod.mixin.GameRulesAccessor;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
@@ -33,13 +34,15 @@ public class FabricMain implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		SkillsMod.setup(
-				FabricLoader.getInstance().getConfigDir(),
-				new ServerRegistrarImpl(),
-				new ServerEventReceiverImpl(),
-				new ServerPacketSenderImpl(),
-				new ServerPlatformImpl()
-		);
+                SkillsMod.setup(
+                                FabricLoader.getInstance().getConfigDir(),
+                                new ServerRegistrarImpl(),
+                                new ServerEventReceiverImpl(),
+                                new ServerPacketSenderImpl(),
+                                new ServerPlatformImpl()
+                );
+
+                AddonPerLevelReward.register();
 
 	}
 

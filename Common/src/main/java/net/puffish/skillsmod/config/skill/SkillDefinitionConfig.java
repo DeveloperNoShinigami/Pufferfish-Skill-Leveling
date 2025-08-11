@@ -15,7 +15,7 @@ import net.puffish.skillsmod.util.LegacyUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
+import net.puffish.skillsmod.reward.builtin.AddonPerLevelReward;
 
 public record SkillDefinitionConfig(
 
@@ -175,10 +175,10 @@ public record SkillDefinitionConfig(
 
                int rewardMaxLevel = rewards.stream()
                                .map(SkillRewardConfig::instance)
-                               .filter(PerLevelRewardsReward.class::isInstance)
-                               .map(PerLevelRewardsReward.class::cast)
+                               .filter(AddonPerLevelReward.class::isInstance)
+                               .map(AddonPerLevelReward.class::cast)
                                .filter(reward -> reward.getSkillId() == null || reward.getSkillId().equals(id))
-                               .mapToInt(PerLevelRewardsReward::getMaxLevel)
+                               .mapToInt(AddonPerLevelReward::getMaxLevel)
                                .max()
                                .orElse(1);
 

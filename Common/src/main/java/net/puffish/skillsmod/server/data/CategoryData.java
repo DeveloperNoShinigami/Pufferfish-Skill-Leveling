@@ -11,7 +11,7 @@ import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.GeneralConfig;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
-import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
+import net.puffish.skillsmod.reward.builtin.AddonPerLevelReward;
 import net.puffish.skillsmod.util.PointSources;
 
 import java.util.HashMap;
@@ -104,7 +104,7 @@ public class CategoryData {
 
                for (var reward : definition.rewards()) {
                        var inst = reward.instance();
-                       if (inst instanceof PerLevelRewardsReward plr) {
+                       if (inst instanceof AddonPerLevelReward plr) {
                                if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
                                        maxLevels = Math.max(maxLevels, plr.getMaxLevel());
                                }
@@ -151,7 +151,7 @@ public class CategoryData {
                 int cost = definition.cost();
                 for (var reward : definition.rewards()) {
                         var inst = reward.instance();
-                        if (inst instanceof PerLevelRewardsReward plr) {
+                        if (inst instanceof AddonPerLevelReward plr) {
                                 if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
                                         cost = Math.max(cost, plr.getPointsPerLevel());
                                 }

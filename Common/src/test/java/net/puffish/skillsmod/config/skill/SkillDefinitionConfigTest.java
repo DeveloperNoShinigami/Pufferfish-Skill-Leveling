@@ -4,7 +4,7 @@ import net.minecraft.server.MinecraftServer;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonPath;
-import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
+import net.puffish.skillsmod.reward.builtin.AddonPerLevelReward;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +23,7 @@ public class SkillDefinitionConfigTest {
 
     static {
         try {
-            PerLevelRewardsReward.register();
+            AddonPerLevelReward.register();
         } catch (IllegalStateException ignored) {
         }
     }

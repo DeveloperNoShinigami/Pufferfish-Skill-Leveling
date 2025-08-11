@@ -24,8 +24,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PerLevelRewardsReward implements Reward {
-	public static final Identifier ID = SkillsMod.createIdentifier("per_level_rewards");
+/**
+ * Reward that grants a list of nested rewards for each level of a target skill.
+ *
+ * <p>Configuration:</p>
+ * <ul>
+ *   <li><code>skill_id</code> – skill to track.</li>
+ *   <li><code>levels</code> – map of level numbers to reward arrays.</li>
+ *   <li><code>max_skill_level</code> – optional maximum level, defaults to the
+ *       highest key in {@code levels}.</li>
+ *   <li><code>points_per_level</code> – optional points cost per level,
+ *       defaults to {@code 0}.</li>
+ * </ul>
+ */
+public class AddonPerLevelReward implements Reward {
+        public static final Identifier ID = SkillsMod.createIdentifier("per_level_rewards");
 
     private final Map<Integer, List<SkillRewardConfig>> levelRewards;
     private final String skillId;
@@ -33,7 +46,7 @@ public class PerLevelRewardsReward implements Reward {
     private final int pointsPerLevel;
     private final Map<UUID, Integer> counts = new HashMap<>();
 
-    private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards, String skillId, int maxLevel, int pointsPerLevel) {
+    private AddonPerLevelReward(Map<Integer, List<SkillRewardConfig>> levelRewards, String skillId, int maxLevel, int pointsPerLevel) {
         this.levelRewards = levelRewards;
         this.skillId = skillId;
         this.maxLevel = maxLevel;
@@ -52,17 +65,17 @@ public class PerLevelRewardsReward implements Reward {
         return pointsPerLevel;
     }
 
-	public static void register() {
-	SkillsAPI.registerReward(ID, PerLevelRewardsReward::parse);
-	}
+        public static void register() {
+        SkillsAPI.registerReward(ID, AddonPerLevelReward::parse);
+        }
 
-        static Result<PerLevelRewardsReward, Problem> parse(RewardConfigContext context) {
-	return context.getData()
-		.andThen(JsonElement::getAsObject)
-		.andThen(LegacyUtils.wrapNoUnused(obj -> parse(obj, context), context));
-	}
+        static Result<AddonPerLevelReward, Problem> parse(RewardConfigContext context) {
+        return context.getData()
+                .andThen(JsonElement::getAsObject)
+                .andThen(LegacyUtils.wrapNoUnused(obj -> parse(obj, context), context));
+        }
 
-        static Result<PerLevelRewardsReward, Problem> parse(JsonObject rootObject, ConfigContext context) {
+        static Result<AddonPerLevelReward, Problem> parse(JsonObject rootObject, ConfigContext context) {
         var problems = new ArrayList<Problem>();
 
         var optLevelsMap = rootObject.getObject("levels")
@@ -119,7 +132,7 @@ public class PerLevelRewardsReward implements Reward {
         int optPointsPerLevel = optPointsPerLevelTmp.orElse(0);
 
         if (problems.isEmpty()) {
-            return Result.success(new PerLevelRewardsReward(levelRewards,
+            return Result.success(new AddonPerLevelReward(levelRewards,
                             optSkillId.orElse(null),
                             optMaxLevelTmp.orElse(Math.max(1, definedMaxLevel)),
                             optPointsPerLevel));

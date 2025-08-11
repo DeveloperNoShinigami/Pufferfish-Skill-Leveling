@@ -5,7 +5,6 @@ import net.puffish.skillsmod.reward.builtin.CommandReward;
 import net.puffish.skillsmod.reward.builtin.PointsReward;
 import net.puffish.skillsmod.reward.builtin.ScoreboardReward;
 import net.puffish.skillsmod.reward.builtin.TagReward;
-import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
 
 public class BuiltinRewards {
 	public static void register() {
@@ -13,7 +12,6 @@ public class BuiltinRewards {
 		CommandReward.register();
 		PointsReward.register();
 		ScoreboardReward.register();
-		TagReward.register();
-		PerLevelRewardsReward.register();
-	}
+                TagReward.register();
+        }
 }

@@ -18,7 +18,7 @@ import net.puffish.skillsmod.config.skill.SkillRewardConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionsConfig;
 import net.puffish.skillsmod.config.skill.SkillConnectionsGroupConfig;
 import net.puffish.skillsmod.config.skill.SkillsConfig;
-import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
+import net.puffish.skillsmod.reward.builtin.AddonPerLevelReward;
 import net.puffish.skillsmod.util.PointSources;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,10 +33,10 @@ public class CategoryDataTest {
     @Test
     public void testPerLevelRewardExtendsMaxLevel() throws Exception {
         Map<Integer, List<SkillRewardConfig>> levelRewards = new HashMap<>();
-        Constructor<PerLevelRewardsReward> ctor = PerLevelRewardsReward.class.getDeclaredConstructor(Map.class, String.class, int.class, int.class);
+        Constructor<AddonPerLevelReward> ctor = AddonPerLevelReward.class.getDeclaredConstructor(Map.class, String.class, int.class, int.class);
         ctor.setAccessible(true);
-        PerLevelRewardsReward plr = ctor.newInstance(levelRewards, "skill", 3, 0);
-        SkillRewardConfig rewardConfig = new SkillRewardConfig(PerLevelRewardsReward.ID, plr);
+        AddonPerLevelReward plr = ctor.newInstance(levelRewards, "skill", 3, 0);
+        SkillRewardConfig rewardConfig = new SkillRewardConfig(AddonPerLevelReward.ID, plr);
 
         SkillDefinitionConfig definition = new SkillDefinitionConfig(
                 "def",
@@ -90,10 +90,10 @@ public class CategoryDataTest {
     @Test
     public void testPerLevelRewardCostsPointsPerLevel() throws Exception {
         Map<Integer, List<SkillRewardConfig>> levelRewards = new HashMap<>();
-        Constructor<PerLevelRewardsReward> ctor = PerLevelRewardsReward.class.getDeclaredConstructor(Map.class, String.class, int.class, int.class);
+        Constructor<AddonPerLevelReward> ctor = AddonPerLevelReward.class.getDeclaredConstructor(Map.class, String.class, int.class, int.class);
         ctor.setAccessible(true);
-        PerLevelRewardsReward plr = ctor.newInstance(levelRewards, "skill", 1, 2);
-        SkillRewardConfig rewardConfig = new SkillRewardConfig(PerLevelRewardsReward.ID, plr);
+        AddonPerLevelReward plr = ctor.newInstance(levelRewards, "skill", 1, 2);
+        SkillRewardConfig rewardConfig = new SkillRewardConfig(AddonPerLevelReward.ID, plr);
 
         SkillDefinitionConfig definition = new SkillDefinitionConfig(
                 "def",

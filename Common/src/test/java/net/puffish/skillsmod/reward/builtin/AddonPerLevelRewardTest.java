@@ -9,7 +9,7 @@ import net.puffish.skillsmod.api.util.Result;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class PerLevelRewardsRewardTest {
+public class AddonPerLevelRewardTest {
 
 	private static class DummyContext implements RewardConfigContext {
 	    private final JsonElement data;
@@ -34,11 +34,11 @@ public class PerLevelRewardsRewardTest {
 	    }
 	}
 
-	private static Result<PerLevelRewardsReward, Problem> parse(String json) {
-	    var element = JsonElement.parseString(json, JsonPath.create("test"))
-	            .getSuccess().orElseThrow();
-	    return PerLevelRewardsReward.parse(new DummyContext(element));
-	}
+        private static Result<AddonPerLevelReward, Problem> parse(String json) {
+            var element = JsonElement.parseString(json, JsonPath.create("test"))
+                    .getSuccess().orElseThrow();
+            return AddonPerLevelReward.parse(new DummyContext(element));
+        }
 
         @Test
         public void testValidValues() {

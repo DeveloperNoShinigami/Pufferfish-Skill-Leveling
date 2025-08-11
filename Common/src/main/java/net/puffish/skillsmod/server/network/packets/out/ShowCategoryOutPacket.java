@@ -22,7 +22,7 @@ import net.puffish.skillsmod.config.skill.SkillDefinitionsConfig;
 import net.puffish.skillsmod.config.skill.SkillsConfig;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.network.Packets;
-import net.puffish.skillsmod.reward.builtin.PerLevelRewardsReward;
+import net.puffish.skillsmod.reward.builtin.AddonPerLevelReward;
 import net.puffish.skillsmod.server.data.CategoryData;
 
 public record ShowCategoryOutPacket(CategoryConfig category, CategoryData categoryData) implements OutPacket {
@@ -90,7 +90,7 @@ public record ShowCategoryOutPacket(CategoryConfig category, CategoryData catego
 		buf.writeInt(definition.requiredPoints());
 		buf.writeInt(definition.requiredSpentPoints());
                 buf.writeInt(definition.requiredExclusions());
-                buf.writeBoolean(definition.rewards().stream().anyMatch(reward -> reward.type().equals(PerLevelRewardsReward.ID)));
+                buf.writeBoolean(definition.rewards().stream().anyMatch(reward -> reward.type().equals(AddonPerLevelReward.ID)));
 	}
 
 	public void write(PacketByteBuf buf, SkillsConfig skills) {

@@ -28,6 +28,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
+import net.puffish.skillsmod.reward.builtin.AddonPerLevelReward;
 import net.puffish.skillsmod.mixin.GameRulesAccessor;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
@@ -56,14 +57,16 @@ public class ForgeMain {
 		forgeEventBus.addListener(this::onOnDatapackSyncEvent);
 		forgeEventBus.addListener(this::onRegisterCommands);
 
-		SkillsMod.setup(
-				FMLPaths.CONFIGDIR.get(),
-				new ServerRegistrarImpl(),
-				new ServerEventReceiverImpl(),
-				new ServerPacketSenderImpl(),
-				new ServerPlatformImpl()
-		);
-	}
+                SkillsMod.setup(
+                                FMLPaths.CONFIGDIR.get(),
+                                new ServerRegistrarImpl(),
+                                new ServerEventReceiverImpl(),
+                                new ServerPacketSenderImpl(),
+                                new ServerPlatformImpl()
+                );
+
+                AddonPerLevelReward.register();
+        }
 
 	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {

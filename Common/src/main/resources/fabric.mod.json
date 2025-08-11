@@ -1,0 +1,30 @@
+{
+        "schemaVersion": 1,
+        "id": "puffish_skill_leveling",
+        "version": "${version}",
+        "name": "Pufferfish Skill Leveling",
+        "description": "Addon enabling skill leveling for Pufferfish's Skills.",
+        "authors": [
+                "Pufferfish"
+        ],
+        "license": "All Rights Reserved",
+        "environment": "*",
+        "entrypoints": {
+                "client": [
+                        "net.puffish.skillsmod.main.FabricClientMain"
+                ],
+                "main": [
+                        "net.puffish.skillsmod.main.FabricMain"
+                ]
+        },
+        "mixins": [
+                "puffish_skills.mixins.json"
+        ],
+        "depends": {
+                "fabricloader": ">=0.14.21",
+                "fabric-api": "*",
+                "minecraft": "~1.20",
+                "java": ">=17",
+                "puffish_skills": ">=0.16.3"
+        }
+}

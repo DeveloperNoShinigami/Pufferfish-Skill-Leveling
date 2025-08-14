@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "enabled": true,
+  "default_max_level": 10,
+  "level_progression": {
+    "xp_multiplier": 1.5,
+    "points_per_level": 1
+  },
+  "description": "Configuration for Pufferfish Skill Leveling addon. This addon extends the core Pufferfish Skills mod with multi-level progression."
+}

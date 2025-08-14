@@ -22,6 +22,11 @@ dependencies {
     // Provide EnvType and other loader classes used by the mapped Mojang sources
     compileOnly("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
 
+    // Dependency on the core Pufferfish Skills mod
+    // Note: In a real scenario, this would be a published mod from a maven repository
+    // For now, using compileOnly to indicate the dependency
+    compileOnly("net.puffish.skillsmod:puffish_skills:${project.properties["mod_version"]}")
+
     testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
 }
 

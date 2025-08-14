@@ -1,6 +1,77 @@
-# Pufferfish Skill Leveling
+# Pufferfish Skill Leveling Addon
 
-This mod provides an API to create skill trees via datapacks. Categories and skills can unlock rewards and gain experience.
+This project has been **restructured as a standalone addon** for Pufferfish's Skills mod, providing enhanced multi-level skill progression and per-level rewards.
+
+## 🔄 Project Restructure
+
+The codebase has been transformed from a core mod modification to a **clean addon** that extends Pufferfish's Skills without modifying the original mod.
+
+### New Structure
+
+- **Package**: `com.developernoshingami.pufferfish.skillleveling`
+- **Mod ID**: `puffish_skill_leveling`
+- **Type**: Standalone addon that depends on `puffish_skills`
+
+## 🏗️ Addon Architecture
+
+### Core Components
+
+- **`SkillLevelingMod`** - Main addon class that integrates with the core mod
+- **`SkillLevelingManager`** - Manages multi-level skill progression, extending core functionality
+- **`LeveledSkill`** - Wraps core Skill class to add level progression without modification
+- **`PerLevelReward`** - Extends core reward system for level-specific rewards
+- **`SkillLevelingCommand`** - Additional commands for level management
+- **`SkillLevelingDataManager`** - Handles skill level data persistence
+
+### Integration Strategy
+
+1. **Extension Pattern**: Extends core functionality through composition and inheritance
+2. **Event Hooking**: Listens to core mod events to provide addon functionality
+3. **API Usage**: Uses core mod's public APIs instead of modifying internal code
+4. **Reward System**: Registers custom reward types through core mod's factory system
+
+## 📦 Installation
+
+1. Install the **Pufferfish's Skills** core mod (dependency)
+2. Install this **Skill Leveling** addon
+3. Addon automatically integrates on server startup
+
+## 🎮 Usage
+
+### Commands
+- `/skillleveling info` - Show addon information
+- `/skillleveling check` - View your skill levels
+- `/skillleveling advance` - Advance skill levels (with parameters)
+
+### Enhanced Features
+- **Multi-level progression** on top of base skills
+- **Per-level rewards** that stack as you advance
+- **Level-specific effects** and bonuses
+- **Advanced progression tracking**
+
+## ⚙️ Configuration
+
+- **Config**: `config/addon_config.json`
+- **Languages**: `assets/puffish_skill_leveling/lang/`
+- **Default Max Level**: 10 levels per skill
+- **Progression**: Configurable XP multipliers and point costs
+
+## 🔧 Development Benefits
+
+### Addon Pattern Advantages
+- ✅ **Non-intrusive**: Core mod remains unmodified
+- ✅ **Maintainable**: Core mod updates don't break addon
+- ✅ **Modular**: Can be enabled/disabled independently
+- ✅ **Compatible**: Works with future core mod versions
+
+### Clean Separation
+- **Core Logic**: Provided by Pufferfish's Skills
+- **Enhancement Logic**: Provided by this addon
+- **Integration**: Through well-defined APIs and events
+
+## 📋 Original Functionality (Base Mod)
+
+The original skill system functionality has been preserved and is now provided by the core Pufferfish's Skills mod:
 
 ## Player skill definitions
 

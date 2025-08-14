@@ -46,9 +46,9 @@ public class ForgeMain {
 
 	private void setup(FMLCommonSetupEvent event) {
 		SkillLevelingMod.setup(
-				ServerLifecycleHooks.getCurrentServer() != null ? 
-					ServerLifecycleHooks.getCurrentServer().getRunDirectory().toPath().resolve("config") :
-					null,
+				ServerLifecycleHooks.getCurrentServer() != null 
+					? ServerLifecycleHooks.getCurrentServer().getRunDirectory().toPath().resolve("config")
+					: null,
 				new ServerRegistrarImpl(),
 				new ServerEventReceiverImpl(),
 				new ServerPacketSenderImpl(),

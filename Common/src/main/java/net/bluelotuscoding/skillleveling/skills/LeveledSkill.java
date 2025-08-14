@@ -1,9 +1,9 @@
-package com.developernoshingami.pufferfish.skillleveling.skills;
+package net.bluelotuscoding.skillleveling.skills;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.Skill;
-import com.developernoshingami.pufferfish.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 /**
  * Extension of core Skill that adds multi-level progression functionality

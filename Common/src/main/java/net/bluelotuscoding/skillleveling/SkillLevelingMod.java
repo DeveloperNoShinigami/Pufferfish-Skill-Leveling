@@ -1,4 +1,4 @@
-package com.developernoshingami.pufferfish.skillleveling;
+package net.bluelotuscoding.skillleveling;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -7,9 +7,9 @@ import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
 import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
-import com.developernoshingami.pufferfish.skillleveling.manager.SkillLevelingManager;
-import com.developernoshingami.pufferfish.skillleveling.commands.SkillLevelingCommand;
-import com.developernoshingami.pufferfish.skillleveling.rewards.PerLevelReward;
+import net.bluelotuscoding.skillleveling.manager.SkillLevelingManager;
+import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
+import net.bluelotuscoding.skillleveling.rewards.PerLevelReward;
 
 import java.nio.file.Path;
 

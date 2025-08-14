@@ -1,4 +1,4 @@
-package com.developernoshingami.pufferfish.skillleveling.rewards;
+package net.bluelotuscoding.skillleveling.rewards;
 
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.reward.Reward;
@@ -7,7 +7,7 @@ import net.puffish.skillsmod.api.reward.RewardDisposeContext;
 import net.puffish.skillsmod.api.reward.RewardUpdateContext;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import com.developernoshingami.pufferfish.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 import java.util.ArrayList;
 import java.util.List;

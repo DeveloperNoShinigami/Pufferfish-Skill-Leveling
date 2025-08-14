@@ -1,4 +1,4 @@
-package com.developernoshingami.pufferfish.skillleveling.data;
+package net.bluelotuscoding.skillleveling.data;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;

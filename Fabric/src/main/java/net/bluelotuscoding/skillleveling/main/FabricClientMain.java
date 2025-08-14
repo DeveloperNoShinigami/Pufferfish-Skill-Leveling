@@ -1,4 +1,4 @@
-package com.developernoshingami.pufferfish.skillleveling.main;
+package net.bluelotuscoding.skillleveling.main;
 
 import net.fabricmc.api.ClientModInitializer;
 

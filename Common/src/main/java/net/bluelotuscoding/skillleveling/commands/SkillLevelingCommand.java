@@ -1,11 +1,11 @@
-package com.developernoshingami.pufferfish.skillleveling.commands;
+package net.bluelotuscoding.skillleveling.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import com.developernoshingami.pufferfish.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 /**
  * Commands for managing multi-level skills, extending the core command system

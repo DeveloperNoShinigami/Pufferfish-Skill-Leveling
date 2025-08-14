@@ -1,4 +1,4 @@
-package com.developernoshingami.pufferfish.skillleveling.mixin;
+package net.bluelotuscoding.skillleveling.mixin;
 
 /**
  * Placeholder package for mixins if needed in the future.

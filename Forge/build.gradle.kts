@@ -20,12 +20,17 @@ dependencies {
 
 	forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
 
+	// Dependency on the core Pufferfish Skills mod
+	// Note: In a real scenario, this would be a published mod from a maven repository
+	// For now, using compileOnly to indicate the dependency
+	compileOnly("net.puffish.skillsmod:puffish_skills:${project.properties["mod_version"]}")
+
 	implementation(project(path = ":Common", configuration = "namedElements"))
 }
 
 loom {
-	mixin.defaultRefmapName.set("puffish_skills-refmap.json")
-	forge.mixinConfig("puffish_skills.mixins.json")
+	mixin.defaultRefmapName.set("puffish_skill_leveling-refmap.json")
+	forge.mixinConfig("puffish_skill_leveling.mixins.json")
 }
 
 tasks.test {

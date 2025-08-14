@@ -8,7 +8,7 @@ The codebase has been transformed from a core mod modification to a **clean addo
 
 ### New Structure
 
-- **Package**: `com.developernoshingami.pufferfish.skillleveling`
+- **Package**: `net.bluelotuscoding.skillleveling`
 - **Mod ID**: `puffish_skill_leveling`
 - **Type**: Standalone addon that depends on `puffish_skills`
 

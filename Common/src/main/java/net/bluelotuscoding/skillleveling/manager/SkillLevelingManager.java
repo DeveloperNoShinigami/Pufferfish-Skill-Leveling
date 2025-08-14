@@ -1,11 +1,11 @@
-package com.developernoshingami.pufferfish.skillleveling.manager;
+package net.bluelotuscoding.skillleveling.manager;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.SkillsAPI;
-import com.developernoshingami.pufferfish.skillleveling.data.SkillLevelingDataManager;
-import com.developernoshingami.pufferfish.skillleveling.skills.LeveledSkill;
+import net.bluelotuscoding.skillleveling.data.SkillLevelingDataManager;
+import net.bluelotuscoding.skillleveling.skills.LeveledSkill;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

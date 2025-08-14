@@ -1,4 +1,4 @@
-package com.developernoshingami.pufferfish.skillleveling;
+package net.bluelotuscoding.skillleveling;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.MinecraftServer;
@@ -6,7 +6,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.puffish.skillsmod.server.event.ServerEventListener;
-import com.developernoshingami.pufferfish.skillleveling.commands.SkillLevelingCommand;
+import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
 
 /**
  * Event listener that hooks into core mod events to provide multi-level skill functionality

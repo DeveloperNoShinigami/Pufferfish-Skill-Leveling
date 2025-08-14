@@ -1,4 +1,4 @@
-package com.developernoshingami.pufferfish.skillleveling.main;
+package net.bluelotuscoding.skillleveling.main;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
@@ -21,7 +21,7 @@ import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
 import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
-import com.developernoshingami.pufferfish.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 import java.util.ArrayList;
 import java.util.List;

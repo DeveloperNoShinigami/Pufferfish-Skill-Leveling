@@ -11,10 +11,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"client": [
-			"com.developernoshingami.pufferfish.skillleveling.main.FabricClientMain"
+			"net.bluelotuscoding.skillleveling.main.FabricClientMain"
 		],
 		"main": [
-			"com.developernoshingami.pufferfish.skillleveling.main.FabricMain"
+			"net.bluelotuscoding.skillleveling.main.FabricMain"
 		]
 	},
 	"mixins": [

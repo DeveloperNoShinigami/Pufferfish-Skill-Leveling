@@ -7,7 +7,7 @@ This document summarizes the complete restructure of the Pufferfish Skill Leveli
 
 ### 1. Package Structure
 - **Old**: `net.puffish.skillsmod.*`
-- **New**: `com.developernoshingami.pufferfish.skillleveling.*`
+- **New**: `net.bluelotuscoding.skillleveling.*`
 
 ### 2. Project Identity
 - **Mod ID**: `puffish_skills` → `puffish_skill_leveling`
@@ -113,7 +113,7 @@ Common/src/main/java/net/puffish/skillsmod/
 
 ### After (Addon)
 ```
-Common/src/main/java/com/developernoshingami/pufferfish/skillleveling/
+Common/src/main/java/net/bluelotuscoding/skillleveling/
 ├── SkillLevelingMod.java (main addon class)
 ├── SkillLevelingEventListener.java
 ├── commands/
@@ -139,7 +139,7 @@ Common/src/main/java/com/developernoshingami/pufferfish/skillleveling/
 
 ## Success Criteria Met
 
-✅ **New Package Structure**: `com.developernoshingami.pufferfish.skillleveling`
+✅ **New Package Structure**: `net.bluelotuscoding.skillleveling`
 ✅ **Non-Intrusive**: Doesn't modify core mod files
 ✅ **Extension Classes**: Created managers, skills, rewards, commands that extend core
 ✅ **Import Strategy**: Uses core mod APIs and classes

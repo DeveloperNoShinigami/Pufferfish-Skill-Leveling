@@ -1,5 +1,6 @@
 package net.bluelotuscoding.skillleveling.commands;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.CommandManager;
@@ -11,6 +12,22 @@ import net.bluelotuscoding.skillleveling.SkillLevelingMod;
  * Commands for managing multi-level skills, extending the core command system
  */
 public class SkillLevelingCommand {
+    
+    /**
+     * Register the skill leveling commands
+     */
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+        dispatcher.register(CommandManager.literal("skillleveling")
+                .then(CommandManager.literal("info")
+                        .executes(SkillLevelingCommand::showInfo)
+                )
+                .then(CommandManager.literal("advance")
+                        .executes(SkillLevelingCommand::advanceSkill)
+                )
+                .then(CommandManager.literal("check")
+                        .executes(SkillLevelingCommand::checkLevels)
+                ));
+    }
     
     /**
      * Create the command structure for skill leveling

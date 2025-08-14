@@ -3,6 +3,10 @@ plugins {
     id("checkstyle")
 }
 
+repositories {
+    maven(url = "https://maven.puffish.net/")
+}
+
 base.archivesName.set("${project.properties["archives_base_name"]}")
 version = "${project.properties["mod_version"]}-${project.properties["minecraft_version"]}-common"
 group = "${project.properties["maven_group"]}"
@@ -22,10 +26,8 @@ dependencies {
     // Provide EnvType and other loader classes used by the mapped Mojang sources
     compileOnly("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"]}")
 
-    // Dependency on the core Pufferfish Skills mod
-    // Note: In a real scenario, this would be a published mod from a maven repository
-    // For now, using compileOnly to indicate the dependency
-    compileOnly("net.puffish.skillsmod:puffish_skills:${project.properties["mod_version"]}")
+    // Dependency on the core Pufferfish Skills mod from maven repository
+    modImplementation("net.puffish:skillsmod:${project.properties["skills_version"]}")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
 }

@@ -5,11 +5,13 @@ import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
-import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
+import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.bluelotuscoding.skillleveling.manager.SkillLevelingManager;
 import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
 import net.bluelotuscoding.skillleveling.rewards.PerLevelReward;
+import net.bluelotuscoding.skillleveling.events.SkillLevelingEventListener;
+import net.bluelotuscoding.skillleveling.events.SkillLevelingEventListener;
 
 import java.nio.file.Path;
 
@@ -51,7 +53,7 @@ public class SkillLevelingMod {
         eventReceiver.registerListener(new SkillLevelingEventListener());
         
         // Register custom rewards that provide per-level functionality
-        SkillsAPI.registerReward(createIdentifier("per_level"), PerLevelReward::create);
+        PerLevelReward.register();
         
         // Register commands for managing multi-level skills
         // Commands will be registered through the event listener

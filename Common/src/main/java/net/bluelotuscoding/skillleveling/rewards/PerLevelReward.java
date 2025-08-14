@@ -7,6 +7,8 @@ import net.puffish.skillsmod.api.reward.RewardDisposeContext;
 import net.puffish.skillsmod.api.reward.RewardUpdateContext;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
+import net.puffish.skillsmod.api.SkillsAPI;
+import net.minecraft.util.Identifier;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 import java.util.ArrayList;
@@ -17,10 +19,28 @@ import java.util.List;
  */
 public class PerLevelReward implements Reward {
     
+    public static final Identifier ID = SkillLevelingMod.createIdentifier("per_level");
+    
     private final List<LevelRewardConfig> levelRewards;
     
     public PerLevelReward(List<LevelRewardConfig> levelRewards) {
         this.levelRewards = levelRewards;
+    }
+    
+    /**
+     * Register this reward with the Skills API
+     */
+    public static void register() {
+        SkillsAPI.registerReward(ID, PerLevelReward::parse);
+    }
+    
+    /**
+     * Parse the reward from configuration context
+     */
+    private static Result<PerLevelReward, Problem> parse(RewardConfigContext context) {
+        return context.getData()
+                .andThen(element -> element.getAsObject())
+                .andThen(obj -> create(obj, context));
     }
     
     @Override

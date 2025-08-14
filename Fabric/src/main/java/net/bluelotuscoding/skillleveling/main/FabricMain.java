@@ -1,7 +1,9 @@
 package net.bluelotuscoding.skillleveling.main;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -10,17 +12,21 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.GameRules;
+import net.minecraft.command.argument.serialize.ArgumentSerializer;
+import net.minecraft.command.argument.ArgumentTypes;
 import net.puffish.skillsmod.network.InPacket;
 import net.puffish.skillsmod.network.OutPacket;
 import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
-import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
+import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 import java.util.function.Function;
+import com.mojang.brigadier.arguments.ArgumentType;
 
 /**
  * Fabric main class for the Skill Leveling addon
@@ -42,6 +48,16 @@ public class FabricMain implements ModInitializer {
 		@Override
 		public <V, T extends V> void register(Registry<V> registry, Identifier id, T entry) {
 			Registry.register(registry, id, entry);
+		}
+
+		@Override
+		public <T extends GameRules.Rule<T>> void registerGameRule(GameRules.Key<T> key, GameRules.Type<T> type) {
+			// Fabric game rule registration would happen here
+		}
+
+		@Override
+		public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
+			ArgumentTypeRegistry.registerArgumentType(id, clazz, serializer);
 		}
 
 		@Override
@@ -92,8 +108,7 @@ public class FabricMain implements ModInitializer {
 	private static class ServerPlatformImpl implements ServerPlatform {
 		@Override
 		public boolean isFakePlayer(ServerPlayerEntity player) {
-			// Use Fabric's fake player detection if available
-			return false; // Simplified implementation
+			return player instanceof FakePlayer;
 		}
 	}
 }

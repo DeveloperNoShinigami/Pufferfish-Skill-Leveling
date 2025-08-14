@@ -4,6 +4,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.SkillsAPI;
+import net.puffish.skillsmod.api.Skill;
 import net.bluelotuscoding.skillleveling.data.SkillLevelingDataManager;
 import net.bluelotuscoding.skillleveling.skills.LeveledSkill;
 
@@ -58,7 +59,7 @@ public class SkillLevelingManager {
         
         // Get the skill from the category
         var skill = category.get().getSkill(skillId);
-        if (skill.isEmpty() || !skill.get().isUnlocked(player)) {
+        if (skill.isEmpty() || skill.get().getState(player) != Skill.State.UNLOCKED) {
             return false;
         }
         
@@ -77,7 +78,7 @@ public class SkillLevelingManager {
         }
         
         var skill = category.get().getSkill(skillId);
-        if (skill.isEmpty() || !skill.get().isUnlocked(player)) {
+        if (skill.isEmpty() || skill.get().getState(player) != Skill.State.UNLOCKED) {
             return 0;
         }
         
@@ -94,7 +95,7 @@ public class SkillLevelingManager {
         }
         
         var skill = category.get().getSkill(skillId);
-        if (skill.isEmpty() || !skill.get().isUnlocked(player)) {
+        if (skill.isEmpty() || skill.get().getState(player) != Skill.State.UNLOCKED) {
             return;
         }
         

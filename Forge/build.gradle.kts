@@ -3,6 +3,10 @@ plugins {
 	id("checkstyle")
 }
 
+repositories {
+	maven(url = "https://maven.puffish.net/")
+}
+
 base.archivesName.set("${project.properties["archives_base_name"]}")
 version = "${project.properties["mod_version"]}-${project.properties["minecraft_version"]}-forge"
 group = "${project.properties["maven_group"]}"
@@ -20,10 +24,8 @@ dependencies {
 
 	forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
 
-	// Dependency on the core Pufferfish Skills mod
-	// Note: In a real scenario, this would be a published mod from a maven repository
-	// For now, using compileOnly to indicate the dependency
-	compileOnly("net.puffish.skillsmod:puffish_skills:${project.properties["mod_version"]}")
+	// Dependency on the core Pufferfish Skills mod from maven repository
+	modImplementation("net.puffish:skillsmod:${project.properties["skills_version"]}:forge")
 
 	implementation(project(path = ":Common", configuration = "namedElements"))
 }

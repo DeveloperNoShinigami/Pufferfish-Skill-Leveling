@@ -4,7 +4,11 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.GameRules;
+import net.minecraft.command.argument.serialize.ArgumentSerializer;
+import com.mojang.brigadier.arguments.ArgumentType;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -19,8 +23,8 @@ import net.puffish.skillsmod.server.event.ServerEventListener;
 import net.puffish.skillsmod.server.event.ServerEventReceiver;
 import net.puffish.skillsmod.server.network.ServerPacketHandler;
 import net.puffish.skillsmod.server.network.ServerPacketSender;
-import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.puffish.skillsmod.server.setup.ServerRegistrar;
+import net.puffish.skillsmod.server.setup.ServerPlatform;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 import java.util.ArrayList;
@@ -92,6 +96,16 @@ public class ForgeMain {
 		}
 
 		@Override
+		public <T extends GameRules.Rule<T>> void registerGameRule(GameRules.Key<T> key, GameRules.Type<T> type) {
+			// Forge game rule registration would happen here
+		}
+
+		@Override
+		public <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(Identifier id, Class<A> clazz, ArgumentSerializer<A, T> serializer) {
+			// Forge argument type registration would happen here
+		}
+
+		@Override
 		public <T extends InPacket> void registerInPacket(Identifier identifier, Function<PacketByteBuf, T> reader, ServerPacketHandler<T> handler) {
 			// Forge packet registration would happen here
 		}
@@ -117,11 +131,10 @@ public class ForgeMain {
 		}
 	}
 
-	private class ServerPlatformImpl implements ServerPlatform {
+	private static class ServerPlatformImpl implements ServerPlatform {
 		@Override
 		public boolean isFakePlayer(ServerPlayerEntity player) {
-			// Use Forge's fake player detection
-			return false; // Simplified implementation
+			return player instanceof FakePlayer;
 		}
 	}
 }

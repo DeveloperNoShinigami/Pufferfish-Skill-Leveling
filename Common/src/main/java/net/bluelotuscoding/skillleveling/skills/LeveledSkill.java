@@ -54,7 +54,7 @@ public class LeveledSkill {
      * Check if the base skill is unlocked for a player
      */
     public boolean isUnlocked(ServerPlayerEntity player) {
-        return baseSkill.isUnlocked(player);
+        return baseSkill.getState(player) == Skill.State.UNLOCKED;
     }
     
     /**
@@ -99,13 +99,13 @@ public class LeveledSkill {
      * Get the name of this skill
      */
     public String getName() {
-        return baseSkill.getName();
+        return baseSkill.getId(); // Use skill ID as the name since Skills API doesn't provide getName()
     }
     
     /**
      * Get the description of this skill
      */
     public String getDescription() {
-        return baseSkill.getDescription();
+        return "Leveled skill: " + baseSkill.getId(); // Create description since Skills API doesn't provide getDescription()
     }
 }

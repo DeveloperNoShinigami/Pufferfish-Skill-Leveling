@@ -140,6 +140,94 @@ When preparing a new addon for Pufferfish's Skills or a similar base mod:
 
 Following this checklist gives future agents a reproducible starting point from
 basic setup through advanced addon customisation.
+
+## Skills Mod API Integration Best Practices
+
+When integrating with Pufferfish's Skills mod as an addon, follow these critical patterns:
+
+### 1. Dependency Version Management
+- **Always use the latest compatible version** of the Skills mod dependency
+- The Skills mod API evolves rapidly - newer versions include essential interfaces
+- **Example Issue**: `ServerPlatform` interface was missing in `0.16.0+1.20` but available in `0.16.3+1.20`
+- **Solution**: Update `skills_version` in `gradle.properties` to the latest available version
+
+### 2. Complete API Interface Implementation
+The Skills mod setup method requires **5 parameters** (not 4):
+```java
+public static void setup(
+    Path configDir,
+    ServerRegistrar registrar,
+    ServerEventReceiver eventReceiver,
+    ServerPacketSender packetSender,
+    ServerPlatform platform  // Essential - DO NOT omit!
+)
+```
+
+### 3. Platform-Specific Implementation Patterns
+
+**Fabric Implementation:**
+```java
+private static class ServerPlatformImpl implements ServerPlatform {
+    @Override
+    public boolean isFakePlayer(ServerPlayerEntity player) {
+        return player instanceof FakePlayer; // net.fabricmc.fabric.api.entity.FakePlayer
+    }
+}
+```
+
+**Forge Implementation:**
+```java
+private static class ServerPlatformImpl implements ServerPlatform {
+    @Override
+    public boolean isFakePlayer(ServerPlayerEntity player) {
+        return player instanceof FakePlayer; // net.minecraftforge.common.util.FakePlayer
+    }
+}
+```
+
+### 4. API Compatibility Debugging Process
+
+When encountering compilation errors:
+
+1. **Check the dependency version first** - newer APIs require newer versions
+2. **Verify all required interfaces are implemented** - `ServerRegistrar` requires:
+   - `register()` - Registry registration
+   - `registerGameRule()` - Game rules registration  
+   - `registerArgumentType()` - Command argument types
+   - `registerInPacket()` - Incoming packet handling
+   - `registerOutPacket()` - Outgoing packet registration
+3. **Use correct API patterns** - Skills mod uses `getState()` not deprecated methods like `isUnlocked()`
+4. **Implement missing event listeners** - Create `ServerEventListener` implementations for lifecycle events
+
+### 5. Reward System Integration
+
+Register custom rewards using the factory pattern:
+```java
+public static void register() {
+    SkillsAPI.registerReward(ID, PerLevelReward::parse);
+}
+
+private static Result<PerLevelReward, Problem> parse(RewardConfigContext context) {
+    return context.getData()
+        .andThen(JsonElement::getAsObject)
+        .andThen(PerLevelReward::parseFromJson);
+}
+```
+
+### 6. Java Version Requirements
+- **Skills mod requires Java 17** - configure in `gradle.properties`:
+```properties
+org.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64
+```
+
+### 7. Troubleshooting Checklist
+- ✅ Latest Skills mod version in dependencies
+- ✅ All 5 setup parameters provided
+- ✅ Complete ServerRegistrar interface implementation
+- ✅ Platform-specific FakePlayer imports
+- ✅ Java 17 configuration
+- ✅ Event listener classes created and registered
+
 ## Forge-only Skillsmod Integration Steps
 
 When refactoring this repository to rely on the external `skillsmod` library while targeting Forge only:

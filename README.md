@@ -1,34 +1,56 @@
 # Pufferfish Skill Leveling Addon
 
-This project has been **restructured as a standalone addon** for Pufferfish's Skills mod, providing enhanced multi-level skill progression and per-level rewards.
+This addon extends Pufferfish's Skills mod with **advanced multi-level progression** and **per-level reward stacking** capabilities.
 
-## 🔄 Project Restructure
+## 🆕 New Features
 
-The codebase has been transformed from a core mod modification to a **clean addon** that extends Pufferfish's Skills without modifying the original mod.
+### Enhanced Multi-Level Skills
+- **Stackable Progression**: Skills can now have multiple levels (e.g., Level 1, 2, 3, etc.)
+- **Progressive Rewards**: Each level grants additional benefits that stack with previous levels
+- **Dynamic Descriptions**: Tooltips automatically update to show current and next level benefits
+- **Flexible Point Costs**: Configure different point costs per level
 
-### New Structure
+### Advanced Reward System
+- **Per-Level Rewards**: Define specific rewards for each skill level
+- **Reward Stacking**: Higher levels automatically include benefits from all previous levels
+- **Custom Reward Types**: New reward types specifically designed for leveled progression
+- **Conditional Unlocking**: Skills can require specific levels of other skills
+- **Merge Description**: Enhanced tooltip system that accumulates descriptions across skill levels
+
+### Enhanced Management
+- **Level Tracking**: Track exact skill levels for each player
+- **Bulk Operations**: Advance multiple levels at once
+- **Level Refunding**: Administrative commands to refund specific skill levels
+- **Progress Persistence**: Skill levels saved with player data
+
+## 🔄 Project Structure
+
+This is a **standalone addon** that extends the base Skills mod without modifying it:
 
 - **Package**: `net.bluelotuscoding.skillleveling`
 - **Mod ID**: `puffish_skill_leveling`
-- **Type**: Standalone addon that depends on `puffish_skills`
+- **Type**: Clean addon that depends on `puffish_skills`
 
-## 🏗️ Addon Architecture
+## 🏗️ New Addon Components
 
-### Core Components
+### Core Classes
+- **`SkillLevelingMod`** - Main addon integration
+- **`SkillLevelingManager`** - Multi-level skill progression logic
+- **`LeveledSkill`** - Enhanced skill wrapper with level tracking
+- **`PerLevelReward`** - New reward type for level-specific benefits
+- **`SkillLevelingEventListener`** - Lifecycle event handling
 
-- **`SkillLevelingMod`** - Main addon class that integrates with the core mod
-- **`SkillLevelingManager`** - Manages multi-level skill progression, extending core functionality
-- **`LeveledSkill`** - Wraps core Skill class to add level progression without modification
-- **`PerLevelReward`** - Extends core reward system for level-specific rewards
-- **`SkillLevelingCommand`** - Additional commands for level management
-- **`SkillLevelingDataManager`** - Handles skill level data persistence
+### New APIs
+```java
+// Check if player has specific skill level
+addon.hasSkillLevel(player, categoryId, skillId, level);
 
-### Integration Strategy
+// Get current skill level
+int currentLevel = addon.getSkillLevel(player, categoryId, skillId);
 
-1. **Extension Pattern**: Extends core functionality through composition and inheritance
-2. **Event Hooking**: Listens to core mod events to provide addon functionality
-3. **API Usage**: Uses core mod's public APIs instead of modifying internal code
-4. **Reward System**: Registers custom reward types through core mod's factory system
+// Advance to next level
+addon.advanceSkillLevel(player, categoryId, skillId);
+```
 
 ## 📦 Installation
 
@@ -36,225 +58,228 @@ The codebase has been transformed from a core mod modification to a **clean addo
 2. Install this **Skill Leveling** addon
 3. Addon automatically integrates on server startup
 
-## 🎮 Usage
+## 🎮 New Commands
 
-### Commands
-- `/skillleveling info` - Show addon information
-- `/skillleveling check` - View your skill levels
-- `/skillleveling advance` - Advance skill levels (with parameters)
+### Addon-Specific Commands
+- `/skillleveling info` - Display addon version and loaded features
+- `/skillleveling check <player> <category> <skill>` - Check specific skill level
+- `/skillleveling advance <player> <category> <skill> [levels]` - Advance skill levels
+- `/skillleveling refund <player> <category> <skill> [levels]` - Refund skill levels
+- `/skillleveling list <player>` - List all skill levels for a player
 
-### Enhanced Features
-- **Multi-level progression** on top of base skills
-- **Per-level rewards** that stack as you advance
-- **Level-specific effects** and bonuses
-- **Advanced progression tracking**
+### Enhanced Core Commands
+The addon extends existing Skills mod commands with level-aware functionality.
 
-## ⚙️ Configuration
+## ⚙️ New Datapack Configuration
 
-- **Config**: `config/addon_config.json`
-- **Languages**: `assets/puffish_skill_leveling/lang/`
-- **Default Max Level**: 10 levels per skill
-- **Progression**: Configurable XP multipliers and point costs
+### Enhanced Skill Definitions
+
+The addon introduces new configuration options for multi-level skills:
+
+#### Merge Description Feature
+
+The addon enhances the `merge_description` functionality for better tooltip management:
+
+```json
+{
+    "progressive_skill": {
+        "merge_description": true,
+        "descriptions": [
+            "+1 melee damage",
+            "+10% mining speed", 
+            "+15% mining speed"
+        ]
+    }
+}
+```
+
+**How it works:**
+- **Level 1:** Shows only `"+1 melee damage"`
+- **Level 2:** Shows `"+1 melee damage"` + `"+10% mining speed"` (accumulated)
+- **Level 3:** Shows all three descriptions accumulated
+
+When `merge_description` is `false` (default), each level shows only its individual description.
+
+#### Stackable Skills with Per-Level Rewards
+```json
+{
+    "enhanced_mining": {
+        "type": "puffish_skills:stackable",
+        "title": "Enhanced Mining",
+        "max_skill_level": 5,
+        "points_per_level": 2,
+        "merge_description": true,
+        "descriptions": [
+            "Level 1: +10% mining speed",
+            "Level 2: +20% mining speed", 
+            "Level 3: +30% mining speed",
+            "Level 4: +40% mining speed",
+            "Level 5: +50% mining speed + Fortune"
+        ],
+        "rewards": [
+            {
+                "type": "puffish_skills:per_level_rewards",
+                "data": {
+                    "skill_id": "enhanced_mining_id",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "player.block_break_speed",
+                                    "value": 0.1,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "player.block_break_speed",
+                                    "value": 0.1,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "player.block_break_speed",
+                                    "value": 0.1,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "player.block_break_speed",
+                                    "value": 0.1,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "player.block_break_speed",
+                                    "value": 0.1,
+                                    "operation": "multiply_base"
+                                }
+                            },
+                            {
+                                "type": "puffish_skills:command",
+                                "data": {
+                                    "command": "enchant @p fortune 1"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}
+```
+
+### New Configuration Options
+- **`max_skill_level`** - Maximum levels this skill can reach (addon feature)
+- **`points_per_level`** - Points consumed for each additional level (addon feature)  
+- **`merge_description`** - Whether level descriptions accumulate (addon enhancement)
+- **`level_requirements`** - Require specific levels of other skills (addon feature)
+
+## 🚀 Quick Start
+
+### 1. Installation
+```bash
+# Install Dependencies
+# 1. Install Pufferfish Skills mod (required)
+# 2. Install this addon
+
+# Development Setup
+git clone <repository-url>
+cd Pufferfish-Skill-Leveling
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+./gradlew build
+```
+
+### 2. Test the Addon
+```bash
+# Fabric
+./gradlew :Fabric:runClient
+
+# Forge  
+./gradlew :Forge:runClient
+```
+
+### 3. Create Multi-Level Skills
+1. Extract `example-skill-level-template_new.zip` to your world's `datapacks` folder
+2. Modify skill definitions to use `"type": "puffish_skills:stackable"`
+3. Add `"max_skill_level"` and `"points_per_level"` to your skills
+4. Use `"puffish_skills:per_level_rewards"` for level-specific benefits
+5. Restart server or `/reload`
+
+### 4. Test Your Multi-Level Skills
+```bash
+# Open skills GUI
+/puffish_skills open <category>
+
+# Check specific skill level
+/skillleveling check <player> <category> <skill>
+
+# Advance a skill level (admin)
+/skillleveling advance <player> <category> <skill>
+```
+
+### 5. Addon APIs for Developers
+```java
+// Get addon instance
+SkillLevelingMod addon = SkillLevelingMod.getInstance();
+
+// Check skill level
+boolean hasLevel3 = addon.hasSkillLevel(player, categoryId, skillId, 3);
+
+// Get current level
+int level = addon.getSkillLevel(player, categoryId, skillId);
+
+// Advance level programmatically
+addon.advanceSkillLevel(player, categoryId, skillId);
+```
 
 ## 🔧 Development Benefits
 
-### Addon Pattern Advantages
-- ✅ **Non-intrusive**: Core mod remains unmodified
-- ✅ **Maintainable**: Core mod updates don't break addon
+### What This Addon Adds
+- ✅ **Multi-level skill progression** - Skills can now have 2-10+ levels
+- ✅ **Stacking reward system** - Each level adds to previous level benefits  
+- ✅ **Dynamic progression costs** - Configure different point costs per level
+- ✅ **Level-aware commands** - New commands for managing skill levels
+- ✅ **Enhanced tooltips** - Show current level and next level previews
+- ✅ **Flexible skill requirements** - Require specific levels of prerequisite skills
+
+### Addon Architecture Benefits
+- ✅ **Non-intrusive**: Extends without modifying the base Skills mod
+- ✅ **Compatible**: Works with existing Skills mod datapacks
 - ✅ **Modular**: Can be enabled/disabled independently
-- ✅ **Compatible**: Works with future core mod versions
+- ✅ **Future-proof**: Updates with new Skills mod versions
 
-### Clean Separation
-- **Core Logic**: Provided by Pufferfish's Skills
-- **Enhancement Logic**: Provided by this addon
-- **Integration**: Through well-defined APIs and events
+### Recent API Integration (August 2025)
+- ✅ **Complete Skills mod API integration** with latest version (0.16.3+1.20)
+- ✅ **Platform-specific implementations** for Fabric and Forge
+- ✅ **Proper ServerPlatform interface** implementation 
+- ✅ **Event-driven integration** through ServerEventListener
+- ✅ **Factory-pattern reward registration** for custom reward types
 
-## 📋 Original Functionality (Base Mod)
+## 📋 Requirements
 
-The original skill system functionality has been preserved and is now provided by the core Pufferfish's Skills mod:
+- **Pufferfish Skills mod** 0.16.3+1.20 or newer (required dependency)
+- **Java 17+** 
+- **Minecraft 1.20**
+- **Fabric Loader** or **Forge** depending on your platform choice
 
-## Player skill definitions
+## 📄 Example Template
 
-Skill definitions describe how a skill looks, how it unlocks, and what it grants.
-
-Supported root fields:
-
-- `type` – identifier of the skill type. Defaults to `puffish_skills:default`. Use `puffish_skills:stackable` to mix normal and per-level rewards.
-- `title` – display name of the skill.
-- `icon` – icon descriptor shown on the tree.
-- `frame` – frame style for the icon.
-- `size` – size of the icon.
-- `max_skill_level` / `max_levels` – how many times the skill can be unlocked. This value defines the maximum level a skill can reach. When omitted and the skill uses `puffish_skills:per_level_rewards`, the highest level is inferred from that reward.
-- `points_per_level` – category points consumed for each level when using `puffish_skills:per_level_rewards`.
-- `descriptions` – list of tooltip lines shown for each level.
-- `extra_descriptions` – list of extra tooltip lines (displayed while holding Shift).
-- `merge_description` – when `true`, descriptions and extra descriptions accumulate from previous levels starting when level 2 is reached. The tooltip for the very first level is shown on its own. Defaults to `false` when omitted.
-- `rewards` – array of reward objects granted when the skill or its levels are unlocked. Include `puffish_skills:per_level_rewards` entries to define level-specific rewards.
-- `cost` – category points spent to unlock the skill.
-- `required_skills` – list of other skills that must be unlocked first.
-- `required_points` – minimum unspent points needed in the category.
-- `required_spent_points` – minimum points already spent in the category.
-- `required_exclusions` – list of skill IDs that must remain locked.
-
-Tooltip lines automatically adjust based on how many times the skill has been unlocked. When hovering a skill, the entry matching the player's current level is shown, and holding Shift displays the line for the next level (or a final message if the skill is maxed).
-
-A basic skill definition using per-level rewards might look like this:
-
-### Basic skill Definition
-```json
-{
-  "stacked_power": {
-      "title": "Master Miner",
-      "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
-      "size": 1.0,
-      "max_skill_level": 3,
-      "points_per_level": 1,
-      "merge_description": false,
-      "descriptions": [
-          "Current: +1 melee damage",
-          "Current: +10% mining speed",
-          "Current: +15% mining speed"
-      ],
-      "extra_descriptions": [
-          "Next: +10% mining speed",
-          "Next: +15% mining speed",
-          "— MAXED OUT —"
-      ],
-      "rewards": [
-          {
-              "type": "puffish_skills:per_level_rewards",
-              "data": {
-                    "skill_id": "19aazycn9ii0lfh1",
-                    "levels": {
-                        "1": [
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.attack_damage",
-                                        "value": 10,
-                                        "operation": "addition" } }
-                        ],
-                        "2": [
-                            {"type": "puffish_skills:command",
-                              "data": { "command": "give @p minecraft:experience_bottle 1" }
-                            }
-                        ],
-                        "3": [
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.max_health",
-                                        "value": 2,
-                                        "operation": "addition" } }
-                        ]
-                    }
-                }
-          }
-      ],
-      "metadata": { "icon": "74sqblu8lgizj777" }
-  }
-}
-```
-
-### Stackable Rewards
-Use the `puffish_skills:stackable` skill type when you want to combine standard rewards with per-level rewards. This lets you run commands or grant other bonuses without adding them to the per-level configuration.
-```js
-{
-  "stacked_power": {
-      "type": "puffish_skills:stackable",
-      "title": "Master Miner",
-      "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
-      "size": 1.0,
-      "max_skill_level": 3,
-      "points_per_level": 1,
-      "required_points": 3,
-      "merge_description": false,
-      "descriptions": [
-          "Current: +1 melee damage",
-          "Current: +10% mining speed",
-          "Current: +15% mining speed"
-      ],
-      "extra_descriptions": [
-          "Next: +10% mining speed",
-          "Next: +15% mining speed",
-          "— MAXED OUT —"
-      ],
-      "rewards": [
-          {
-              "type": "puffish_skills:per_level_rewards",
-              "data": {
-                    "skill_id": "19aazycn9ii0lfh1",
-                    "levels": {
-                        "1": [
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.attack_damage",
-                                        "value": 10,
-                                        "operation": "addition" } }
-                        ],
-                        "2": [
-                            {"type": "puffish_skills:command",
-                              "data": { "command": "give @p minecraft:experience_bottle 1" } 
-                            }
-                        ],
-                        "3": [
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.max_health",
-                                        "value": 2,
-                                        "operation": "addition" } }
-                        ]
-                    }
-                }
-          },
-          { 
-              "type": "puffish_skills:command",
-              "data": { "command": "give @p minecraft:experience_bottle 1" }
-          }
-      ],
-      "metadata": { "icon": "74sqblu8lgizj777" }
-  }
-}
-```
-
-## Per level rewards
-
-The reward registry includes `puffish_skills:per_level_rewards` which lets you specify rewards that depend on the skill's level.
-
-Supported fields:
-
-- `skill_id` – ID of the skill being leveled.
-- `levels` – maps level numbers to arrays of nested rewards.
-
-```json
-{
-  "type": "puffish_skills:per_level_rewards", // Skill levels can provide different rewards.
-  "data": {
-    "skill_id": "19aazycn9ii0lfh1",
-    "levels": {
-      "1": [ { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 1, "operation": "addition" } } ],
-      "2": [ { "type": "puffish_skills:command", "data": {"command": "give @p minecraft:experience_bottle 1"} } ],
-      "3": [ { "type": "puffish_skills:attribute", "data": { "attribute": "generic.max_health", "value": 2, "operation": "addition" } } ]
-    }
-  }
-}
-```
-
-Each nested reward behaves as if it were a normal reward, but is only active when the player's skill level is at least the specified level.
-
-The `skill_id` field is used only by `puffish_skills:per_level_rewards` to specify which skill is leveled. The skill's `max_skill_level` and `points_per_level` are defined in the root skill definition. If the skill omits `max_levels`/`max_skill_level`, the highest level is inferred from the reward's `levels`.
-
-All active level rewards stack automatically, so unlocking additional levels increases the total bonus without any extra configuration. When a level is unlocked the category loses `points_per_level` points. A player cannot level beyond `max_skill_level` unless they have enough points to pay for the additional levels.
-
-
-## Example datapack
-
-The `example-skill-level-template.zip` file contains a datapack demonstrating a stackable skill using per-level rewards. Drop the zip into the `datapacks` folder of a world to test the feature.
-
-
-
-## Commands
-
-Administrators can refund skill levels using `/puffish_skills skills refund`.
-
-```
-/puffish_skills skills refund <players> <category> <skill> [<count>|all]
-```
-
-By default this command refunds one level of the chosen skill. Optionally provide a number of levels to refund or use `all` to remove every level. It reports an error if none of the selected players have any levels to refund.
-
-Refunding removes the reward linked to that level without running any unlock or lock triggers.
+See `example-skill-level-template_new.zip` for a complete working example demonstrating the addon's multi-level features.

@@ -1,0 +1,16 @@
+{
+	"version": 3,
+	"show_warnings": false,
+	"categories": [
+		"combat",
+		"mining",
+		"woodcutting",
+		"farming",
+		"crafting",
+		"building",
+		"enchanting",
+		"fishing",
+		"archery",
+		"magic"
+	]
+}

@@ -10,6 +10,11 @@ import net.puffish.skillsmod.api.reward.RewardFactory;
 import net.puffish.skillsmod.experience.source.ExperienceSourceRegistry;
 import net.puffish.skillsmod.impl.CategoryImpl;
 import net.puffish.skillsmod.reward.RewardRegistry;
+import net.puffish.skillsmod.api.version.VersionManager;
+import net.puffish.skillsmod.api.platform.PlatformDetector;
+import net.puffish.skillsmod.api.config.ConfigurationManager;
+import net.puffish.skillsmod.api.data.DataManager;
+import net.puffish.skillsmod.api.integration.IntegrationAPI;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -20,6 +25,65 @@ public final class SkillsAPI {
 	private SkillsAPI() { }
 	
 	public static final String MOD_ID = "puffish_skills";
+	
+	// Enhanced addon components
+	private static VersionManager versionManager;
+	private static ConfigurationManager configurationManager;
+	private static DataManager dataManager;
+	
+	/**
+	 * Initializes the enhanced addon components.
+	 * This should be called during mod initialization.
+	 */
+	public static void initializeAddonComponents(String modVersion, java.nio.file.Path configDir) {
+		versionManager = new VersionManager(modVersion);
+		configurationManager = new ConfigurationManager(configDir, categories -> {
+			// Handle configuration changes
+		});
+		dataManager = new DataManager(configDir.resolve("data"));
+	}
+	
+	/**
+	 * Gets the version manager for update checking and version validation.
+	 */
+	public static Optional<VersionManager> getVersionManager() {
+		return Optional.ofNullable(versionManager);
+	}
+	
+	/**
+	 * Gets the configuration manager for hot-reloading and config management.
+	 */
+	public static Optional<ConfigurationManager> getConfigurationManager() {
+		return Optional.ofNullable(configurationManager);
+	}
+	
+	/**
+	 * Gets the data manager for export/import operations.
+	 */
+	public static Optional<DataManager> getDataManager() {
+		return Optional.ofNullable(dataManager);
+	}
+	
+	/**
+	 * Gets information about the current platform.
+	 */
+	public static PlatformDetector.PlatformType getCurrentPlatform() {
+		return PlatformDetector.detectPlatform();
+	}
+	
+	/**
+	 * Registers an integration hook for other mods.
+	 */
+	public static void registerIntegrationHook(String hookId, IntegrationAPI.IntegrationHook hook) {
+		IntegrationAPI.registerIntegrationHook(hookId, hook);
+	}
+	
+	/**
+	 * Registers an integration event listener.
+	 */
+	public static void registerIntegrationEventListener(String listenerId, java.util.function.Consumer<IntegrationAPI.IntegrationEvent> listener) {
+		IntegrationAPI.registerEventListener(listenerId, listener);
+	}
 
 	public static void registerSkillUnlockEvent(Events.SkillUnlock event) {
 		SkillsMod.SKILL_UNLOCK.register(event);

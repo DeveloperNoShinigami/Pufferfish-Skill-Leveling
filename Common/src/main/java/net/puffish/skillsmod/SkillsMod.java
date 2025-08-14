@@ -23,6 +23,7 @@ import net.puffish.skillsmod.commands.ExperienceCommand;
 import net.puffish.skillsmod.commands.OpenCommand;
 import net.puffish.skillsmod.commands.PointsCommand;
 import net.puffish.skillsmod.commands.SkillsCommand;
+import net.puffish.skillsmod.commands.AdminCommand;
 import net.puffish.skillsmod.config.CategoryConfig;
 import net.puffish.skillsmod.config.Config;
 import net.puffish.skillsmod.config.ModConfig;
@@ -157,6 +158,9 @@ public class SkillsMod {
 		BuiltinExperienceSources.register();
 
 		LegacyBuiltinPrototypes.register();
+		
+		// Initialize enhanced addon components
+		SkillsAPI.initializeAddonComponents("0.16.5", modConfigDir);
 	}
 
 	public static Identifier createIdentifier(String path) {
@@ -840,6 +844,9 @@ public class SkillsMod {
 					.then(ExperienceCommand.create())
 					.then(OpenCommand.create())
 			);
+			
+			// Register admin commands
+			dispatcher.register(AdminCommand.create());
 		}
 	}
 }

@@ -280,7 +280,9 @@ public class SkillLevelingManager {
     }
     
     private void triggerLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        // Future hook for applying per-level rewards
+        getPerLevelRewardsReward(categoryId, skillId).ifPresent(reward ->
+                reward.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, level, true))
+        );
     }
     
     /**
@@ -349,11 +351,39 @@ public class SkillLevelingManager {
     }
     
     private void deactivateLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        // Future hook for deactivating rewards when a level is refunded
+        getPerLevelRewardsReward(categoryId, skillId).ifPresent(reward ->
+                reward.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, level - 1, false))
+        );
     }
-    
+
+    @SuppressWarnings("unchecked")
     private void loadLeveledSkillConfigurations() {
-        // In a full implementation, we would load configuration from data files
-        // For now, configuration is handled through datapack definitions
+        leveledSkills.clear();
+        perLevelRewardsRewards.clear();
+
+        try {
+            var method = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("getAllCategories");
+            method.setAccessible(true);
+            var categories = (java.util.Collection<net.puffish.skillsmod.config.CategoryConfig>) method.invoke(net.puffish.skillsmod.SkillsMod.getInstance());
+
+            for (var category : categories) {
+                Identifier categoryId = (Identifier) category.id();
+                for (var definition : category.definitions().getAll()) {
+                    String id = definition.id();
+
+                    for (var reward : definition.rewards()) {
+                        if (reward.instance() instanceof PerLevelRewardsReward perReward) {
+                            registerPerLevelRewardsReward(categoryId, id, perReward);
+
+                            SkillsAPI.getCategory(categoryId)
+                                    .flatMap(cat -> cat.getSkill(id))
+                                    .ifPresent(skill -> leveledSkills.put(id, new LeveledSkill(skill, categoryId, id, perReward.getMaxLevel())));
+                        }
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // Failed to access internal categories - leave maps empty
+        }
     }
 }

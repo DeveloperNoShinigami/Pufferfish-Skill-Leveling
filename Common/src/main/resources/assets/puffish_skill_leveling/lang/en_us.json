@@ -1,12 +1,7 @@
 {
-  "skillleveling.command.info": "=== Skill Leveling Info ===",
-  "skillleveling.command.active": "Multi-level skill progression is active!",
-  "skillleveling.command.check_help": "Use /skillleveling check to see your skill levels",
+  "skillleveling.command.get_help": "Use /skillleveling get to view skill levels",
+  "skillleveling.command.set_help": "Use /skillleveling set to modify skill levels",
   "skillleveling.command.advance_help": "Use /skillleveling advance to advance skill levels",
-  "skillleveling.command.levels_header": "=== Your Skill Levels ===",
-  "skillleveling.command.gui_available": "Skill level checking is available through the core skills GUI",
-  "skillleveling.command.enhanced": "Enhanced with multi-level progression!",
-  "skillleveling.command.needs_params": "Skill advancement requires specific skill parameters",
-  "skillleveling.command.use_gui": "Use the core skills GUI to interact with your skills",
+  "skillleveling.command.refund_help": "Use /skillleveling refund <one|multiple|all> to refund skill levels",
   "skillleveling.command.player_only": "This command can only be used by players"
 }

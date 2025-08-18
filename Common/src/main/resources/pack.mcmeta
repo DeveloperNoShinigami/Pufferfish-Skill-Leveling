@@ -1,0 +1,7 @@
+{
+	"pack": {
+		"pack_format": 8,
+		"supported_formats": [0, 999],
+		"description": "This is an example datapack showcasing the new fields and rewards methods for the addon."
+	}
+}

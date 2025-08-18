@@ -151,7 +151,9 @@ public class SkillLevelingDataManager {
             gson.toJson(root, writer);
         } catch (IOException e) {
             e.printStackTrace();
-          
+        }
+    }
+    
     /**
      * Check if a specific skill level entry exists for a player.
      */

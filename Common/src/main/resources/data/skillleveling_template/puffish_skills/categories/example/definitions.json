@@ -20,7 +20,6 @@
           {
               "type": "puffish_skill_leveling:per_level_rewards",
               "data": {
-
                     "skill_id": "19aazycn9ii0lfh1",
                     "levels": {
                         "1": [
@@ -48,44 +47,43 @@
   },
 
   "stacked_power_2": {
-      "title": "Master Miner",
+      "title": "Master Miner 2",
       "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
       "size": 1.0,
       "max_skill_level": 3,
       "points_per_level": 1,
       "merge_description": false,
       "descriptions": [
-          "Current: +1 melee damage",
-          "Current: +1 Exp Potion",
-          "Current: +2 Health"
+          "Current: +2 melee damage",
+          "Current: +20% mining speed", 
+          "Current: +30% mining speed"
       ],
       "extra_descriptions": [
-          "Next: +Exp Potion",
-          "Next: +2 Health",
+          "Next: +20% mining speed",
+          "Next: +30% mining speed",
           "— MAXED OUT —"
       ],
       "rewards": [
           {
               "type": "puffish_skill_leveling:per_level_rewards",
               "data": {
-
                     "skill_id": "ykn32h02xhgaujyr", 
                     "levels": {
                         "1": [
                             { "type": "puffish_skills:attribute",
                               "data": { "attribute": "generic.attack_damage",
-                                        "value": 10,
+                                        "value": 20,
                                         "operation": "addition" } }
                         ],
                         "2": [
                             {"type": "puffish_skills:command",
-                              "data": { "command": "give @p minecraft:experience_bottle 1" } 
+                              "data": { "command": "give @p minecraft:experience_bottle 2" } 
                             }
                         ],
                         "3": [
                             { "type": "puffish_skills:attribute",
                               "data": { "attribute": "generic.max_health",
-                                        "value": 2,
+                                        "value": 4,
                                         "operation": "addition" } }
                         ]
                     }
@@ -98,5 +96,4 @@
       ],
       "metadata": { "icon": "74sqblu8lgizj777" }
   }
-
 }

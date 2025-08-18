@@ -73,4 +73,32 @@ public class SkillLevelingDataManager {
             playerData.remove(categoryId);
         }
     }
+
+    /**
+     * Check if a specific skill level entry exists for a player.
+     */
+    public boolean hasSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        var playerData = playerSkillLevels.get(player.getUuid());
+        if (playerData == null) {
+            return false;
+        }
+        var categoryData = playerData.get(categoryId);
+        return categoryData != null && categoryData.containsKey(skillId);
+    }
+
+    /**
+     * Remove a specific skill level entry for a player.
+     */
+    public void clearSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        var playerData = playerSkillLevels.get(player.getUuid());
+        if (playerData != null) {
+            var categoryData = playerData.get(categoryId);
+            if (categoryData != null) {
+                categoryData.remove(skillId);
+                if (categoryData.isEmpty()) {
+                    playerData.remove(categoryId);
+                }
+            }
+        }
+    }
 }

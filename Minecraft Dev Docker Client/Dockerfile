@@ -19,13 +19,14 @@ RUN mkdir -p /home/minecraft/fabric-server/mods /home/minecraft/forge-server/mod
 RUN mkdir -p /home/minecraft/fabric-server/config /home/minecraft/forge-server/config
 
 # Copy scripts
+COPY scripts/ /home/minecraft/scripts/
 COPY install_fabric.sh /home/minecraft/
 COPY install_forge.sh /home/minecraft/
 COPY copy_latest_mod.sh /home/minecraft/
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Make scripts executable
-RUN chmod +x /home/minecraft/*.sh
+RUN chmod +x /home/minecraft/*.sh /home/minecraft/scripts/*.sh
 
 # Set ownership
 RUN chown -R minecraft:minecraft /home/minecraft

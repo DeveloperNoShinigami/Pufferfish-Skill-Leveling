@@ -44,6 +44,10 @@ public class SkillLevelingManager {
         // Reload configurations
         loadLeveledSkillConfigurations();
     }
+
+    public void onServerStopping(MinecraftServer server) {
+        dataManager.saveAll();
+    }
     
     public void onPlayerJoin(ServerPlayerEntity player) {
         // Load player skill level data

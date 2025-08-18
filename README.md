@@ -13,6 +13,7 @@ This addon extends Pufferfish's Skills mod with **advanced multi-level progressi
 ### Advanced Reward System
 - **Per-Level Rewards**: Define specific rewards for each skill level
 - **Reward Stacking**: Higher levels automatically include benefits from all previous levels
+- **Outer Rewards**: Standard rewards applied when unlocking a multi-level skill
 - **Custom Reward Types**: New reward types specifically designed for leveled progression
 - **Conditional Unlocking**: Skills can require specific levels of other skills
 - **Merge Description**: Enhanced tooltip system that accumulates descriptions across skill levels
@@ -37,7 +38,7 @@ This is a **standalone addon** that extends the base Skills mod without modifyin
 - **`SkillLevelingMod`** - Main addon integration
 - **`SkillLevelingManager`** - Multi-level skill progression logic
 - **`LeveledSkill`** - Enhanced skill wrapper with level tracking
-- **`PerLevelReward`** - New reward type for level-specific benefits
+- **`PerLevelRewards`** - New reward type for level-specific benefits
 - **`SkillLevelingEventListener`** - Lifecycle event handling
 
 ### New APIs
@@ -103,86 +104,53 @@ When `merge_description` is `false` (default), each level shows only its individ
 #### Stackable Skills with Per-Level Rewards
 ```json
 {
-    "enhanced_mining": {
-        "type": "puffish_skills:stackable",
-        "title": "Enhanced Mining",
-        "max_skill_level": 5,
-        "points_per_level": 2,
-        "merge_description": true,
-        "descriptions": [
-            "Level 1: +10% mining speed",
-            "Level 2: +20% mining speed", 
-            "Level 3: +30% mining speed",
-            "Level 4: +40% mining speed",
-            "Level 5: +50% mining speed + Fortune"
-        ],
-        "rewards": [
-            {
-                "type": "puffish_skills:per_level_rewards",
+  "enhanced_mining": {
+    "name": "Enhanced Mining",
+    "description": "Improves mining capabilities",
+    "rewards": [
+      {
+        "type": "puffish_skills:per_level_rewards",
+        "data": {
+          "skill_id": "unique_skill_id",
+          "levels": {
+            "1": [
+              {
+                "type": "puffish_skills:attribute",
                 "data": {
-                    "skill_id": "enhanced_mining_id",
-                    "levels": {
-                        "1": [
-                            {
-                                "type": "puffish_skills:attribute",
-                                "data": {
-                                    "attribute": "player.block_break_speed",
-                                    "value": 0.1,
-                                    "operation": "multiply_base"
-                                }
-                            }
-                        ],
-                        "2": [
-                            {
-                                "type": "puffish_skills:attribute",
-                                "data": {
-                                    "attribute": "player.block_break_speed",
-                                    "value": 0.1,
-                                    "operation": "multiply_base"
-                                }
-                            }
-                        ],
-                        "3": [
-                            {
-                                "type": "puffish_skills:attribute",
-                                "data": {
-                                    "attribute": "player.block_break_speed",
-                                    "value": 0.1,
-                                    "operation": "multiply_base"
-                                }
-                            }
-                        ],
-                        "4": [
-                            {
-                                "type": "puffish_skills:attribute",
-                                "data": {
-                                    "attribute": "player.block_break_speed",
-                                    "value": 0.1,
-                                    "operation": "multiply_base"
-                                }
-                            }
-                        ],
-                        "5": [
-                            {
-                                "type": "puffish_skills:attribute",
-                                "data": {
-                                    "attribute": "player.block_break_speed",
-                                    "value": 0.1,
-                                    "operation": "multiply_base"
-                                }
-                            },
-                            {
-                                "type": "puffish_skills:command",
-                                "data": {
-                                    "command": "enchant @p fortune 1"
-                                }
-                            }
-                        ]
-                    }
+                  "attribute": "generic.attack_damage",
+                  "value": 1.0,
+                  "operation": "addition"
                 }
-            }
-        ]
-    }
+              }
+            ],
+            "2": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.attack_damage",
+                  "value": 2.0,
+                  "operation": "addition"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "title": "Master Miner",
+    "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
+    "size": 1.0,
+    "max_skill_level": 5,
+    "points_per_level": 2,
+    "merge_description": true,
+    "descriptions": [
+      "Level 1: +10% mining speed",
+      "Level 2: +20% mining speed", 
+      "Level 3: +30% mining speed",
+      "Level 4: +40% mining speed",
+      "Level 5: +50% mining speed + Fortune"
+    ]
+  }
 }
 ```
 
@@ -191,6 +159,7 @@ When `merge_description` is `false` (default), each level shows only its individ
 - **`points_per_level`** - Points consumed for each additional level (addon feature)  
 - **`merge_description`** - Whether level descriptions accumulate (addon enhancement)
 - **`level_requirements`** - Require specific levels of other skills (addon feature)
+- **`outer_rewards`** - Standard rewards applied upon unlocking a multi-level skill
 
 ## 🚀 Quick Start
 
@@ -250,21 +219,102 @@ int level = addon.getSkillLevel(player, categoryId, skillId);
 addon.advanceSkillLevel(player, categoryId, skillId);
 ```
 
-## 🔧 Development Benefits
+## � Important Datapack Compatibility Notice 🚨
 
-### What This Addon Adds
-- ✅ **Multi-level skill progression** - Skills can now have 2-10+ levels
-- ✅ **Stacking reward system** - Each level adds to previous level benefits  
-- ✅ **Dynamic progression costs** - Configure different point costs per level
-- ✅ **Level-aware commands** - New commands for managing skill levels
-- ✅ **Enhanced tooltips** - Show current level and next level previews
-- ✅ **Flexible skill requirements** - Require specific levels of prerequisite skills
+If you encounter errors like these when loading your datapacks:
 
-### Addon Architecture Benefits
-- ✅ **Non-intrusive**: Extends without modifying the base Skills mod
-- ✅ **Compatible**: Works with existing Skills mod datapacks
-- ✅ **Modular**: Can be enabled/disabled independently
-- ✅ **Future-proof**: Updates with new Skills mod versions
+```
+Unused field `type` at `skill_name`
+Unused field `max_skill_level` at `skill_name`
+Unused field `points_per_level` at `skill_name`
+Unused field `merge_description` at `skill_name`
+Unused field `descriptions` at `skill_name`
+Expected a valid reward type at `type` at index 0 at `rewards` at `skill_name`
+```
+
+Your datapack may be using an incompatible format. This addon requires the following format:
+
+### ✅ Required Format
+
+The format uses `"type": "puffish_skills:per_level_rewards"` with a nested data structure:
+
+```json
+{
+  "stacked_power": {
+    "name": "Stacked Power",
+    "description": "Increases your strength with each level",
+    "rewards": [
+      {
+        "type": "puffish_skills:per_level_rewards",
+        "data": {
+          "skill_id": "19aazycn9ii0lfh1",
+          "levels": {
+            "1": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.attack_damage",
+                  "value": 10,
+                  "operation": "addition"
+                }
+              }
+            ],
+            "2": [
+              {
+                "type": "puffish_skills:command",
+                "data": {
+                  "command": "give @p minecraft:experience_bottle 1"
+                }
+              }
+            ],
+            "3": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.max_health",
+                  "value": 2,
+                  "operation": "addition"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "title": "Master Miner",
+    "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
+    "size": 1.0,
+    "max_skill_level": 3,
+    "points_per_level": 1,
+    "merge_description": false,
+    "descriptions": [
+      "Current: +1 melee damage",
+      "Current: +10% mining speed",
+      "Current: +15% mining speed"
+    ],
+    "extra_descriptions": [
+      "Next: +10% mining speed",
+      "Next: +15% mining speed",
+      "— MAXED OUT —"
+    ],
+    "metadata": { "icon": "74sqblu8lgizj777" }
+  },
+  "simple_skill": {
+    "name": "Simple Skill",
+    "description": "A non-stackable skill",
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute_modifier",
+        "attribute": "minecraft:generic.movement_speed",
+        "operation": "add",
+        "value": 0.1
+      }
+    ]
+  }
+}
+```
+
+See the `example_datapack` folder for a complete working example.
 
 ### Recent API Integration (August 2025)
 - ✅ **Complete Skills mod API integration** with latest version (0.16.3+1.20)

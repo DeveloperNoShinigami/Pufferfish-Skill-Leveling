@@ -1,0 +1,99 @@
+{
+  "type": "per_level_rewards",
+  "skill_id": "enhanced_mining",
+  "max_skill_level": 5,
+  "points_per_level": 1,
+  "merge_description": true,
+  "descriptions": {
+    "1": "§7Mining Speed: §a+10%",
+    "2": "§7Mining Speed: §a+25%",
+    "3": "§7Mining Speed: §a+40%\n§7Bonus: §6Efficiency III Pickaxe",
+    "4": "§7Mining Speed: §a+60%\n§7Bonus: §bDiamond Tools with Unbreaking",
+    "5": "§7Mining Speed: §a+100% §d(MASTER LEVEL!)\n§7Bonus: §5Ultimate Netherite Pickaxe"
+  },
+  "extra_descriptions": {
+    "1": "§8Your first step into advanced mining",
+    "2": "§8Noticeable improvement in mining efficiency",
+    "3": "§8Significant boost with tool rewards", 
+    "4": "§8Expert-level mining capabilities",
+    "5": "§8§l✦ LEGENDARY MINING MASTERY ✦"
+  },
+  "levels": {
+    "1": [
+      {
+        "type": "attribute",
+        "attribute": "minecraft:player.block_break_speed",
+        "operation": "multiply_total",
+        "value": 0.1
+      },
+      {
+        "type": "command",
+        "command": "tellraw @s {\"text\":\"Enhanced Mining Level 1: +10% mining speed!\",\"color\":\"green\"}"
+      }
+    ],
+    "2": [
+      {
+        "type": "attribute",
+        "attribute": "minecraft:player.block_break_speed", 
+        "operation": "multiply_total",
+        "value": 0.25
+      },
+      {
+        "type": "command",
+        "command": "tellraw @s {\"text\":\"Enhanced Mining Level 2: +25% mining speed!\",\"color\":\"green\"}"
+      }
+    ],
+    "3": [
+      {
+        "type": "attribute",
+        "attribute": "minecraft:player.block_break_speed",
+        "operation": "multiply_total", 
+        "value": 0.4
+      },
+      {
+        "type": "command",
+        "command": "give @s minecraft:iron_pickaxe{Enchantments:[{id:\"minecraft:efficiency\",lvl:3}]} 1"
+      },
+      {
+        "type": "command",
+        "command": "tellraw @s {\"text\":\"Enhanced Mining Level 3: +40% mining speed + Efficiency III Pickaxe!\",\"color\":\"gold\"}"
+      }
+    ],
+    "4": [
+      {
+        "type": "attribute",
+        "attribute": "minecraft:player.block_break_speed",
+        "operation": "multiply_total",
+        "value": 0.6
+      },
+      {
+        "type": "command", 
+        "command": "give @s minecraft:diamond_pickaxe{Enchantments:[{id:\"minecraft:efficiency\",lvl:4},{id:\"minecraft:unbreaking\",lvl:3}]} 1"
+      },
+      {
+        "type": "command",
+        "command": "tellraw @s {\"text\":\"Enhanced Mining Level 4: +60% mining speed + Diamond Tools!\",\"color\":\"aqua\"}"
+      }
+    ],
+    "5": [
+      {
+        "type": "attribute",
+        "attribute": "minecraft:player.block_break_speed",
+        "operation": "multiply_total",
+        "value": 1.0
+      },
+      {
+        "type": "command",
+        "command": "give @s minecraft:netherite_pickaxe{Enchantments:[{id:\"minecraft:efficiency\",lvl:5},{id:\"minecraft:fortune\",lvl:3},{id:\"minecraft:unbreaking\",lvl:3},{id:\"minecraft:mending\",lvl:1}]} 1"
+      },
+      {
+        "type": "command",
+        "command": "tellraw @s {\"text\":\"Enhanced Mining Level 5: MASTER MINER! +100% speed + Netherite Tools!\",\"color\":\"light_purple\"}"
+      },
+      {
+        "type": "command",
+        "command": "playsound minecraft:ui.toast.challenge_complete player @s ~ ~ ~ 1.0 1.0"
+      }
+    ]
+  }
+}

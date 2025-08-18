@@ -91,7 +91,7 @@ public class LeveledSkill {
      */
     public void advance(ServerPlayerEntity player) {
         if (canAdvance(player)) {
-            SkillLevelingMod.getInstance().advanceSkillLevel(player, categoryId, skillId);
+            SkillLevelingMod.getInstance().getSkillLevelingManager().advanceSkillLevel(player, categoryId, skillId);
         }
     }
     

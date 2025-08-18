@@ -1,40 +1,54 @@
 package net.bluelotuscoding.skillleveling.events;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.server.event.ServerEventListener;
+import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
 
 /**
- * Event listener that handles server events for the skill leveling addon.
+ * Listener for skill-related events to integrate multi-level functionality
  */
 public class SkillLevelingEventListener implements ServerEventListener {
-
+    
+    @Override
+    public void onSkillUnlocked(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        // When a skill is unlocked, initialize level tracking for that skill
+        // The first level is automatically unlocked when the base skill is unlocked
+        SkillLevelingMod.getInstance().getSkillLevelingManager()
+            .setSkillLevel(player, categoryId, skillId, 1);
+    }
+    
     @Override
     public void onServerStarting(MinecraftServer server) {
-        // Initialize any server-specific data when server starts
+        SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStarting(server);
     }
-
+    
+    @Override
+    public void onServerStopping(MinecraftServer server) {
+        // Ensure data is saved when server stops
+    }
+    
     @Override
     public void onServerReload(MinecraftServer server) {
-        // Handle server reload events - refresh configurations if needed
+        SkillLevelingMod.getInstance().getSkillLevelingManager().onServerReload(server);
     }
-
+    
     @Override
     public void onPlayerJoin(ServerPlayerEntity player) {
-        // Initialize player-specific skill leveling data when they join
+        SkillLevelingMod.getInstance().getSkillLevelingManager().onPlayerJoin(player);
     }
-
+    
     @Override
     public void onPlayerLeave(ServerPlayerEntity player) {
-        // Clean up player-specific data when they leave
+        SkillLevelingMod.getInstance().getSkillLevelingManager().onPlayerLeave(player);
     }
-
+    
     @Override
     public void onCommandsRegister(CommandDispatcher<ServerCommandSource> dispatcher) {
-        // Register our custom commands
         SkillLevelingCommand.register(dispatcher);
     }
 }

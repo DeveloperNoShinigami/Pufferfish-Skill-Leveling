@@ -3,6 +3,7 @@ package net.bluelotuscoding.skillleveling.points;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.SkillsAPI;
+import net.puffish.skillsmod.util.PointSources;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 /**
@@ -71,9 +72,8 @@ public class SkillPointManager {
         }
         
         var category = categoryOptional.get();
-        // Note: This would need proper integration with the Skills mod point system
-        // The actual implementation would use the Skills mod's point manipulation methods
-        return true; // Placeholder for actual point deduction
+        category.addPoints(player, PointSources.COMMANDS, -pointCost);
+        return true;
     }
     
     /**
@@ -102,8 +102,7 @@ public class SkillPointManager {
         }
         
         var category = categoryOptional.get();
-        // Note: This would need proper integration with the Skills mod point system
-        // The actual implementation would use the Skills mod's point manipulation methods
+        category.addPoints(player, PointSources.COMMANDS, pointRefund);
     }
     
     /**

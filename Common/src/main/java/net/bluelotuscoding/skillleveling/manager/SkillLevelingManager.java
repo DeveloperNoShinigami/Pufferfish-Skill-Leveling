@@ -280,12 +280,7 @@ public class SkillLevelingManager {
     }
     
     private void triggerLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        // Apply rewards from the reward type
-        var reward = getPerLevelRewardsReward(categoryId, skillId);
-        if (reward.isPresent()) {
-            // The reward system will handle this automatically through the Skills mod
-            // when skills are unlocked. This is just a placeholder for future expansion.
-        }
+        // Future hook for applying per-level rewards
     }
     
     /**
@@ -354,12 +349,7 @@ public class SkillLevelingManager {
     }
     
     private void deactivateLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        // Deactivate rewards for this specific level
-        var reward = getPerLevelRewardsReward(categoryId, skillId);
-        if (reward.isPresent()) {
-            // The reward system should handle this automatically when the level changes
-            // This is a placeholder for future expansion if needed
-        }
+        // Future hook for deactivating rewards when a level is refunded
     }
     
     private void loadLeveledSkillConfigurations() {

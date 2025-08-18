@@ -1,0 +1,12 @@
+{
+  "skillleveling.command.info": "=== Información de Nivelación de Habilidades ===",
+  "skillleveling.command.active": "¡La progresión de habilidades multinivel está activa!",
+  "skillleveling.command.get_help": "Usa /skillleveling get para ver tus niveles de habilidad",
+  "skillleveling.command.advance_help": "Usa /skillleveling advance para avanzar niveles de habilidad",
+  "skillleveling.command.levels_header": "=== Tus Niveles de Habilidad ===",
+  "skillleveling.command.gui_available": "La revisión de niveles de habilidad está disponible mediante la GUI de habilidades principal",
+  "skillleveling.command.enhanced": "¡Mejorado con progresión multinivel!",
+  "skillleveling.command.needs_params": "El avance de habilidades requiere parámetros específicos de habilidad",
+  "skillleveling.command.use_gui": "Usa la GUI de habilidades principal para interactuar con tus habilidades",
+  "skillleveling.command.player_only": "Este comando solo puede ser usado por jugadores"
+}

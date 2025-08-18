@@ -1,7 +1,7 @@
 {
   "skillleveling.command.info": "=== Skill Leveling Info ===",
   "skillleveling.command.active": "Multi-level skill progression is active!",
-  "skillleveling.command.check_help": "Use /skillleveling check to see your skill levels",
+  "skillleveling.command.get_help": "Use /skillleveling get to see your skill levels",
   "skillleveling.command.advance_help": "Use /skillleveling advance to advance skill levels",
   "skillleveling.command.levels_header": "=== Your Skill Levels ===",
   "skillleveling.command.gui_available": "Skill level checking is available through the core skills GUI",

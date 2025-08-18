@@ -25,6 +25,7 @@ public class SkillLevelingManager {
     private final SkillLevelingDataManager dataManager;
     private final Map<String, LeveledSkill> leveledSkills;
     private final Map<Identifier, Map<String, PerLevelRewardsReward>> perLevelRewardsRewards;
+    private MinecraftServer server;
     
     public SkillLevelingManager() {
         this.dataManager = new SkillLevelingDataManager();
@@ -33,9 +34,10 @@ public class SkillLevelingManager {
     }
     
     public void onServerStarting(MinecraftServer server) {
+        this.server = server;
         // Initialize data storage
         dataManager.initialize(server);
-        
+
         // Load leveled skill configurations
         loadLeveledSkillConfigurations();
     }
@@ -57,6 +59,22 @@ public class SkillLevelingManager {
     public void onPlayerLeave(ServerPlayerEntity player) {
         // Save player skill level data
         dataManager.savePlayerData(player);
+    }
+
+    public Optional<MinecraftServer> getServer() {
+        return Optional.ofNullable(server);
+    }
+
+    public boolean hasSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        return dataManager.hasSkillLevel(player, categoryId, skillId);
+    }
+
+    public void initializeSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        dataManager.setSkillLevel(player, categoryId, skillId, 1);
+    }
+
+    public void clearSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        dataManager.clearSkillLevel(player, categoryId, skillId);
     }
     
     /**

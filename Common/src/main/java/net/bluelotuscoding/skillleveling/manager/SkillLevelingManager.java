@@ -25,6 +25,7 @@ public class SkillLevelingManager {
     private final SkillLevelingDataManager dataManager;
     private final Map<String, LeveledSkill> leveledSkills;
     private final Map<Identifier, Map<String, PerLevelRewardsReward>> perLevelRewardsRewards;
+    private MinecraftServer server;
     
     public SkillLevelingManager() {
         this.dataManager = new SkillLevelingDataManager();
@@ -33,9 +34,10 @@ public class SkillLevelingManager {
     }
     
     public void onServerStarting(MinecraftServer server) {
+        this.server = server;
         // Initialize data storage
         dataManager.initialize(server);
-        
+
         // Load leveled skill configurations
         loadLeveledSkillConfigurations();
     }
@@ -43,6 +45,10 @@ public class SkillLevelingManager {
     public void onServerReload(MinecraftServer server) {
         // Reload configurations
         loadLeveledSkillConfigurations();
+    }
+
+    public void onServerStopping(MinecraftServer server) {
+        dataManager.saveAll();
     }
     
     public void onPlayerJoin(ServerPlayerEntity player) {
@@ -53,6 +59,22 @@ public class SkillLevelingManager {
     public void onPlayerLeave(ServerPlayerEntity player) {
         // Save player skill level data
         dataManager.savePlayerData(player);
+    }
+
+    public Optional<MinecraftServer> getServer() {
+        return Optional.ofNullable(server);
+    }
+
+    public boolean hasSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        return dataManager.hasSkillLevel(player, categoryId, skillId);
+    }
+
+    public void initializeSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        dataManager.setSkillLevel(player, categoryId, skillId, 1);
+    }
+
+    public void clearSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        dataManager.clearSkillLevel(player, categoryId, skillId);
     }
     
     /**
@@ -280,7 +302,9 @@ public class SkillLevelingManager {
     }
     
     private void triggerLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        // Future hook for applying per-level rewards
+        getPerLevelRewardsReward(categoryId, skillId).ifPresent(reward ->
+                reward.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, level, true))
+        );
     }
     
     /**
@@ -349,11 +373,39 @@ public class SkillLevelingManager {
     }
     
     private void deactivateLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        // Future hook for deactivating rewards when a level is refunded
+        getPerLevelRewardsReward(categoryId, skillId).ifPresent(reward ->
+                reward.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, level - 1, false))
+        );
     }
-    
+
+    @SuppressWarnings("unchecked")
     private void loadLeveledSkillConfigurations() {
-        // In a full implementation, we would load configuration from data files
-        // For now, configuration is handled through datapack definitions
+        leveledSkills.clear();
+        perLevelRewardsRewards.clear();
+
+        try {
+            var method = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("getAllCategories");
+            method.setAccessible(true);
+            var categories = (java.util.Collection<net.puffish.skillsmod.config.CategoryConfig>) method.invoke(net.puffish.skillsmod.SkillsMod.getInstance());
+
+            for (var category : categories) {
+                Identifier categoryId = (Identifier) category.id();
+                for (var definition : category.definitions().getAll()) {
+                    String id = definition.id();
+
+                    for (var reward : definition.rewards()) {
+                        if (reward.instance() instanceof PerLevelRewardsReward perReward) {
+                            registerPerLevelRewardsReward(categoryId, id, perReward);
+
+                            SkillsAPI.getCategory(categoryId)
+                                    .flatMap(cat -> cat.getSkill(id))
+                                    .ifPresent(skill -> leveledSkills.put(id, new LeveledSkill(skill, categoryId, id, perReward.getMaxLevel())));
+                        }
+                    }
+                }
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // Failed to access internal categories - leave maps empty
+        }
     }
 }

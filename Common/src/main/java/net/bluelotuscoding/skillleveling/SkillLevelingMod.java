@@ -2,8 +2,10 @@ package net.bluelotuscoding.skillleveling;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
+import net.bluelotuscoding.skillleveling.events.SkillLevelingEventListener;
 import net.bluelotuscoding.skillleveling.manager.SkillLevelingManager;
+import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
+import net.puffish.skillsmod.api.SkillsAPI;
 
 /**
  * Main addon class that integrates with Pufferfish Skills to provide per-level skill rewards.
@@ -23,6 +25,15 @@ public class SkillLevelingMod {
         
         // Register our custom reward type
         PerLevelRewardsReward.register();
+
+        // Register server event listener if supported by the Skills API
+        try {
+            SkillsAPI.class
+                    .getMethod("registerServerEventListener", net.puffish.skillsmod.server.event.ServerEventListener.class)
+                    .invoke(null, new SkillLevelingEventListener());
+        } catch (ReflectiveOperationException ignored) {
+            // Older Skills API versions might not expose this method
+        }
         
         // Initialize event handlers
         net.bluelotuscoding.skillleveling.events.SkillEventHandler.initialize();

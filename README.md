@@ -62,11 +62,12 @@ addon.advanceSkillLevel(player, categoryId, skillId);
 ## 🎮 New Commands
 
 ### Addon-Specific Commands
-- `/skillleveling info` - Display addon version and loaded features
-- `/skillleveling check <player> <category> <skill>` - Check specific skill level
-- `/skillleveling advance <player> <category> <skill> [levels]` - Advance skill levels
-- `/skillleveling refund <player> <category> <skill> [levels]` - Refund skill levels
-- `/skillleveling list <player>` - List all skill levels for a player
+- `/skillleveling get <player> <category> <skill>` - Get the level of a skill
+- `/skillleveling set <player> <category> <skill> <level>` - Set the level of a skill
+- `/skillleveling advance <player> <category> <skill>` - Advance a skill by one level
+- `/skillleveling refund one <player> <category> <skill>` - Refund one level
+- `/skillleveling refund multiple <player> <category> <skill> <levels>` - Refund multiple levels
+- `/skillleveling refund all <player> <category> <skill>` - Reset a skill to level 1
 
 ### Enhanced Core Commands
 The addon extends existing Skills mod commands with level-aware functionality.
@@ -198,10 +199,13 @@ export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 /puffish_skills open <category>
 
 # Check specific skill level
-/skillleveling check <player> <category> <skill>
+/skillleveling get <player> <category> <skill>
 
 # Advance a skill level (admin)
 /skillleveling advance <player> <category> <skill>
+
+# Refund a skill level
+/skillleveling refund one <player> <category> <skill>
 ```
 
 ### 5. Addon APIs for Developers

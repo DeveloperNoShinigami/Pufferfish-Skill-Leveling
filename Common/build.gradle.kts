@@ -30,6 +30,8 @@ dependencies {
     modImplementation("net.puffish:skillsmod:${project.properties["skills_version"]}")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${project.properties["junit_version"]}")
+    testImplementation("org.mockito:mockito-core:5.2.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
 }
 
 tasks.test {

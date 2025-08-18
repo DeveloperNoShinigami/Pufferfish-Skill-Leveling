@@ -1,5 +1,7 @@
 {
-  "skillleveling.command.get_help": "Use /skillleveling get to view skill levels",
+  "skillleveling.command.info": "=== Skill Leveling Info ===",
+  "skillleveling.command.active": "Multi-level skill progression is active!",
+  "skillleveling.command.get_help": "Use /skillleveling get to see your skill levels",
   "skillleveling.command.set_help": "Use /skillleveling set to modify skill levels",
   "skillleveling.command.advance_help": "Use /skillleveling advance to advance skill levels",
   "skillleveling.command.refund_help": "Use /skillleveling refund <one|multiple|all> to refund skill levels",

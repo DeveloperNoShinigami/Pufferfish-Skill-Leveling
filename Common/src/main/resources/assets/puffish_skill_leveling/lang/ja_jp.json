@@ -1,0 +1,12 @@
+{
+  "skillleveling.command.info": "=== スキルレベリング情報 ===",
+  "skillleveling.command.active": "マルチレベルのスキル進行が有効です！",
+  "skillleveling.command.get_help": "/skillleveling get を使用してスキルレベルを確認します",
+  "skillleveling.command.advance_help": "/skillleveling advance を使用してスキルレベルを進めます",
+  "skillleveling.command.levels_header": "=== あなたのスキルレベル ===",
+  "skillleveling.command.gui_available": "スキルレベルの確認はコアスキルGUIから利用できます",
+  "skillleveling.command.enhanced": "マルチレベルの進行で強化されています！",
+  "skillleveling.command.needs_params": "スキルの進行には特定のスキルパラメータが必要です",
+  "skillleveling.command.use_gui": "スキルとやり取りするにはコアスキルGUIを使用してください",
+  "skillleveling.command.player_only": "このコマンドはプレイヤーのみが使用できます"
+}

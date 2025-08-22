@@ -9,6 +9,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.client.SkillLevelingClient;
 
 /**
  * Commands for managing skill levels in the Pufferfish Skill Leveling addon
@@ -79,6 +80,29 @@ public class SkillLevelingCommand {
                         )
                     )
                 )
+                .then(CommandManager.literal("info")
+                    .then(CommandManager.argument("player", EntityArgumentType.player())
+                        .then(CommandManager.argument("category", net.puffish.skillsmod.commands.arguments.CategoryArgumentType.category())
+                            .then(CommandManager.argument("skill", net.puffish.skillsmod.commands.arguments.SkillArgumentType.skillFromCategory("category"))
+                                .executes(SkillLevelingCommand::showSkillInfo)
+                            )
+                        )
+                    )
+                )
+                .then(CommandManager.literal("list")
+                    .then(CommandManager.argument("player", EntityArgumentType.player())
+                        .executes(SkillLevelingCommand::listPlayerSkills)
+                    )
+                )
+                .then(CommandManager.literal("max")
+                    .then(CommandManager.argument("player", EntityArgumentType.player())
+                        .then(CommandManager.argument("category", net.puffish.skillsmod.commands.arguments.CategoryArgumentType.category())
+                            .then(CommandManager.argument("skill", net.puffish.skillsmod.commands.arguments.SkillArgumentType.skillFromCategory("category"))
+                                .executes(SkillLevelingCommand::maxSkillLevel)
+                            )
+                        )
+                    )
+                )
         );
     }
 
@@ -92,17 +116,22 @@ public class SkillLevelingCommand {
         var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context, "skill", category);
         
         var addon = SkillLevelingMod.getInstance();
-        int level = addon.getSkillLevel(player, category.getId(), skill.getId());
+        var manager = addon.getSkillLevelingManager();
         
-        source.sendMessage(Text.literal(String.format(
-                "§6%s §ahas §e%s §ain §e%s §aat level §6%d",
-                player.getName().getString(),
-                skill.getId(),
-                category.getId(),
-                level
-        )));
+        int currentLevel = manager.getSkillLevel(player, category.getId(), skill.getId());
+        int maxLevel = manager.getMaxLevel(category.getId(), skill.getId());
         
-        return level;
+        // ENHANCED DISPLAY: Use client formatting for better visual presentation
+        String skillName = skill.getId().replace("_", " ");
+        String levelDisplay = SkillLevelingClient.formatSkillLevel(skillName, currentLevel, maxLevel);
+        String progressBar = SkillLevelingClient.createProgressBar(currentLevel, maxLevel, 10);
+        
+        source.sendMessage(Text.literal("§6═══ Skill Information ═══"));
+        source.sendMessage(Text.literal(String.format("§aPlayer: §e%s", player.getName().getString())));
+        source.sendMessage(Text.literal(levelDisplay));
+        source.sendMessage(Text.literal(progressBar));
+        
+        return currentLevel;
     }
     
     /**
@@ -119,13 +148,19 @@ public class SkillLevelingCommand {
         boolean success = addon.setSkillLevel(player, category.getId(), skill.getId(), level);
         
         if (success) {
-            source.sendMessage(Text.literal(String.format(
-                    "§aSet §e%s §ain §e%s §afor §6%s §ato level §6%d",
-                    skill.getId(),
-                    category.getId(),
-                    player.getName().getString(),
-                    level
-            )));
+            var manager = addon.getSkillLevelingManager();
+            int maxLevel = manager.getMaxLevel(category.getId(), skill.getId());
+            
+            // ENHANCED DISPLAY: Better visual feedback with client formatting
+            String skillName = skill.getId().replace("_", " ");
+            String levelDisplay = SkillLevelingClient.formatSkillLevel(skillName, level, maxLevel);
+            String progressBar = SkillLevelingClient.createProgressBar(level, maxLevel, 10);
+            
+            source.sendMessage(Text.literal("§6═══ Skill Level Set ═══"));
+            source.sendMessage(Text.literal(String.format("§aPlayer: §e%s", player.getName().getString())));
+            source.sendMessage(Text.literal(levelDisplay));
+            source.sendMessage(Text.literal(progressBar));
+            
             return 1;
         } else {
             source.sendError(Text.literal(String.format(
@@ -149,17 +184,25 @@ public class SkillLevelingCommand {
         var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context, "skill", category);
         
         var addon = SkillLevelingMod.getInstance();
+        var manager = addon.getSkillLevelingManager();
+        int oldLevel = manager.getSkillLevel(player, category.getId(), skill.getId());
+        
         boolean success = addon.advanceSkillLevel(player, category.getId(), skill.getId());
         
         if (success) {
-            int newLevel = addon.getSkillLevel(player, category.getId(), skill.getId());
-            source.sendMessage(Text.literal(String.format(
-                    "§aAdvanced §e%s §ain §e%s §afor §6%s §ato level §6%d",
-                    skill.getId(),
-                    category.getId(),
-                    player.getName().getString(),
-                    newLevel
-            )));
+            int newLevel = manager.getSkillLevel(player, category.getId(), skill.getId());
+            int maxLevel = manager.getMaxLevel(category.getId(), skill.getId());
+            
+            // ENHANCED DISPLAY: Use client formatting for level advancement
+            String skillName = skill.getId().replace("_", " ");
+            String levelUpMessage = SkillLevelingClient.createLevelUpMessage(skillName, oldLevel, newLevel);
+            String progressBar = SkillLevelingClient.createProgressBar(newLevel, maxLevel, 10);
+            
+            source.sendMessage(Text.literal("§6═══ Skill Advanced ═══"));
+            source.sendMessage(Text.literal(String.format("§aPlayer: §e%s", player.getName().getString())));
+            source.sendMessage(Text.literal(levelUpMessage));
+            source.sendMessage(Text.literal(progressBar));
+            
             return 1;
         } else {
             source.sendError(Text.literal(String.format(
@@ -182,17 +225,26 @@ public class SkillLevelingCommand {
         var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context, "skill", category);
         
         var addon = SkillLevelingMod.getInstance();
+        var manager = addon.getSkillLevelingManager();
+        int oldLevel = manager.getSkillLevel(player, category.getId(), skill.getId());
+        
         boolean success = addon.refundSkillLevel(player, category.getId(), skill.getId());
         
         if (success) {
-            int newLevel = addon.getSkillLevel(player, category.getId(), skill.getId());
-            source.sendMessage(Text.literal(String.format(
-                    "§aRefunded 1 level of §e%s §ain §e%s §afor §6%s §a(now level §6%d§a)",
-                    skill.getId(),
-                    category.getId(),
-                    player.getName().getString(),
-                    newLevel
-            )));
+            int newLevel = manager.getSkillLevel(player, category.getId(), skill.getId());
+            int maxLevel = manager.getMaxLevel(category.getId(), skill.getId());
+            
+            // ENHANCED DISPLAY: Show refund with visual feedback
+            String skillName = skill.getId().replace("_", " ");
+            String refundMessage = String.format("§6%s §7level reduced from §c%d §7to §e%d §7(refunded)", 
+                skillName, oldLevel, newLevel);
+            String progressBar = SkillLevelingClient.createProgressBar(newLevel, maxLevel, 10);
+            
+            source.sendMessage(Text.literal("§6═══ Skill Refunded ═══"));
+            source.sendMessage(Text.literal(String.format("§aPlayer: §e%s", player.getName().getString())));
+            source.sendMessage(Text.literal(refundMessage));
+            source.sendMessage(Text.literal(progressBar));
+            
             return 1;
         } else {
             source.sendError(Text.literal(String.format(
@@ -264,6 +316,129 @@ public class SkillLevelingCommand {
         } else {
             source.sendError(Text.literal(String.format(
                     "§cNo levels to refund for §e%s §cin §e%s §cfor §6%s §c(already at minimum level)",
+                    skill.getId(),
+                    category.getId(),
+                    player.getName().getString()
+            )));
+            return 0;
+        }
+    }
+    
+    /**
+     * Show detailed information about a skill's levels and progression
+     */
+    private static int showSkillInfo(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        var source = context.getSource();
+        var player = EntityArgumentType.getPlayer(context, "player");
+        var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context, "category");
+        var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context, "skill", category);
+        
+        var addon = SkillLevelingMod.getInstance();
+        var manager = addon.getSkillLevelingManager();
+        
+        int currentLevel = manager.getSkillLevel(player, category.getId(), skill.getId());
+        int maxLevel = manager.getMaxLevel(category.getId(), skill.getId());
+        int pointsPerLevel = manager.getPointsForLevel(category.getId(), skill.getId(), currentLevel + 1);
+        
+        // Build comprehensive skill information
+        source.sendMessage(Text.literal("§6═══ Skill Information ═══"));
+        source.sendMessage(Text.literal(String.format("§aPlayer: §e%s", player.getName().getString())));
+        source.sendMessage(Text.literal(String.format("§aSkill: §e%s §7(§e%s§7)", skill.getId(), category.getId())));
+        source.sendMessage(Text.literal(String.format("§aLevel: §6%d§7/§6%d", currentLevel, maxLevel)));
+        
+        if (pointsPerLevel > 0) {
+            int currentPoints = net.bluelotuscoding.skillleveling.points.SkillPointManager.getCurrentPoints(player, category.getId());
+            source.sendMessage(Text.literal(String.format("§aNext Level Cost: §6%d §7points (§6%d §7available)", pointsPerLevel, currentPoints)));
+        } else {
+            source.sendMessage(Text.literal("§aNext Level Cost: §eFree"));
+        }
+        
+        // Show current level description if available
+        String description = manager.getDescriptionForLevel(category.getId(), skill.getId(), currentLevel);
+        if (!description.isEmpty()) {
+            source.sendMessage(Text.literal("§aLevel Description:"));
+            source.sendMessage(Text.literal("§7" + description));
+        }
+        
+        // Show next level preview if not at max
+        if (currentLevel < maxLevel) {
+            String nextDescription = manager.getDescriptionForLevel(category.getId(), skill.getId(), currentLevel + 1);
+            if (!nextDescription.isEmpty()) {
+                source.sendMessage(Text.literal("§aNext Level Preview:"));
+                source.sendMessage(Text.literal("§8" + nextDescription));
+            }
+        }
+        
+        return 1;
+    }
+    
+    /**
+     * List all skills with levels for a player
+     */
+    private static int listPlayerSkills(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        var source = context.getSource();
+        var player = EntityArgumentType.getPlayer(context, "player");
+        
+        var addon = SkillLevelingMod.getInstance();
+        var manager = addon.getSkillLevelingManager();
+        
+        source.sendMessage(Text.literal(String.format("§6═══ Skills for §e%s §6═══", player.getName().getString())));
+        
+        int skillCount = 0;
+        
+        // Iterate through all categories and skills
+        net.puffish.skillsmod.api.SkillsAPI.streamCategories().forEach(category -> {
+            category.streamSkills().forEach(skill -> {
+                // Only show skills that have level data (are leveled)
+                if (manager.hasSkillData(player, category.getId(), skill.getId())) {
+                    int level = manager.getSkillLevel(player, category.getId(), skill.getId());
+                    int maxLevel = manager.getMaxLevel(category.getId(), skill.getId());
+                    
+                    source.sendMessage(Text.literal(String.format(
+                        "§a%s:%s §7- Level §6%d§7/§6%d",
+                        category.getId().getPath(),
+                        skill.getId(),
+                        level,
+                        maxLevel
+                    )));
+                }
+            });
+        });
+        
+        if (skillCount == 0) {
+            source.sendMessage(Text.literal("§7No leveled skills found for this player."));
+        }
+        
+        return 1;
+    }
+    
+    /**
+     * Maximize a skill to its maximum level
+     */
+    private static int maxSkillLevel(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        var source = context.getSource();
+        var player = EntityArgumentType.getPlayer(context, "player");
+        var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context, "category");
+        var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context, "skill", category);
+        
+        var addon = SkillLevelingMod.getInstance();
+        var manager = addon.getSkillLevelingManager();
+        
+        int maxLevel = manager.getMaxLevel(category.getId(), skill.getId());
+        boolean success = manager.setSkillLevel(player, category.getId(), skill.getId(), maxLevel);
+        
+        if (success) {
+            source.sendMessage(Text.literal(String.format(
+                    "§aMaximized §e%s §ain §e%s §afor §6%s §a(set to level §6%d§a)",
+                    skill.getId(),
+                    category.getId(),
+                    player.getName().getString(),
+                    maxLevel
+            )));
+            return 1;
+        } else {
+            source.sendError(Text.literal(String.format(
+                    "§cFailed to maximize §e%s §cin §e%s §cfor §6%s",
                     skill.getId(),
                     category.getId(),
                     player.getName().getString()

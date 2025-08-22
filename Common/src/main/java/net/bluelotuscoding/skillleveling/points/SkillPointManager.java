@@ -129,4 +129,16 @@ public class SkillPointManager {
         
         return levelsToGain * pointsPerLevel;
     }
+    
+    /**
+     * Get current points available for a player in a category
+     */
+    public static int getCurrentPoints(ServerPlayerEntity player, Identifier categoryId) {
+        var categoryOptional = SkillsAPI.getCategory(categoryId);
+        if (categoryOptional.isEmpty()) {
+            return 0;
+        }
+        
+        return categoryOptional.get().getPointsLeft(player);
+    }
 }

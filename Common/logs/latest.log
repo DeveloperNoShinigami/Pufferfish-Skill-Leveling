@@ -1,0 +1,6 @@
+[14:58:14] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Initializing Pufferfish Skill Leveling addon...
+[14:58:14] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Registered per-level rewards reward type
+[14:58:14] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Registered Skills mod event handlers
+[14:58:14] [Test worker/WARN]: [puffish_skill_leveling] [ADDON] Skills mod server event registration failed - using fallback initialization
+[14:58:14] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Initialized legacy event handlers
+[14:58:14] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Addon initialization complete - ready for skill level progression!

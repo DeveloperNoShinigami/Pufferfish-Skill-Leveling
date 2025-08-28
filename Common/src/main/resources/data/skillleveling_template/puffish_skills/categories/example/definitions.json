@@ -68,6 +68,14 @@
               "type": "puffish_skill_leveling:per_level_rewards",
               "data": {
                     "skill_id": "ykn32h02xhgaujyr", 
+                    "required_skill": [
+                        {
+                            "skill_id": "19aazycn9ii0lfh1",
+                            "level": 2
+                        }
+                    ],
+                    "allow_partial_rewards": false,
+                    "scaling_factor": 1.2,
                     "levels": {
                         "1": [
                             { "type": "puffish_skills:attribute",
@@ -95,5 +103,92 @@
           }
       ],
       "metadata": { "icon": "74sqblu8lgizj777" }
+  },
+
+  "advanced_combat": {
+      "title": "Elite Warrior",
+      "icon": { "type": "item", "data": { "item": "minecraft:netherite_sword" } },
+      "size": 1.5,
+      "max_skill_level": 5,
+      "points_per_level": 2,
+      "merge_description": true,
+      "descriptions": [
+          "Level 1: +5 Attack Damage",
+          "Level 2: +10% Critical Hit Chance",
+          "Level 3: +15% Attack Speed",
+          "Level 4: Weapon Mastery: +20% Damage",
+          "Level 5: Combat Expert: All bonuses enhanced"
+      ],
+      "extra_descriptions": [
+          "Next: Critical hit chance boost",
+          "Next: Attack speed improvement",
+          "Next: Weapon mastery unlocked",
+          "Next: Combat expertise achieved",
+          "— ULTIMATE WARRIOR —"
+      ],
+      "rewards": [
+          {
+              "type": "puffish_skill_leveling:per_level_rewards",
+              "data": {
+                    "skill_id": "advanced_combat_skill",
+                    "required_skill": [
+                        {
+                            "skill_id": "19aazycn9ii0lfh1",
+                            "level": 3
+                        },
+                        {
+                            "skill_id": "ykn32h02xhgaujyr",
+                            "level": 2
+                        }
+                    ],
+                    "allow_partial_rewards": true,
+                    "scaling_factor": 1.5,
+                    "max_skill_level": 5,
+                    "points_per_level": 2,
+                    "merge_description": true,
+                    "levels": {
+                        "1": [
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.attack_damage",
+                                        "value": 5,
+                                        "operation": "addition" } }
+                        ],
+                        "2": [
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.luck",
+                                        "value": 1,
+                                        "operation": "addition" } }
+                        ],
+                        "3": [
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.attack_speed",
+                                        "value": 0.15,
+                                        "operation": "multiply_base" } }
+                        ],
+                        "4": [
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.attack_damage",
+                                        "value": 10,
+                                        "operation": "addition" } },
+                            {"type": "puffish_skills:command",
+                              "data": { "command": "give @p minecraft:totem_of_undying 1" } }
+                        ],
+                        "5": [
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.max_health",
+                                        "value": 10,
+                                        "operation": "addition" } },
+                            { "type": "puffish_skills:attribute",
+                              "data": { "attribute": "generic.armor",
+                                        "value": 5,
+                                        "operation": "addition" } },
+                            {"type": "puffish_skills:command",
+                              "data": { "command": "effect give @p minecraft:strength 300 1" } }
+                        ]
+                    }
+                }
+          }
+      ],
+      "metadata": { "icon": "combat_mastery_icon" }
   }
 }

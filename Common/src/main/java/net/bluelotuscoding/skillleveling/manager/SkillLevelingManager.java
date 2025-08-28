@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Manager class that extends core skill management to provide multi-level functionality
@@ -182,6 +183,13 @@ public class SkillLevelingManager {
     }
     
     /**
+     * Get all registered per-level rewards (package-private for internal use)
+     */
+    public Map<Identifier, Map<String, PerLevelRewardsReward>> getPerLevelRewardsRewards() {
+        return perLevelRewardsRewards;
+    }
+    
+    /**
      * Check if a player has unlocked a specific level of a skill
      */
     public boolean hasSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
@@ -232,8 +240,10 @@ public class SkillLevelingManager {
      */
     public int getPointsForLevel(Identifier categoryId, String skillId, int level) {
         var reward = getPerLevelRewardsReward(categoryId, skillId);
-        // For now, assume a fixed point cost - we can extend this in the future
-        return reward.isPresent() ? 1 : 1;
+        if (reward.isPresent()) {
+            return reward.get().getEffectivePointsPerLevel(level);
+        }
+        return 1; // Default fallback
     }
     
     /**
@@ -493,6 +503,126 @@ public class SkillLevelingManager {
         getPerLevelRewardsReward(categoryId, skillId).ifPresent(reward ->
                 reward.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, level - 1, false))
         );
+    }
+
+    /**
+     * Enhanced prerequisite checking for skills with required_skill dependencies
+     * 
+     * @param player The player to check
+     * @param categoryId The category of the skill
+     * @param skillId The skill to check prerequisites for
+     * @return true if all prerequisites are met
+     */
+    public boolean checkSkillPrerequisites(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        return checkSkillPrerequisites(player.getUuid(), categoryId, skillId);
+    }
+    
+    /**
+     * Enhanced prerequisite checking for skills with required_skill dependencies
+     * 
+     * @param playerId The player UUID to check
+     * @param categoryId The category of the skill
+     * @param skillId The skill to check prerequisites for
+     * @return true if all prerequisites are met
+     */
+    public boolean checkSkillPrerequisites(UUID playerId, Identifier categoryId, String skillId) {
+        var reward = getPerLevelRewardsReward(categoryId, skillId);
+        if (reward.isEmpty()) {
+            return true; // No reward means no prerequisites
+        }
+        
+        var requiredSkills = reward.get().getRequiredSkills();
+        if (requiredSkills.isEmpty()) {
+            return true; // No prerequisites defined
+        }
+        
+        // Check each prerequisite
+        for (var prerequisite : requiredSkills) {
+            if (!checkSinglePrerequisite(playerId, categoryId, prerequisite)) {
+                SkillLevelingMod.getInstance().getLogger().debug("Prerequisite not met for " + skillId + ": " + prerequisite.getSkillId() + " level " + prerequisite.getLevel() + " required");
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Check a single skill prerequisite
+     */
+    private boolean checkSinglePrerequisite(UUID playerId, Identifier defaultCategoryId, 
+                                          PerLevelRewardsReward.SkillPrerequisite prerequisite) {
+        // Determine category (use specified category or default to current)
+        Identifier categoryId = defaultCategoryId;
+        if (prerequisite.getCategoryId() != null) {
+            categoryId = new Identifier(prerequisite.getCategoryId());
+        }
+        
+        // Get current skill level for the prerequisite skill
+        int currentLevel = getSkillLevelByUUID(playerId, categoryId, prerequisite.getSkillId());
+        
+        // Check if current level meets requirement
+        boolean met = currentLevel >= prerequisite.getLevel();
+        
+        SkillLevelingMod.getInstance().getLogger().debug("Checking prerequisite " + prerequisite.getSkillId() + ": current level " + currentLevel + ", required level " + prerequisite.getLevel() + ", met: " + met);
+        
+        return met;
+    }
+    
+    /**
+     * Get skill level by UUID (for prerequisite checking)
+     */
+    private int getSkillLevelByUUID(UUID playerId, Identifier categoryId, String skillId) {
+        // Get player by UUID
+        if (server == null) {
+            SkillLevelingMod.getInstance().getLogger().warn("Server not available for prerequisite checking");
+            return 0;
+        }
+        
+        var player = server.getPlayerManager().getPlayer(playerId);
+        if (player == null) {
+            SkillLevelingMod.getInstance().getLogger().debug("Player not online for prerequisite checking: " + playerId);
+            return 0;
+        }
+        
+        return getSkillLevel(player, categoryId, skillId);
+    }
+    
+    /**
+     * Get detailed prerequisite information for a skill
+     */
+    public List<String> getPrerequisiteInfo(Identifier categoryId, String skillId) {
+        var reward = getPerLevelRewardsReward(categoryId, skillId);
+        if (reward.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        var requiredSkills = reward.get().getRequiredSkills();
+        var info = new ArrayList<String>();
+        
+        for (var prerequisite : requiredSkills) {
+            String categoryStr = prerequisite.getCategoryId() != null 
+                    ? prerequisite.getCategoryId() : categoryId.toString();
+            info.add(String.format("%s (Level %d) in %s", 
+                    prerequisite.getSkillId(), 
+                    prerequisite.getLevel(),
+                    categoryStr));
+        }
+        
+        return info;
+    }
+    
+    /**
+     * Check if a player can advance to a specific level (including prerequisites)
+     */
+    public boolean canAdvanceToLevelWithPrerequisites(ServerPlayerEntity player, Identifier categoryId, String skillId, int targetLevel) {
+        // Check basic advancement requirements
+        if (!canAdvanceToLevel(player, categoryId, skillId, targetLevel)) {
+            return false;
+        }
+        
+        // Check prerequisites
+        return checkSkillPrerequisites(player, categoryId, skillId);
     }
 
     @SuppressWarnings("unchecked")

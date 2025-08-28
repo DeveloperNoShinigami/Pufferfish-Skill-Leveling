@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,9 +34,9 @@ public class SkillPointManagerTest {
     private static PerLevelRewardsReward createReward(int pointsPerLevel) {
         try {
             var ctor = PerLevelRewardsReward.class.getDeclaredConstructor(
-                    Map.class, String.class, int.class, int.class, Map.class, Map.class, boolean.class);
+                    Map.class, String.class, int.class, int.class, Map.class, Map.class, boolean.class, List.class, boolean.class, double.class);
             ctor.setAccessible(true);
-            return ctor.newInstance(new HashMap<>(), SKILL_ID, 1, pointsPerLevel, new HashMap<>(), new HashMap<>(), false);
+            return ctor.newInstance(new HashMap<>(), SKILL_ID, 1, pointsPerLevel, new HashMap<>(), new HashMap<>(), false, new ArrayList<>(), false, 1.0);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

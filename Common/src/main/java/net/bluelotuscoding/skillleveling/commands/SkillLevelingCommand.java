@@ -80,6 +80,13 @@ public class SkillLevelingCommand {
                         )
                     )
                 )
+                .then(CommandManager.literal("prerequisites")
+                    .then(CommandManager.argument("category", net.puffish.skillsmod.commands.arguments.CategoryArgumentType.category())
+                        .then(CommandManager.argument("skill", net.puffish.skillsmod.commands.arguments.SkillArgumentType.skillFromCategory("category"))
+                            .executes(SkillLevelingCommand::showPrerequisites)
+                        )
+                    )
+                )
                 .then(CommandManager.literal("info")
                     .then(CommandManager.argument("player", EntityArgumentType.player())
                         .then(CommandManager.argument("category", net.puffish.skillsmod.commands.arguments.CategoryArgumentType.category())
@@ -360,6 +367,24 @@ public class SkillLevelingCommand {
             source.sendMessage(Text.literal("§7" + description));
         }
         
+        // Show prerequisites if any exist
+        var prerequisites = manager.getPrerequisiteInfo(category.getId(), skill.getId());
+        if (!prerequisites.isEmpty()) {
+            source.sendMessage(Text.literal("§aPrerequisites:"));
+            for (var prerequisite : prerequisites) {
+                boolean met = manager.checkSkillPrerequisites(player, category.getId(), skill.getId());
+                String status = met ? "§a✓" : "§c✗";
+                source.sendMessage(Text.literal(String.format("  %s §7%s", status, prerequisite)));
+            }
+        }
+        
+        // Show scaling information if scaling is enabled
+        var reward = manager.getPerLevelRewardsReward(category.getId(), skill.getId());
+        if (reward.isPresent() && reward.get().getScalingFactor() != 1.0) {
+            source.sendMessage(Text.literal(String.format("§aScaling Factor: §6%.2f", reward.get().getScalingFactor())));
+            source.sendMessage(Text.literal("§7(Point costs increase exponentially with level)"));
+        }
+        
         // Show next level preview if not at max
         if (currentLevel < maxLevel) {
             String nextDescription = manager.getDescriptionForLevel(category.getId(), skill.getId(), currentLevel + 1);
@@ -445,5 +470,45 @@ public class SkillLevelingCommand {
             )));
             return 0;
         }
+    }
+    
+    /**
+     * Show prerequisites for a skill
+     */
+    private static int showPrerequisites(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        var source = context.getSource();
+        var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context, "category");
+        var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context, "skill", category);
+        
+        var addon = SkillLevelingMod.getInstance();
+        var manager = addon.getSkillLevelingManager();
+        
+        var prerequisites = manager.getPrerequisiteInfo(category.getId(), skill.getId());
+        
+        source.sendMessage(Text.literal(String.format("§6═══ Prerequisites for §e%s §6═══", skill.getId())));
+        source.sendMessage(Text.literal(String.format("§aCategory: §e%s", category.getId())));
+        
+        if (prerequisites.isEmpty()) {
+            source.sendMessage(Text.literal("§7No prerequisites required"));
+        } else {
+            source.sendMessage(Text.literal("§aRequired Skills:"));
+            for (var prerequisite : prerequisites) {
+                source.sendMessage(Text.literal("§7• " + prerequisite));
+            }
+            
+            // Show reward configuration info
+            var reward = manager.getPerLevelRewardsReward(category.getId(), skill.getId());
+            if (reward.isPresent()) {
+                var r = reward.get();
+                source.sendMessage(Text.literal(""));
+                source.sendMessage(Text.literal("§aReward Configuration:"));
+                source.sendMessage(Text.literal(String.format("  §7Allow Partial Rewards: §e%s", r.allowsPartialRewards())));
+                if (r.getScalingFactor() != 1.0) {
+                    source.sendMessage(Text.literal(String.format("  §7Scaling Factor: §6%.2f", r.getScalingFactor())));
+                }
+            }
+        }
+        
+        return 1;
     }
 }

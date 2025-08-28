@@ -12,13 +12,13 @@
                     "points_per_level": 1,
                     "merge_description": false,
                     "descriptions": {
-                        "1": "Current: +1 melee damage",
-                        "2": "Current: +10% mining speed",
-                        "3": "Current: +15% mining speed"
+                        "1": "Level 1: +10 Attack Damage",
+                        "2": "Level 2: +10 Attack Damage + Experience Bottle",
+                        "3": "Level 3: +10 Attack Damage + Experience Bottle + 2 Health"
                     },
                     "extra_descriptions": {
-                        "1": "Next: +10% mining speed",
-                        "2": "Next: +15% mining speed",
+                        "1": "Next: Experience Bottle reward",
+                        "2": "Next: +2 Max Health",
                         "3": "— MAXED OUT —"
                     },
                     "levels": {
@@ -47,8 +47,8 @@
   },
 
   "stacked_power_2": {
-      "title": "Master Miner 2",
-      "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
+      "title": "Advanced Miner",
+      "icon": { "type": "item", "data": { "item": "minecraft:netherite_pickaxe" } },
       "size": 1.0,
       "rewards": [
           {
@@ -59,14 +59,14 @@
                     "points_per_level": 1,
                     "merge_description": false,
                     "descriptions": {
-                        "1": "Current: +2 melee damage",
-                        "2": "Current: +20% mining speed",
-                        "3": "Current: +30% mining speed"
+                        "1": "Level 1: +20 Attack Damage (Enhanced)",
+                        "2": "Level 2: +20 Attack Damage + 2 Experience Bottles (1.2x scaling)",
+                        "3": "Level 3: +20 Attack Damage + 2 Experience Bottles + 4 Health (1.44x scaling)"
                     },
                     "extra_descriptions": {
-                        "1": "Next: +20% mining speed",
-                        "2": "Next: +30% mining speed",
-                        "3": "— MAXED OUT —"
+                        "1": "Next: Double experience bottles (scaled cost)",
+                        "2": "Next: +4 Max Health (scaled cost)",
+                        "3": "— MASTER ACHIEVED —"
                     },
                     "required_skill": [
                         {
@@ -103,89 +103,5 @@
           }
       ],
       "metadata": { "icon": "74sqblu8lgizj777" }
-  },
-
-  "advanced_combat": {
-      "title": "Elite Warrior",
-      "icon": { "type": "item", "data": { "item": "minecraft:netherite_sword" } },
-      "size": 1.5,
-      "rewards": [
-          {
-              "type": "puffish_skill_leveling:per_level_rewards",
-              "data": {
-                    "skill_id": "advanced_combat_skill",
-                    "max_skill_level": 5,
-                    "points_per_level": 2,
-                    "merge_description": true,
-                    "descriptions": {
-                        "1": "Level 1: +5 Attack Damage",
-                        "2": "Level 2: +10% Critical Hit Chance",
-                        "3": "Level 3: +15% Attack Speed",
-                        "4": "Level 4: Weapon Mastery: +20% Damage",
-                        "5": "Level 5: Combat Expert: All bonuses enhanced"
-                    },
-                    "extra_descriptions": {
-                        "1": "Next: Critical hit chance boost",
-                        "2": "Next: Attack speed improvement",
-                        "3": "Next: Weapon mastery unlocked",
-                        "4": "Next: Combat expertise achieved",
-                        "5": "— ULTIMATE WARRIOR —"
-                    },
-                    "required_skill": [
-                        {
-                            "skill_id": "19aazycn9ii0lfh1",
-                            "level": 3
-                        },
-                        {
-                            "skill_id": "ykn32h02xhgaujyr",
-                            "level": 2
-                        }
-                    ],
-                    "allow_partial_rewards": true,
-                    "scaling_factor": 1.5,
-                    "levels": {
-                        "1": [
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.attack_damage",
-                                        "value": 5,
-                                        "operation": "addition" } }
-                        ],
-                        "2": [
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.luck",
-                                        "value": 1,
-                                        "operation": "addition" } }
-                        ],
-                        "3": [
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.attack_speed",
-                                        "value": 0.15,
-                                        "operation": "multiply_base" } }
-                        ],
-                        "4": [
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.attack_damage",
-                                        "value": 10,
-                                        "operation": "addition" } },
-                            {"type": "puffish_skills:command",
-                              "data": { "command": "give @p minecraft:totem_of_undying 1" } }
-                        ],
-                        "5": [
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.max_health",
-                                        "value": 10,
-                                        "operation": "addition" } },
-                            { "type": "puffish_skills:attribute",
-                              "data": { "attribute": "generic.armor",
-                                        "value": 5,
-                                        "operation": "addition" } },
-                            {"type": "puffish_skills:command",
-                              "data": { "command": "effect give @p minecraft:strength 300 1" } }
-                        ]
-                    }
-                }
-          }
-      ],
-      "metadata": { "icon": "combat_mastery_icon" }
   }
 }

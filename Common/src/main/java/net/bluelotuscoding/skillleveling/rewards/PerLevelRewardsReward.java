@@ -154,17 +154,33 @@ public class PerLevelRewardsReward implements Reward {
         }
         
         // For prerequisite checking, we need to know which category this skill belongs to
-        // We'll attempt to find it by looking through registered rewards
+        // First try to find it through the SkillsAPI
         Identifier categoryId = null;
-        for (var categoryEntry : manager.getPerLevelRewardsRewards().entrySet()) {
-            for (var skillEntry : categoryEntry.getValue().entrySet()) {
-                if (skillEntry.getValue() == this && skillId != null) {
-                    categoryId = categoryEntry.getKey();
+        
+        // Try to get category from SkillsAPI first (more reliable)
+        var categories = SkillsAPI.getCategories();
+        for (var categoryEntry : categories.entrySet()) {
+            var category = categoryEntry.getValue();
+            var skill = category.getSkill(skillId);
+            if (skill.isPresent()) {
+                categoryId = categoryEntry.getKey();
+                break;
+            }
+        }
+        
+        // If that fails, try looking through registered rewards as fallback
+        if (categoryId == null) {
+            for (var categoryEntry : manager.getPerLevelRewardsRewards().entrySet()) {
+                for (var skillEntry : categoryEntry.getValue().entrySet()) {
+                    // Check if this is our skill by comparing the skillId
+                    if (skillEntry.getValue() == this || skillEntry.getKey().equals(skillId)) {
+                        categoryId = categoryEntry.getKey();
+                        break;
+                    }
+                }
+                if (categoryId != null) {
                     break;
                 }
-            }
-            if (categoryId != null) {
-                break;
             }
         }
         

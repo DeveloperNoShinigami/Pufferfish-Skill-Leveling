@@ -26,6 +26,6 @@ side="BOTH"
 [[dependencies.puffish_skill_leveling]]
 modId="puffish_skills"
 mandatory=true
-versionRange="[0.16,)"
+versionRange="[0.17,)"
 ordering="AFTER"
 side="BOTH"

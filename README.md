@@ -1,6 +1,9 @@
 # Pufferfish Skill Leveling Addon
 
-This addon extends Pufferfish's Skills mod with **multi-level skill progression** capabilities.
+**An addon for Pufferfish's Skills mod that adds multi-level skill progression.**
+
+> [!IMPORTANT]
+> **This is an ADDON** - it works alongside the official Pufferfish Skills mod. Both mods must be installed together.
 
 ## 🆕 New Features
 
@@ -9,17 +12,20 @@ This addon extends Pufferfish's Skills mod with **multi-level skill progression*
 - **Per-Level Rewards**: Each level can grant different rewards when reached
 - **Dynamic Descriptions**: Tooltips show current level and preview next level
 - **Configurable Point Costs**: Set skill points required per level
+- **Stackable Type**: New `puffish_skill_leveling:stackable` skill type that combines standard and per-level rewards
 
 ### Reward System
 - **Per-Level Rewards**: Define specific rewards that trigger when reaching each level
 - **Initial Unlock Rewards**: Standard rewards applied when first unlocking a skill
 - **Custom Reward Type**: New `puffish_skill_leveling:per_level_rewards` reward type
 - **Merge Description**: Option to accumulate descriptions across skill levels
+- **Skill Prerequisites**: Require other skills to reach certain levels before unlocking
 
 ### Management
 - **Level Tracking**: Track exact skill levels for each player
 - **Administrative Commands**: Commands to get, set, advance, and refund skill levels
 - **Data Persistence**: Skill levels saved with player data
+- **Independent Storage**: Addon data stored separately from Skills mod data
 
 ## 🎮 New Commands
 
@@ -34,23 +40,35 @@ This addon extends Pufferfish's Skills mod with **multi-level skill progression*
 
 ## ⚙️ Configuration
 
-### New Fields
+### Skill Definition Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `max_skill_level` | integer | Maximum levels for this skill |
+| `type` | string | Skill type. Use `puffish_skill_leveling:stackable` to mix normal and per-level rewards |
+| `max_skill_level` / `max_levels` | integer | Maximum levels for this skill (inferred from rewards if omitted) |
 | `points_per_level` | integer | Points required per level |
 | `merge_description` | boolean | Accumulate descriptions (default: false) |
 | `descriptions` | string[] | Description for each level |
 | `extra_descriptions` | string[] | Preview for next level |
 
+### Reward Type: `puffish_skill_leveling:per_level_rewards`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `skill_id` | string | ID of the skill being leveled |
+| `levels` | object | Maps level numbers to arrays of rewards |
+| `max_skill_level` | integer | Optional override for max level |
+| `points_per_level` | integer | Optional points cost per level |
+
 ### Examples
 
-**Example 1: Individual Descriptions (merge_description: false)**
+**Example 1: Basic Per-Level Skill**
 ```json
 {
-  "stacked_power": {
-    "title": "Master Miner",
+  "warrior": {
+    "title": "Master Warrior",
+    "icon": { "type": "item", "data": { "item": "minecraft:diamond_sword" } },
+    "size": 1.0,
     "max_skill_level": 3,
     "points_per_level": 1,
     "merge_description": false,
@@ -68,11 +86,11 @@ This addon extends Pufferfish's Skills mod with **multi-level skill progression*
       {
         "type": "puffish_skill_leveling:per_level_rewards",
         "data": {
-          "skill_id": "19aazycn9ii0lfh1",
+          "skill_id": "warrior",
           "levels": {
             "1": [
               { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.attack_damage", "value": 10, "operation": "addition" } }
+                "data": { "attribute": "generic.attack_damage", "value": 1, "operation": "addition" } }
             ],
             "2": [
               { "type": "puffish_skills:command",
@@ -90,11 +108,63 @@ This addon extends Pufferfish's Skills mod with **multi-level skill progression*
 }
 ```
 
-**Example 2: Merged Descriptions (merge_description: true)**
+**Example 2: Stackable Skill Type (Combines Normal + Per-Level Rewards)**
 ```json
 {
-  "stacked_power_2": {
-    "title": "Master Miner 2",
+  "master_miner": {
+    "type": "puffish_skill_leveling:stackable",
+    "title": "Master Miner",
+    "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
+    "size": 1.0,
+    "max_skill_level": 3,
+    "points_per_level": 1,
+    "required_points": 3,
+    "merge_description": false,
+    "descriptions": [
+      "Current: +10% mining speed",
+      "Current: +20% mining speed",
+      "Current: +30% mining speed"
+    ],
+    "extra_descriptions": [
+      "Next: +20% mining speed",
+      "Next: +30% mining speed",
+      "— MAXED OUT —"
+    ],
+    "rewards": [
+      {
+        "type": "puffish_skill_leveling:per_level_rewards",
+        "data": {
+          "skill_id": "master_miner",
+          "levels": {
+            "1": [
+              { "type": "puffish_skills:attribute",
+                "data": { "attribute": "generic.attack_damage", "value": 1, "operation": "addition" } }
+            ],
+            "2": [
+              { "type": "puffish_skills:command",
+                "data": { "command": "give @p minecraft:experience_bottle 1" } }
+            ],
+            "3": [
+              { "type": "puffish_skills:attribute",
+                "data": { "attribute": "generic.max_health", "value": 2, "operation": "addition" } }
+            ]
+          }
+        }
+      },
+      {
+        "type": "puffish_skills:command",
+        "data": { "command": "give @p minecraft:diamond 1" }
+      }
+    ]
+  }
+}
+```
+
+**Example 3: Merged Descriptions**
+```json
+{
+  "stacked_power": {
+    "title": "Stacked Power",
     "max_skill_level": 3,
     "points_per_level": 1,
     "merge_description": true,
@@ -112,11 +182,11 @@ This addon extends Pufferfish's Skills mod with **multi-level skill progression*
       {
         "type": "puffish_skill_leveling:per_level_rewards",
         "data": {
-          "skill_id": "ykn32h02xhgaujyr",
+          "skill_id": "stacked_power",
           "levels": {
             "1": [
               { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.attack_damage", "value": 20, "operation": "addition" } }
+                "data": { "attribute": "generic.attack_damage", "value": 2, "operation": "addition" } }
             ],
             "2": [
               { "type": "puffish_skills:command",
@@ -128,10 +198,6 @@ This addon extends Pufferfish's Skills mod with **multi-level skill progression*
             ]
           }
         }
-      },
-      { 
-        "type": "puffish_skills:command",
-        "data": { "command": "give @p minecraft:experience_bottle 1" }
       }
     ]
   }
@@ -151,27 +217,23 @@ This addon extends Pufferfish's Skills mod with **multi-level skill progression*
 - Level 3: Shows all three descriptions accumulated
 
 
-## � Important Datapack Compatibility Notice 🚨
-
-If you encounter errors like these when loading your datapacks:
-
-```
-Unused field `type` at `skill_name`
-Unused field `max_skill_level` at `skill_name`
-Unused field `points_per_level` at `skill_name`
-Unused field `merge_description` at `skill_name`
-Unused field `descriptions` at `skill_name`
-Expected a valid reward type at `type` at index 0 at `rewards` at `skill_name`
-```
-
-See the `example_datapack` folder for a complete working example.
-
 ## 📋 Requirements
 
-- **Pufferfish Skills mod** 0.16.3+1.20 or newer (required dependency)
+> [!IMPORTANT]
+> **Both mods are required!** This addon does not work standalone.
+
+- **Pufferfish Skills mod** 0.17.1+1.20 or newer ([Download from CurseForge](https://www.curseforge.com/minecraft/mc-mods/pufferfish-skills))
 - **Java 17+** 
 - **Minecraft 1.20**
-- **Fabric ** or **Forge** depending on your platform choice
+- **Forge 47.4.10+** or **Fabric** depending on your platform choice
+
+## 📦 Installation
+
+1. Install **Pufferfish Skills** mod first
+2. Install **Pufferfish Skill Leveling** addon
+3. Launch Minecraft - both mods should load together
+
+## 🚨 Compatibility Notice
 
 ## 📄 Example Template
 

@@ -1,22 +1,18 @@
 # gradle
-
 .gradle/
 build/
 classes/
 
 # eclipse
-
 *.launch
 
 # idea
-
 .idea/
 *.iml
 *.ipr
 *.iws
 
 # vscode
-
 .settings/
 .vscode/
 bin/
@@ -24,15 +20,22 @@ bin/
 .project
 
 # macos
-
 *.DS_Store
 
 # java
-
 hs_err_*.log
 replay_*.log
 *.hprof
 *.jfr
 
-# game
+# game runs
 run/
+*/run/
+Forge/run/
+Fabric/run/
+
+# decompiled sources
+puffish_skills-0.17.1-1.20-forge_source_do_not_edit/
+
+# working version reference
+Pufferfish-Skill-Leveling-working version_f21508f/

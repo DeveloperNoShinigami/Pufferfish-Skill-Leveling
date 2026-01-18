@@ -1,5 +1,6 @@
 package net.bluelotuscoding.skillleveling.main;
 
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
@@ -20,13 +21,16 @@ import net.minecraft.server.network.ServerPlayerEntity;
 @Mod(SkillLevelingMod.MOD_ID)
 public class ForgeMain {
 
-	public ForgeMain() {
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-		MinecraftForge.EVENT_BUS.register(this);
-	}
+        public ForgeMain() {
+                FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+                MinecraftForge.EVENT_BUS.register(this);
+        }
 
         private void setup(FMLCommonSetupEvent event) {
+                net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler.init();
                 SkillLevelingMod.init();
+                SkillLevelingMod.getInstance()
+                                .setNetworkHandler(new net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler());
         }
 
         @SubscribeEvent
@@ -42,6 +46,20 @@ public class ForgeMain {
         @SubscribeEvent
         public void onServerStopping(ServerStoppingEvent event) {
                 SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStopping(event.getServer());
+        }
+
+        @SubscribeEvent
+        public void onAddReloadListener(AddReloadListenerEvent event) {
+                // Hook into datapack reload to re-load addon configurations after Pufferfish
+                // loads
+                event.addListener(
+                                (net.minecraft.resource.SynchronousResourceReloader) resourceManager -> {
+                                        var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+                                        var server = manager.getServer().orElse(null);
+                                        if (server != null) {
+                                                manager.onServerReload(server);
+                                        }
+                                });
         }
 
         @SubscribeEvent

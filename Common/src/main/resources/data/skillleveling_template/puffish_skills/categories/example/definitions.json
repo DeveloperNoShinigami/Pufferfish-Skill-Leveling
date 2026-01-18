@@ -1,191 +1,162 @@
 {
-  "stacked_power": {
-    "title": "Master Miner",
-    "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
+  "test_warrior": {
+    "type": "puffish_skill_leveling:default",
+    "title": "Test Warrior",
+    "description": "A multi-level combat skill",
+    "icon": {
+      "type": "item",
+      "data": {
+        "item": "minecraft:diamond_sword"
+      }
+    },
     "size": 1.0,
+    "max_skill_level": 5,
+    "points_per_level": 1,
+    "merge_description": false,
+    "descriptions": {
+      "1": "Level 1: Basic sword training (+1 Damage)",
+      "2": "Level 2: Advanced techniques (+2 Damage)",
+      "3": "Level 3: Master of combat (+3 Damage)",
+      "4": "Level 4: Legendary warrior (+4 Damage)",
+      "5": "Level 5: God of war (+5 Damage)"
+    },
+    "extra_descriptions": {
+      "1": "Next: Advanced techniques",
+      "2": "Next: Master of combat",
+      "3": "Next: Legendary warrior",
+      "4": "Next: God of war",
+      "5": "— MAXED OUT —"
+    },
     "rewards": [
       {
         "type": "puffish_skill_leveling:per_level_rewards",
         "data": {
-          "skill_id": "19aazycn9ii0lfh1",
-          "max_skill_level": 3,
-          "points_per_level": 1,
-          "merge_description": false,
-          "descriptions": {
-            "1": "Current: +1 melee damage",
-            "2": "Current: +10% mining speed",
-            "3": "Current: +15% mining speed"
-          },
-          "extra_descriptions": {
-            "1": "Next: +10% mining speed",
-            "2": "Next: +15% mining speed",
-            "3": "— MAXED OUT —"
-          },
+          "skill_id": "test_warrior",
           "levels": {
             "1": [
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.attack_damage",
-                  "value": 10,
-                  "operation": "addition" } }
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.attack_damage",
+                  "value": 1,
+                  "operation": "addition"
+                }
+              }
             ],
             "2": [
-              {"type": "puffish_skills:command",
-                "data": { "command": "give @p minecraft:experience_bottle 1" }
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.attack_damage",
+                  "value": 2,
+                  "operation": "addition"
+                }
               }
             ],
             "3": [
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.max_health",
-                  "value": 2,
-                  "operation": "addition" } }
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.attack_damage",
+                  "value": 3,
+                  "operation": "addition"
+                }
+              }
+            ],
+            "4": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.attack_damage",
+                  "value": 4,
+                  "operation": "addition"
+                }
+              }
+            ],
+            "5": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.attack_damage",
+                  "value": 5,
+                  "operation": "addition"
+                }
+              }
             ]
           }
         }
       }
     ],
-    "metadata": { "icon": "74sqblu8lgizj777" }
+    "metadata": {
+      "icon": "test_warrior_icon_id"
+    }
   },
-
-  "stacked_power_2": {
-    "title": "Master Miner 2",
-    "icon": { "type": "item", "data": { "item": "minecraft:diamond_pickaxe" } },
+  "test_mage": {
+    "type": "puffish_skill_leveling:stackable",
+    "title": "Test Mage",
+    "description": "A multi-level magic skill",
+    "icon": {
+      "type": "item",
+      "data": {
+        "item": "minecraft:blaze_rod"
+      }
+    },
     "size": 1.0,
+    "max_skill_level": 3,
+    "points_per_level": 1,
+    "merge_description": true,
+    "descriptions": {
+      "1": "Mastery of Fire",
+      "2": "Mastery of Lightning",
+      "3": "Mastery of Arcane"
+    },
+    "extra_descriptions": {
+      "1": "Next: Mastery of Lightning",
+      "2": "Next: Mastery of Arcane",
+      "3": "— MAXED OUT —"
+    },
     "rewards": [
       {
-        "type": "puffish_skill_leveling:per_level_rewards",
+        "type": "puffish_skills:command",
         "data": {
-          "skill_id": "ykn32h02xhgaujyr",
-          "max_skill_level": 3,
-          "points_per_level": 1,
-          "merge_description": false,
-          "descriptions": {
-            "1": "Current: +2 melee damage",
-            "2": "Current: +20% mining speed",
-            "3": "Current: +30% mining speed"
-          },
-          "extra_descriptions": {
-            "1": "Next: +20% mining speed",
-            "2": "Next: +30% mining speed",
-            "3": "— MAXED OUT —"
-          },
-          "required_skill": [
-            {
-              "skill_id": "19aazycn9ii0lfh1",
-              "level": 2
-            }
-          ],
-          "allow_partial_rewards": false,
-          "scaling_factor": 1.2,
-          "levels": {
-            "1": [
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.attack_damage",
-                  "value": 20,
-                  "operation": "addition" } }
-            ],
-            "2": [
-              {"type": "puffish_skills:command",
-                "data": { "command": "give @p minecraft:experience_bottle 2" }
-              }
-            ],
-            "3": [
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.max_health",
-                  "value": 4,
-                  "operation": "addition" } }
-            ]
-          }
+          "command": "say Player unlocked the Mage skill tree!"
         }
       },
       {
-        "type": "puffish_skills:command",
-        "data": { "command": "give @p minecraft:experience_bottle 1" }
-      }
-    ],
-    "metadata": { "icon": "74sqblu8lgizj777" }
-  },
-
-  "advanced_combat": {
-    "title": "Elite Warrior",
-    "icon": { "type": "item", "data": { "item": "minecraft:netherite_sword" } },
-    "size": 1.5,
-    "rewards": [
-      {
         "type": "puffish_skill_leveling:per_level_rewards",
         "data": {
-          "skill_id": "advanced_combat_skill",
-          "max_skill_level": 5,
-          "points_per_level": 2,
-          "merge_description": true,
-          "descriptions": {
-            "1": "Level 1: +5 Attack Damage",
-            "2": "Level 2: +10% Critical Hit Chance",
-            "3": "Level 3: +15% Attack Speed",
-            "4": "Level 4: Weapon Mastery: +20% Damage",
-            "5": "Level 5: Combat Expert: All bonuses enhanced"
-          },
-          "extra_descriptions": {
-            "1": "Next: Critical hit chance boost",
-            "2": "Next: Attack speed improvement",
-            "3": "Next: Weapon mastery unlocked",
-            "4": "Next: Combat expertise achieved",
-            "5": "— ULTIMATE WARRIOR —"
-          },
-          "required_skill": [
-            {
-              "skill_id": "19aazycn9ii0lfh1",
-              "level": 3
-            },
-            {
-              "skill_id": "ykn32h02xhgaujyr",
-              "level": 2
-            }
-          ],
-          "allow_partial_rewards": true,
-          "scaling_factor": 1.5,
+          "skill_id": "test_mage",
           "levels": {
             "1": [
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.attack_damage",
-                  "value": 5,
-                  "operation": "addition" } }
+              {
+                "type": "puffish_skills:command",
+                "data": {
+                  "command": "say Learned Fire Magic! (Level 1)"
+                }
+              }
             ],
             "2": [
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.luck",
-                  "value": 1,
-                  "operation": "addition" } }
+              {
+                "type": "puffish_skills:command",
+                "data": {
+                  "command": "say Learned Lightning Magic! (Level 2)"
+                }
+              }
             ],
             "3": [
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.attack_speed",
-                  "value": 0.15,
-                  "operation": "multiply_base" } }
-            ],
-            "4": [
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.attack_damage",
-                  "value": 10,
-                  "operation": "addition" } },
-              {"type": "puffish_skills:command",
-                "data": { "command": "give @p minecraft:totem_of_undying 1" } }
-            ],
-            "5": [
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.max_health",
-                  "value": 10,
-                  "operation": "addition" } },
-              { "type": "puffish_skills:attribute",
-                "data": { "attribute": "generic.armor",
-                  "value": 5,
-                  "operation": "addition" } },
-              {"type": "puffish_skills:command",
-                "data": { "command": "effect give @p minecraft:strength 300 1" } }
+              {
+                "type": "puffish_skills:command",
+                "data": {
+                  "command": "say Mastered Arcane Magic! (Level 3)"
+                }
+              }
             ]
           }
         }
       }
     ],
-    "metadata": { "icon": "combat_mastery_icon" }
+    "metadata": {
+      "icon": "test_mage_icon_id"
+    }
   }
 }

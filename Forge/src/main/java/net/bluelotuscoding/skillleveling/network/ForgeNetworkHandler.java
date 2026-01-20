@@ -25,10 +25,22 @@ public class ForgeNetworkHandler implements NetworkHandler {
                     context.enqueueWork(packet::handleClient);
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, SyncSkillDescriptionsPacket.class, SyncSkillDescriptionsPacket::encode,
+                SyncSkillDescriptionsPacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    context.enqueueWork(packet::handleClient);
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
 
     @Override
     public void sendToPlayer(SyncSkillLevelPacket packet, ServerPlayerEntity player) {
+        CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    @Override
+    public void sendToPlayer(SyncSkillDescriptionsPacket packet, ServerPlayerEntity player) {
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 }

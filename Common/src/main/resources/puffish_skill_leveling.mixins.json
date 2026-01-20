@@ -11,7 +11,9 @@
 		"SkillsModMixin",
 		"PlayerDataMixin"
 	],
-	"client": [],
+	"client": [
+		"ClientSkillDefinitionConfigMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},

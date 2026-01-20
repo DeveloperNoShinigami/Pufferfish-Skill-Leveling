@@ -64,22 +64,23 @@ public class SkillLevelingManager {
      * without requiring screen refresh or reconnection.
      */
     public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
-            int currentLevel,
-            int maxLevel) {
+            int currentLevel, int maxLevel) {
+        syncSkillLevelToClient(player, categoryId, skillId, currentLevel, maxLevel, null);
+    }
+
+    /**
+     * CLIENT SYNC: Extended version with definition ID for description mapping.
+     */
+    public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
+            int currentLevel, int maxLevel, String definitionId) {
         try {
-            // TECHNICAL SYNC: Send packet to client for UI display
             var networkHandler = SkillLevelingMod.getInstance().getNetworkHandler();
             if (networkHandler != null) {
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillLevelPacket(categoryId, skillId,
-                                currentLevel,
-                                maxLevel),
+                                currentLevel, maxLevel, definitionId),
                         player);
             }
-
-            // Note: Action bar notification disabled - use per_level_rewards commands for
-            // notifications
-
         } catch (Exception e) {
             var logger = SkillLevelingMod.getInstance().getLogger();
             logger.error("Failed to sync skill level to client: " + e.getMessage());
@@ -87,31 +88,76 @@ public class SkillLevelingManager {
     }
 
     /**
+     * DESCRIPTION SYNC: Sends per-level descriptions to client for tooltip display.
+     */
+    public void syncDescriptionsToClient(ServerPlayerEntity player, String definitionId,
+            java.util.Map<Integer, String> levelDescriptions,
+            java.util.Map<Integer, String> levelExtraDescriptions,
+            boolean mergeDescription, int maxLevel) {
+        try {
+            var networkHandler = SkillLevelingMod.getInstance().getNetworkHandler();
+            if (networkHandler != null) {
+                networkHandler.sendToPlayer(
+                        new net.bluelotuscoding.skillleveling.network.SyncSkillDescriptionsPacket(
+                                definitionId, levelDescriptions, levelExtraDescriptions, mergeDescription, maxLevel),
+                        player);
+            }
+        } catch (Exception e) {
+            var logger = SkillLevelingMod.getInstance().getLogger();
+            logger.error("Failed to sync descriptions to client: " + e.getMessage());
+        }
+    }
+
+    /**
      * PLAYER PROGRESSION SYNC: Sends comprehensive skill data to joining player
      * 
      * FULL SYNC MECHANICS: When players join, send all their skill level data
-     * to ensure client UI shows correct progression state immediately.
+     * AND descriptions to ensure client UI shows correct progression state
+     * immediately.
      */
     public void syncAllSkillsToPlayer(ServerPlayerEntity player) {
         int syncedSkills = 0;
 
         // Iterate through all skills that have leveling enabled
-        // Use a defensive copy of values to avoid ConcurrentModificationException if
-        // registration happens during iteration
         for (LeveledSkill info : new java.util.ArrayList<>(leveledSkills.values())) {
-            // If the skill is unlocked in Skills mod, we want to show its level info in our
-            // UI overlay
-            if (info.getBaseSkill().getState(player) == net.puffish.skillsmod.api.Skill.State.UNLOCKED) {
+            try {
                 int currentLevel = getSkillLevel(player, info.getCategoryId(), info.getSkillId());
-                syncSkillLevelToClient(player, info.getCategoryId(), info.getSkillId(), currentLevel,
-                        info.getMaxLevel());
+
+                // Get PerLevelRewardsReward for descriptions
+                var rewardOpt = getPerLevelRewardsReward(info.getCategoryId(), info.getSkillId());
+                String definitionId = null;
+
+                if (rewardOpt.isPresent()) {
+                    var plr = rewardOpt.get();
+                    definitionId = plr.getSkillId(); // Definition ID is often same as skill ID
+
+                    // Sync descriptions for this skill (needed for tooltip display)
+                    var levelDescs = plr.getLevelDescriptions();
+                    var extraDescs = plr.getLevelExtraDescriptions();
+                    boolean merge = plr.isMergeDescription();
+
+                    if ((levelDescs != null && !levelDescs.isEmpty())
+                            ||
+                            (extraDescs != null && !extraDescs.isEmpty())) {
+                        syncDescriptionsToClient(player, definitionId, levelDescs, extraDescs, merge,
+                                plr.getMaxLevel());
+                    }
+                }
+
+                // Sync level info (always, even for level 0 skills)
+                syncSkillLevelToClient(player, info.getCategoryId(), info.getSkillId(),
+                        currentLevel, info.getMaxLevel(), definitionId);
                 syncedSkills++;
+            } catch (Exception e) {
+                SkillLevelingMod.getInstance().getLogger()
+                        .error("Failed to sync skill " + info.getSkillId() + ": " + e.getMessage());
             }
         }
 
         if (syncedSkills > 0) {
             SkillLevelingMod.getInstance().getLogger()
-                    .info("Synchronized " + syncedSkills + " skill levels for player " + player.getName().getString());
+                    .info("Synchronized " + syncedSkills + " skill levels and descriptions for player "
+                            + player.getName().getString());
         }
     }
 
@@ -133,6 +179,9 @@ public class SkillLevelingManager {
     }
 
     public void onPlayerJoin(ServerPlayerEntity player) {
+        // CRITICAL: Ensure configurations are loaded before any skill lookups
+        ensureConfigurationsLoaded();
+
         // Load player skill level data from disk
         dataManager.loadPlayerData(player);
 
@@ -148,7 +197,7 @@ public class SkillLevelingManager {
             }
         }
 
-        // Sync all skill levels to client for UI display
+        // Sync all skill levels and descriptions to client for UI display
         syncAllSkillsToPlayer(player);
     }
 

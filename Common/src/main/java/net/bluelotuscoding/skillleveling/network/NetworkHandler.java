@@ -4,4 +4,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 public interface NetworkHandler {
     void sendToPlayer(SyncSkillLevelPacket packet, ServerPlayerEntity player);
+
+    void sendToPlayer(SyncSkillDescriptionsPacket packet, ServerPlayerEntity player);
 }

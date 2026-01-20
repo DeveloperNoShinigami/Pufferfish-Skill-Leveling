@@ -21,10 +21,11 @@
       "5": "Level 5: God of war (+5 Damage)"
     },
     "extra_descriptions": {
-      "1": "Next: Advanced techniques",
-      "2": "Next: Master of combat",
-      "3": "Next: Legendary warrior",
-      "4": "Next: God of war",
+      "0": "Level 1: Basic sword training (+1 Damage)",
+      "1": "Level 2: Advanced techniques (+2 Damage)",
+      "2": "Level 3: Master of combat (+3 Damage)",
+      "3": "Level 4: Legendary warrior (+4 Damage)",
+      "4": "Level 5: God of war (+5 Damage)",
       "5": "— MAXED OUT —"
     },
     "rewards": [
@@ -111,8 +112,9 @@
       "3": "Mastery of Arcane"
     },
     "extra_descriptions": {
-      "1": "Next: Mastery of Lightning",
-      "2": "Next: Mastery of Arcane",
+      "0": "Level 1: Mastery of Fire",
+      "1": "Level 2: Mastery of Lightning",
+      "2": "Level 3: Mastery of Arcane",
       "3": "— MAXED OUT —"
     },
     "rewards": [

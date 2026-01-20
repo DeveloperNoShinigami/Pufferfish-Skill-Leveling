@@ -210,23 +210,41 @@ public abstract class SkillsModMixin {
             if (categoryData instanceof CategoryDataExtension ext) {
                 int level = ext.addon$getSkillLevel(skillId);
                 int maxLevel = 1;
+                String definitionId = null;
+                net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward perLevelReward = null;
 
-                // Get max level from PerLevelRewardsReward
+                // Get max level and definition info from PerLevelRewardsReward
                 var skillConfig = categoryConfig.skills().getById(skillId);
                 if (skillConfig.isPresent()) {
-                    var defOpt = categoryConfig.definitions().getById(skillConfig.get().definitionId());
+                    definitionId = skillConfig.get().definitionId();
+                    var defOpt = categoryConfig.definitions().getById(definitionId);
                     if (defOpt.isPresent()) {
                         for (var reward : defOpt.get().rewards()) {
                             if (reward
                                     .instance() instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
                                 maxLevel = Math.max(maxLevel, plr.getMaxLevel());
+                                perLevelReward = plr;
                             }
                         }
                     }
                 }
 
-                // Send our sync packet with the correct level
-                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, level, maxLevel);
+                // Send our sync packet with the correct level and definition ID
+                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, level, maxLevel,
+                        definitionId);
+
+                // On first unlock (level 1), also sync descriptions to client
+                if (level == 1 && perLevelReward != null) {
+                    var levelDescs = perLevelReward.getLevelDescriptions();
+                    var extraDescs = perLevelReward.getLevelExtraDescriptions();
+                    boolean merge = perLevelReward.isMergeDescription();
+
+                    if ((levelDescs != null && !levelDescs.isEmpty()) ||
+                            (extraDescs != null && !extraDescs.isEmpty())) {
+                        mod.getSkillLevelingManager().syncDescriptionsToClient(
+                                player, definitionId, levelDescs, extraDescs, merge, maxLevel);
+                    }
+                }
             }
         } catch (Exception e) {
             var logger = SkillLevelingMod.getInstance().getLogger();

@@ -12,6 +12,9 @@ public class ClientSkillLevelStorage {
     private static final Map<String, Integer> skillLevels = new ConcurrentHashMap<>();
     private static final Map<String, Integer> skillMaxLevels = new ConcurrentHashMap<>();
 
+    // Mapping from definition ID to the key (for mixin lookups)
+    private static final Map<String, String> definitionToKey = new ConcurrentHashMap<>();
+
     private static String getKey(String categoryId, String skillId) {
         return categoryId + ":" + skillId;
     }
@@ -26,6 +29,37 @@ public class ClientSkillLevelStorage {
             skillLevels.put(key, level);
             skillMaxLevels.put(key, maxLevel);
         }
+    }
+
+    /**
+     * Register a mapping from definition ID to skill key.
+     * Called when syncing descriptions so we can look up levels by definition.
+     */
+    public static void registerDefinitionMapping(String definitionId, String categoryId, String skillId) {
+        definitionToKey.put(definitionId, getKey(categoryId, skillId));
+    }
+
+    /**
+     * Get level by definition ID (used by ClientSkillDefinitionConfigMixin).
+     * Returns 0 if no mapping found.
+     */
+    public static int getLevelByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        if (key == null) {
+            return 0;
+        }
+        return skillLevels.getOrDefault(key, 0);
+    }
+
+    /**
+     * Get max level by definition ID.
+     */
+    public static int getMaxLevelByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        if (key == null) {
+            return 1;
+        }
+        return skillMaxLevels.getOrDefault(key, 1);
     }
 
     public static int getLevel(String categoryId, String skillId) {
@@ -65,5 +99,6 @@ public class ClientSkillLevelStorage {
     public static void clearAll() {
         skillLevels.clear();
         skillMaxLevels.clear();
+        definitionToKey.clear();
     }
 }

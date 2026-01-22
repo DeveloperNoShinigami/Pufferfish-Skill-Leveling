@@ -10,7 +10,6 @@ import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,13 +36,8 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     @Shadow
     private Set<String> unlockedSkills;
 
-    /**
-     * Shadow map to track actual skill levels.
-     * The original unlockedSkills Set only knows "unlocked or not".
-     * This map tracks the actual level (1, 2, 3, etc.) per skill.
-     */
     @Unique
-    private Map<String, Integer> addon$skillLevels = new HashMap<>();
+    private final Map<String, Integer> addon$skillLevels = new HashMap<>();
 
     @Unique
     private ServerPlayerEntity addon$owner;
@@ -72,7 +66,7 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
             unlockedSkills.remove(skillId);
         } else {
             addon$skillLevels.put(skillId, level);
-            unlockedSkills.add(skillId); // Keep original Set in sync
+            unlockedSkills.add(skillId);
         }
     }
 
@@ -145,6 +139,7 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     @Inject(method = "resetSkills", at = @At("HEAD"))
     private void onResetSkills(CallbackInfo ci) {
         addon$skillLevels.clear();
+        unlockedSkills.clear();
     }
 
     /**
@@ -247,17 +242,15 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     }
 
     /**
-     * Intercept writeNbt to serialize skill levels as integers.
+     * Intercept writeNbt to ensure our custom levels are saved.
+     * Since we're using the base mod's Map now, it's mostly for extra safety
+     * or custom tags.
      */
     @Inject(method = "writeNbt", at = @At("RETURN"))
     private void onWriteNbt(NbtCompound nbt, CallbackInfoReturnable<NbtCompound> cir) {
-        // The original method writes unlockedSkills as a list of strings.
-        // We need to replace it with a compound of integers.
-        var levelsNbt = new NbtCompound();
-        for (var entry : addon$skillLevels.entrySet()) {
-            if (entry.getValue() > 0) {
-                levelsNbt.putInt(entry.getKey(), entry.getValue());
-            }
+        NbtCompound levelsNbt = new NbtCompound();
+        for (Map.Entry<String, Integer> entry : addon$skillLevels.entrySet()) {
+            levelsNbt.putInt(entry.getKey(), entry.getValue());
         }
         nbt.put("addon_skill_levels", levelsNbt);
     }
@@ -278,13 +271,12 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                     ext.addon$setSkillLevel(key, levelsNbt.getInt(key));
                 }
             } else {
-                // Backward compatibility: convert existing unlocked skills to level 1
-                if (nbt.contains("unlocked_skills", NbtElement.LIST_TYPE)) {
-                    var unlockedList = nbt.getList("unlocked_skills", NbtElement.STRING_TYPE);
-                    for (var element : unlockedList) {
-                        if (element instanceof NbtString nbtString) {
-                            ext.addon$setSkillLevel(nbtString.asString(), 1);
-                        }
+                // Backward compatibility: check base unlocked skills
+                // The base mod's read already populates its unlockedSkills set/map
+                // We just need to ensure our addon map matches it for level 1
+                for (String skillId : categoryData.getUnlockedSkillIds()) {
+                    if (ext.addon$getSkillLevel(skillId) == 0) {
+                        ext.addon$setSkillLevel(skillId, 1);
                     }
                 }
             }

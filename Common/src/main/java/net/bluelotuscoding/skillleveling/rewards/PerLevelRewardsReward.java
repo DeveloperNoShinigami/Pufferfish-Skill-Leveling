@@ -64,27 +64,30 @@ public class PerLevelRewardsReward implements Reward {
             this.level = level;
             this.categoryId = categoryId;
         }
-        
+
         public String getSkillId() {
             return skillId;
         }
-        
+
         public int getLevel() {
             return level;
         }
-        
+
         public String getCategoryId() {
             return categoryId;
         }
-        
+
         @Override
         public String toString() {
-            return String.format("%s:%d%s", skillId, level, 
-                categoryId != null ? "@" + categoryId : "");
+            return String.format("%s:%d%s", skillId, level,
+                    categoryId != null ? "@" + categoryId : "");
         }
     }
 
-    private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards, String skillId, int maxLevel, int pointsPerLevel, Map<Integer, String> levelDescriptions, Map<Integer, String> levelExtraDescriptions, boolean mergeDescription, List<SkillPrerequisite> requiredSkills, boolean allowPartialRewards, double scalingFactor) {
+    private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards, String skillId, int maxLevel,
+            int pointsPerLevel, Map<Integer, String> levelDescriptions, Map<Integer, String> levelExtraDescriptions,
+            boolean mergeDescription, List<SkillPrerequisite> requiredSkills, boolean allowPartialRewards,
+            double scalingFactor) {
         this.levelRewards = levelRewards;
         this.skillId = skillId;
         this.maxLevel = maxLevel;
@@ -95,7 +98,9 @@ public class PerLevelRewardsReward implements Reward {
         this.requiredSkills = requiredSkills != null ? requiredSkills : new ArrayList<>();
         this.allowPartialRewards = allowPartialRewards;
         this.scalingFactor = scalingFactor;
-    }    public String getSkillId() {
+    }
+
+    public String getSkillId() {
         return skillId;
     }
 
@@ -106,31 +111,31 @@ public class PerLevelRewardsReward implements Reward {
     public int getPointsPerLevel() {
         return pointsPerLevel;
     }
-    
+
     public Map<Integer, String> getLevelDescriptions() {
         return levelDescriptions;
     }
-    
+
     public Map<Integer, String> getLevelExtraDescriptions() {
         return levelExtraDescriptions;
     }
-    
+
     public boolean isMergeDescription() {
         return mergeDescription;
     }
-    
+
     public List<SkillPrerequisite> getRequiredSkills() {
         return requiredSkills;
     }
-    
+
     public boolean allowsPartialRewards() {
         return allowPartialRewards;
     }
-    
+
     public double getScalingFactor() {
         return scalingFactor;
     }
-    
+
     /**
      * Check if all skill prerequisites are met for a given player
      */
@@ -138,7 +143,7 @@ public class PerLevelRewardsReward implements Reward {
         if (requiredSkills.isEmpty()) {
             return true;
         }
-        
+
         // Use SkillLevelingManager for prerequisite checking
         var mod = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance();
         if (mod == null) {
@@ -146,14 +151,15 @@ public class PerLevelRewardsReward implements Reward {
             SkillLevelingMod.getInstance().getLogger().warn("Addon not initialized for prerequisite checking");
             return false;
         }
-        
+
         var manager = mod.getSkillLevelingManager();
         if (manager == null) {
             mod.getLogger().warn("SkillLevelingManager not available for prerequisite checking");
             return false; // Fail safe - don't allow rewards if we can't check
         }
-        
-        // For prerequisite checking, we need to know which category this skill belongs to
+
+        // For prerequisite checking, we need to know which category this skill belongs
+        // to
         // We'll attempt to find it by looking through registered rewards
         Identifier categoryId = null;
         for (var categoryEntry : manager.getPerLevelRewardsRewards().entrySet()) {
@@ -167,17 +173,19 @@ public class PerLevelRewardsReward implements Reward {
                 break;
             }
         }
-        
+
         if (categoryId == null) {
-            mod.getLogger().warn("Could not determine category for skill " + (skillId != null ? skillId : "unknown") + " during prerequisite checking");
+            mod.getLogger().warn("Could not determine category for skill " + (skillId != null ? skillId : "unknown")
+                    + " during prerequisite checking");
             return false; // Fail safe
         }
-        
-        mod.getLogger().debug("Checking prerequisites for skill " + skillId + " in category " + categoryId + ": " + requiredSkills.size() + " requirements");
-        
+
+        mod.getLogger().debug("Checking prerequisites for skill " + skillId + " in category " + categoryId + ": "
+                + requiredSkills.size() + " requirements");
+
         return manager.checkSkillPrerequisites(playerId, categoryId, skillId != null ? skillId : "unknown");
     }
-    
+
     /**
      * Get the effective points per level with scaling applied
      */
@@ -185,10 +193,10 @@ public class PerLevelRewardsReward implements Reward {
         if (scalingFactor == 1.0) {
             return pointsPerLevel;
         }
-        
+
         return (int) Math.ceil(pointsPerLevel * Math.pow(scalingFactor, currentLevel - 1));
     }
-    
+
     /**
      * Get all prerequisites as a formatted string
      */
@@ -196,28 +204,29 @@ public class PerLevelRewardsReward implements Reward {
         if (requiredSkills.isEmpty()) {
             return "None";
         }
-        
+
         return requiredSkills.stream()
                 .map(SkillPrerequisite::toString)
                 .collect(Collectors.joining(", "));
     }
-    
+
     /**
-     * Get the description for a specific level, optionally merging with previous levels
+     * Get the description for a specific level, optionally merging with previous
+     * levels
      */
     public String getDescriptionForLevel(int level) {
         if (!mergeDescription || level <= 1) {
             String desc = levelDescriptions.getOrDefault(level, "");
-            
+
             // Add prerequisite info if this is level 1 and prerequisites exist
             if (level == 1 && !requiredSkills.isEmpty()) {
                 String prereqStr = "Requires: " + getPrerequisitesString();
                 desc = desc.isEmpty() ? prereqStr : desc + "\n" + prereqStr;
             }
-            
+
             return desc;
         }
-        
+
         // Enhanced merging with better formatting
         StringBuilder merged = new StringBuilder();
         for (int i = 1; i <= level; i++) {
@@ -231,24 +240,25 @@ public class PerLevelRewardsReward implements Reward {
                 merged.append(desc);
             }
         }
-        
+
         // Add prerequisite info
         if (!requiredSkills.isEmpty()) {
             String prereqStr = "\nRequires: " + getPrerequisitesString();
             merged.append(prereqStr);
         }
-        
+
         return merged.toString();
     }
-    
+
     /**
-     * Get the extra description for a specific level, optionally merging with previous levels
+     * Get the extra description for a specific level, optionally merging with
+     * previous levels
      */
     public String getExtraDescriptionForLevel(int level) {
         if (!mergeDescription || level <= 1) {
             return levelExtraDescriptions.getOrDefault(level, "");
         }
-        
+
         // Enhanced merging with better formatting
         StringBuilder merged = new StringBuilder();
         for (int i = 1; i <= level; i++) {
@@ -280,11 +290,10 @@ public class PerLevelRewardsReward implements Reward {
 
         // Parse levels (required)
         var optLevelsMap = rootObject.getObject("levels")
-                .andThen(obj -> obj.getAsMap((key, element) ->
-                        element.getAsArray()
-                                .andThen(arr -> arr.getAsList((i, e) -> SkillRewardConfig.parse(e, context))
-                                        .mapFailure(Problem::combine))
-                ).mapFailure(map -> Problem.combine(map.values())))
+                .andThen(obj -> obj.getAsMap((key, element) -> element.getAsArray()
+                        .andThen(arr -> arr.getAsList((i, e) -> SkillRewardConfig.parse(e, context))
+                                .mapFailure(Problem::combine)))
+                        .mapFailure(map -> Problem.combine(map.values())))
                 .ifFailure(problems::add)
                 .getSuccess();
 
@@ -329,12 +338,12 @@ public class PerLevelRewardsReward implements Reward {
         var optPointsPerLevelTmp = rootObject.get("points_per_level")
                 .getSuccess()
                 .flatMap(element -> element.getAsInt()
-                                .ifFailure(problems::add)
-                                .getSuccess());
+                        .ifFailure(problems::add)
+                        .getSuccess());
         optPointsPerLevelTmp.ifPresent(points -> {
             if (points < 0) {
                 problems.add(rootObject.getPath().getObject("points_per_level")
-                                .createProblem("Expected a value ≥ 0"));
+                        .createProblem("Expected a value ≥ 0"));
             }
         });
         int optPointsPerLevel = optPointsPerLevelTmp.orElse(0);
@@ -346,16 +355,16 @@ public class PerLevelRewardsReward implements Reward {
                 .flatMap(element -> element.getAsArray()
                         .ifFailure(problems::add)
                         .getSuccess());
-        
+
         optRequiredSkills.ifPresent(array -> {
             var arrayResult = array.getAsList((index, element) -> {
                 var prereqResult = element.getAsObject()
                         .ifFailure(problems::add);
-                
+
                 if (prereqResult.getFailure().isPresent()) {
                     return prereqResult.mapSuccess(obj -> (SkillPrerequisite) null);
                 }
-                
+
                 var prereqObj = prereqResult.getSuccess().get();
                 var skillIdResult = prereqObj.getString("skill_id")
                         .ifFailure(problems::add);
@@ -366,7 +375,7 @@ public class PerLevelRewardsReward implements Reward {
                         .flatMap(elem -> elem.getAsString()
                                 .ifFailure(problems::add)
                                 .getSuccess());
-                
+
                 if (skillIdResult.getSuccess().isPresent() && levelResult.getSuccess().isPresent()) {
                     var level = levelResult.getSuccess().get();
                     if (level < 1) {
@@ -376,14 +385,13 @@ public class PerLevelRewardsReward implements Reward {
                         return Result.success(new SkillPrerequisite(
                                 skillIdResult.getSuccess().get(),
                                 level,
-                                categoryIdResult.orElse(null)
-                        ));
+                                categoryIdResult.orElse(null)));
                     }
                 } else {
                     return Result.failure(Problem.message("Missing required fields"));
                 }
             });
-            
+
             arrayResult.ifSuccess(list -> {
                 for (var prerequisite : list) {
                     if (prerequisite != null) {
@@ -408,7 +416,7 @@ public class PerLevelRewardsReward implements Reward {
                         .ifFailure(problems::add)
                         .getSuccess());
         double scalingFactor = scalingFactorOpt.orElse(1.0);
-        
+
         if (scalingFactor <= 0) {
             problems.add(rootObject.getPath().getObject("scaling_factor")
                     .createProblem("Scaling factor must be > 0"));
@@ -468,15 +476,15 @@ public class PerLevelRewardsReward implements Reward {
 
         if (problems.isEmpty()) {
             return Result.success(new PerLevelRewardsReward(levelRewards,
-                            optSkillId.orElse(null),
-                            optMaxLevelTmp.orElse(Math.max(1, definedMaxLevel)),
-                            optPointsPerLevel,
-                            levelDescriptions,
-                            levelExtraDescriptions,
-                            mergeDescription,
-                            requiredSkills,
-                            allowPartialRewards,
-                            scalingFactor));
+                    optSkillId.orElse(null),
+                    optMaxLevelTmp.orElse(Math.max(1, definedMaxLevel)),
+                    optPointsPerLevel,
+                    levelDescriptions,
+                    levelExtraDescriptions,
+                    mergeDescription,
+                    requiredSkills,
+                    allowPartialRewards,
+                    scalingFactor));
         } else {
             return Result.failure(Problem.combine(problems));
         }
@@ -494,25 +502,31 @@ public class PerLevelRewardsReward implements Reward {
         if (!arePrerequisitesMet(uuid)) {
             if (!allowPartialRewards) {
                 // Prerequisites not met and partial rewards not allowed
-                SkillLevelingMod.getInstance().getLogger().info("Prerequisites not met for skill " + (skillId != null ? skillId : "unknown") + ", skipping rewards");
+                SkillLevelingMod.getInstance().getLogger().info("Prerequisites not met for skill "
+                        + (skillId != null ? skillId : "unknown") + ", skipping rewards");
                 return;
             }
             // If partial rewards allowed, continue but log a warning
-            SkillLevelingMod.getInstance().getLogger().warn("Prerequisites not met for skill " + (skillId != null ? skillId : "unknown") + ", but partial rewards allowed");
+            SkillLevelingMod.getInstance().getLogger().warn("Prerequisites not met for skill "
+                    + (skillId != null ? skillId : "unknown") + ", but partial rewards allowed");
         }
 
         // Apply level rewards with enhanced logic
         for (var entry : levelRewards.entrySet()) {
             int level = entry.getKey();
             int count = newCount >= level ? 1 : 0;
-            boolean action = level > oldCount && level <= newCount;
+            // Respect the calling context's action flag!
+            // If the base mod says this is NOT an action (e.g. on join),
+            // we should NOT trigger actions here either.
+            boolean action = context.isAction() && level > oldCount && level <= newCount;
 
             // Apply scaling factor if configured
             if (action && scalingFactor != 1.0) {
                 // Modify reward effectiveness based on scaling
                 double effectiveMultiplier = Math.pow(scalingFactor, level - 1);
-                SkillLevelingMod.getInstance().getLogger().debug("Applying scaling factor " + scalingFactor + " for level " + level + ", effective multiplier: " + effectiveMultiplier);
-                
+                SkillLevelingMod.getInstance().getLogger().debug("Applying scaling factor " + scalingFactor
+                        + " for level " + level + ", effective multiplier: " + effectiveMultiplier);
+
                 // TODO: Apply scaling to rewards if supported by reward types
             }
 
@@ -520,8 +534,9 @@ public class PerLevelRewardsReward implements Reward {
                 try {
                     reward.instance().update(new RewardUpdateContextImpl(player, count, action));
                 } catch (Exception e) {
-                    SkillLevelingMod.getInstance().getLogger().error("Failed to apply reward for skill " + (skillId != null ? skillId : "unknown") + " level " + level + ": " + e.getMessage());
-                    
+                    SkillLevelingMod.getInstance().getLogger().error("Failed to apply reward for skill "
+                            + (skillId != null ? skillId : "unknown") + " level " + level + ": " + e.getMessage());
+
                     if (!allowPartialRewards) {
                         // If partial rewards not allowed, stop processing on error
                         throw new RuntimeException("Reward application failed", e);

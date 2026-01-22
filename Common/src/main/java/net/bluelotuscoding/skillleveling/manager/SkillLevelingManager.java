@@ -428,13 +428,31 @@ public class SkillLevelingManager {
      * Advance a skill to the next level for a player
      */
     public boolean advanceSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        return advanceSkillLevel(player, categoryId, skillId, false);
+    }
+
+    /**
+     * Advance a skill to the next level for a player (with optional prereq bypass)
+     * 
+     * @param bypassPrerequisites If true, skip unlock state and prerequisite checks
+     *                            (admin use)
+     *                            Points are ALWAYS deducted regardless of this
+     *                            flag.
+     */
+    public boolean advanceSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId,
+            boolean bypassPrerequisites) {
         var category = SkillsAPI.getCategory(categoryId);
         if (category.isEmpty()) {
             return false;
         }
 
         var skill = category.get().getSkill(skillId);
-        if (skill.isEmpty() || skill.get().getState(player) != Skill.State.UNLOCKED) {
+        if (skill.isEmpty()) {
+            return false;
+        }
+
+        // For admin bypass, allow advancing even if skill is not unlocked yet
+        if (!bypassPrerequisites && skill.get().getState(player) != Skill.State.UNLOCKED) {
             return false;
         }
 
@@ -446,26 +464,31 @@ public class SkillLevelingManager {
             return false;
         }
 
-        // Check if advancement is allowed
-        if (canAdvanceToLevel(player, categoryId, skillId, newLevel)) {
-            // Deduct points for this level
-            if (!net.bluelotuscoding.skillleveling.points.SkillPointManager.deductPointsForLevel(player, categoryId,
-                    skillId, newLevel)) {
-                return false;
-            }
-
-            dataManager.setSkillLevel(player, categoryId, skillId, newLevel);
-
-            // Trigger rewards for the new level
-            triggerLevelRewards(player, categoryId, skillId, newLevel);
-
-            // REAL-TIME SYNC: Immediately notify client of level advancement
-            syncSkillLevelToClient(player, categoryId, skillId, newLevel, maxLevel);
-
-            return true;
+        // Check if advancement is allowed (skip if bypassing prerequisites)
+        if (!bypassPrerequisites && !canAdvanceToLevel(player, categoryId, skillId, newLevel)) {
+            return false;
         }
 
-        return false;
+        // ALWAYS deduct points - even for admin commands
+        if (!net.bluelotuscoding.skillleveling.points.SkillPointManager.deductPointsForLevel(player, categoryId,
+                skillId, newLevel)) {
+            // If admin is bypassing prerequisites but still can't afford, allow anyway
+            // but only if bypassing prerequisites
+            if (!bypassPrerequisites) {
+                return false;
+            }
+            // Admin bypass - proceed even without enough points (edge case)
+        }
+
+        dataManager.setSkillLevel(player, categoryId, skillId, newLevel);
+
+        // Trigger rewards for the new level
+        triggerLevelRewards(player, categoryId, skillId, newLevel);
+
+        // REAL-TIME SYNC: Immediately notify client of level advancement
+        syncSkillLevelToClient(player, categoryId, skillId, newLevel, maxLevel);
+
+        return true;
     }
 
     /**
@@ -540,8 +563,8 @@ public class SkillLevelingManager {
 
         int currentLevel = getSkillLevel(player, categoryId, skillId);
 
-        if (currentLevel <= 1) {
-            // Cannot refund below level 1 (base skill must remain unlocked)
+        if (currentLevel <= 0) {
+            // Cannot refund below level 0
             return false;
         }
 
@@ -550,12 +573,15 @@ public class SkillLevelingManager {
         // Deactivate rewards for the level being refunded
         deactivateLevelRewards(player, categoryId, skillId, currentLevel);
 
-        // Refund points for this level
-        net.bluelotuscoding.skillleveling.points.SkillPointManager.refundPointsForLevel(player, categoryId, skillId,
-                currentLevel);
+        // DO NOT MANUALLY REFUND POINTS HERE
+        // The CategoryDataMixin dynamic getSpentPoints handles the refund automatically
+        // when the level is decreased in the map.
 
         // Set the new level
         dataManager.setSkillLevel(player, categoryId, skillId, newLevel);
+
+        // Trigger point sync
+        category.get().addPoints(player, net.puffish.skillsmod.util.PointSources.COMMANDS, 0);
 
         // REAL-TIME SYNC: Immediately notify client of level refund
         syncSkillLevelToClient(player, categoryId, skillId, newLevel,
@@ -582,7 +608,7 @@ public class SkillLevelingManager {
     }
 
     /**
-     * Refund all levels of a skill for a player (except base level 1)
+     * Refund all levels of a skill for a player (to level 0)
      */
     public int refundAllSkillLevels(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         int refunded = 0;

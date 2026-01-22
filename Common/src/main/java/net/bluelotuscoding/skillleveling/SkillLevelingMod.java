@@ -143,7 +143,15 @@ public class SkillLevelingMod {
      * Advance a skill to the next level for a player
      */
     public boolean advanceSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
-        return skillLevelingManager.advanceSkillLevel(player, categoryId, skillId);
+        return skillLevelingManager.advanceSkillLevel(player, categoryId, skillId, false);
+    }
+
+    /**
+     * Advance a skill to the next level for a player (admin version - bypasses
+     * checks)
+     */
+    public boolean advanceSkillLevelAdmin(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        return skillLevelingManager.advanceSkillLevel(player, categoryId, skillId, true);
     }
 
     /**

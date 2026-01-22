@@ -1,5 +1,0 @@
-[23:01:59] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Initializing Pufferfish Skill Leveling addon...
-[23:01:59] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Registered per-level rewards reward type
-[23:01:59] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Registered Skills mod event handlers
-[23:01:59] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Server lifecycle events are managed by platform runners
-[23:01:59] [Test worker/INFO]: [puffish_skill_leveling] [ADDON] Addon initialization complete - ready for skill level progression!

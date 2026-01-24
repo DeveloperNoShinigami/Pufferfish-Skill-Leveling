@@ -165,7 +165,8 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     }
 
     /**
-     * Intercept canUnlockSkill to allow re-purchase of multi-level skills.
+     * Intercept canUnlockSkill to allow re-purchase of multi-level skills
+     * and enforce required_skills prerequisites.
      * CRITICAL: The original method returns false if skill is already unlocked.
      * We must override this to allow purchasing additional levels.
      */
@@ -174,6 +175,28 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
             CallbackInfoReturnable<Boolean> cir) {
         int currentLevel = addon$getSkillLevel(skill.id());
         int maxLevel = addon$getMaxLevelFromDefinition(category, skill);
+
+        // Check required_skills prerequisites for FIRST unlock (level 0 → 1)
+        if (currentLevel == 0 && !force) {
+            var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
+            if (leveledConfig != null && !leveledConfig.requiredSkills.isEmpty()) {
+                for (var reqSkill : leveledConfig.requiredSkills) {
+                    int reqLevel = addon$getSkillLevel(reqSkill.skillId);
+                    if (reqLevel < reqSkill.minLevel) {
+                        // Prerequisite not met
+                        var owner = addon$getOwner();
+                        if (owner != null) {
+                            owner.sendMessage(net.minecraft.text.Text.literal(
+                                    "§cRequires " + reqSkill.skillId + " at Level " + reqSkill.minLevel + " first!"),
+                                    false);
+                        }
+                        cir.setReturnValue(false);
+                        return;
+                    }
+
+                }
+            }
+        }
 
         if (currentLevel > 0) {
             // Skill already has levels

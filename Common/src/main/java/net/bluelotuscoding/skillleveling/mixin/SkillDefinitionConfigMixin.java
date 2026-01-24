@@ -11,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(value = SkillDefinitionConfig.class, remap = false)
@@ -50,6 +52,9 @@ public abstract class SkillDefinitionConfigMixin {
         var descriptions = rootObject.get("descriptions").getSuccess();
         var extraDescriptions = rootObject.get("extra_descriptions").getSuccess();
         var requiredSkill = rootObject.get("required_skill").getSuccess();
+        // Use getArray to properly consume the prerequisite_skills field
+        // (prevents "unused field" error from Pufferfish)
+        rootObject.getArray("prerequisite_skills");
 
         // Inject them into per_level_rewards reward data if they are missing there
         rootObject.getArray("rewards").ifSuccess(rewardsArray -> {
@@ -81,6 +86,7 @@ public abstract class SkillDefinitionConfigMixin {
                             if (requiredSkill.isPresent() && !data.has("required_skill")) {
                                 data.add("required_skill", requiredSkill.get().getJson());
                             }
+
                             // Ensure skill_id is set if missing
                             if (!data.has("skill_id")) {
                                 data.addProperty("skill_id", id);
@@ -116,8 +122,31 @@ public abstract class SkillDefinitionConfigMixin {
                                     .orElse(0);
                             boolean merge = rootObject.get("merge_description").getSuccess()
                                     .flatMap(e -> e.getAsBoolean().getSuccess()).orElse(false);
+
+                            // Parse prerequisite_skills array
+                            List<LeveledConfigStorage.RequiredSkillEntry> requiredSkillsList = new ArrayList<>();
+                            rootObject.getArray("prerequisite_skills").ifSuccess(arr -> {
+
+                                var jsonArr = arr.getJson();
+                                for (int i = 0; i < jsonArr.size(); i++) {
+                                    var elem = jsonArr.get(i);
+                                    if (elem.isJsonObject()) {
+                                        var reqObj = elem.getAsJsonObject();
+                                        var skillIdElem = reqObj.get("skill");
+                                        var minLevelElem = reqObj.get("min_level");
+                                        if (skillIdElem != null && minLevelElem != null) {
+                                            String reqSkillId = skillIdElem.getAsString();
+                                            int minLevel = minLevelElem.getAsInt();
+                                            requiredSkillsList.add(
+                                                    new LeveledConfigStorage.RequiredSkillEntry(reqSkillId, minLevel));
+                                        }
+                                    }
+                                }
+                            });
+
                             LeveledConfigStorage.put(id,
-                                    new LeveledConfigStorage.LeveledConfig(maxLevels, points, merge));
+                                    new LeveledConfigStorage.LeveledConfig(maxLevels, points, merge,
+                                            requiredSkillsList));
                         });
             });
         });

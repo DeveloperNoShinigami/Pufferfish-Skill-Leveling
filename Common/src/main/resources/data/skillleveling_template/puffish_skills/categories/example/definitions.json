@@ -160,5 +160,78 @@
     "metadata": {
       "icon": "test_mage_icon_id"
     }
+  },
+  "test_magic_swordsman": {
+    "type": "puffish_skill_leveling:default",
+    "title": "Test Magic Swordsman",
+    "description": "A hybrid skill requiring both Test Warrior and Test Mage",
+    "icon": {
+      "type": "item",
+      "data": {
+        "item": "minecraft:netherite_sword"
+      }
+    },
+    "size": 1.2,
+    "prerequisite_skills": [
+      {
+        "skill": "test_warrior",
+        "min_level": 1
+      },
+      {
+        "skill": "test_mage",
+        "min_level": 1
+      }
+    ],
+    "max_skill_level": 3,
+    "points_per_level": 2,
+    "merge_description": false,
+    "descriptions": {
+      "1": "Level 1: Blade Enchantment (+1 Magic Damage per hit)",
+      "2": "Level 2: Arcane Strikes (+2 Magic Damage per hit)",
+      "3": "Level 3: Elemental Mastery (+3 Magic Damage per hit)"
+    },
+    "extra_descriptions": {
+      "0": "Level 1: Blade Enchantment (+1 Magic Damage per hit)",
+      "1": "Level 2: Arcane Strikes (+2 Magic Damage per hit)",
+      "2": "Level 3: Elemental Mastery (+3 Magic Damage per hit)",
+      "3": "— MAXED OUT —"
+    },
+    "rewards": [
+      {
+        "type": "puffish_skill_leveling:per_level_rewards",
+        "data": {
+          "skill_id": "test_magic_swordsman",
+          "levels": {
+            "1": [
+              {
+                "type": "puffish_skills:command",
+                "data": {
+                  "command": "say Unlocked Blade Enchantment! (Level 1)"
+                }
+              }
+            ],
+            "2": [
+              {
+                "type": "puffish_skills:command",
+                "data": {
+                  "command": "say Learned Arcane Strikes! (Level 2)"
+                }
+              }
+            ],
+            "3": [
+              {
+                "type": "puffish_skills:command",
+                "data": {
+                  "command": "say Mastered Elemental Mastery! (Level 3)"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "icon": "test_magic_swordsman_icon_id"
+    }
   }
 }

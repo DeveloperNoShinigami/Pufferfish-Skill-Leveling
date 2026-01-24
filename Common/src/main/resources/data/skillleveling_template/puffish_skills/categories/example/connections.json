@@ -4,6 +4,14 @@
 			[
 				"test_warrior",
 				"test_mage"
+			],
+			[
+				"test_warrior",
+				"test_magic_swordsman"
+			],
+			[
+				"test_mage",
+				"test_magic_swordsman"
 			]
 		]
 	}

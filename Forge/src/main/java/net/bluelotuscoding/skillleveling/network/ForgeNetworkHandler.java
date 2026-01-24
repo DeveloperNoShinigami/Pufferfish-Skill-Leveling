@@ -32,6 +32,21 @@ public class ForgeNetworkHandler implements NetworkHandler {
                     context.enqueueWork(packet::handleClient);
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        // Client-to-server packet for Tome actions
+        CHANNEL.registerMessage(id++, TomeActionPacket.class, TomeActionPacket::write,
+                TomeActionPacket::read, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    context.enqueueWork(() -> {
+                        var sender = context.getSender();
+                        if (sender != null) {
+                            SkillLevelingMod.getInstance().getSkillLevelingManager()
+                                    .processTomeAction(sender, packet.getCategoryId(),
+                                            packet.getSkillId(), packet.getTomeType());
+                        }
+                    });
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_SERVER));
     }
 
     @Override

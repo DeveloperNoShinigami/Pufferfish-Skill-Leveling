@@ -352,16 +352,18 @@ public class SkillLevelingCommand {
                         getPlayerDataMethod.setAccessible(true);
                         var playerData = (PlayerData) getPlayerDataMethod.invoke(skillsMod, player);
 
-                        if (playerData == null)
+                        if (playerData == null) {
                                 return 0;
+                        }
 
                         var getCategoryMethod = SkillsMod.class.getDeclaredMethod("getCategory",
                                         net.minecraft.util.Identifier.class);
                         getCategoryMethod.setAccessible(true);
                         var categoryConfigOpt = (java.util.Optional<?>) getCategoryMethod.invoke(skillsMod, categoryId);
 
-                        if (categoryConfigOpt.isEmpty())
+                        if (categoryConfigOpt.isEmpty()) {
                                 return 0;
+                        }
 
                         var categoryConfig = (net.puffish.skillsmod.config.CategoryConfig) categoryConfigOpt.get();
                         var getOrCreateMethod = PlayerData.class.getDeclaredMethod("getOrCreateCategoryData",
@@ -390,16 +392,18 @@ public class SkillLevelingCommand {
                         getPlayerDataMethod.setAccessible(true);
                         var playerData = (PlayerData) getPlayerDataMethod.invoke(skillsMod, player);
 
-                        if (playerData == null)
+                        if (playerData == null) {
                                 return false;
+                        }
 
                         var getCategoryMethod = SkillsMod.class.getDeclaredMethod("getCategory",
                                         net.minecraft.util.Identifier.class);
                         getCategoryMethod.setAccessible(true);
                         var categoryConfigOpt = (java.util.Optional<?>) getCategoryMethod.invoke(skillsMod, categoryId);
 
-                        if (categoryConfigOpt.isEmpty())
+                        if (categoryConfigOpt.isEmpty()) {
                                 return false;
+                        }
 
                         var categoryConfig = (net.puffish.skillsmod.config.CategoryConfig) categoryConfigOpt.get();
                         var getOrCreateMethod = PlayerData.class.getDeclaredMethod("getOrCreateCategoryData",

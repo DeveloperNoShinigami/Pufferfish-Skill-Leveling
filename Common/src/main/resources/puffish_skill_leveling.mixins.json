@@ -9,7 +9,8 @@
 		"CategoryDataMixin",
 		"ClientCategoryDataMixin",
 		"SkillsModMixin",
-		"PlayerDataMixin"
+		"PlayerDataMixin",
+		"ServerChatMixin"
 	],
 	"client": [
 		"ClientSkillDefinitionConfigMixin"

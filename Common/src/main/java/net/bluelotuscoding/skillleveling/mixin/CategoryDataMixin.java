@@ -9,7 +9,6 @@ import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,6 +41,9 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     @Unique
     private ServerPlayerEntity addon$owner;
 
+    @Unique
+    private net.minecraft.util.Identifier addon$categoryId;
+
     // ===== CategoryDataExtension Implementation =====
 
     @Override
@@ -55,6 +57,16 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     }
 
     @Override
+    public void addon$setCategoryId(net.minecraft.util.Identifier categoryId) {
+        this.addon$categoryId = categoryId;
+    }
+
+    @Override
+    public net.minecraft.util.Identifier addon$getCategoryId() {
+        return this.addon$categoryId;
+    }
+
+    @Override
     public int addon$getSkillLevel(String skillId) {
         return addon$skillLevels.getOrDefault(skillId, 0);
     }
@@ -64,9 +76,19 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         if (level <= 0) {
             addon$skillLevels.remove(skillId);
             unlockedSkills.remove(skillId);
+            if (addon$owner != null) {
+                // Also update persistent data manager
+                SkillLevelingMod.getInstance().getSkillLevelingManager().getDataManager()
+                        .clearSkillLevel(addon$owner, addon$categoryId, skillId);
+            }
         } else {
             addon$skillLevels.put(skillId, level);
             unlockedSkills.add(skillId);
+            if (addon$owner != null) {
+                // Also update persistent data manager
+                SkillLevelingMod.getInstance().getSkillLevelingManager().getDataManager()
+                        .setSkillLevel(addon$owner, addon$categoryId, skillId, level);
+            }
         }
     }
 

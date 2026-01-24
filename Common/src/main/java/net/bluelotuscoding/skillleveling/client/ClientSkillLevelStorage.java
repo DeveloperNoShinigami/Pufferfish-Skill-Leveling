@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ClientSkillLevelStorage {
     private static final Map<String, Integer> skillLevels = new ConcurrentHashMap<>();
     private static final Map<String, Integer> skillMaxLevels = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> skillPointsPerLevel = new ConcurrentHashMap<>();
 
     // Mapping from definition ID to the key (for mixin lookups)
     private static final Map<String, String> definitionToKey = new ConcurrentHashMap<>();
@@ -19,15 +20,17 @@ public class ClientSkillLevelStorage {
         return categoryId + ":" + skillId;
     }
 
-    public static void setLevel(String categoryId, String skillId, int level, int maxLevel) {
+    public static void setLevel(String categoryId, String skillId, int level, int maxLevel, int pointsPerLevel) {
         String key = getKey(categoryId, skillId);
         if (level <= 0) {
             // Level 0 means skill is locked/reset - remove from cache
             skillLevels.remove(key);
             skillMaxLevels.remove(key);
+            skillPointsPerLevel.remove(key);
         } else {
             skillLevels.put(key, level);
             skillMaxLevels.put(key, maxLevel);
+            skillPointsPerLevel.put(key, pointsPerLevel);
         }
     }
 
@@ -62,7 +65,19 @@ public class ClientSkillLevelStorage {
         return skillMaxLevels.getOrDefault(key, 1);
     }
 
+    /**
+     * Get points per level by definition ID.
+     */
+    public static int getPointsPerLevelByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        if (key == null) {
+            return 0; // Means not a leveled skill in this context
+        }
+        return skillPointsPerLevel.getOrDefault(key, 0);
+    }
+
     public static int getLevel(String categoryId, String skillId) {
+
         // Default to 0 (not unlocked), not 1
         return skillLevels.getOrDefault(getKey(categoryId, skillId), 0);
     }
@@ -99,6 +114,8 @@ public class ClientSkillLevelStorage {
     public static void clearAll() {
         skillLevels.clear();
         skillMaxLevels.clear();
+        skillPointsPerLevel.clear();
         definitionToKey.clear();
     }
+
 }

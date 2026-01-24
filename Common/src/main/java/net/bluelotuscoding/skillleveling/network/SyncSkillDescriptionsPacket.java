@@ -2,7 +2,6 @@ package net.bluelotuscoding.skillleveling.network;
 
 import net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;

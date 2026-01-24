@@ -117,6 +117,22 @@ public abstract class SkillsModMixin {
                         }
                     }
 
+                    // Get current points available
+                    int pointsLeft = 0;
+                    try {
+                        var getPointsLeftMethod = CategoryData.class.getDeclaredMethod("getPointsLeft",
+                                net.puffish.skillsmod.config.CategoryConfig.class);
+                        getPointsLeftMethod.setAccessible(true);
+                        pointsLeft = (int) getPointsLeftMethod.invoke(categoryData, categoryConfig);
+                    } catch (Exception e) {
+                        // Fallback or log error
+                    }
+
+                    if (pointsLeft < pointsPerLevel && !force) {
+                        ci.cancel();
+                        return;
+                    }
+
                     // Increment level
                     ext.addon$incrementSkillLevel(skillId);
 
@@ -124,10 +140,9 @@ public abstract class SkillsModMixin {
                     int newLevel = ext.addon$getSkillLevel(skillId);
                     triggerPerLevelRewardsOnly(player, categoryConfig, skillId, newLevel);
 
-                    // Deduct points (negative value to subtract)
-                    if (pointsPerLevel > 0) {
-                        deductPoints(player, categoryConfig, categoryData, pointsPerLevel);
-                    }
+                    // Deduct points (handled dynamically by CategoryDataMixin.getSpentPoints)
+                    // We just need to sync the point change to the client
+                    deductPoints(player, categoryConfig, categoryData, 0);
 
                     // Sync to client
                     var mod = SkillLevelingMod.getInstance();
@@ -165,7 +180,8 @@ public abstract class SkillsModMixin {
             var mod = SkillLevelingMod.getInstance();
             if (mod != null) {
                 // Send level 0 to indicate locked
-                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, 0, 1);
+                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, 0, 1, 0);
+
             }
         } catch (Exception e) {
             var logger = SkillLevelingMod.getInstance().getLogger();
@@ -229,9 +245,10 @@ public abstract class SkillsModMixin {
                     }
                 }
 
-                // Send our sync packet with the correct level and definition ID
+                // Send our sync packet with the correct level, max level, and points per level
+                int pointsPerLevelFinal = (perLevelReward != null) ? perLevelReward.getPointsPerLevel() : 1;
                 mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, level, maxLevel,
-                        definitionId);
+                        pointsPerLevelFinal, definitionId);
 
                 // On first unlock (level 1), also sync descriptions to client
                 if (level == 1 && perLevelReward != null) {
@@ -239,8 +256,8 @@ public abstract class SkillsModMixin {
                     var extraDescs = perLevelReward.getLevelExtraDescriptions();
                     boolean merge = perLevelReward.isMergeDescription();
 
-                    if ((levelDescs != null && !levelDescs.isEmpty()) ||
-                            (extraDescs != null && !extraDescs.isEmpty())) {
+                    if ((levelDescs != null && !levelDescs.isEmpty())
+                            || (extraDescs != null && !extraDescs.isEmpty())) {
                         mod.getSkillLevelingManager().syncDescriptionsToClient(
                                 player, definitionId, levelDescs, extraDescs, merge, maxLevel);
                     }
@@ -295,8 +312,9 @@ public abstract class SkillsModMixin {
             CategoryData categoryData, CallbackInfo ci) {
         try {
             var mod = SkillLevelingMod.getInstance();
-            if (mod == null)
+            if (mod == null) {
                 return;
+            }
 
             for (var skill : category.skills().getAll()) {
                 if (categoryData instanceof CategoryDataExtension ext) {

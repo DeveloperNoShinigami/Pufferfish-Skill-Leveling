@@ -2,7 +2,6 @@ package net.bluelotuscoding.skillleveling.mixin;
 
 import net.puffish.skillsmod.server.data.PlayerData;
 import net.puffish.skillsmod.server.data.CategoryData;
-import net.puffish.skillsmod.config.CategoryConfig;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,10 +33,20 @@ public abstract class PlayerDataMixin implements PlayerDataExtension {
         }
     }
 
+    @Override
+    public Object addon$getCategoryData(Identifier categoryId) {
+        return categories.get(categoryId);
+    }
+
     @Inject(method = "getOrCreateCategoryData", at = @At("RETURN"))
-    private void onGetOrCreateCategoryData(CategoryConfig category, CallbackInfoReturnable<CategoryData> cir) {
-        if (addon$owner != null) {
-            ((CategoryDataExtension) (Object) cir.getReturnValue()).addon$setOwner(addon$owner);
+    private void onGetOrCreateCategoryData(net.puffish.skillsmod.config.CategoryConfig category,
+            CallbackInfoReturnable<CategoryData> cir) {
+        CategoryData categoryData = cir.getReturnValue();
+        if (categoryData instanceof CategoryDataExtension ext) {
+            if (addon$owner != null) {
+                ext.addon$setOwner(addon$owner);
+            }
+            ext.addon$setCategoryId(category.id());
         }
     }
 }

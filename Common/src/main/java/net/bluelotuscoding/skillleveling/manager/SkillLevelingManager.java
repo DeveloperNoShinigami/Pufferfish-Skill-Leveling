@@ -1,10 +1,10 @@
 package net.bluelotuscoding.skillleveling.manager;
 
 import net.bluelotuscoding.skillleveling.skills.LeveledSkill;
+import net.bluelotuscoding.skillleveling.item.TomeItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.text.Text;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.Skill;
 import net.bluelotuscoding.skillleveling.data.SkillLevelingDataManager;
@@ -52,6 +52,10 @@ public class SkillLevelingManager {
         this.perLevelRewardsRewards = new ConcurrentHashMap<>();
     }
 
+    public SkillLevelingDataManager getDataManager() {
+        return dataManager;
+    }
+
     // ================================================
     // REAL-TIME CLIENT SYNCHRONIZATION
     // ================================================
@@ -65,7 +69,13 @@ public class SkillLevelingManager {
      */
     public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
             int currentLevel, int maxLevel) {
-        syncSkillLevelToClient(player, categoryId, skillId, currentLevel, maxLevel, null);
+        syncSkillLevelToClient(player, categoryId, skillId, currentLevel, maxLevel,
+                getPointsForLevel(categoryId, skillId, 1), null);
+    }
+
+    public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
+            int currentLevel, int maxLevel, int pointsPerLevel) {
+        syncSkillLevelToClient(player, categoryId, skillId, currentLevel, maxLevel, pointsPerLevel, null);
     }
 
     /**
@@ -73,13 +83,20 @@ public class SkillLevelingManager {
      */
     public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
             int currentLevel, int maxLevel, String definitionId) {
+        syncSkillLevelToClient(player, categoryId, skillId, currentLevel, maxLevel,
+                getPointsForLevel(categoryId, skillId, 1), definitionId);
+    }
+
+    public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
+            int currentLevel, int maxLevel, int pointsPerLevel, String definitionId) {
         try {
             var networkHandler = SkillLevelingMod.getInstance().getNetworkHandler();
             if (networkHandler != null) {
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillLevelPacket(categoryId, skillId,
-                                currentLevel, maxLevel, definitionId),
+                                currentLevel, maxLevel, pointsPerLevel, definitionId),
                         player);
+
             }
         } catch (Exception e) {
             var logger = SkillLevelingMod.getInstance().getLogger();
@@ -279,14 +296,23 @@ public class SkillLevelingManager {
      */
     public int getSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         // Return 0 if base skill is not unlocked
-        var category = SkillsAPI.getCategory(categoryId);
-        if (category.isEmpty()) {
+        var categoryOpt = SkillsAPI.getCategory(categoryId);
+        if (categoryOpt.isEmpty()) {
             return 0;
         }
 
-        var skill = category.get().getSkill(skillId);
+        var skill = categoryOpt.get().getSkill(skillId);
         if (skill.isEmpty() || skill.get().getState(player) != Skill.State.UNLOCKED) {
             return 0;
+        }
+
+        // Try to get from Mixin first as it's the most "live" during a session
+        var ext = getCategoryDataExtension(player, categoryId);
+        if (ext != null) {
+            int level = ext.addon$getSkillLevel(skillId);
+            if (level > 0) {
+                return level;
+            }
         }
 
         return dataManager.getSkillLevel(player, categoryId, skillId);
@@ -469,24 +495,28 @@ public class SkillLevelingManager {
             return false;
         }
 
-        // ALWAYS deduct points - even for admin commands
-        if (!net.bluelotuscoding.skillleveling.points.SkillPointManager.deductPointsForLevel(player, categoryId,
-                skillId, newLevel)) {
-            // If admin is bypassing prerequisites but still can't afford, allow anyway
-            // but only if bypassing prerequisites
-            if (!bypassPrerequisites) {
-                return false;
-            }
-            // Admin bypass - proceed even without enough points (edge case)
-        }
+        // Deduct points (handled dynamically by CategoryDataMixin.getSpentPoints)
+        // We just need to ensure the client is notified of the level change
+        // so it recalculates its own spent points.
 
         dataManager.setSkillLevel(player, categoryId, skillId, newLevel);
+
+        // Also update the Mixin data for immediate point calculation updates
+        var ext = getCategoryDataExtension(player, categoryId);
+        if (ext != null) {
+            ext.addon$setOwner(player);
+            ext.addon$setCategoryId(categoryId);
+            ext.addon$setSkillLevel(skillId, newLevel);
+        }
 
         // Trigger rewards for the new level
         triggerLevelRewards(player, categoryId, skillId, newLevel);
 
         // REAL-TIME SYNC: Immediately notify client of level advancement
         syncSkillLevelToClient(player, categoryId, skillId, newLevel, maxLevel);
+
+        // Force full category sync to update client UI (points display, skill states)
+        forceFullCategorySync(player, categoryId);
 
         return true;
     }
@@ -520,13 +550,31 @@ public class SkillLevelingManager {
 
         dataManager.setSkillLevel(player, categoryId, skillId, level);
 
-        // Trigger rewards for the new level if higher than current
+        // Also update the Mixin data for immediate point calculation updates
+        var ext = getCategoryDataExtension(player, categoryId);
+        if (ext != null) {
+            ext.addon$setOwner(player);
+            ext.addon$setCategoryId(categoryId);
+            ext.addon$setSkillLevel(skillId, level);
+        }
+
+        // Trigger rewards for ALL levels between old and new (not just the final one)
         if (level > currentLevel) {
-            triggerLevelRewards(player, categoryId, skillId, level);
+            for (int lvl = currentLevel + 1; lvl <= level; lvl++) {
+                triggerLevelRewards(player, categoryId, skillId, lvl);
+            }
+        } else if (level < currentLevel) {
+            // Deactivate rewards for levels being removed
+            for (int lvl = currentLevel; lvl > level; lvl--) {
+                deactivateLevelRewards(player, categoryId, skillId, lvl);
+            }
         }
 
         // REAL-TIME SYNC: Immediately notify client of level change
         syncSkillLevelToClient(player, categoryId, skillId, level, maxLevel);
+
+        // Force full category sync to update client UI (points display, skill states)
+        forceFullCategorySync(player, categoryId);
 
         return true;
     }
@@ -580,12 +628,22 @@ public class SkillLevelingManager {
         // Set the new level
         dataManager.setSkillLevel(player, categoryId, skillId, newLevel);
 
-        // Trigger point sync
-        category.get().addPoints(player, net.puffish.skillsmod.util.PointSources.COMMANDS, 0);
+        // Also update the Mixin data for immediate point calculation updates
+        var ext = getCategoryDataExtension(player, categoryId);
+        if (ext != null) {
+            ext.addon$setOwner(player);
+            ext.addon$setCategoryId(categoryId);
+            ext.addon$setSkillLevel(skillId, newLevel);
+        }
 
         // REAL-TIME SYNC: Immediately notify client of level refund
         syncSkillLevelToClient(player, categoryId, skillId, newLevel,
                 getMaxLevel(categoryId, skillId));
+
+        // Force full category sync to update client UI (points display, skill states)
+        // This replaces the addPoints(..., 0) hack which only synced points, not skill
+        // states
+        forceFullCategorySync(player, categoryId);
 
         return true;
     }
@@ -803,6 +861,264 @@ public class SkillLevelingManager {
         } catch (ReflectiveOperationException e) {
             SkillLevelingMod.getInstance().getLogger()
                     .error("Failed to access internal categories via reflection: " + e.getMessage());
+        }
+    }
+
+    // ================================================
+    // TOME HANDLERS
+    // ================================================
+
+    /**
+     * Handle Tome of Progression usage.
+     * Grants enough experience to advance to the next category level.
+     * Cannot be used if already at max level.
+     */
+    public boolean handleTomeOfProgression(ServerPlayerEntity player, Identifier categoryId) {
+        try {
+            var categoryOpt = net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId);
+            if (categoryOpt.isEmpty()) {
+                SkillLevelingMod.getInstance().getLogger()
+                        .warn("Tome of Progression: Category " + categoryId + " not found");
+                return false;
+            }
+
+            var category = categoryOpt.get();
+            var experienceOpt = category.getExperience();
+
+            if (experienceOpt.isEmpty()) {
+                // This category doesn't use experience/levels
+                SkillLevelingMod.getInstance().getLogger()
+                        .warn("Tome of Progression: Category " + categoryId + " does not use experience");
+                player.sendMessage(net.minecraft.text.Text.translatable(
+                        "skillleveling.tome.no_experience")
+                        .formatted(net.minecraft.util.Formatting.RED), false);
+                return false;
+            }
+
+            var experience = experienceOpt.get();
+            int currentLevel = experience.getLevel(player);
+            int totalXpNow = experience.getTotal(player);
+            int totalXpForNextLevel = experience.getRequiredTotal(currentLevel + 1);
+
+            // Check if player is at max level (requiredTotal returns -1 or same as current
+            // when maxed)
+            if (totalXpForNextLevel <= 0 || totalXpForNextLevel <= totalXpNow) {
+                SkillLevelingMod.getInstance().getLogger()
+                        .info("Tome of Progression: Player " + player.getName().getString()
+                                + " is already at max level for " + categoryId.getPath());
+                player.sendMessage(net.minecraft.text.Text.translatable(
+                        "skillleveling.tome.max_level")
+                        .formatted(net.minecraft.util.Formatting.RED), false);
+                return false;
+            }
+
+            // Calculate XP needed to reach exactly the next level
+            int xpNeeded = totalXpForNextLevel - totalXpNow;
+
+            // LOG XP FOR DEBUGGING
+            SkillLevelingMod.getInstance().getLogger().info(
+                    "Tome of Progression Logic: CurrentTotalXP=" + totalXpNow +
+                            ", TargetTotalXP=" + totalXpForNextLevel +
+                            ", xpNeeded=" + xpNeeded);
+
+            // Grant the experience
+            experience.addTotal(player, xpNeeded);
+
+            // NOTE: Do NOT call forceFullCategorySync here!
+            // experience.addTotal already triggers the internal Pufferfish Skills sync,
+            // and calling updateAllCategories again would cause double processing.
+
+            SkillLevelingMod.getInstance().getLogger()
+                    .info("Tome of Progression: Player "
+                            + player.getName().getString()
+                            + " advanced to level " + (currentLevel + 1) + " in " + categoryId.getPath()
+                            + " (granted " + xpNeeded + " XP)");
+
+            player.sendMessage(net.minecraft.text.Text.translatable(
+                    "skillleveling.tome.level_up", currentLevel + 1)
+                    .formatted(net.minecraft.util.Formatting.GREEN), false);
+            return true;
+        } catch (Exception e) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .error("Tome of Progression failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Handle Tome of Clear Mind usage.
+     * Refunds 1 level of the selected skill and returns the point cost.
+     */
+    public boolean handleTomeOfClearMind(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        int currentLevel = getSkillLevel(player, categoryId, skillId);
+        if (currentLevel <= 0) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("Tome of Clear Mind: Skill " + skillId + " is already at level 0");
+            return false;
+        }
+
+        int pointsToRefund = getPointsForLevel(categoryId, skillId, currentLevel);
+        boolean success = refundSkillLevel(player, categoryId, skillId);
+        if (success) {
+            syncCategoryPoints(player, categoryId, pointsToRefund);
+            SkillLevelingMod.getInstance().getLogger()
+                    .info("Tome of Clear Mind: Player "
+                            + player.getName().getString()
+                            + " refunded 1 level of " + skillId + " (now level " + (currentLevel - 1) + ")");
+        }
+        return success;
+    }
+
+    /**
+     * Handle Tome of Greater Clear Mind usage.
+     * Resets the selected skill to level 0 and refunds all points.
+     */
+    public boolean handleTomeOfGreaterClearMind(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        int currentLevel = getSkillLevel(player, categoryId, skillId);
+        if (currentLevel <= 0) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("Tome of Greater Clear Mind: Skill " + skillId + " is already at level 0");
+            return false;
+        }
+
+        boolean success = true;
+        int totalPointsToRefund = 0;
+        var reward = getPerLevelRewardsReward(categoryId, skillId);
+        if (reward.isPresent()) {
+            for (int i = 1; i <= currentLevel; i++) {
+                totalPointsToRefund += reward.get().getEffectivePointsPerLevel(i);
+            }
+        } else {
+            totalPointsToRefund = currentLevel;
+        }
+
+        for (int i = 0; i < currentLevel && success; i++) {
+            success = refundSkillLevel(player, categoryId, skillId);
+        }
+
+        if (success) {
+            syncCategoryPoints(player, categoryId, totalPointsToRefund);
+            SkillLevelingMod.getInstance().getLogger()
+                    .info("Tome of Greater Clear Mind: Player "
+                            + player.getName().getString()
+                            + " reset " + skillId + " from level " + currentLevel + " to 0");
+        }
+
+        return success;
+    }
+
+    public void syncCategoryPoints(ServerPlayerEntity player, Identifier categoryId) {
+        syncCategoryPoints(player, categoryId, 0);
+    }
+
+    /**
+     * Public method to trigger a point sync for a player's category.
+     */
+    public void syncCategoryPoints(ServerPlayerEntity player, Identifier categoryId, int pointsRefunded) {
+        try {
+            var categoryOpt = net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId);
+            if (categoryOpt.isPresent()) {
+                categoryOpt.get().addPoints(player, net.puffish.skillsmod.util.PointSources.COMMANDS, 0);
+
+                if (pointsRefunded > 0) {
+                    player.sendMessage(net.minecraft.text.Text.translatable(
+                            "skillleveling.tome.points_refunded", pointsRefunded)
+                            .formatted(net.minecraft.util.Formatting.GREEN), false);
+                }
+            }
+        } catch (Exception e) {
+            // Ignore sync errors
+        }
+    }
+
+    /**
+     * Helper to get the CategoryData extension for a player and category.
+     */
+    private net.bluelotuscoding.skillleveling.mixin_interface.CategoryDataExtension getCategoryDataExtension(
+            ServerPlayerEntity player, Identifier categoryId) {
+        try {
+            var skillsMod = net.puffish.skillsmod.SkillsMod.getInstance();
+            var getPlayerDataMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("getPlayerData",
+                    ServerPlayerEntity.class);
+            getPlayerDataMethod.setAccessible(true);
+            var playerData = getPlayerDataMethod.invoke(skillsMod, player);
+
+            if (playerData instanceof net.bluelotuscoding.skillleveling.mixin_interface.PlayerDataExtension playerExt) {
+                var categoryData = playerExt.addon$getCategoryData(categoryId);
+                if (categoryData instanceof net.bluelotuscoding.skillleveling.mixin_interface.CategoryDataExtension catExt) {
+                    return catExt;
+                }
+            }
+        } catch (Exception e) {
+            SkillLevelingMod.getInstance().getLogger().error("Failed to get CategoryData extension: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Process a tome action from client request.
+     * This is the central dispatcher for tome functionality.
+     */
+    public void processTomeAction(ServerPlayerEntity player, Identifier categoryId, String skillId,
+            TomeItem.TomeType tomeType) {
+        switch (tomeType) {
+            case PROGRESSION:
+                handleTomeOfProgression(player, categoryId);
+                break;
+            case CLEAR_MIND:
+                handleTomeOfClearMind(player, categoryId, skillId);
+                break;
+            case GREATER_CLEAR_MIND:
+                handleTomeOfGreaterClearMind(player, categoryId, skillId);
+                break;
+            default:
+                SkillLevelingMod.getInstance().getLogger()
+                        .warn("Unknown tome type: " + tomeType);
+                break;
+        }
+    }
+
+    /**
+     * Force a full category sync to the client.
+     * This calls SkillsMod.updateAllCategories which sends all skill states,
+     * points, and other data to the client.
+     */
+    public void forceFullCategorySync(ServerPlayerEntity player, Identifier categoryId) {
+        try {
+            // Call updateAllCategories on SkillsMod to trigger full client sync
+            net.puffish.skillsmod.SkillsMod.getInstance().updateAllCategories(player);
+
+            // Also sync our addon's level data for all skills in this category
+            syncAllSkillsInCategory(player, categoryId);
+
+            SkillLevelingMod.getInstance().getLogger()
+                    .debug("Forced full category sync for player " + player.getName().getString());
+
+        } catch (Exception e) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .error("Failed to force category sync: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sync all leveled skills in a category to client.
+     */
+    public void syncAllSkillsInCategory(ServerPlayerEntity player, Identifier categoryId) {
+        try {
+            var categoryOpt = net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId);
+            if (categoryOpt.isEmpty())
+                return;
+
+            var category = categoryOpt.get();
+            category.streamSkills().forEach(skill -> {
+                String skillId = skill.getId();
+                int level = getSkillLevel(player, categoryId, skillId);
+                int maxLevel = getMaxLevel(categoryId, skillId);
+                syncSkillLevelToClient(player, categoryId, skillId, level, maxLevel);
+            });
+        } catch (Exception e) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .error("Failed to sync all skills in category: " + e.getMessage());
         }
     }
 }

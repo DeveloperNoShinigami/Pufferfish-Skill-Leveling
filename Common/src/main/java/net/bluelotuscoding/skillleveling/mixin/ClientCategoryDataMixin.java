@@ -23,6 +23,51 @@ public abstract class ClientCategoryDataMixin {
     private Map<String, Skill.State> skillStates;
 
     /**
+     * Intercept getSpentPoints on the client to calculate correct spent points
+     * for multi-level skills. This ensures the client's point display matches
+     * the server's calculation in CategoryDataMixin.getSpentPoints.
+     */
+    @Inject(method = "getSpentPoints", at = @At("HEAD"), cancellable = true)
+    private void onGetSpentPoints(CallbackInfoReturnable<Integer> cir) {
+        if (config == null) {
+            return;
+        }
+
+        String categoryId = config.id().toString();
+        int totalSpent = 0;
+
+        // Iterate through all skills and calculate their total cost based on level
+        for (var skill : config.skills().values()) {
+            String skillId = skill.id();
+
+            // Get the definition for this skill via its definitionId
+            var definition = config.definitions().get(skill.definitionId());
+            int baseCost = (definition != null) ? definition.cost() : 1;
+
+            if (ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)) {
+                int level = ClientSkillLevelStorage.getLevel(categoryId, skillId);
+
+                // Use synced points_per_level if available, fallback to base cost
+                int pointsPerLevel = ClientSkillLevelStorage.getPointsPerLevelByDefinitionId(skill.definitionId());
+                if (pointsPerLevel <= 0) {
+                    pointsPerLevel = baseCost;
+                }
+
+                totalSpent += level * pointsPerLevel;
+            } else {
+
+                // Fallback: check if skill is unlocked in base states (counts as 1 level)
+                Skill.State state = skillStates.get(skillId);
+                if (state == Skill.State.UNLOCKED) {
+                    totalSpent += baseCost;
+                }
+            }
+        }
+
+        cir.setReturnValue(totalSpent);
+    }
+
+    /**
      * Intercept getSkillState on the client to:
      * - Show UNLOCKED (highlighted) at max level
      * - Show AFFORDABLE/AVAILABLE below max level for re-purchase

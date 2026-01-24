@@ -43,4 +43,8 @@ public interface CategoryDataExtension {
      * Get the max level for a skill from its definition rewards.
      */
     int addon$getMaxLevelForSkill(String skillId);
+
+    void addon$setCategoryId(net.minecraft.util.Identifier categoryId);
+
+    net.minecraft.util.Identifier addon$getCategoryId();
 }

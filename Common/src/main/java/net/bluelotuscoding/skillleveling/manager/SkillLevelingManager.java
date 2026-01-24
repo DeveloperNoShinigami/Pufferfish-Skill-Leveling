@@ -898,11 +898,14 @@ public class SkillLevelingManager {
             var experience = experienceOpt.get();
             int currentLevel = experience.getLevel(player);
             int totalXpNow = experience.getTotal(player);
-            int totalXpForNextLevel = experience.getRequiredTotal(currentLevel + 1);
 
-            // Check if player is at max level (requiredTotal returns -1 or same as current
-            // when maxed)
-            if (totalXpForNextLevel <= 0 || totalXpForNextLevel <= totalXpNow) {
+            // getRequired returns XP needed for JUST this level transition
+            // getRequiredTotal returns cumulative XP for all levels up to that point
+            // For Tome of Progression, we want to grant exactly enough XP for ONE level
+            int xpNeeded = experience.getRequired(currentLevel + 1);
+
+            // Check if player is at max level (getRequired returns -1 or 0 when maxed)
+            if (xpNeeded <= 0) {
                 SkillLevelingMod.getInstance().getLogger()
                         .info("Tome of Progression: Player " + player.getName().getString()
                                 + " is already at max level for " + categoryId.getPath());
@@ -912,14 +915,11 @@ public class SkillLevelingManager {
                 return false;
             }
 
-            // Calculate XP needed to reach exactly the next level
-            int xpNeeded = totalXpForNextLevel - totalXpNow;
-
             // LOG XP FOR DEBUGGING
             SkillLevelingMod.getInstance().getLogger().info(
-                    "Tome of Progression Logic: CurrentTotalXP=" + totalXpNow +
-                            ", TargetTotalXP=" + totalXpForNextLevel +
-                            ", xpNeeded=" + xpNeeded);
+                    "[TOME DEBUG] Before: Level=" + currentLevel +
+                            ", TotalXP=" + totalXpNow +
+                            ", XPNeededForNext=" + xpNeeded);
 
             // Grant the experience
             experience.addTotal(player, xpNeeded);
@@ -928,15 +928,21 @@ public class SkillLevelingManager {
             // experience.addTotal already triggers the internal Pufferfish Skills sync,
             // and calling updateAllCategories again would cause double processing.
 
-            SkillLevelingMod.getInstance().getLogger()
-                    .info("Tome of Progression: Player "
-                            + player.getName().getString()
-                            + " advanced to level " + (currentLevel + 1) + " in " + categoryId.getPath()
-                            + " (granted " + xpNeeded + " XP)");
+            // Capture and log the post-state
+            int newLevel = experience.getLevel(player);
+            int newTotalXp = experience.getTotal(player);
+            int expectedNextLevelXp = experience.getRequiredTotal(newLevel + 1);
+
+            SkillLevelingMod.getInstance().getLogger().info(
+                    "[TOME DEBUG] After: Level=" + newLevel +
+                            ", TotalXP=" + newTotalXp +
+                            ", ExpectedLevel=" + (currentLevel + 1) +
+                            ", NextLevelTargetXP=" + expectedNextLevelXp);
 
             player.sendMessage(net.minecraft.text.Text.translatable(
-                    "skillleveling.tome.level_up", currentLevel + 1)
+                    "skillleveling.tome.level_up", newLevel)
                     .formatted(net.minecraft.util.Formatting.GREEN), false);
+
             return true;
         } catch (Exception e) {
             SkillLevelingMod.getInstance().getLogger()

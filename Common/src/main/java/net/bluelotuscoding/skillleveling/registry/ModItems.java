@@ -96,8 +96,12 @@ public class ModItems {
                                 var config = entry.getValue();
                                 // Only add tomes for skills that have explicit loot_mode and category_id
                                 if (config.lootMode != null && config.categoryId != null) {
-                                        entries.accept(SkillTomeItem.createSkillTome(SKILL_TOME, config.categoryId,
-                                                        skillId, config.lootMode));
+                                        // Generate tome for each level from 1 to maxLevels
+                                        for (int level = 1; level <= config.maxLevels; level++) {
+                                                entries.accept(SkillTomeItem.createSkillTome(SKILL_TOME,
+                                                                config.categoryId,
+                                                                skillId, config.lootMode, level));
+                                        }
                                 }
                         }
                 }

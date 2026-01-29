@@ -51,7 +51,56 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
             return;
         }
 
-        // Check if slot 2 is a Skill Tome
+        // Check if both slots are Skill Tomes (Combining)
+        if (slot1.getItem() instanceof SkillTomeItem && slot2.getItem() instanceof SkillTomeItem) {
+            String skillId1 = SkillTomeItem.getSkillId(slot1);
+            String categoryId1 = SkillTomeItem.getCategoryId(slot1);
+            int level1 = SkillTomeItem.getLevel(slot1);
+
+            String skillId2 = SkillTomeItem.getSkillId(slot2);
+            String categoryId2 = SkillTomeItem.getCategoryId(slot2);
+            int level2 = SkillTomeItem.getLevel(slot2);
+
+            if (skillId1 != null && skillId1.equals(skillId2) &&
+                    categoryId1 != null && categoryId1.equals(categoryId2) &&
+                    level1 == level2) {
+
+                net.bluelotuscoding.skillleveling.manager.SkillLevelingManager manager = net.bluelotuscoding.skillleveling.SkillLevelingMod
+                        .getInstance()
+                        .getSkillLevelingManager();
+
+                if (manager != null) {
+                    net.minecraft.util.Identifier catId = categoryId1.contains(":")
+                            ? new net.minecraft.util.Identifier(categoryId1)
+                            : new net.minecraft.util.Identifier("skillleveling_template", categoryId1);
+                    int maxLevel = manager.getMaxLevel(catId, skillId1);
+
+                    if (level1 < maxLevel) {
+                        String lootMode = SkillTomeItem.getLootMode(slot1);
+                        ItemStack result = SkillTomeItem.createSkillTome(slot1.getItem(), categoryId1, skillId1,
+                                lootMode, level1 + 1);
+
+                        this.slots.get(2).setStack(result);
+
+                        // Experience cost: configured enchantment_levels * current level
+                        int enchantmentCost = 0;
+                        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId1);
+                        if (config != null) {
+                            enchantmentCost = config.enchantmentLevels * level1;
+                        }
+
+                        this.levelCost.set(enchantmentCost);
+                        this.repairItemUsage = 1;
+
+                        skillLeveling$isSkillImbue = true;
+                        this.sendContentUpdates();
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Check if slot 2 is a Skill Tome (Imbuing onto equipment)
         if (slot2.getItem() instanceof SkillTomeItem) {
             String lootMode = SkillTomeItem.getLootMode(slot2);
 
@@ -70,18 +119,20 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
                     // comparisons match (e.g., "skillleveling_template:example").
                     String normalizedCategory = categoryId.contains(":") ? categoryId
                             : "skillleveling_template:" + categoryId;
+                    int level = SkillTomeItem.getLevel(slot2);
                     skillLevelingNbt.putString("CategoryId", normalizedCategory);
                     skillLevelingNbt.putString("SkillId", skillId);
+                    skillLevelingNbt.putInt("Level", level);
                     nbt.put("SkillLevelingImbued", skillLevelingNbt);
 
                     // Update output slot (slot index 2 in anvil)
                     this.slots.get(2).setStack(result);
 
-                    // Set experience cost to 0 (free imbuing)
+                    // Set experience cost to 0 (free imbuing onto gear)
                     this.levelCost.set(0);
                     // Consume only 1 tome instead of the whole stack
                     this.repairItemUsage = 1;
-                    
+
                     skillLeveling$isSkillImbue = true;
 
                     // Force sync the changes
@@ -95,11 +146,28 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
 
     @Inject(method = "canTakeOutput", at = @At("HEAD"), cancellable = true)
     private void onCanTakeOutput(PlayerEntity player, boolean present, CallbackInfoReturnable<Boolean> cir) {
-        // Always allow taking output if this is our skill imbue
-        // Vanilla requires levelCost > 0, but we set it to 0, so we must override this
-        // check
+        // Explicitly override taking output for skill actions
         if (skillLeveling$isSkillImbue && present) {
-            cir.setReturnValue(true);
+            int cost = this.levelCost.get();
+
+            // 1. Creative mode always allowed
+            if (player.getAbilities().creativeMode) {
+                cir.setReturnValue(true);
+                return;
+            }
+
+            // 2. Paid actions (combining tomes) require sufficient levels
+            if (cost > 0) {
+                if (player.experienceLevel >= cost) {
+                    cir.setReturnValue(true);
+                } else {
+                    // Force gate if insufficient levels
+                    cir.setReturnValue(false);
+                }
+            } else {
+                // 3. Free actions (imbuing equipment) are always allowed
+                cir.setReturnValue(true);
+            }
         }
     }
 }

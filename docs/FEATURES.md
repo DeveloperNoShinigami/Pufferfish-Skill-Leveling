@@ -19,6 +19,7 @@ Skills can have any number of levels (1, 2, 3, ... N), each granting cumulative 
 | `descriptions` | object | — | Level-specific descriptions (e.g., `"1": "Level 1 desc"`) |
 | `extra_descriptions` | object | — | Preview text for next level |
 | `prerequisite_skills` | array | — | Required skills before unlocking |
+| `enchantment_levels` | integer | 0 | XP cost per level for combining tomes |
 
 ### Skill Types
 
@@ -145,6 +146,12 @@ This addon is designed to be **fully compatible** with the base Pufferfish Skill
 
 ### With Other Mods
 The real-time attribute sync works with any mod that registers attributes through Minecraft's standard attribute system.
+
+### Pufferfish Base Skills & Attribute Unlocking
+The system is fully compatible with standard Pufferfish Skills that do not use the leveling system:
+- **Base Skill Support**: Any standard skill (max level of 1) can be placed into a Skill Tome or imbued onto equipment.
+- **Attribute Unlocking**: Imbuing a base Pufferfish skill that grants attribute modifiers will correctly "unlock" and apply those attributes when the item is equipped.
+- **Automatic Scaling**: Standard skills default to Level 1, meaning they grant their full benefit immediately when used or equipped via the addon system.
 
 ---
 

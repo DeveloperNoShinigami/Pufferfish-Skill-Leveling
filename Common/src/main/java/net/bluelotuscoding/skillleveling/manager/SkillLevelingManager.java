@@ -505,7 +505,8 @@ public class SkillLevelingManager {
                                                                              // namespace
 
                     if (normalizedTargetCategory.equals(normalizedImbueCategory) && skillId.equals(imbueSkill)) {
-                        bonus += 1;
+                        int level = imbueNbt.contains("Level") ? imbueNbt.getInt("Level") : 1;
+                        bonus += level;
                     }
                 }
             }

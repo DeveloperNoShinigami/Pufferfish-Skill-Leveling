@@ -34,13 +34,14 @@ public abstract class ItemTooltipMixin {
 
                 // Convert snake_case to Title Case
                 String displayName = convertToTitleCase(skillId);
+                int level = imbuedNbt.contains("Level") ? imbuedNbt.getInt("Level") : 1;
 
                 tooltip.add(Text.literal(" "));
-                // CONCISE TOOLTIP: [ Skill Name ] +1 level
-                // Gold for name, Aqua/Blue for bonus
+                // CONCISE TOOLTIP: [ Skill Name ] +N level(s)
                 tooltip.add(Text.literal("[ " + displayName + " ] ")
                         .formatted(Formatting.GOLD)
-                        .append(Text.literal("+1 level").formatted(Formatting.AQUA)));
+                        .append(Text.literal("+" + level + (level == 1 ? " level" : " levels"))
+                                .formatted(Formatting.AQUA)));
             }
         }
     }

@@ -31,6 +31,7 @@ public class SkillTomeItem extends Item {
     public static final String NBT_SKILL_ID = "SkillId";
     public static final String NBT_CATEGORY_ID = "CategoryId";
     public static final String NBT_LOOT_MODE = "LootMode";
+    public static final String NBT_LEVEL = "Level";
 
     // Loot mode constants
     public static final String LOOT_MODE_BOTH = "both";
@@ -42,22 +43,31 @@ public class SkillTomeItem extends Item {
     }
 
     /**
-     * Creates a Skill Tome ItemStack for the given skill.
+     * Creates a Skill Tome ItemStack for the given skill and level.
      */
-    public static ItemStack createSkillTome(Item tomeItem, String categoryId, String skillId, String lootMode) {
+    public static ItemStack createSkillTome(Item tomeItem, String categoryId, String skillId, String lootMode,
+            int level) {
         ItemStack stack = new ItemStack(tomeItem);
         NbtCompound nbt = stack.getOrCreateNbt();
         nbt.putString(NBT_CATEGORY_ID, categoryId);
         nbt.putString(NBT_SKILL_ID, skillId);
         nbt.putString(NBT_LOOT_MODE, lootMode != null ? lootMode : LOOT_MODE_BOTH);
+        nbt.putInt(NBT_LEVEL, Math.max(1, level));
         return stack;
     }
 
     /**
-     * Creates a Skill Tome with default loot mode.
+     * Creates a Skill Tome ItemStack for the given skill (default level 1).
+     */
+    public static ItemStack createSkillTome(Item tomeItem, String categoryId, String skillId, String lootMode) {
+        return createSkillTome(tomeItem, categoryId, skillId, lootMode, 1);
+    }
+
+    /**
+     * Creates a Skill Tome with default loot mode (default level 1).
      */
     public static ItemStack createSkillTome(Item tomeItem, String categoryId, String skillId) {
-        return createSkillTome(tomeItem, categoryId, skillId, LOOT_MODE_BOTH);
+        return createSkillTome(tomeItem, categoryId, skillId, LOOT_MODE_BOTH, 1);
     }
 
     @Override
@@ -81,6 +91,7 @@ public class SkillTomeItem extends Item {
         String skillId = nbt.getString(NBT_SKILL_ID);
         String categoryId = nbt.getString(NBT_CATEGORY_ID);
         String lootMode = nbt.getString(NBT_LOOT_MODE);
+        int tomeLevel = nbt.contains(NBT_LEVEL) ? nbt.getInt(NBT_LEVEL) : 1;
 
         // Check if this is an "imbue_only" tome - can't be used directly
         if (LOOT_MODE_IMBUE_ONLY.equals(lootMode)) {
@@ -117,17 +128,17 @@ public class SkillTomeItem extends Item {
             return TypedActionResult.fail(stack);
         }
 
-        if (currentLevel >= maxLevel) {
-            serverPlayer.sendMessage(Text.translatable("skillleveling.tome.mastered"), false);
+        if (currentLevel >= tomeLevel) {
+            serverPlayer.sendMessage(Text.translatable("skillleveling.tome.already_at_level", tomeLevel), false);
             return TypedActionResult.fail(stack);
         }
 
-        // Grant the skill level (bypass prerequisites for Tomes)
-        boolean success = manager.advanceSkillLevel(serverPlayer, catId, skillId, true);
+        // Grant the specific skill level
+        boolean success = manager.setSkillLevel(serverPlayer, catId, skillId, tomeLevel);
 
         if (success) {
             String skillName = getSkillDisplayName(skillId);
-            serverPlayer.sendMessage(Text.translatable("skillleveling.tome.learn_success", skillName, currentLevel + 1),
+            serverPlayer.sendMessage(Text.translatable("skillleveling.tome.learn_success", skillName, tomeLevel),
                     false);
 
             // Consume the tome
@@ -156,11 +167,12 @@ public class SkillTomeItem extends Item {
         String skillId = nbt.getString(NBT_SKILL_ID);
         String categoryId = nbt.getString(NBT_CATEGORY_ID);
         String lootMode = nbt.getString(NBT_LOOT_MODE);
+        int level = nbt.contains(NBT_LEVEL) ? nbt.getInt(NBT_LEVEL) : 1;
 
-        // Skill name
+        // Skill name and level
         String skillName = getSkillDisplayName(skillId);
         tooltip.add(Text.translatable("item.puffish_skill_leveling.skill_tome.desc1",
-                Text.literal(skillName).formatted(Formatting.BLUE)));
+                Text.literal(skillName + " (+" + level + ")").formatted(Formatting.BLUE)));
 
         // Category (fetch title from datapack via helper)
         tooltip.add(Text.translatable("skillleveling.tome.category",
@@ -221,5 +233,13 @@ public class SkillTomeItem extends Item {
     public static String getLootMode(ItemStack stack) {
         NbtCompound nbt = stack.getNbt();
         return nbt != null ? nbt.getString(NBT_LOOT_MODE) : LOOT_MODE_BOTH;
+    }
+
+    /**
+     * Get the level from a Skill Tome stack.
+     */
+    public static int getLevel(ItemStack stack) {
+        NbtCompound nbt = stack.getNbt();
+        return nbt != null && nbt.contains(NBT_LEVEL) ? nbt.getInt(NBT_LEVEL) : 1;
     }
 }

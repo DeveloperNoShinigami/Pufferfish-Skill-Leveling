@@ -159,14 +159,15 @@ public class ClientSkillLevelStorage {
                 String imbueSkill = imbueNbt.getString("SkillId");
 
                 if (imbueCategory != null && !imbueCategory.isEmpty()) {
-                    // ID ALIGNMENT FIX: ensure consistent identifier strings
-                    String normalizedImbueCategory = imbueCategory.contains(":") ? imbueCategory
-                            : "skillleveling_template:" + imbueCategory;
-                    String targetKey = categoryId.contains(":") ? categoryId
+                    // Normalize both IDs for robust comparison (handles namespace:path variants)
+                    String normalizedTarget = categoryId.contains(":") ? categoryId
                             : "skillleveling_template:" + categoryId;
+                    String normalizedImbue = imbueCategory.contains(":") ? imbueCategory
+                            : "skillleveling_template:" + imbueCategory;
 
-                    if (targetKey.equals(normalizedImbueCategory) && skillId.equals(imbueSkill)) {
-                        bonus += 1;
+                    if (normalizedTarget.equals(normalizedImbue) && skillId.equals(imbueSkill)) {
+                        int level = imbueNbt.contains("Level") ? imbueNbt.getInt("Level") : 1;
+                        bonus += level;
                     }
                 }
             }

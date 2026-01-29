@@ -85,9 +85,11 @@ public abstract class ClientCategoryDataMixin {
         int baseLevel = ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)
                 ? ClientSkillLevelStorage.getBaseLevel(categoryId, skillId)
                 : 0;
-        int maxLevel = ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)
-                ? ClientSkillLevelStorage.getMaxLevel(categoryId, skillId)
-                : 1;
+
+        // Use ClientDescriptionStorage as the source of truth for max level
+        // as it's populated for all skills regardless of player progress.
+        int maxLevel = net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage
+                .getMaxLevel(skill.definitionId());
         int totalLevel = baseLevel + bonus;
 
         // 2. Decide State

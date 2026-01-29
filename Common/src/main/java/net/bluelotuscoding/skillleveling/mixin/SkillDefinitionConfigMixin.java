@@ -55,6 +55,7 @@ public abstract class SkillDefinitionConfigMixin {
         rootObject.getArray("prerequisite_skills");
         rootObject.get("loot_mode");
         rootObject.get("category_id");
+        rootObject.get("enchantment_levels");
 
         // Inject them into per_level_rewards reward data if they are missing there
         rootObject.getArray("rewards").ifSuccess(rewardsArray -> {
@@ -158,9 +159,13 @@ public abstract class SkillDefinitionConfigMixin {
                                     .flatMap(e -> e.getAsString().getSuccess())
                                     .orElse(null);
 
+                            int enchantmentLevels = rootObject.get("enchantment_levels").getSuccess()
+                                    .flatMap(e -> e.getAsInt().getSuccess())
+                                    .orElse(0);
+
                             LeveledConfigStorage.put(id,
                                     new LeveledConfigStorage.LeveledConfig(maxLevels, points, merge,
-                                            requiredSkillsList, lootMode, categoryId));
+                                            requiredSkillsList, lootMode, categoryId, enchantmentLevels));
                         });
             });
         });

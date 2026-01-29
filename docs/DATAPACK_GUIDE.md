@@ -104,6 +104,7 @@ Each skill in `definitions.json` must follow this structure:
 | `descriptions` | object | — | Level-specific descriptions (keyed by level number) |
 | `extra_descriptions` | object | — | Preview text for next level (keyed by level number) |
 | `prerequisite_skills` | array | — | Skills required before this one can be unlocked |
+| `enchantment_levels` | integer | 0 | Experience level cost per level for anvil combining |
 
 ### Skill Types
 
@@ -111,6 +112,9 @@ Each skill in `definitions.json` must follow this structure:
 |------|-------------|
 | `puffish_skills:default` | Standard skill type from base mod |
 | `puffish_skill_leveling:stackable` | Combines standard rewards + per-level rewards |
+
+> [!TIP]
+> **Base Skill Support**: You can use `puffish_skills:default` skills with the Skill Tome and Imbuement systems! The addon treats standard skills as having a `max_skill_level` of 1, allowing you to imbue base Pufferfish attribute modifiers onto gear.
 
 ---
 
@@ -170,7 +174,7 @@ Descriptions accumulate across levels:
 Use `extra_descriptions` to show what the next level will grant.
 
 > [!IMPORTANT]
-> **Levels start at 0!** When a skill is unlocked but not yet leveled, it is at level 0. The `descriptions` key `"0"` shows the base/unlocked state, and `extra_descriptions` key `"0"` previews what level 1 will grant.
+> **Levels start at 0!** When a skill is unlocked but not yet leveled, it is at level 0. The `descriptions` key `"0"` shows the inital description (not needed, totally optional), and `extra_descriptions` key `"0"` previews what level 1 will grant.
 
 ### Level Numbering Explained:
 | Player Level | `descriptions` Key | Shows | `extra_descriptions` Key | Shows |
@@ -186,7 +190,6 @@ Use `extra_descriptions` to show what the next level will grant.
     "warrior": {
         "max_skill_level": 3,
         "descriptions": {
-            "0": "Unlocked: No bonus yet",
             "1": "Level 1: +1 Attack Damage",
             "2": "Level 2: +2 Attack Damage",
             "3": "Level 3: +3 Attack Damage"

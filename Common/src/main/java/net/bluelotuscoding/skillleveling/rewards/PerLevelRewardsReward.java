@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -109,6 +108,16 @@ public class PerLevelRewardsReward implements Reward {
     }
 
     public int getPointsPerLevel() {
+        if (pointsPerLevel > 0) {
+            return pointsPerLevel;
+        }
+        // Fallback to global leveled config if available
+        if (skillId != null) {
+            var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+            if (config != null) {
+                return config.pointsPerLevel;
+            }
+        }
         return pointsPerLevel;
     }
 
@@ -190,11 +199,12 @@ public class PerLevelRewardsReward implements Reward {
      * Get the effective points per level with scaling applied
      */
     public int getEffectivePointsPerLevel(int currentLevel) {
+        int baseCost = getPointsPerLevel();
         if (scalingFactor == 1.0) {
-            return pointsPerLevel;
+            return baseCost;
         }
 
-        return (int) Math.ceil(pointsPerLevel * Math.pow(scalingFactor, currentLevel - 1));
+        return (int) Math.ceil(baseCost * Math.pow(scalingFactor, currentLevel - 1));
     }
 
     /**
@@ -288,6 +298,11 @@ public class PerLevelRewardsReward implements Reward {
     static Result<PerLevelRewardsReward, Problem> parse(JsonObject rootObject, ConfigContext context) {
         var problems = new ArrayList<Problem>();
 
+        // Parse skill_id (optional)
+        var optSkillId = rootObject.getString("skill_id")
+                .ifFailure(problems::add)
+                .getSuccess();
+
         // Parse levels (required)
         var optLevelsMap = rootObject.getObject("levels")
                 .andThen(obj -> obj.getAsMap((key, element) -> element.getAsArray()
@@ -307,7 +322,31 @@ public class PerLevelRewardsReward implements Reward {
                         problems.add(levelsPath.getObject(entry.getKey())
                                 .createProblem("Level must be ≥ 1"));
                     } else {
-                        levelRewards.put(level, entry.getValue());
+                        // REWARD IDENTITY FIX: Use wrapped context for each reward
+                        // This ensures rewards at different levels get unique identities (paths)
+                        // allowing them to stack correctly (e.g. +2 + +2 = +4)
+                        var list = new ArrayList<SkillRewardConfig>();
+                        var levelArrayResult = rootObject.getObject("levels")
+                                .andThen(obj -> obj.getArray(entry.getKey()));
+
+                        levelArrayResult.ifSuccess(levelArray -> {
+                            levelArray.getAsList((i, rewardElement) -> {
+                                // REWARD IDENTITY: Rely on wrapped context to provide unique paths
+                                // for each reward, which Pufferfish uses for identity.
+                                var rewardContext = wrapRewardContext(context, rewardElement);
+                                var rewardConfigResult = SkillRewardConfig.parse(rewardElement, rewardContext);
+
+                                rewardConfigResult.ifSuccess(config -> {
+                                    // STABLE IDENTITY FIX: Inject deterministic UUIDs for AttributeRewards
+                                    injectStableUUID(config.instance(), rewardElement);
+                                    list.add(config);
+                                });
+
+                                rewardConfigResult.ifFailure(problems::add);
+                                return rewardConfigResult;
+                            });
+                        });
+                        levelRewards.put(level, list);
                     }
                 } catch (NumberFormatException e) {
                     problems.add(levelsPath.getObject(entry.getKey()).createProblem("Expected an integer"));
@@ -315,11 +354,6 @@ public class PerLevelRewardsReward implements Reward {
             }
         });
         int definedMaxLevel = levelRewards.keySet().stream().max(Integer::compareTo).orElse(0);
-
-        // Parse skill_id (optional)
-        var optSkillId = rootObject.getString("skill_id")
-                .ifFailure(problems::add)
-                .getSuccess();
 
         // Parse max_skill_level (optional)
         var optMaxLevelTmp = rootObject.get("max_skill_level")
@@ -490,6 +524,33 @@ public class PerLevelRewardsReward implements Reward {
         }
     }
 
+    /**
+     * Helper to wrap context for sub-reward parsing.
+     * This provides each reward with its own data and path identity.
+     */
+    private static ConfigContext wrapRewardContext(ConfigContext context,
+            net.puffish.skillsmod.api.json.JsonElement data) {
+        if (context instanceof RewardConfigContext rewardContext) {
+            return new RewardConfigContext() {
+                @Override
+                public net.minecraft.server.MinecraftServer getServer() {
+                    return rewardContext.getServer();
+                }
+
+                @Override
+                public void emitWarning(String message) {
+                    rewardContext.emitWarning(message);
+                }
+
+                @Override
+                public Result<net.puffish.skillsmod.api.json.JsonElement, Problem> getData() {
+                    return Result.success(data);
+                }
+            };
+        }
+        return context;
+    }
+
     @Override
     public void update(RewardUpdateContext context) {
         var player = context.getPlayer();
@@ -498,27 +559,44 @@ public class PerLevelRewardsReward implements Reward {
         int oldCount = counts.getOrDefault(uuid, 0);
         counts.put(uuid, newCount);
 
+        SkillLevelingMod.getInstance().getLogger()
+                .info("[REWARD DEBUG] Updating skill " + skillId + " for " + player.getName().getString()
+                        + ": old=" + oldCount + ", new=" + newCount + ", action=" + context.isAction());
+
         // Check prerequisites before applying any rewards
-        if (!arePrerequisitesMet(uuid)) {
+        boolean prerequisitesMet = arePrerequisitesMet(uuid);
+
+        // Effective count logic: Handle prerequisite loss correctly.
+        // If prereqs are NOT met and partial rewards ARE NOT allowed, effective count
+        // is 0.
+        // This ensures existing rewards are REMOVED (reverted) when prerequisites are
+        // lost.
+        int effectiveNewCount = (prerequisitesMet || allowPartialRewards) ? newCount : 0;
+        int effectiveOldCount = counts.getOrDefault(uuid, 0);
+        counts.put(uuid, effectiveNewCount);
+
+        if (!prerequisitesMet) {
             if (!allowPartialRewards) {
-                // Prerequisites not met and partial rewards not allowed
-                SkillLevelingMod.getInstance().getLogger().info("Prerequisites not met for skill "
-                        + (skillId != null ? skillId : "unknown") + ", skipping rewards");
-                return;
+                SkillLevelingMod.getInstance().getLogger().info("[REWARD] Prerequisites NOT met for skill "
+                        + (skillId != null ? skillId : "unknown") + " - Deactivating all rewards.");
+            } else {
+                SkillLevelingMod.getInstance().getLogger().warn("[REWARD] Prerequisites NOT met for skill "
+                        + (skillId != null ? skillId : "unknown") + " - Continuing due to allow_partial_rewards.");
             }
-            // If partial rewards allowed, continue but log a warning
-            SkillLevelingMod.getInstance().getLogger().warn("Prerequisites not met for skill "
-                    + (skillId != null ? skillId : "unknown") + ", but partial rewards allowed");
         }
 
         // Apply level rewards with enhanced logic
         for (var entry : levelRewards.entrySet()) {
             int level = entry.getKey();
-            int count = newCount >= level ? 1 : 0;
-            // Respect the calling context's action flag!
-            // If the base mod says this is NOT an action (e.g. on join),
-            // we should NOT trigger actions here either.
-            boolean action = context.isAction() && level > oldCount && level <= newCount;
+            int levelCount = effectiveNewCount >= level ? 1 : 0;
+            int oldLevelCount = effectiveOldCount >= level ? 1 : 0;
+
+            // Persistence Fix: Action is true if THIS specific level's state changed
+            // (either added or removed).
+            boolean action = context.isAction() && (levelCount != oldLevelCount);
+
+            // Sub-count for the Pufferfish reward (0 or 1)
+            int count = levelCount;
 
             // Apply scaling factor if configured
             if (action && scalingFactor != 1.0) {
@@ -532,6 +610,10 @@ public class PerLevelRewardsReward implements Reward {
 
             for (var reward : entry.getValue()) {
                 try {
+                    SkillLevelingMod.getInstance().getLogger()
+                            .info("[REWARD DEBUG] - Sub-Reward Update: " + (skillId != null ? skillId : "unnamed")
+                                    + " Lvl " + level
+                                    + " -> count=" + count + ", action=" + action + ", type=" + reward.type());
                     reward.instance().update(new RewardUpdateContextImpl(player, count, action));
                 } catch (Exception e) {
                     SkillLevelingMod.getInstance().getLogger().error("Failed to apply reward for skill "
@@ -556,5 +638,55 @@ public class PerLevelRewardsReward implements Reward {
             });
         });
         counts.clear();
+    }
+
+    /**
+     * STABLE IDENTITY FIX: Injects deterministic UUIDs into Pufferfish
+     * AttributeRewards.
+     * 
+     * Pufferfish's built-in AttributeReward generates random UUIDs on its first
+     * update.
+     * This makes it impossible to remove/revert attributes if the reward object is
+     * re-created
+     * (e.g., during config reloads or across server restarts).
+     * 
+     * We solve this by using the JSON path of the reward as a stable seed for a
+     * deterministic UUID.
+     */
+    private static void injectStableUUID(net.puffish.skillsmod.api.reward.Reward reward, JsonElement element) {
+        if (reward == null || element == null)
+            return;
+
+        // Target Specifically AttributeReward for stable UUIDs.
+        if (reward.getClass().getName().equals("net.puffish.skillsmod.reward.builtin.AttributeReward")) {
+            try {
+                java.lang.reflect.Field uuidsField = reward.getClass().getDeclaredField("uuids");
+                uuidsField.setAccessible(true);
+
+                @SuppressWarnings("unchecked")
+                java.util.List<java.util.UUID> uuids = (java.util.List<java.util.UUID>) uuidsField.get(reward);
+
+                if (uuids != null) {
+                    // Clear any random UUIDs.
+                    uuids.clear();
+
+                    // Generate a pool of stable UUIDs from the unique JSON path.
+                    // Pufferfish adds modifiers by index, so we provide a stable UUID for each
+                    // possible index.
+                    // 100 should be more than enough for any reasonable skill level.
+                    String path = element.getPath().toString();
+                    for (int i = 0; i < 100; i++) {
+                        String seed = path + "_level_" + i;
+                        uuids.add(java.util.UUID.nameUUIDFromBytes(seed.getBytes()));
+                    }
+
+                    SkillLevelingMod.getInstance().getLogger()
+                            .debug("[SYNC] Injected 100 stable UUIDs for attribute reward at " + path);
+                }
+            } catch (Exception e) {
+                SkillLevelingMod.getInstance().getLogger()
+                        .error("Failed to inject stable UUIDs into AttributeReward: " + e.getMessage());
+            }
+        }
     }
 }

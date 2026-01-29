@@ -10,10 +10,14 @@
 		"ClientCategoryDataMixin",
 		"SkillsModMixin",
 		"PlayerDataMixin",
-		"ServerChatMixin"
+		"ServerChatMixin",
+		"AnvilScreenHandlerMixin",
+		"LivingEntityMixin",
+		"ServerPlayNetworkHandlerMixin"
 	],
 	"client": [
-		"ClientSkillDefinitionConfigMixin"
+		"ClientSkillDefinitionConfigMixin",
+		"ItemTooltipMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

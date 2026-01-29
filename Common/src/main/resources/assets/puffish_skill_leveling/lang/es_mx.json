@@ -9,4 +9,5 @@
   "skillleveling.command.needs_params": "El avance de habilidades requiere parámetros específicos de habilidad",
   "skillleveling.command.use_gui": "Usa la GUI de habilidades principal para interactuar con tus habilidades",
   "skillleveling.command.player_only": "Este comando solo puede ser usado por jugadores"
+  ,"skillleveling.refund.blocked_by_prereq": "No se puede reembolsar: las siguientes habilidades dependen de esto y deben reembolsarse primero: %s"
 }

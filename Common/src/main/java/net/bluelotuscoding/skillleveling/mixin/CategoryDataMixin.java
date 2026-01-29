@@ -161,7 +161,10 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     @Inject(method = "resetSkills", at = @At("HEAD"))
     private void onResetSkills(CallbackInfo ci) {
         addon$skillLevels.clear();
-        unlockedSkills.clear();
+        if (addon$owner != null && addon$categoryId != null) {
+            SkillLevelingMod.getInstance().getSkillLevelingManager().getDataManager()
+                    .resetCategorySkillLevels(addon$owner, addon$categoryId);
+        }
     }
 
     /**
@@ -179,21 +182,37 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         // Check required_skills prerequisites for FIRST unlock (level 0 → 1)
         if (currentLevel == 0 && !force) {
             var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
-            if (leveledConfig != null && !leveledConfig.requiredSkills.isEmpty()) {
-                for (var reqSkill : leveledConfig.requiredSkills) {
-                    int reqLevel = addon$getSkillLevel(reqSkill.skillId);
-                    if (reqLevel < reqSkill.minLevel) {
-                        // Prerequisite not met
-                        var owner = addon$getOwner();
-                        if (owner != null) {
-                            owner.sendMessage(net.minecraft.text.Text.literal(
-                                    "§cRequires " + reqSkill.skillId + " at Level " + reqSkill.minLevel + " first!"),
-                                    false);
-                        }
-                        cir.setReturnValue(false);
-                        return;
-                    }
+            if (leveledConfig != null) {
+                // Check loot_mode
+                if (!force && leveledConfig.lootMode != null && (leveledConfig.lootMode.equals("tome_only")
+                        || leveledConfig.lootMode.equals("imbue_only"))) {
+                    cir.setReturnValue(false);
+                    return;
+                }
 
+                if (!leveledConfig.requiredSkills.isEmpty()) {
+                    for (var reqSkill : leveledConfig.requiredSkills) {
+                        int reqLevel = addon$getSkillLevel(reqSkill.skillId);
+                        if (reqLevel < reqSkill.minLevel) {
+                            // Prerequisite not met
+                            var owner = addon$getOwner();
+                            if (owner != null) {
+                                owner.sendMessage(net.minecraft.text.Text.literal(
+                                        "§cRequires " + reqSkill.skillId + " at Level " + reqSkill.minLevel
+                                                + " first!"),
+                                        false);
+                            }
+                            cir.setReturnValue(false);
+                            return;
+                        }
+                    }
+                }
+
+                // Affordability check for first level
+                if (addon$owner != null && !net.bluelotuscoding.skillleveling.points.SkillPointManager
+                        .canAffordLevel(addon$owner, category.id(), skill.id(), 1)) {
+                    cir.setReturnValue(false);
+                    return;
                 }
             }
         }
@@ -208,9 +227,14 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
 
             // Not at max level - allow re-purchase
             // Force means admin/command usage - always allow
-            // Otherwise, the original affordability check would work,
-            // BUT the original method will return false because skill is "already unlocked"
-            // So we MUST return true here to allow it
+            // Otherwise, check if player has enough points
+            if (!force) {
+                if (addon$owner != null && !net.bluelotuscoding.skillleveling.points.SkillPointManager
+                        .canAffordLevel(addon$owner, category.id(), skill.id(), currentLevel + 1)) {
+                    cir.setReturnValue(false);
+                    return;
+                }
+            }
             cir.setReturnValue(true);
         }
         // If level is 0, let original method handle first unlock
@@ -225,12 +249,36 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         int level = addon$getSkillLevel(skill.id());
         int maxLevel = addon$getMaxLevelFromDefinition(category, skill);
 
-        if (level >= maxLevel && level > 0) {
-            // Fully maxed out - show as UNLOCKED (highlighted)
+        // Calculate total level including equipment bonuses for state decision
+        int bonus = (addon$owner != null) ? SkillLevelingMod.getInstance().getSkillLevelingManager()
+                .calculateEquipmentBonus(addon$owner, category.id(), skill.id()) : 0;
+        int totalLevel = level + bonus;
+
+        if (totalLevel >= maxLevel && maxLevel > 0) {
+            // Fully maxed out - show as UNLOCKED (highlighted gold)
             cir.setReturnValue(Skill.State.UNLOCKED);
+            return;
         }
-        // Otherwise let original method determine state (AFFORDABLE, AVAILABLE, LOCKED,
-        // etc.)
+
+        // Purchasability Fix: If we haven't reached the max BASE level,
+        // it should still show as buyable even if gear bonuses make it active.
+        if (level < maxLevel) {
+            if (addon$owner != null && net.bluelotuscoding.skillleveling.points.SkillPointManager
+                    .canAffordLevel(addon$owner, category.id(), skill.id(), level + 1)) {
+                cir.setReturnValue(Skill.State.AFFORDABLE);
+                return;
+            }
+            cir.setReturnValue(Skill.State.AVAILABLE);
+            return;
+        }
+
+        // If base level is maxed but total isn't (maybe gear penalty? or just maxed
+        // base)
+        // it's active.
+        if (totalLevel > 0) {
+            cir.setReturnValue(Skill.State.UNLOCKED);
+            return;
+        }
     }
 
     /**
@@ -272,13 +320,23 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                         for (var reward : defOpt.get().rewards()) {
                             if (reward.instance() instanceof PerLevelRewardsReward plr) {
                                 if (plr.getSkillId() == null || plr.getSkillId().equals(skillId)) {
-                                    pointsPerLevel = plr.getPointsPerLevel();
+                                    // CALCULATE TOTAL COST by summing effective cost for each level
+                                    int skillCost = 0;
+                                    for (int i = 1; i <= level; i++) {
+                                        skillCost += plr.getEffectivePointsPerLevel(i);
+                                    }
+                                    total += skillCost;
                                     break;
                                 }
                             }
                         }
 
-                        total += pointsPerLevel * level;
+                        // Fallback if no PLR found (shouldn't happen for our skills, but for vanilla
+                        // ones)
+                        if (category.definitions().getById(skillOpt.get().definitionId()).get().rewards().stream()
+                                .noneMatch(r -> r.instance() instanceof PerLevelRewardsReward)) {
+                            total += pointsPerLevel * level;
+                        }
                     }
                 }
             }

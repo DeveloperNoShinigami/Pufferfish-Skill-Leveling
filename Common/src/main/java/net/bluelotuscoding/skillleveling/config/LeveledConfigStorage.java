@@ -9,9 +9,6 @@ import java.util.Map;
  * Stores leveled configuration data parsed from skill definitions.
  * This is populated by SkillDefinitionConfigMixin and accessed by
  * SkillLevelingManager.
- * 
- * Uses skill ID as key since object references may differ between
- * parsing phase and loading phase.
  */
 public class LeveledConfigStorage {
 
@@ -23,6 +20,10 @@ public class LeveledConfigStorage {
 
     public static LeveledConfig get(String skillId) {
         return leveledConfigs.get(skillId);
+    }
+
+    public static Map<String, LeveledConfig> getAllEntries() {
+        return new HashMap<>(leveledConfigs);
     }
 
     public static boolean has(String skillId) {
@@ -38,17 +39,22 @@ public class LeveledConfigStorage {
         public final int pointsPerLevel;
         public final boolean mergeDescription;
         public final List<RequiredSkillEntry> requiredSkills;
+        public final String lootMode;
+        public final String categoryId;
 
-        public LeveledConfig(int maxLevels, int pointsPerLevel, boolean mergeDescription) {
-            this(maxLevels, pointsPerLevel, mergeDescription, new ArrayList<>());
+        public LeveledConfig(int maxLevels, int pointsPerLevel, boolean mergeDescription, String lootMode,
+                String categoryId) {
+            this(maxLevels, pointsPerLevel, mergeDescription, new ArrayList<>(), lootMode, categoryId);
         }
 
         public LeveledConfig(int maxLevels, int pointsPerLevel, boolean mergeDescription,
-                List<RequiredSkillEntry> requiredSkills) {
+                List<RequiredSkillEntry> requiredSkills, String lootMode, String categoryId) {
             this.maxLevels = maxLevels;
             this.pointsPerLevel = pointsPerLevel;
             this.mergeDescription = mergeDescription;
             this.requiredSkills = requiredSkills != null ? requiredSkills : new ArrayList<>();
+            this.lootMode = lootMode;
+            this.categoryId = categoryId;
         }
     }
 

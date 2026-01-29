@@ -21,55 +21,61 @@ public abstract class SkillDefinitionConfigMixin {
     private static final String DEFAULT_TYPE = "puffish_skill_leveling:default";
     private static final String STACKABLE_TYPE = "puffish_skill_leveling:stackable";
 
+    private static final String PUFFISH_DEFAULT_TYPE = "puffish_skills:default";
+    private static final String PUFFISH_STACKABLE_TYPE = "puffish_skills:stackable";
+
     private static boolean isAddonType(String type) {
-        return DEFAULT_TYPE.equals(type) || STACKABLE_TYPE.equals(type);
+        return DEFAULT_TYPE.equals(type) || STACKABLE_TYPE.equals(type)
+                || PUFFISH_DEFAULT_TYPE.equals(type) || PUFFISH_STACKABLE_TYPE.equals(type);
     }
 
     @Inject(method = "parse(Ljava/lang/String;Lnet/puffish/skillsmod/api/json/JsonObject;Lnet/puffish/skillsmod/api/config/ConfigContext;)Lnet/puffish/skillsmod/api/util/Result;", at = @At("HEAD"))
     private static void onParseHead(String id, JsonObject rootObject, ConfigContext context,
             CallbackInfoReturnable<Result<Optional<SkillDefinitionConfig>, Problem>> cir) {
-        // Read the type field to consume it (prevents "unused field" error)
-        // Only process leveling logic if this is a stackable skill
+
         var typeResult = rootObject.get("type").getSuccess();
         if (typeResult.isEmpty()) {
-            // No type field - this is a regular Puffish skill, not a stackable one
             return;
         }
 
         var typeString = typeResult.flatMap(e -> e.getAsString().getSuccess());
         if (typeString.isEmpty() || !isAddonType(typeString.get())) {
-            // Type doesn't match our addon's stackable type - skip leveling logic
             return;
         }
 
-        // This is a stackable skill - read leveling parameters from root level
-        var maxSkillLevel = rootObject.get("max_skill_level")
-                .getSuccess()
-                .or(() -> rootObject.get("max_levels").getSuccess());
-
+        // Consume our fields to prevent "unused field" errors from Pufferfish
+        var maxSkillLevel = rootObject.get("max_skill_level").getSuccess();
+        var maxLevels = rootObject.get("max_levels").getSuccess();
         var pointsPerLevel = rootObject.get("points_per_level").getSuccess();
         var mergeDescription = rootObject.get("merge_description").getSuccess();
         var descriptions = rootObject.get("descriptions").getSuccess();
         var extraDescriptions = rootObject.get("extra_descriptions").getSuccess();
         var requiredSkill = rootObject.get("required_skill").getSuccess();
         // Use getArray to properly consume the prerequisite_skills field
-        // (prevents "unused field" error from Pufferfish)
         rootObject.getArray("prerequisite_skills");
+        rootObject.get("loot_mode");
+        rootObject.get("category_id");
 
         // Inject them into per_level_rewards reward data if they are missing there
         rootObject.getArray("rewards").ifSuccess(rewardsArray -> {
-            var jsonArray = rewardsArray.getJson();
-            for (int i = 0; i < jsonArray.size(); i++) {
-                var rewardElement = jsonArray.get(i);
+            var rewards = rewardsArray.getJson();
+            for (int i = 0; i < rewards.size(); i++) {
+                var rewardElement = rewards.get(i);
                 if (rewardElement.isJsonObject()) {
                     var rewardObj = rewardElement.getAsJsonObject();
-                    var rewardTypeElement = rewardObj.get("type");
-                    if (rewardTypeElement != null && rewardTypeElement.isJsonPrimitive()
-                            && rewardTypeElement.getAsString().equals("puffish_skill_leveling:per_level_rewards")) {
-                        var data = rewardObj.getAsJsonObject("data");
-                        if (data != null) {
+                    var typeElement = rewardObj.get("type");
+                    if (typeElement != null && typeElement.isJsonPrimitive()
+                            && typeElement.getAsString().equals("puffish_skill_leveling:per_level_rewards")) {
+                        var dataElement = rewardObj.get("data");
+                        if (dataElement != null && dataElement.isJsonObject()) {
+                            var data = dataElement.getAsJsonObject();
+
+                            // Inject missing fields from top level
                             if (maxSkillLevel.isPresent() && !data.has("max_skill_level")) {
                                 data.add("max_skill_level", maxSkillLevel.get().getJson());
+                            }
+                            if (maxLevels.isPresent() && !data.has("max_levels")) {
+                                data.add("max_levels", maxLevels.get().getJson());
                             }
                             if (pointsPerLevel.isPresent() && !data.has("points_per_level")) {
                                 data.add("points_per_level", pointsPerLevel.get().getJson());
@@ -101,18 +107,20 @@ public abstract class SkillDefinitionConfigMixin {
     @Inject(method = "parse(Ljava/lang/String;Lnet/puffish/skillsmod/api/json/JsonObject;Lnet/puffish/skillsmod/api/config/ConfigContext;)Lnet/puffish/skillsmod/api/util/Result;", at = @At("RETURN"))
     private static void onParseReturn(String id, JsonObject rootObject, ConfigContext context,
             CallbackInfoReturnable<Result<Optional<SkillDefinitionConfig>, Problem>> cir) {
-        // Check if this is an addon skill before storing config
-        var typeString = rootObject.get("type").getSuccess()
-                .flatMap(e -> e.getAsString().getSuccess());
+
+        var typeResult = rootObject.get("type").getSuccess();
+        if (typeResult.isEmpty()) {
+            return;
+        }
+
+        var typeString = typeResult.flatMap(e -> e.getAsString().getSuccess());
         if (typeString.isEmpty() || !isAddonType(typeString.get())) {
-            // Not an addon skill - don't store in leveled config
             return;
         }
 
         Result<Optional<SkillDefinitionConfig>, Problem> result = cir.getReturnValue();
         result.getSuccess().ifPresent(optConfig -> {
             optConfig.ifPresent(config -> {
-                // Store leveled config in external storage using skill ID as key
                 rootObject.get("max_skill_level").getSuccess()
                         .or(() -> rootObject.get("max_levels").getSuccess())
                         .flatMap(e -> e.getAsInt().getSuccess())
@@ -123,10 +131,8 @@ public abstract class SkillDefinitionConfigMixin {
                             boolean merge = rootObject.get("merge_description").getSuccess()
                                     .flatMap(e -> e.getAsBoolean().getSuccess()).orElse(false);
 
-                            // Parse prerequisite_skills array
                             List<LeveledConfigStorage.RequiredSkillEntry> requiredSkillsList = new ArrayList<>();
                             rootObject.getArray("prerequisite_skills").ifSuccess(arr -> {
-
                                 var jsonArr = arr.getJson();
                                 for (int i = 0; i < jsonArr.size(); i++) {
                                     var elem = jsonArr.get(i);
@@ -144,9 +150,17 @@ public abstract class SkillDefinitionConfigMixin {
                                 }
                             });
 
+                            String lootMode = rootObject.get("loot_mode").getSuccess()
+                                    .flatMap(e -> e.getAsString().getSuccess())
+                                    .orElse(null);
+
+                            String categoryId = rootObject.get("category_id").getSuccess()
+                                    .flatMap(e -> e.getAsString().getSuccess())
+                                    .orElse(null);
+
                             LeveledConfigStorage.put(id,
                                     new LeveledConfigStorage.LeveledConfig(maxLevels, points, merge,
-                                            requiredSkillsList));
+                                            requiredSkillsList, lootMode, categoryId));
                         });
             });
         });

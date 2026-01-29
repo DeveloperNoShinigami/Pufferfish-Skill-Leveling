@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Stores skill levels synchronized from the server for display in the UI.
  */
 public class ClientSkillLevelStorage {
-    private static final Map<String, Integer> skillLevels = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> baseSkillLevels = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> totalSkillLevels = new ConcurrentHashMap<>();
     private static final Map<String, Integer> skillMaxLevels = new ConcurrentHashMap<>();
     private static final Map<String, Integer> skillPointsPerLevel = new ConcurrentHashMap<>();
 
@@ -20,15 +21,18 @@ public class ClientSkillLevelStorage {
         return categoryId + ":" + skillId;
     }
 
-    public static void setLevel(String categoryId, String skillId, int level, int maxLevel, int pointsPerLevel) {
+    public static void setLevel(String categoryId, String skillId, int baseLevel, int totalLevel, int maxLevel,
+            int pointsPerLevel) {
         String key = getKey(categoryId, skillId);
-        if (level <= 0) {
+        if (baseLevel <= 0 && totalLevel <= 0) {
             // Level 0 means skill is locked/reset - remove from cache
-            skillLevels.remove(key);
+            baseSkillLevels.remove(key);
+            totalSkillLevels.remove(key);
             skillMaxLevels.remove(key);
             skillPointsPerLevel.remove(key);
         } else {
-            skillLevels.put(key, level);
+            baseSkillLevels.put(key, baseLevel);
+            totalSkillLevels.put(key, totalLevel);
             skillMaxLevels.put(key, maxLevel);
             skillPointsPerLevel.put(key, pointsPerLevel);
         }
@@ -51,7 +55,18 @@ public class ClientSkillLevelStorage {
         if (key == null) {
             return 0;
         }
-        return skillLevels.getOrDefault(key, 0);
+        return baseSkillLevels.getOrDefault(key, 0);
+    }
+
+    /**
+     * Get TOTAL level by definition ID.
+     */
+    public static int getTotalLevelByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        if (key == null) {
+            return 0;
+        }
+        return totalSkillLevels.getOrDefault(key, 0);
     }
 
     /**
@@ -60,9 +75,16 @@ public class ClientSkillLevelStorage {
     public static int getMaxLevelByDefinitionId(String definitionId) {
         String key = definitionToKey.get(definitionId);
         if (key == null) {
-            return 1;
+            return 0; // Changed default from 1 to 0 for better leveled check
         }
-        return skillMaxLevels.getOrDefault(key, 1);
+        return skillMaxLevels.getOrDefault(key, 0);
+    }
+
+    /**
+     * Check if a skill definition is a leveled skill (max level > 1)
+     */
+    public static boolean isLeveledByDefinitionId(String definitionId) {
+        return getMaxLevelByDefinitionId(definitionId) > 1;
     }
 
     /**
@@ -77,9 +99,12 @@ public class ClientSkillLevelStorage {
     }
 
     public static int getLevel(String categoryId, String skillId) {
+        // Default to 0 (not unlocked)
+        return totalSkillLevels.getOrDefault(getKey(categoryId, skillId), 0);
+    }
 
-        // Default to 0 (not unlocked), not 1
-        return skillLevels.getOrDefault(getKey(categoryId, skillId), 0);
+    public static int getBaseLevel(String categoryId, String skillId) {
+        return baseSkillLevels.getOrDefault(getKey(categoryId, skillId), 0);
     }
 
     public static int getMaxLevel(String categoryId, String skillId) {
@@ -87,7 +112,7 @@ public class ClientSkillLevelStorage {
     }
 
     public static boolean hasLevelInfo(String categoryId, String skillId) {
-        return skillLevels.containsKey(getKey(categoryId, skillId));
+        return totalSkillLevels.containsKey(getKey(categoryId, skillId));
     }
 
     /**
@@ -95,7 +120,8 @@ public class ClientSkillLevelStorage {
      */
     public static void clearSkill(String categoryId, String skillId) {
         String key = getKey(categoryId, skillId);
-        skillLevels.remove(key);
+        baseSkillLevels.remove(key);
+        totalSkillLevels.remove(key);
         skillMaxLevels.remove(key);
     }
 
@@ -104,18 +130,73 @@ public class ClientSkillLevelStorage {
      */
     public static void clearCategory(String categoryId) {
         String prefix = categoryId + ":";
-        skillLevels.entrySet().removeIf(e -> e.getKey().startsWith(prefix));
-        skillMaxLevels.entrySet().removeIf(e -> e.getKey().startsWith(prefix));
+        baseSkillLevels.keySet().removeIf(k -> k.startsWith(prefix));
+        totalSkillLevels.keySet().removeIf(k -> k.startsWith(prefix));
+        skillMaxLevels.keySet().removeIf(k -> k.startsWith(prefix));
+    }
+
+    /**
+     * Calculate equipment bonus on the client side.
+     */
+    public static int getEquipmentBonus(String categoryId, String skillId) {
+        var client = net.minecraft.client.MinecraftClient.getInstance();
+        var player = client.player;
+        if (player == null) {
+            return 0;
+        }
+
+        int bonus = 0;
+        for (var slot : net.minecraft.entity.EquipmentSlot.values()) {
+            var stack = player.getEquippedStack(slot);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            var nbt = stack.getNbt();
+            if (nbt != null && nbt.contains("SkillLevelingImbued", 10)) {
+                var imbueNbt = nbt.getCompound("SkillLevelingImbued");
+                String imbueCategory = imbueNbt.getString("CategoryId");
+                String imbueSkill = imbueNbt.getString("SkillId");
+
+                if (imbueCategory != null && !imbueCategory.isEmpty()) {
+                    // ID ALIGNMENT FIX: ensure consistent identifier strings
+                    String normalizedImbueCategory = imbueCategory.contains(":") ? imbueCategory
+                            : "skillleveling_template:" + imbueCategory;
+                    String targetKey = categoryId.contains(":") ? categoryId
+                            : "skillleveling_template:" + categoryId;
+
+                    if (targetKey.equals(normalizedImbueCategory) && skillId.equals(imbueSkill)) {
+                        bonus += 1;
+                    }
+                }
+            }
+        }
+        return bonus;
+    }
+
+    /**
+     * Get equipment bonus by definition ID.
+     */
+    public static int getEquipmentBonusByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        if (key == null) {
+            return 0;
+        }
+        String[] parts = key.split(":", 2);
+        if (parts.length == 2) {
+            return getEquipmentBonus(parts[0], parts[1]);
+        }
+        return 0;
     }
 
     /**
      * Clear all level info (used on disconnect/logout).
      */
     public static void clearAll() {
-        skillLevels.clear();
+        baseSkillLevels.clear();
+        totalSkillLevels.clear();
         skillMaxLevels.clear();
         skillPointsPerLevel.clear();
         definitionToKey.clear();
     }
-
 }

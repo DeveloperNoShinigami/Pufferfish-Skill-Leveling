@@ -1,7 +1,5 @@
 package net.bluelotuscoding.skillleveling.manager;
 
-import net.bluelotuscoding.skillleveling.skills.LeveledSkill;
-import net.bluelotuscoding.skillleveling.item.TomeItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -9,9 +7,10 @@ import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.Skill;
 import net.bluelotuscoding.skillleveling.data.SkillLevelingDataManager;
 import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
-import net.bluelotuscoding.skillleveling.skills.LeveledSkill;
-import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
+import net.bluelotuscoding.skillleveling.SkillLevelingMod;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
@@ -41,14 +40,16 @@ public class SkillLevelingManager {
             .createIdentifier("skill_progress_update");
 
     private final SkillLevelingDataManager dataManager;
-    private final Map<String, LeveledSkill> leveledSkills;
+
     private final Map<Identifier, Map<String, PerLevelRewardsReward>> perLevelRewardsRewards;
     private MinecraftServer server;
     private boolean configurationsLoaded = false;
+    private boolean networkHandlerNullWarned = false;
+    // Track which definitionIds have been sent to which players to avoid redundant
+    // sends
 
     public SkillLevelingManager() {
         this.dataManager = new SkillLevelingDataManager();
-        this.leveledSkills = new ConcurrentHashMap<>();
         this.perLevelRewardsRewards = new ConcurrentHashMap<>();
     }
 
@@ -68,35 +69,60 @@ public class SkillLevelingManager {
      * without requiring screen refresh or reconnection.
      */
     public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
-            int currentLevel, int maxLevel) {
-        syncSkillLevelToClient(player, categoryId, skillId, currentLevel, maxLevel,
-                getPointsForLevel(categoryId, skillId, 1), null);
+            int baseLevel, int totalLevel, int maxLevel) {
+        String definitionId = null;
+        var category = net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId);
+        if (category.isPresent()) {
+            var skill = category.get().getSkill(skillId);
+            if (skill.isPresent()) {
+                // Access definitionId via reflection to be safe
+                try {
+                    var skillConfig = skill.get();
+                    var method = skillConfig.getClass().getMethod("definitionId");
+                    definitionId = (String) method.invoke(skillConfig);
+                } catch (Exception e) {
+                    definitionId = skillId;
+                }
+            }
+        }
+        syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel,
+                getPointsForLevel(categoryId, skillId, 1), definitionId);
     }
 
     public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
-            int currentLevel, int maxLevel, int pointsPerLevel) {
-        syncSkillLevelToClient(player, categoryId, skillId, currentLevel, maxLevel, pointsPerLevel, null);
+            int baseLevel, int totalLevel, int maxLevel, int pointsPerLevel) {
+        syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel, pointsPerLevel, null);
     }
 
     /**
      * CLIENT SYNC: Extended version with definition ID for description mapping.
      */
     public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
-            int currentLevel, int maxLevel, String definitionId) {
-        syncSkillLevelToClient(player, categoryId, skillId, currentLevel, maxLevel,
+            int baseLevel, int totalLevel, int maxLevel, String definitionId) {
+        syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel,
                 getPointsForLevel(categoryId, skillId, 1), definitionId);
     }
 
     public void syncSkillLevelToClient(ServerPlayerEntity player, Identifier categoryId, String skillId,
-            int currentLevel, int maxLevel, int pointsPerLevel, String definitionId) {
+            int baseLevel, int totalLevel, int maxLevel, int pointsPerLevel, String definitionId) {
         try {
             var networkHandler = SkillLevelingMod.getInstance().getNetworkHandler();
             if (networkHandler != null) {
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillLevelPacket(categoryId, skillId,
-                                currentLevel, maxLevel, pointsPerLevel, definitionId),
+                                baseLevel, totalLevel, maxLevel, pointsPerLevel, definitionId),
                         player);
 
+            } else {
+                try {
+                    if (!networkHandlerNullWarned) {
+                        SkillLevelingMod.getInstance().getLogger()
+                                .warn("NetworkHandler is null when attempting to sync skill level to "
+                                        + player.getName().getString() + " for " + categoryId + ":" + skillId);
+                        networkHandlerNullWarned = true;
+                    }
+                } catch (Exception ignored) {
+                }
             }
         } catch (Exception e) {
             var logger = SkillLevelingMod.getInstance().getLogger();
@@ -111,13 +137,42 @@ public class SkillLevelingManager {
             java.util.Map<Integer, String> levelDescriptions,
             java.util.Map<Integer, String> levelExtraDescriptions,
             boolean mergeDescription, int maxLevel) {
+        boolean imbueOnly = false;
+        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(definitionId);
+        if (config != null && config.lootMode != null) {
+            imbueOnly = config.lootMode.equals("imbue_only");
+        }
+
         try {
             var networkHandler = SkillLevelingMod.getInstance().getNetworkHandler();
             if (networkHandler != null) {
+                try {
+                    SkillLevelingMod.getInstance().getLogger()
+                            .info("[DEBUG] Preparing to send descriptions to " + player.getName().getString() + " -> "
+                                    + definitionId + " (levels=" + levelDescriptions.size() + ", extras="
+                                    + levelExtraDescriptions.size() + ")");
+                } catch (Exception ignored) {
+                }
+                try {
+                    SkillLevelingMod.getInstance().getLogger().info("[ADDON] Sending SyncSkillDescriptionsPacket to "
+                            + player.getName().getString() + " -> " + definitionId);
+                } catch (Exception ignored) {
+                }
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillDescriptionsPacket(
-                                definitionId, levelDescriptions, levelExtraDescriptions, mergeDescription, maxLevel),
+                                definitionId, levelDescriptions, levelExtraDescriptions, mergeDescription, maxLevel,
+                                imbueOnly),
                         player);
+            } else {
+                if (!networkHandlerNullWarned) {
+                    try {
+                        SkillLevelingMod.getInstance().getLogger()
+                                .warn("NetworkHandler is null when attempting to sync descriptions to "
+                                        + player.getName().getString() + " for definitionId=" + definitionId);
+                    } catch (Exception ignored) {
+                    }
+                    networkHandlerNullWarned = true;
+                }
             }
         } catch (Exception e) {
             var logger = SkillLevelingMod.getInstance().getLogger();
@@ -134,40 +189,111 @@ public class SkillLevelingManager {
      */
     public void syncAllSkillsToPlayer(ServerPlayerEntity player) {
         int syncedSkills = 0;
+        try {
+            SkillLevelingMod.getInstance().getLogger()
+                    .info("[ADDON] Starting full skill sync for player " + player.getName().getString()
+                            + " (registered skills="
+                            + perLevelRewardsRewards.values().stream().mapToInt(m -> m.size()).sum() + ")");
+        } catch (Exception ignored) {
+        }
 
-        // Iterate through all skills that have leveling enabled
-        for (LeveledSkill info : new java.util.ArrayList<>(leveledSkills.values())) {
-            try {
-                int currentLevel = getSkillLevel(player, info.getCategoryId(), info.getSkillId());
-
-                // Get PerLevelRewardsReward for descriptions
-                var rewardOpt = getPerLevelRewardsReward(info.getCategoryId(), info.getSkillId());
-                String definitionId = null;
-
-                if (rewardOpt.isPresent()) {
-                    var plr = rewardOpt.get();
-                    definitionId = plr.getSkillId(); // Definition ID is often same as skill ID
-
-                    // Sync descriptions for this skill (needed for tooltip display)
+        // Phase 1: Ensure clients have all per-level descriptions first (tooltips rely
+        // on these)
+        for (var entry : perLevelRewardsRewards.entrySet()) {
+            Identifier categoryId = entry.getKey();
+            for (var skillEntry : entry.getValue().entrySet()) {
+                String skillId = skillEntry.getKey();
+                PerLevelRewardsReward plr = skillEntry.getValue();
+                try {
                     var levelDescs = plr.getLevelDescriptions();
                     var extraDescs = plr.getLevelExtraDescriptions();
                     boolean merge = plr.isMergeDescription();
 
-                    if ((levelDescs != null && !levelDescs.isEmpty())
-                            ||
-                            (extraDescs != null && !extraDescs.isEmpty())) {
-                        syncDescriptionsToClient(player, definitionId, levelDescs, extraDescs, merge,
+                    // Always attempt to send descriptions on join so clients receive mapping
+                    // (some clients relied on this previously; sending empty maps is safe)
+                    Map<Integer, String> levelDescsSafe = levelDescs != null ? levelDescs
+                            : java.util.Collections.<Integer, String>emptyMap();
+                    Map<Integer, String> extraDescsSafe = extraDescs != null ? extraDescs
+                            : java.util.Collections.<Integer, String>emptyMap();
+                    // Try to resolve definitionId via reflection, fallback to skillId
+                    String definitionId = skillId;
+                    try {
+                        try {
+                            var skillsMod = net.puffish.skillsmod.SkillsMod.getInstance();
+                            var getCategoryMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod(
+                                    "getCategory",
+                                    Identifier.class);
+                            getCategoryMethod.setAccessible(true);
+                            var categoryConfigOpt = (java.util.Optional<?>) getCategoryMethod.invoke(skillsMod,
+                                    categoryId);
+
+                            if (categoryConfigOpt.isPresent()) {
+                                var categoryConfig = categoryConfigOpt.get();
+                                var skillsMethod = categoryConfig.getClass().getMethod("skills");
+                                var skillsConfig = skillsMethod.invoke(categoryConfig);
+
+                                var getByIdMethod = skillsConfig.getClass().getMethod("getById", String.class);
+                                var skillConfigOpt = (java.util.Optional<?>) getByIdMethod.invoke(skillsConfig,
+                                        skillId);
+
+                                if (skillConfigOpt.isPresent()) {
+                                    var skillConfig = skillConfigOpt.get();
+                                    definitionId = (String) skillConfig.getClass().getMethod("definitionId")
+                                            .invoke(skillConfig);
+                                }
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    } catch (Exception ignored) {
+                    }
+
+                    try {
+                        SkillLevelingMod.getInstance().getLogger()
+                                .info("[ADDON] Preparing descriptions for " + categoryId + "/" + skillId + " -> def="
+                                        + definitionId + " (levels=" + levelDescsSafe.size() + ", extras="
+                                        + extraDescsSafe.size() + ")");
+                    } catch (Exception ignored) {
+                    }
+                    // Send descriptions to client for both definitionId and skillId fallback
+                    syncDescriptionsToClient(player, definitionId, levelDescsSafe, extraDescsSafe, merge,
+                            plr.getMaxLevel());
+                    if (!definitionId.equals(skillId)) {
+                        syncDescriptionsToClient(player, skillId, levelDescsSafe, extraDescsSafe, merge,
                                 plr.getMaxLevel());
                     }
+                } catch (Exception e) {
+                    SkillLevelingMod.getInstance().getLogger()
+                            .error("Failed to sync descriptions for " + skillId + ": " + e.getMessage());
                 }
+            }
+        }
 
-                // Sync level info (always, even for level 0 skills)
-                syncSkillLevelToClient(player, info.getCategoryId(), info.getSkillId(),
-                        currentLevel, info.getMaxLevel(), definitionId);
-                syncedSkills++;
-            } catch (Exception e) {
-                SkillLevelingMod.getInstance().getLogger()
-                        .error("Failed to sync skill " + info.getSkillId() + ": " + e.getMessage());
+        // Phase 2: Send level info for ALL skills in ALL categories (Global Sync)
+        for (var category : net.puffish.skillsmod.api.SkillsAPI.streamCategories().toList()) {
+            Identifier categoryId = category.getId();
+            for (var skill : category.streamSkills().toList()) {
+                String skillId = skill.getId();
+                try {
+                    int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
+                    int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
+
+                    int maxLevel = getMaxLevel(categoryId, skillId);
+
+                    // Resolve definitionId for the level packet too
+                    String definitionId = skillId;
+                    try {
+                        var method = skill.getClass().getMethod("definitionId");
+                        definitionId = (String) method.invoke(skill);
+                    } catch (Exception ignored) {
+                    }
+
+                    syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel,
+                            definitionId);
+                    syncedSkills++;
+                } catch (Exception e) {
+                    SkillLevelingMod.getInstance().getLogger()
+                            .error("Failed to sync skill " + skillId + ": " + e.getMessage());
+                }
             }
         }
 
@@ -188,7 +314,9 @@ public class SkillLevelingManager {
     public void onServerReload(MinecraftServer server) {
         this.server = server;
         // Reload leveled skill configurations after datapack reload
-        loadLeveledSkillConfigurations();
+        this.configurationsLoaded = false;
+        this.perLevelRewardsRewards.clear();
+        ensureConfigurationsLoaded();
     }
 
     public void onServerStopping(MinecraftServer server) {
@@ -196,7 +324,7 @@ public class SkillLevelingManager {
     }
 
     public void onPlayerJoin(ServerPlayerEntity player) {
-        // CRITICAL: Ensure configurations are loaded before any skill lookups
+        // Ensure configurations are loaded before any skill lookups
         ensureConfigurationsLoaded();
 
         // Load player skill level data from disk
@@ -204,18 +332,35 @@ public class SkillLevelingManager {
 
         // AUTO-INITIALIZATION: Ensure all currently unlocked skills have level data in
         // our manager
-        // This handles skills unlocked before the addon was installed or when data is
-        // missing
-        for (LeveledSkill info : leveledSkills.values()) {
-            if (info.getBaseSkill().getState(player) == net.puffish.skillsmod.api.Skill.State.UNLOCKED) {
-                if (!hasSkillData(player, info.getCategoryId(), info.getSkillId())) {
-                    initializeSkillData(player, info.getCategoryId(), info.getSkillId());
-                }
+        try {
+            for (var entry : perLevelRewardsRewards.entrySet()) {
+                Identifier categoryId = entry.getKey();
+                net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId).ifPresent(category -> {
+                    for (String skillId : entry.getValue().keySet()) {
+                        category.getSkill(skillId).ifPresent(skill -> {
+                            if (skill.getState(player) == net.puffish.skillsmod.api.Skill.State.UNLOCKED) {
+                                // Check if this is an actual unlock or just an equipment bonus
+                                int equipmentBonus = calculateEquipmentBonus(player, categoryId, skillId);
+                                if (equipmentBonus == 0) {
+                                    if (!hasSkillData(player, categoryId, skillId)) {
+                                        initializeSkillData(player, categoryId, skillId);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
             }
+        } catch (Exception e) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .error("Error during onPlayerJoin auto-initialization: " + e.getMessage());
         }
 
         // Sync all skill levels and descriptions to client for UI display
         syncAllSkillsToPlayer(player);
+
+        // REFRESH REWARDS: Ensure imbued bonuses apply their attribute modifiers etc.
+        refreshAllRewards(player);
     }
 
     public void onPlayerLeave(ServerPlayerEntity player) {
@@ -257,11 +402,18 @@ public class SkillLevelingManager {
      * Get the PerLevelRewardsReward for a specific skill
      */
     public Optional<PerLevelRewardsReward> getPerLevelRewardsReward(Identifier categoryId, String skillId) {
-        if (!perLevelRewardsRewards.containsKey(categoryId)) {
-            return Optional.empty();
+        var catMap = perLevelRewardsRewards.get(categoryId);
+        if (catMap != null && catMap.containsKey(skillId)) {
+            return Optional.of(catMap.get(skillId));
         }
 
-        return Optional.ofNullable(perLevelRewardsRewards.get(categoryId).get(skillId));
+        // Lazy load and try again
+        ensureConfigurationsLoaded();
+        catMap = perLevelRewardsRewards.get(categoryId);
+        if (catMap != null) {
+            return Optional.ofNullable(catMap.get(skillId));
+        }
+        return Optional.empty();
     }
 
     /**
@@ -283,7 +435,11 @@ public class SkillLevelingManager {
 
         // Get the skill from the category
         var skill = category.get().getSkill(skillId);
-        if (skill.isEmpty() || skill.get().getState(player) != Skill.State.UNLOCKED) {
+        if (skill.isEmpty()) {
+            return false;
+        }
+        Skill.State state = skill.get().getState(player);
+        if (state != Skill.State.UNLOCKED && state != Skill.State.AFFORDABLE && state != Skill.State.AVAILABLE) {
             return false;
         }
 
@@ -292,30 +448,70 @@ public class SkillLevelingManager {
     }
 
     /**
-     * Get the current level of a skill for a player
+     * Get the TOTAL skill level (Base + Equipment Bonus)
      */
-    public int getSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
-        // Return 0 if base skill is not unlocked
-        var categoryOpt = SkillsAPI.getCategory(categoryId);
-        if (categoryOpt.isEmpty()) {
-            return 0;
-        }
+    public int getTotalSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
+        int bonusLevel = calculateEquipmentBonus(player, categoryId, skillId);
+        return baseLevel + bonusLevel;
+    }
 
-        var skill = categoryOpt.get().getSkill(skillId);
-        if (skill.isEmpty() || skill.get().getState(player) != Skill.State.UNLOCKED) {
-            return 0;
-        }
-
+    /**
+     * Get only the base (purchased/persisted) skill level.
+     */
+    public int getBaseSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         // Try to get from Mixin first as it's the most "live" during a session
         var ext = getCategoryDataExtension(player, categoryId);
         if (ext != null) {
-            int level = ext.addon$getSkillLevel(skillId);
-            if (level > 0) {
-                return level;
+            return ext.addon$getSkillLevel(skillId);
+        }
+
+        // FALLBACK: always check persisted storage
+        return dataManager.getSkillLevel(player, categoryId, skillId);
+    }
+
+    /**
+     * @deprecated Use {@link #getTotalSkillLevel} or {@link #getBaseSkillLevel}
+     */
+    @Deprecated
+    public int getSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        return getTotalSkillLevel(player, categoryId, skillId);
+    }
+
+    /**
+     * Calculate additional skill levels granted by equipped items.
+     * Scans main hand, off hand, and armor slots.
+     */
+    public int calculateEquipmentBonus(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        int bonus = 0;
+
+        // Scan all equipment slots
+        for (var slot : net.minecraft.entity.EquipmentSlot.values()) {
+            ItemStack stack = player.getEquippedStack(slot);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            NbtCompound nbt = stack.getNbt();
+            if (nbt != null && nbt.contains("SkillLevelingImbued", net.minecraft.nbt.NbtElement.COMPOUND_TYPE)) {
+                NbtCompound imbueNbt = nbt.getCompound("SkillLevelingImbued");
+                String imbueCategory = imbueNbt.getString("CategoryId");
+                String imbueSkill = imbueNbt.getString("SkillId");
+
+                if (imbueCategory != null && !imbueCategory.isEmpty()) {
+                    String normalizedImbueCategory = imbueCategory.contains(":") ? imbueCategory
+                            : "skillleveling_template:" + imbueCategory;
+                    String normalizedTargetCategory = categoryId.toString(); // Identifier.toString() always includes
+                                                                             // namespace
+
+                    if (normalizedTargetCategory.equals(normalizedImbueCategory) && skillId.equals(imbueSkill)) {
+                        bonus += 1;
+                    }
+                }
             }
         }
 
-        return dataManager.getSkillLevel(player, categoryId, skillId);
+        return bonus;
     }
 
     /**
@@ -429,9 +625,105 @@ public class SkillLevelingManager {
     /**
      * Ensure configurations are loaded (lazy-load if not yet loaded)
      */
-    private void ensureConfigurationsLoaded() {
-        if (!configurationsLoaded && server != null) {
-            loadLeveledSkillConfigurations();
+    public void ensureConfigurationsLoaded() {
+        if (configurationsLoaded) {
+            return;
+        }
+
+        SkillLevelingMod.getInstance().getLogger().info("[CONFIG LOAD] Starting configuration discovery...");
+
+        try {
+            var mod = net.puffish.skillsmod.SkillsMod.getInstance();
+            if (mod == null) {
+                SkillLevelingMod.getInstance().getLogger().error("[CONFIG LOAD] SkillsMod instance is null!");
+                return;
+            }
+
+            int categoryCount = 0;
+            int skillCount = 0;
+
+            for (var category : net.puffish.skillsmod.api.SkillsAPI.streamCategories().toList()) {
+                try {
+                    Identifier categoryId = category.getId();
+                    SkillLevelingMod.getInstance().getLogger().info("[CONFIG LOAD] Processing category: " + categoryId);
+                    categoryCount++;
+
+                    var getCategoryMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("getCategory",
+                            Identifier.class);
+                    getCategoryMethod.setAccessible(true);
+                    var categoryConfigOpt = (java.util.Optional<?>) getCategoryMethod.invoke(mod, categoryId);
+
+                    if (categoryConfigOpt.isPresent()) {
+                        var categoryConfig = categoryConfigOpt.get();
+
+                        // Access internal configuration structures via reflection to avoid API
+                        // limitations
+                        var skillsMethod = categoryConfig.getClass().getMethod("skills");
+                        var skillsConfig = skillsMethod.invoke(categoryConfig);
+
+                        var definitionsMethod = categoryConfig.getClass().getMethod("definitions");
+                        var definitionsConfig = definitionsMethod.invoke(categoryConfig);
+
+                        for (var skill : category.streamSkills().toList()) {
+                            try {
+                                String skillId = skill.getId();
+                                var skillConfigOpt = (java.util.Optional<?>) skillsConfig.getClass()
+                                        .getMethod("getById", String.class).invoke(skillsConfig, skillId);
+
+                                if (skillConfigOpt.isPresent()) {
+                                    var skillConfig = skillConfigOpt.get();
+                                    String defId = (String) skillConfig.getClass().getMethod("definitionId")
+                                            .invoke(skillConfig);
+
+                                    var defOpt = (java.util.Optional<?>) definitionsConfig.getClass()
+                                            .getMethod("getById", String.class).invoke(definitionsConfig, defId);
+                                    if (defOpt.isPresent()) {
+                                        var definition = defOpt.get();
+                                        var rewards = (java.util.Collection<?>) definition.getClass()
+                                                .getMethod("rewards").invoke(definition);
+
+                                        for (Object rewardObj : rewards) {
+                                            var rewardInstance = rewardObj.getClass().getMethod("instance")
+                                                    .invoke(rewardObj);
+                                            if (rewardInstance instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
+                                                registerPerLevelRewardsReward(categoryId, skillId, plr);
+                                                skillCount++;
+                                                SkillLevelingMod.getInstance().getLogger()
+                                                        .debug("[CONFIG LOAD] Registered PLR for: " + categoryId + "/"
+                                                                + skillId + " (maxLevel=" + plr.getMaxLevel() + ")");
+
+                                                // (reverted) do not send descriptions here; keep join-time sync logic
+                                                // simple
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (Exception e) {
+                                SkillLevelingMod.getInstance().getLogger()
+                                        .error("[CONFIG LOAD] Failed to process skill: " + skill.getId() + " - "
+                                                + e.getMessage());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    SkillLevelingMod.getInstance().getLogger()
+                            .error("[CONFIG LOAD] Failed to process category: " + e.getMessage());
+                }
+            }
+
+            SkillLevelingMod.getInstance().getLogger().info("[CONFIG LOAD] Discovery complete: " + categoryCount
+                    + " categories, " + skillCount + " skills registered");
+            configurationsLoaded = true;
+            // Sync to all online players now that configs are loaded
+            if (this.server != null) {
+                for (ServerPlayerEntity player : this.server.getPlayerManager().getPlayerList()) {
+                    syncAllSkillsToPlayer(player);
+                }
+            }
+        } catch (Exception e) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .error("Failed to discover leveled skill configurations: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -451,7 +743,7 @@ public class SkillLevelingManager {
     }
 
     /**
-     * Advance a skill to the next level for a player
+     * Advance a skill to the next level for a player (overloaded for convenience)
      */
     public boolean advanceSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         return advanceSkillLevel(player, categoryId, skillId, false);
@@ -467,8 +759,12 @@ public class SkillLevelingManager {
      */
     public boolean advanceSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId,
             boolean bypassPrerequisites) {
+        // Lazy-load configurations if not yet loaded
+        ensureConfigurationsLoaded();
+
         var category = SkillsAPI.getCategory(categoryId);
         if (category.isEmpty()) {
+            SkillLevelingMod.getInstance().getLogger().warn("[TOME DEBUG] Category not found: " + categoryId);
             return false;
         }
 
@@ -479,19 +775,30 @@ public class SkillLevelingManager {
 
         // For admin bypass, allow advancing even if skill is not unlocked yet
         if (!bypassPrerequisites && skill.get().getState(player) != Skill.State.UNLOCKED) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("Cannot advance " + skillId + ": Skill not unlocked and not bypassing");
             return false;
         }
 
-        int currentLevel = getSkillLevel(player, categoryId, skillId);
-        int newLevel = currentLevel + 1;
+        // Check for prerequisites and affordability based on BASE level
+        int currentBaseLevel = getBaseSkillLevel(player, categoryId, skillId);
+        int newBaseLevel = currentBaseLevel + 1;
         int maxLevel = getMaxLevel(categoryId, skillId);
 
-        if (newLevel > maxLevel) {
+        SkillLevelingMod.getInstance().getLogger().info("[TOME DEBUG] Advancing " + skillId + ": currentBase="
+                + currentBaseLevel + ", newBase=" + newBaseLevel + ", max=" + maxLevel + ", bypass="
+                + bypassPrerequisites);
+
+        if (newBaseLevel > maxLevel) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("Cannot advance " + skillId + ": already at max level " + maxLevel);
             return false;
         }
 
         // Check if advancement is allowed (skip if bypassing prerequisites)
-        if (!bypassPrerequisites && !canAdvanceToLevel(player, categoryId, skillId, newLevel)) {
+        if (!bypassPrerequisites && !canAdvanceToLevel(player, categoryId, skillId, newBaseLevel)) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("Cannot advance " + skillId + ": requirements not met and not bypassing");
             return false;
         }
 
@@ -499,24 +806,36 @@ public class SkillLevelingManager {
         // We just need to ensure the client is notified of the level change
         // so it recalculates its own spent points.
 
-        dataManager.setSkillLevel(player, categoryId, skillId, newLevel);
+        dataManager.setSkillLevel(player, categoryId, skillId, newBaseLevel);
 
         // Also update the Mixin data for immediate point calculation updates
         var ext = getCategoryDataExtension(player, categoryId);
         if (ext != null) {
             ext.addon$setOwner(player);
             ext.addon$setCategoryId(categoryId);
-            ext.addon$setSkillLevel(skillId, newLevel);
+            ext.addon$setSkillLevel(skillId, newBaseLevel);
         }
 
         // Trigger rewards for the new level
-        triggerLevelRewards(player, categoryId, skillId, newLevel);
+        triggerLevelRewards(player, categoryId, skillId, newBaseLevel);
 
         // REAL-TIME SYNC: Immediately notify client of level advancement
-        syncSkillLevelToClient(player, categoryId, skillId, newLevel, maxLevel);
+        // Sync TOTAL level to client for UI
+        int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
+        int totalLevel = getSkillLevel(player, categoryId, skillId);
+        syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel);
 
-        // Force full category sync to update client UI (points display, skill states)
-        forceFullCategorySync(player, categoryId);
+        // Ensure the core Skills mod updates its UI/state (points/spent calculation)
+        try {
+            net.puffish.skillsmod.SkillsMod.getInstance().updateAllCategories(player);
+        } catch (Exception ignored) {
+        }
+
+        // Sync our category points to the client as well
+        try {
+            syncCategoryPoints(player, categoryId);
+        } catch (Exception ignored) {
+        }
 
         return true;
     }
@@ -541,10 +860,10 @@ public class SkillLevelingManager {
             return false;
         }
 
-        int currentLevel = getSkillLevel(player, categoryId, skillId);
+        int currentBaseLevel = getBaseSkillLevel(player, categoryId, skillId);
 
         // If we're setting a level higher than current, check requirements
-        if (level > currentLevel && !canAdvanceToLevel(player, categoryId, skillId, level)) {
+        if (level > currentBaseLevel && !canAdvanceToLevel(player, categoryId, skillId, level)) {
             return false;
         }
 
@@ -559,29 +878,99 @@ public class SkillLevelingManager {
         }
 
         // Trigger rewards for ALL levels between old and new (not just the final one)
-        if (level > currentLevel) {
-            for (int lvl = currentLevel + 1; lvl <= level; lvl++) {
+        if (level > currentBaseLevel) {
+            for (int lvl = currentBaseLevel + 1; lvl <= level; lvl++) {
                 triggerLevelRewards(player, categoryId, skillId, lvl);
             }
-        } else if (level < currentLevel) {
+        } else if (level < currentBaseLevel) {
             // Deactivate rewards for levels being removed
-            for (int lvl = currentLevel; lvl > level; lvl--) {
+            for (int lvl = currentBaseLevel; lvl > level; lvl--) {
                 deactivateLevelRewards(player, categoryId, skillId, lvl);
             }
         }
 
         // REAL-TIME SYNC: Immediately notify client of level change
-        syncSkillLevelToClient(player, categoryId, skillId, level, maxLevel);
+        // Sync TOTAL level to client for UI
+        int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
+        int totalLevel = getSkillLevel(player, categoryId, skillId);
+        syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel);
 
-        // Force full category sync to update client UI (points display, skill states)
-        forceFullCategorySync(player, categoryId);
+        // Ensure the core Skills mod updates its UI/state (points/spent calculation)
+        try {
+            net.puffish.skillsmod.SkillsMod.getInstance().updateAllCategories(player);
+        } catch (Exception ignored) {
+        }
+
+        // Sync our category points to the client as well
+        try {
+            syncCategoryPoints(player, categoryId);
+        } catch (Exception ignored) {
+        }
+
+        // removed forceFullCategorySync to prevent stuttering
 
         return true;
     }
 
+    /**
+     * REWARD REFRESH: Re-applies all skill rewards for a player.
+     * Use this when equipment changes or when sync issues occur.
+     */
+    public void refreshAllRewards(ServerPlayerEntity player) {
+        for (var entry : perLevelRewardsRewards.entrySet()) {
+            Identifier categoryId = entry.getKey();
+            for (var skillEntry : entry.getValue().entrySet()) {
+                String skillId = skillEntry.getKey();
+                PerLevelRewardsReward plr = skillEntry.getValue();
+
+                int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
+                SkillLevelingMod.getInstance().getLogger()
+                        .debug("[REWARD] Refreshing " + skillId + " to level " + totalLevel);
+                // Trigger update with the new total level.
+                // Action is true here (even though it's a refresh) to force Pufferfish
+                // attribute rewards to re-evaluate and apply/revert attribute modifiers.
+                plr.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, totalLevel, true));
+            }
+        }
+
+        // SYNC FIX: Force attribute sync to client after all rewards have been updated.
+        // This ensures that health, armor, and other visual attributes update in
+        // real-time.
+        syncPlayerAttributes(player);
+    }
+
+    /**
+     * ATTRIBUTE SYNC: Sends an attribute update packet to the client.
+     * This ensures that changes to attributes like max_health are reflected
+     * in the player's UI immediately, not just on the server.
+     */
+    private void syncPlayerAttributes(ServerPlayerEntity player) {
+        if (player == null || player.networkHandler == null) {
+            return;
+        }
+
+        // AGGRESSIVE SYNC: Use getTracked() instead of getAttributesToSend()
+        // This sends ALL attributes that are capable of being synced (health, speed,
+        // etc.)
+        // even if Minecraft doesn't think they are "dirty". This is necessary for
+        // reliable realtime hearts.
+        var attributesToSync = player.getAttributes().getTracked();
+        if (!attributesToSync.isEmpty()) {
+            player.networkHandler.sendPacket(
+                    new net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket(
+                            player.getId(), attributesToSync));
+        }
+
+        // HEALTH REFRESH: Force the client to recalculate hearts by triggering a health
+        // update.
+        // This ensures heart segments (red/empty) are redrawn correctly.
+        player.setHealth(player.getHealth());
+    }
+
     private boolean canAdvanceToLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        // Check if player meets level requirements
-        if (!meetsLevelRequirements(player, categoryId, skillId, level)) {
+        // Check if player meets level requirements (using our custom prerequisite
+        // check)
+        if (!checkSkillPrerequisites(player.getUuid(), categoryId, skillId)) {
             return false;
         }
 
@@ -598,6 +987,76 @@ public class SkillLevelingManager {
     /**
      * Refund one level of a skill for a player
      */
+    /**
+     * Check if refunding a skill to a lower level would break prerequisites for
+     * other skills.
+     * 
+     * @return List of blocking skill names, or empty list if safe.
+     */
+    public List<String> checkPrerequisites(ServerPlayerEntity player, Identifier categoryId, String skillId,
+            int targetLevel) {
+        var blockingSkills = new ArrayList<String>();
+        try {
+            // Check mod-bundled prerequisites
+            for (var entry : perLevelRewardsRewards.entrySet()) {
+                Identifier depCategoryId = entry.getKey();
+                for (var depEntry : entry.getValue().entrySet()) {
+                    String depSkillId = depEntry.getKey();
+                    var depReward = depEntry.getValue();
+
+                    if (depCategoryId.equals(categoryId) && depSkillId.equals(skillId))
+                        continue;
+
+                    for (var prereq : depReward.getRequiredSkills()) {
+                        String prereqSkillId = prereq.getSkillId();
+                        Identifier prereqCategory = prereq.getCategoryId() != null
+                                ? new Identifier(prereq.getCategoryId())
+                                : categoryId;
+
+                        if (!prereqSkillId.equals(skillId))
+                            continue;
+                        if (!prereqCategory.equals(categoryId))
+                            continue;
+
+                        int requiredLevel = prereq.getLevel();
+                        if (targetLevel < requiredLevel) {
+                            int depCurrentLevel = getSkillLevel(player, depCategoryId, depSkillId);
+                            if (depCurrentLevel > 0) {
+                                blockingSkills.add(
+                                        (depCategoryId.equals(categoryId) ? "" : (depCategoryId + ":")) + depSkillId);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Check config-defined prerequisites
+            var leveledEntries = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.getAllEntries();
+            for (var e : leveledEntries.entrySet()) {
+                String depSkillId = e.getKey();
+                var cfg = e.getValue();
+                for (var req : cfg.requiredSkills) {
+                    if (req.skillId.equals(skillId)) {
+                        if (targetLevel < req.minLevel) {
+                            Identifier depCategory = cfg.categoryId != null ? new Identifier(cfg.categoryId)
+                                    : categoryId;
+                            int depCurrentLevel = getSkillLevel(player, depCategory, depSkillId);
+                            if (depCurrentLevel > 0) {
+                                blockingSkills.add(depSkillId);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            SkillLevelingMod.getInstance().getLogger().error("Error checking prerequisites: " + e.getMessage());
+        }
+        return blockingSkills;
+    }
+
+    /**
+     * Refund one level of a skill for a player
+     */
     public boolean refundSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         var category = SkillsAPI.getCategory(categoryId);
         if (category.isEmpty()) {
@@ -605,21 +1064,39 @@ public class SkillLevelingManager {
         }
 
         var skill = category.get().getSkill(skillId);
-        if (skill.isEmpty() || skill.get().getState(player) != Skill.State.UNLOCKED) {
+        if (skill.isEmpty()) {
             return false;
         }
 
-        int currentLevel = getSkillLevel(player, categoryId, skillId);
+        Skill.State state = skill.get().getState(player);
+        if (state != Skill.State.UNLOCKED && state != Skill.State.AFFORDABLE && state != Skill.State.AVAILABLE) {
+            return false;
+        }
 
-        if (currentLevel <= 0) {
+        int currentBaseLevel = getBaseSkillLevel(player, categoryId, skillId);
+
+        if (currentBaseLevel <= 0) {
             // Cannot refund below level 0
             return false;
         }
 
-        int newLevel = currentLevel - 1;
+        // Atomic check for next level
+        var blockers = checkPrerequisites(player, categoryId, skillId, currentBaseLevel - 1);
+        if (!blockers.isEmpty()) {
+            String joined = String.join(", ", blockers);
+            player.sendMessage(net.minecraft.text.Text.translatable("skillleveling.refund.blocked_by_prereq", joined)
+                    .formatted(net.minecraft.util.Formatting.RED), false);
+            try {
+                player.closeHandledScreen();
+            } catch (Exception ignored) {
+            }
+            return false;
+        }
+
+        int newLevel = currentBaseLevel - 1;
 
         // Deactivate rewards for the level being refunded
-        deactivateLevelRewards(player, categoryId, skillId, currentLevel);
+        deactivateLevelRewards(player, categoryId, skillId, currentBaseLevel);
 
         // DO NOT MANUALLY REFUND POINTS HERE
         // The CategoryDataMixin dynamic getSpentPoints handles the refund automatically
@@ -637,13 +1114,25 @@ public class SkillLevelingManager {
         }
 
         // REAL-TIME SYNC: Immediately notify client of level refund
-        syncSkillLevelToClient(player, categoryId, skillId, newLevel,
-                getMaxLevel(categoryId, skillId));
+        // Sync TOTAL level to client for UI
+        int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
+        int totalLevel = getSkillLevel(player, categoryId, skillId);
+        int maxLevel = getMaxLevel(categoryId, skillId);
+        syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel);
 
-        // Force full category sync to update client UI (points display, skill states)
-        // This replaces the addPoints(..., 0) hack which only synced points, not skill
-        // states
-        forceFullCategorySync(player, categoryId);
+        // Ensure the core Skills mod updates its UI/state (points/spent calculation)
+        try {
+            net.puffish.skillsmod.SkillsMod.getInstance().updateAllCategories(player);
+        } catch (Exception ignored) {
+        }
+
+        // Sync our category points to the client as well
+        try {
+            syncCategoryPoints(player, categoryId);
+        } catch (Exception ignored) {
+        }
+
+        // removed forceFullCategorySync to prevent stuttering
 
         return true;
     }
@@ -808,62 +1297,6 @@ public class SkillLevelingManager {
         return checkSkillPrerequisites(player, categoryId, skillId);
     }
 
-    @SuppressWarnings("unchecked")
-    private void loadLeveledSkillConfigurations() {
-        leveledSkills.clear();
-        perLevelRewardsRewards.clear();
-        configurationsLoaded = false; // Reset for reload
-
-        try {
-            var categoriesField = net.puffish.skillsmod.SkillsMod.class.getDeclaredField("categories");
-            categoriesField.setAccessible(true);
-            var changeListener = (net.puffish.skillsmod.util.ChangeListener<java.util.Optional<java.util.Map<Identifier, net.puffish.skillsmod.config.CategoryConfig>>>) categoriesField
-                    .get(net.puffish.skillsmod.SkillsMod.getInstance());
-
-            var categoriesOptional = changeListener.get();
-            if (categoriesOptional == null || categoriesOptional.isEmpty()) {
-                SkillLevelingMod.getInstance().getLogger()
-                        .warn("No categories found in Skills mod - leveling features may be disabled");
-                return;
-            }
-
-            var categories = categoriesOptional.get();
-            int loadedCount = 0;
-
-            for (var category : categories.values()) {
-                Identifier categoryId = category.id();
-                for (var definition : category.definitions().getAll()) {
-                    String id = definition.id();
-
-                    for (var reward : definition.rewards()) {
-                        if (reward.instance() instanceof PerLevelRewardsReward perReward) {
-                            registerPerLevelRewardsReward(categoryId, id, perReward);
-
-                            final String finalId = id;
-                            final Identifier finalCategoryId = categoryId;
-
-                            var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage
-                                    .get(id);
-                            int maxLevel = leveledConfig != null ? leveledConfig.maxLevels : perReward.getMaxLevel();
-
-                            SkillsAPI.getCategory(categoryId)
-                                    .flatMap(cat -> cat.getSkill(finalId))
-                                    .ifPresent(skill -> leveledSkills.put(finalId,
-                                            new LeveledSkill(skill, finalCategoryId, finalId, maxLevel)));
-                            loadedCount++;
-                        }
-                    }
-                }
-            }
-            configurationsLoaded = true; // Mark as loaded
-            SkillLevelingMod.getInstance().getLogger()
-                    .info("Successfully loaded " + loadedCount + " leveled skill configurations");
-        } catch (ReflectiveOperationException e) {
-            SkillLevelingMod.getInstance().getLogger()
-                    .error("Failed to access internal categories via reflection: " + e.getMessage());
-        }
-    }
-
     // ================================================
     // TOME HANDLERS
     // ================================================
@@ -917,9 +1350,9 @@ public class SkillLevelingManager {
 
             // LOG XP FOR DEBUGGING
             SkillLevelingMod.getInstance().getLogger().info(
-                    "[TOME DEBUG] Before: Level=" + currentLevel +
-                            ", TotalXP=" + totalXpNow +
-                            ", XPNeededForNext=" + xpNeeded);
+                    "[TOME DEBUG] Before: Level=" + currentLevel
+                            + ", TotalXP=" + totalXpNow
+                            + ", XPNeededForNext=" + xpNeeded);
 
             // Grant the experience
             experience.addTotal(player, xpNeeded);
@@ -934,10 +1367,10 @@ public class SkillLevelingManager {
             int expectedNextLevelXp = experience.getRequiredTotal(newLevel + 1);
 
             SkillLevelingMod.getInstance().getLogger().info(
-                    "[TOME DEBUG] After: Level=" + newLevel +
-                            ", TotalXP=" + newTotalXp +
-                            ", ExpectedLevel=" + (currentLevel + 1) +
-                            ", NextLevelTargetXP=" + expectedNextLevelXp);
+                    "[TOME DEBUG] After: Level=" + newLevel
+                            + ", TotalXP=" + newTotalXp
+                            + ", ExpectedLevel=" + (currentLevel + 1)
+                            + ", NextLevelTargetXP=" + expectedNextLevelXp);
 
             player.sendMessage(net.minecraft.text.Text.translatable(
                     "skillleveling.tome.level_up", newLevel)
@@ -963,10 +1396,9 @@ public class SkillLevelingManager {
             return false;
         }
 
-        int pointsToRefund = getPointsForLevel(categoryId, skillId, currentLevel);
         boolean success = refundSkillLevel(player, categoryId, skillId);
         if (success) {
-            syncCategoryPoints(player, categoryId, pointsToRefund);
+            syncCategoryPoints(player, categoryId);
             SkillLevelingMod.getInstance().getLogger()
                     .info("Tome of Clear Mind: Player "
                             + player.getName().getString()
@@ -984,6 +1416,15 @@ public class SkillLevelingManager {
         if (currentLevel <= 0) {
             SkillLevelingMod.getInstance().getLogger()
                     .warn("Tome of Greater Clear Mind: Skill " + skillId + " is already at level 0");
+            return false;
+        }
+
+        // ATOMIC CHECK: Verify FULL reset to 0 is possible manually
+        var blockers = checkPrerequisites(player, categoryId, skillId, 0);
+        if (!blockers.isEmpty()) {
+            String joined = String.join(", ", blockers);
+            player.sendMessage(net.minecraft.text.Text.translatable("skillleveling.refund.blocked_by_prereq", joined)
+                    .formatted(net.minecraft.util.Formatting.RED), false);
             return false;
         }
 
@@ -1024,7 +1465,10 @@ public class SkillLevelingManager {
         try {
             var categoryOpt = net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId);
             if (categoryOpt.isPresent()) {
-                categoryOpt.get().addPoints(player, net.puffish.skillsmod.util.PointSources.COMMANDS, 0);
+                // DO NOT add points here! The point recalculation happens automatically
+                // when we reduce the skill level in dataManager.
+                // categoryOpt.get().addPoints(player,
+                // net.puffish.skillsmod.util.PointSources.COMMANDS, pointsRefunded);
 
                 if (pointsRefunded > 0) {
                     player.sendMessage(net.minecraft.text.Text.translatable(
@@ -1066,7 +1510,7 @@ public class SkillLevelingManager {
      * This is the central dispatcher for tome functionality.
      */
     public void processTomeAction(ServerPlayerEntity player, Identifier categoryId, String skillId,
-            TomeItem.TomeType tomeType) {
+            net.bluelotuscoding.skillleveling.item.TomeItem.TomeType tomeType) {
         switch (tomeType) {
             case PROGRESSION:
                 handleTomeOfProgression(player, categoryId);
@@ -1112,15 +1556,20 @@ public class SkillLevelingManager {
     public void syncAllSkillsInCategory(ServerPlayerEntity player, Identifier categoryId) {
         try {
             var categoryOpt = net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId);
-            if (categoryOpt.isEmpty())
+            if (categoryOpt.isEmpty()) {
                 return;
+            }
 
             var category = categoryOpt.get();
             category.streamSkills().forEach(skill -> {
                 String skillId = skill.getId();
+                // CRITICAL FIX: Use getSkillLevel instead of dataManager.getSkillLevel
                 int level = getSkillLevel(player, categoryId, skillId);
                 int maxLevel = getMaxLevel(categoryId, skillId);
-                syncSkillLevelToClient(player, categoryId, skillId, level, maxLevel);
+
+                // Sync ALL skills, even those at level 0, to ensure bonuses clear in UI
+                int totalLevel = getSkillLevel(player, categoryId, skillId);
+                syncSkillLevelToClient(player, categoryId, skillId, level, totalLevel, maxLevel);
             });
         } catch (Exception e) {
             SkillLevelingMod.getInstance().getLogger()

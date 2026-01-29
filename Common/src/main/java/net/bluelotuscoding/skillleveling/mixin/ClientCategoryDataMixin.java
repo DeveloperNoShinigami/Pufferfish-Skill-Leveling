@@ -45,7 +45,7 @@ public abstract class ClientCategoryDataMixin {
             int baseCost = (definition != null) ? definition.cost() : 1;
 
             if (ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)) {
-                int level = ClientSkillLevelStorage.getLevel(categoryId, skillId);
+                int level = ClientSkillLevelStorage.getBaseLevel(categoryId, skillId);
 
                 // Use synced points_per_level if available, fallback to base cost
                 int pointsPerLevel = ClientSkillLevelStorage.getPointsPerLevelByDefinitionId(skill.definitionId());
@@ -55,7 +55,6 @@ public abstract class ClientCategoryDataMixin {
 
                 totalSpent += level * pointsPerLevel;
             } else {
-
                 // Fallback: check if skill is unlocked in base states (counts as 1 level)
                 Skill.State state = skillStates.get(skillId);
                 if (state == Skill.State.UNLOCKED) {
@@ -81,24 +80,35 @@ public abstract class ClientCategoryDataMixin {
         String categoryId = config.id().toString();
         String skillId = skill.id();
 
-        if (ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)) {
-            int currentLevel = ClientSkillLevelStorage.getLevel(categoryId, skillId);
-            int maxLevel = ClientSkillLevelStorage.getMaxLevel(categoryId, skillId);
+        // 1. Get current levels and max level
+        int bonus = ClientSkillLevelStorage.getEquipmentBonus(categoryId, skillId);
+        int baseLevel = ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)
+                ? ClientSkillLevelStorage.getBaseLevel(categoryId, skillId)
+                : 0;
+        int maxLevel = ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)
+                ? ClientSkillLevelStorage.getMaxLevel(categoryId, skillId)
+                : 1;
+        int totalLevel = baseLevel + bonus;
 
-            if (currentLevel >= maxLevel && currentLevel > 0) {
-                // AT MAX LEVEL - show as UNLOCKED (highlighted/completed)
-                cir.setReturnValue(Skill.State.UNLOCKED);
-            } else if (currentLevel > 0 && currentLevel < maxLevel) {
-                // Not at max level yet - show as purchasable
-                Skill.State originalState = skillStates.get(skillId);
-                if (originalState == Skill.State.UNLOCKED) {
-                    // It IS unlocked in Pufferfish, but we want it to look buyable in our UI
-                    if (isAffordable(skill)) {
-                        cir.setReturnValue(Skill.State.AFFORDABLE);
-                    } else {
-                        cir.setReturnValue(Skill.State.AVAILABLE);
-                    }
+        // 2. Decide State
+        if (totalLevel >= maxLevel && maxLevel > 0) {
+            // AT MAX LEVEL - show as UNLOCKED (highlighted/completed)
+            cir.setReturnValue(Skill.State.UNLOCKED);
+            return;
+        }
+
+        // 3. If not maxed, but we have some progress
+        if (totalLevel > 0 || ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)) {
+            if (baseLevel < maxLevel) {
+                // Not at max base level yet - show as purchasable
+                if (isAffordable(skill)) {
+                    cir.setReturnValue(Skill.State.AFFORDABLE);
+                } else {
+                    cir.setReturnValue(Skill.State.AVAILABLE);
                 }
+            } else {
+                // Base level is maxed, but total isn't (maybe gear penalty? or just maxed)
+                cir.setReturnValue(Skill.State.UNLOCKED);
             }
         }
     }

@@ -1,6 +1,5 @@
 package net.bluelotuscoding.skillleveling.config;
 
-import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.json.JsonObject;
 import java.util.Map;
 import java.util.HashMap;

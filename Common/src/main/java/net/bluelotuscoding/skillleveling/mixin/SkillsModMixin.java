@@ -147,8 +147,9 @@ public abstract class SkillsModMixin {
                     // Sync to client
                     var mod = SkillLevelingMod.getInstance();
                     if (mod != null) {
+                        int totalLevel = mod.getSkillLevelingManager().getTotalSkillLevel(player, categoryId, skillId);
                         mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, newLevel,
-                                maxLevel);
+                                totalLevel, maxLevel);
                     }
 
                     ci.cancel(); // Don't let original run - we handled it
@@ -180,7 +181,7 @@ public abstract class SkillsModMixin {
             var mod = SkillLevelingMod.getInstance();
             if (mod != null) {
                 // Send level 0 to indicate locked
-                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, 0, 1, 0);
+                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, 0, 0, 1, 0);
 
             }
         } catch (Exception e) {
@@ -245,9 +246,11 @@ public abstract class SkillsModMixin {
                     }
                 }
 
+                int totalLevel = mod.getSkillLevelingManager().getTotalSkillLevel(player, categoryId, skillId);
                 // Send our sync packet with the correct level, max level, and points per level
                 int pointsPerLevelFinal = (perLevelReward != null) ? perLevelReward.getPointsPerLevel() : 1;
-                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, level, maxLevel,
+                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, level, totalLevel,
+                        maxLevel,
                         pointsPerLevelFinal, definitionId);
 
                 // On first unlock (level 1), also sync descriptions to client
@@ -295,7 +298,7 @@ public abstract class SkillsModMixin {
 
             // Sync level=0 for all skills in the category
             for (var skill : categoryConfig.skills().getAll()) {
-                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skill.id(), 0, 1);
+                mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skill.id(), 0, 0, 1);
             }
         } catch (Exception e) {
             var logger = SkillLevelingMod.getInstance().getLogger();
@@ -330,8 +333,10 @@ public abstract class SkillsModMixin {
                                 }
                             }
                         }
+                        int totalLevel = mod.getSkillLevelingManager().getTotalSkillLevel(player, category.id(),
+                                skill.id());
                         mod.getSkillLevelingManager().syncSkillLevelToClient(player, category.id(), skill.id(), level,
-                                maxLevel, skill.definitionId());
+                                totalLevel, maxLevel, skill.definitionId());
                     }
                 }
             }

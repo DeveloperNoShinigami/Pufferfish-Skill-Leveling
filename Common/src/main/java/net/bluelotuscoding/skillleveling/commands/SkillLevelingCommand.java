@@ -167,6 +167,22 @@ public class SkillLevelingCommand {
                                                                                                 .executes(SkillLevelingCommand::showPrerequisites))))
                                                 // CATEGORYLEVEL: Set player's category level (calculates XP needed)
                                                 .then(CommandManager.literal("categorylevel")
+                                                                .then(CommandManager.literal("sync")
+                                                                                .then(CommandManager
+                                                                                                .argument("player",
+                                                                                                                EntityArgumentType
+                                                                                                                                .player())
+                                                                                                .then(CommandManager
+                                                                                                                .argument(
+                                                                                                                                "category",
+                                                                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
+                                                                                                                                                .category())
+                                                                                                                .then(CommandManager
+                                                                                                                                .argument("skill",
+                                                                                                                                                net.puffish.skillsmod.commands.arguments.SkillArgumentType
+                                                                                                                                                                .skillFromCategory(
+                                                                                                                                                                                "category"))
+                                                                                                                                .executes(SkillLevelingCommand::forceSync)))))
                                                                 .then(CommandManager
                                                                                 .argument("player", EntityArgumentType
                                                                                                 .player())
@@ -234,8 +250,10 @@ public class SkillLevelingCommand {
                         // Sync to client
                         var addon = SkillLevelingMod.getInstance();
                         if (addon != null) {
+                                int totalLevel = addon.getSkillLevelingManager().getSkillLevel(player, category.getId(),
+                                                skill.getId());
                                 addon.getSkillLevelingManager().syncSkillLevelToClient(player, category.getId(),
-                                                skill.getId(), targetLevel, maxLevel);
+                                                skill.getId(), targetLevel, totalLevel, maxLevel);
                         }
 
                         String skillName = skill.getId().replace("_", " ");
@@ -302,8 +320,10 @@ public class SkillLevelingCommand {
                         // Sync our addon's level display
                         var addon = SkillLevelingMod.getInstance();
                         if (addon != null) {
+                                int totalLevel = addon.getSkillLevelingManager().getSkillLevel(player, category.getId(),
+                                                skill.getId());
                                 addon.getSkillLevelingManager().syncSkillLevelToClient(player, category.getId(),
-                                                skill.getId(), newLevel, maxLevel);
+                                                skill.getId(), newLevel, totalLevel, maxLevel);
                         }
 
                         String skillName = skill.getId().replace("_", " ");
@@ -429,6 +449,60 @@ public class SkillLevelingCommand {
                 if (addon != null) {
                         return addon.getSkillLevelingManager().getMaxLevel(categoryId, skillId);
                 }
+                return 1;
+        }
+
+        /**
+         * Force-sync level and descriptions to a player for debugging.
+         */
+        private static int forceSync(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+                var source = context.getSource();
+                var player = EntityArgumentType.getPlayer(context, "player");
+                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
+                                "category");
+                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
+                                "skill", category);
+
+                var addon = SkillLevelingMod.getInstance();
+                if (addon == null) {
+                        source.sendError(Text.literal("§cAddon not initialized"));
+                        return 0;
+                }
+
+                var manager = addon.getSkillLevelingManager();
+
+                int currentLevel = getLevel(player, category.getId(), skill.getId());
+                int maxLevel = getMaxLevel(category.getId(), skill.getId());
+
+                int totalLevel = manager.getSkillLevel(player, category.getId(), skill.getId());
+                // Send level update (base and total)
+                manager.syncSkillLevelToClient(player, category.getId(), skill.getId(), currentLevel, totalLevel,
+                                maxLevel);
+
+                // Send descriptions if available
+                var reward = manager.getPerLevelRewardsReward(category.getId(), skill.getId());
+                if (reward.isPresent()) {
+                        var plr = reward.get();
+                        // Try to obtain definitionId via reflection; fallback to skill id
+                        String definitionId = null;
+                        try {
+                                var method = skill.getClass().getMethod("definitionId");
+                                definitionId = (String) method.invoke(skill);
+                        } catch (Exception e) {
+                                try {
+                                        definitionId = skill.getId();
+                                } catch (Exception ignored) {
+                                }
+                        }
+
+                        if (definitionId != null) {
+                                manager.syncDescriptionsToClient(player, definitionId, plr.getLevelDescriptions(),
+                                                plr.getLevelExtraDescriptions(), plr.isMergeDescription(),
+                                                plr.getMaxLevel());
+                        }
+                }
+
+                source.sendMessage(Text.literal("§aForced sync sent"));
                 return 1;
         }
 

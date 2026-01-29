@@ -1,6 +1,6 @@
 {
   "test_warrior": {
-    "type": "puffish_skill_leveling:default",
+    "type": "puffish_skills:default",
     "title": "Test Warrior",
     "description": "A multi-level combat skill",
     "icon": {
@@ -93,7 +93,7 @@
     }
   },
   "test_mage": {
-    "type": "puffish_skill_leveling:stackable",
+    "type": "puffish_skills:stackable",
     "title": "Test Mage",
     "description": "A multi-level magic skill",
     "icon": {
@@ -162,7 +162,7 @@
     }
   },
   "test_magic_swordsman": {
-    "type": "puffish_skill_leveling:default",
+    "type": "puffish_skills:default",
     "title": "Test Magic Swordsman",
     "description": "A hybrid skill requiring both Test Warrior and Test Mage",
     "icon": {

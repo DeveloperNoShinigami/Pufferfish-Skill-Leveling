@@ -18,18 +18,25 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * ADDON COMPONENT: Manages persistent data for skill levels across server restarts
+ * ADDON COMPONENT: Manages persistent data for skill levels across server
+ * restarts
  * 
- * This is a complete refactor from the fork version - instead of modifying the Skills mod's
- * internal data structures, this creates a separate, parallel data storage system that tracks
- * skill levels independently. This allows us to work ALONGSIDE the official Skills mod rather
+ * This is a complete refactor from the fork version - instead of modifying the
+ * Skills mod's
+ * internal data structures, this creates a separate, parallel data storage
+ * system that tracks
+ * skill levels independently. This allows us to work ALONGSIDE the official
+ * Skills mod rather
  * than replacing it.
  * 
  * KEY DESIGN DECISIONS:
- * - Uses separate data files (skill_leveling_data/) to avoid conflicts with Skills mod data
- * - Maintains player UUID -> category -> skill -> level mapping for fast lookups
+ * - Uses separate data files (skill_leveling_data/) to avoid conflicts with
+ * Skills mod data
+ * - Maintains player UUID -> category -> skill -> level mapping for fast
+ * lookups
  * - Thread-safe concurrent data structures for multiplayer server support
- * - Graceful defaults (level 1) when Skills mod reports a skill as unlocked but we have no data
+ * - Graceful defaults (level 1) when Skills mod reports a skill as unlocked but
+ * we have no data
  */
 public class SkillLevelingDataManager {
 
@@ -38,13 +45,13 @@ public class SkillLevelingDataManager {
     private final Map<UUID, Map<Identifier, Map<String, Integer>>> playerSkillLevels;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private Path dataDir;
-    
+
     public SkillLevelingDataManager() {
         // THREAD-SAFE COLLECTIONS: Essential for multiplayer servers where multiple
         // players might be advancing skills simultaneously
         this.playerSkillLevels = new ConcurrentHashMap<>();
     }
-    
+
     /**
      * ADDON INITIALIZATION: Sets up our independent data storage system
      * 
@@ -57,7 +64,7 @@ public class SkillLevelingDataManager {
         dataDir = server.getRunDirectory().toPath().resolve("skill_leveling_data");
         try {
             Files.createDirectories(dataDir);
-            
+
             // STARTUP DATA LOADING: Pre-load all existing player data for performance
             // This prevents file I/O lag when players join and try to check skill levels
             Files.list(dataDir)
@@ -70,7 +77,8 @@ public class SkillLevelingDataManager {
                                 playerSkillLevels.put(uuid, readPlayerData(path));
                             } catch (Exception e) {
                                 // GRACEFUL ERROR HANDLING: Corrupted data files don't crash the server
-                                System.err.println("Failed to load skill leveling data for " + name + ": " + e.getMessage());
+                                System.err.println(
+                                        "Failed to load skill leveling data for " + name + ": " + e.getMessage());
                             }
                         }
                     });
@@ -122,11 +130,12 @@ public class SkillLevelingDataManager {
         }
         playerSkillLevels.forEach(this::writePlayerData);
     }
-    
+
     /**
      * CORE LEVEL RETRIEVAL: Gets the current level of a skill for a player
      * 
-     * CRITICAL ADDON BEHAVIOR: This method bridges our level data with the Skills mod's
+     * CRITICAL ADDON BEHAVIOR: This method bridges our level data with the Skills
+     * mod's
      * unlock state. We only return meaningful levels for skills that the Skills mod
      * reports as unlocked. If a skill is locked in the Skills mod, we effectively
      * ignore our level data and return 0.
@@ -139,9 +148,9 @@ public class SkillLevelingDataManager {
         return playerSkillLevels
                 .computeIfAbsent(player.getUuid(), k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(categoryId, k -> new ConcurrentHashMap<>())
-                .getOrDefault(skillId, 1); // DEFAULT TO LEVEL 1: Base unlock level
+                .getOrDefault(skillId, 0); // DEFAULT TO 0: not unlocked unless we explicitly initialize
     }
-    
+
     /**
      * LEVEL ADVANCEMENT: Sets a new level for a skill
      * 
@@ -155,7 +164,7 @@ public class SkillLevelingDataManager {
                 .computeIfAbsent(categoryId, k -> new ConcurrentHashMap<>())
                 .put(skillId, level);
     }
-    
+
     /**
      * BULK OPERATIONS: Category-level data access for admin commands and UI
      * 
@@ -179,6 +188,9 @@ public class SkillLevelingDataManager {
         var playerData = playerSkillLevels.get(player.getUuid());
         if (playerData != null) {
             playerData.remove(categoryId);
+            // PERSIST RESET: Immediately save to disk so rejoin doesn't restore data
+            writePlayerData(player.getUuid(), playerData);
+
             // CLEANUP: If player has no skill data left, remove their entry entirely
             if (playerData.isEmpty()) {
                 playerSkillLevels.remove(player.getUuid());
@@ -192,7 +204,7 @@ public class SkillLevelingDataManager {
      * These handle the actual file I/O operations for our separate data storage.
      * Uses JSON format for human readability and debugging convenience.
      */
-    
+
     private Path getPlayerPath(UUID uuid) {
         return dataDir.resolve(uuid.toString() + ".json");
     }
@@ -200,7 +212,8 @@ public class SkillLevelingDataManager {
     /**
      * JSON DESERIALIZATION: Converts saved data back to in-memory structures
      * 
-     * Handles the Identifier parsing carefully since they have namespace:path format.
+     * Handles the Identifier parsing carefully since they have namespace:path
+     * format.
      * This is critical for compatibility with modded Skills mod configurations that
      * might use custom namespaces for their categories and skills.
      */
@@ -217,7 +230,8 @@ public class SkillLevelingDataManager {
                             try {
                                 skills.put(e.getKey(), e.getValue().getAsInt());
                             } catch (Exception ex) {
-                                // GRACEFUL DEGRADATION: Skip corrupted skill entries rather than failing entirely
+                                // GRACEFUL DEGRADATION: Skip corrupted skill entries rather than failing
+                                // entirely
                                 System.err.println("Skipping corrupted skill entry: " + e.getKey());
                             }
                         });
@@ -241,14 +255,14 @@ public class SkillLevelingDataManager {
         if (dataDir == null || data.isEmpty()) {
             return; // Don't create empty files
         }
-        
+
         JsonObject root = new JsonObject();
         for (var entry : data.entrySet()) {
             JsonObject skills = new JsonObject();
             entry.getValue().forEach(skills::addProperty);
             root.add(entry.getKey().toString(), skills);
         }
-        
+
         Path path = getPlayerPath(uuid);
         try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
             gson.toJson(root, writer);
@@ -256,7 +270,7 @@ public class SkillLevelingDataManager {
             System.err.println("Failed to save player skill data to " + path + ": " + e.getMessage());
         }
     }
-    
+
     /**
      * DATA EXISTENCE CHECK: Determines if we have level data for a skill
      * 

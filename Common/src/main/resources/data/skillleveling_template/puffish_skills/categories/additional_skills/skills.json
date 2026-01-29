@@ -1,0 +1,14 @@
+{
+    "lootable_berserker": {
+        "definition": "lootable_berserker",
+        "x": 0,
+        "y": 0,
+        "root": true
+    },
+    "imbued_vitality": {
+        "definition": "imbued_vitality",
+        "x": 64,
+        "y": 0,
+        "root": true
+    }
+}

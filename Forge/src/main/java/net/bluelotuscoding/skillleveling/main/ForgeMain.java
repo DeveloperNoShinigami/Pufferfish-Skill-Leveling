@@ -1,30 +1,27 @@
 package net.bluelotuscoding.skillleveling.main;
 
-import net.minecraftforge.event.AddReloadListenerEvent;
+import net.bluelotuscoding.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.item.SkillTomeItem;
+import net.bluelotuscoding.skillleveling.item.TomeItem;
+import net.bluelotuscoding.skillleveling.registry.ModItems;
+import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import net.bluelotuscoding.skillleveling.SkillLevelingMod;
-import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
-import net.bluelotuscoding.skillleveling.item.TomeItem;
-import net.bluelotuscoding.skillleveling.registry.ModItems;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 
 /**
  * Forge main class for the Skill Leveling addon
@@ -43,26 +40,41 @@ public class ForgeMain {
                         "tome_of_clear_mind", ModItems::createTomeOfClearMind);
         public static final RegistryObject<TomeItem> TOME_OF_GREATER_CLEAR_MIND = ITEMS.register(
                         "tome_of_greater_clear_mind", ModItems::createTomeOfGreaterClearMind);
+        public static final RegistryObject<SkillTomeItem> SKILL_TOME = ITEMS.register(
+                        "skill_tome", ModItems::createSkillTome);
 
         // Deferred Register for creative tabs
         public static final DeferredRegister<ItemGroup> CREATIVE_TABS = DeferredRegister.create(
                         Registries.ITEM_GROUP.getKey(), SkillLevelingMod.MOD_ID);
 
-        // Our custom creative tab
-        public static final RegistryObject<ItemGroup> SKILL_LEVELING_TAB = CREATIVE_TABS.register(
-                        "skill_leveling_tab",
+        // Base Tomes Tab
+        public static final RegistryObject<ItemGroup> BASE_TOMES_TAB = CREATIVE_TABS.register(
+                        "base_tomes_tab",
                         () -> ItemGroup.builder()
                                         .icon(() -> new ItemStack(TOME_OF_PROGRESSION.get()))
-                                        .displayName(Text.translatable("itemGroup.puffish_skill_leveling"))
+                                        .displayName(Text.translatable("itemGroup.puffish_skill_leveling_base"))
                                         .entries((displayContext, entries) -> {
-                                                entries.add(TOME_OF_PROGRESSION.get());
-                                                entries.add(TOME_OF_CLEAR_MIND.get());
-                                                entries.add(TOME_OF_GREATER_CLEAR_MIND.get());
+                                                ModItems.fillBaseTomesTab(entries::add);
+                                        })
+                                        .build());
+
+        // Skill Tomes Tab
+        public static final RegistryObject<ItemGroup> SKILL_TOMES_TAB = CREATIVE_TABS.register(
+                        "skill_tomes_tab",
+                        () -> ItemGroup.builder()
+                                        .withTabsBefore(BASE_TOMES_TAB.getId())
+                                        .icon(() -> new ItemStack(SKILL_TOME.get()))
+                                        .displayName(Text.translatable("itemGroup.puffish_skill_leveling_tomes"))
+                                        .entries((displayContext, entries) -> {
+                                                ModItems.fillSkillTomesTab(entries::add);
                                         })
                                         .build());
 
         public ForgeMain() {
                 IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+                // Initialize common addon logic
+                SkillLevelingMod.init();
 
                 // Register items and creative tabs
                 ITEMS.register(modEventBus);
@@ -73,59 +85,75 @@ public class ForgeMain {
         }
 
         private void setup(FMLCommonSetupEvent event) {
+                // Initializing ModItems references
+                ModItems.TOME_OF_PROGRESSION = TOME_OF_PROGRESSION.get();
+                ModItems.TOME_OF_CLEAR_MIND = TOME_OF_CLEAR_MIND.get();
+                ModItems.TOME_OF_GREATER_CLEAR_MIND = TOME_OF_GREATER_CLEAR_MIND.get();
+                ModItems.SKILL_TOME = SKILL_TOME.get();
+
+                // Initialize and register the Forge network channel
                 net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler.init();
-                SkillLevelingMod.init();
-                SkillLevelingMod.getInstance()
-                                .setNetworkHandler(new net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler());
 
-                // Populate ModItems references
-                event.enqueueWork(() -> {
-                        ModItems.TOME_OF_PROGRESSION = TOME_OF_PROGRESSION.get();
-                        ModItems.TOME_OF_CLEAR_MIND = TOME_OF_CLEAR_MIND.get();
-                        ModItems.TOME_OF_GREATER_CLEAR_MIND = TOME_OF_GREATER_CLEAR_MIND.get();
-                });
-        }
-
-        @SubscribeEvent
-        public void onCommandsRegister(RegisterCommandsEvent event) {
-                SkillLevelingCommand.register(event.getDispatcher());
-        }
-
-        @SubscribeEvent
-        public void onServerStarting(ServerStartingEvent event) {
-                SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStarting(event.getServer());
-        }
-
-        @SubscribeEvent
-        public void onServerStopping(ServerStoppingEvent event) {
-                SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStopping(event.getServer());
-        }
-
-        @SubscribeEvent
-        public void onAddReloadListener(AddReloadListenerEvent event) {
-                // Hook into datapack reload to re-load addon configurations after Pufferfish
-                // loads
-                event.addListener(
-                                (net.minecraft.resource.SynchronousResourceReloader) resourceManager -> {
-                                        var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
-                                        var server = manager.getServer().orElse(null);
-                                        if (server != null) {
-                                                manager.onServerReload(server);
-                                        }
-                                });
-        }
-
-        @SubscribeEvent
-        public void onPlayerJoin(PlayerLoggedInEvent event) {
-                if (event.getEntity() instanceof ServerPlayerEntity player) {
-                        SkillLevelingMod.getInstance().getSkillLevelingManager().onPlayerJoin(player);
+                // Set the network handler instance on the addon so manager sync calls use it
+                try {
+                        SkillLevelingMod.getInstance().setNetworkHandler(
+                                        new net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler());
+                } catch (Exception e) {
+                        SkillLevelingMod.getInstance().getLogger()
+                                        .error("Failed to set Forge network handler: " + e.getMessage());
                 }
+
+                // No delayed tick handling required - rely on immediate syncs
         }
 
-        @SubscribeEvent
-        public void onPlayerLeave(PlayerLoggedOutEvent event) {
-                if (event.getEntity() instanceof ServerPlayerEntity player) {
-                        SkillLevelingMod.getInstance().getSkillLevelingManager().onPlayerLeave(player);
+        @Mod.EventBusSubscriber(modid = SkillLevelingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+        public static class ForgeEvents {
+                @SubscribeEvent
+                public static void onRegisterCommands(RegisterCommandsEvent event) {
+                        SkillLevelingCommand.register(event.getDispatcher());
+                }
+
+                @SubscribeEvent
+                public static void onPlayerJoin(
+                                net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
+                        if (event.getEntity() instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
+                                SkillLevelingMod.getInstance().getSkillLevelingManager().onPlayerJoin(serverPlayer);
+                        }
+                }
+
+                @SubscribeEvent
+                public static void onServerStarting(net.minecraftforge.event.server.ServerStartingEvent event) {
+                        SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStarting(event.getServer());
+                }
+
+                @SubscribeEvent
+                public static void onServerStopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
+                        SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStopping(event.getServer());
+                }
+
+                @SubscribeEvent
+                public static void onEquipmentChange(
+                                net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent event) {
+                        if (event.getEntity() instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
+                                ItemStack from = event.getFrom();
+                                ItemStack to = event.getTo();
+
+                                boolean fromImbued = from.hasNbt()
+                                                && from.getNbt().contains("SkillLevelingImbued",
+                                                                net.minecraft.nbt.NbtElement.COMPOUND_TYPE);
+                                boolean toImbued = to.hasNbt()
+                                                && to.getNbt().contains("SkillLevelingImbued",
+                                                                net.minecraft.nbt.NbtElement.COMPOUND_TYPE);
+
+                                if (fromImbued || toImbued) {
+                                        // CRITICAL FIX: Refresh attributes on equipment change
+                                        SkillLevelingMod.getInstance().getSkillLevelingManager()
+                                                        .refreshAllRewards(serverPlayer);
+                                        // Then sync UI levels
+                                        SkillLevelingMod.getInstance().getSkillLevelingManager()
+                                                        .syncAllSkillsToPlayer(serverPlayer);
+                                }
+                        }
                 }
         }
 }

@@ -80,7 +80,7 @@ public class SkillPointManager {
             return 0;
         }
 
-        int currentLevel = manager.getSkillLevel(player, categoryId, skillId);
+        int currentLevel = manager.getBaseSkillLevel(player, categoryId, skillId);
         int levelsToGain = Math.max(0, targetLevel - currentLevel);
 
         return levelsToGain * pointsPerLevel;

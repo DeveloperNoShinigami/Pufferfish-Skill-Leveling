@@ -231,8 +231,9 @@ public class TomePendingActionManager {
             return true;
         }
 
-        // Check if player has the skill unlocked
-        int currentLevel = SkillLevelingMod.getInstance().getSkillLevel(player, action.categoryId, matchedSkillId);
+        // Check if player has the skill unlocked (use base level for gear-independent
+        // refund check)
+        int currentLevel = SkillLevelingMod.getInstance().getBaseSkillLevel(player, action.categoryId, matchedSkillId);
         if (currentLevel <= 0) {
             player.sendMessage(
                     Text.literal("§cYou don't have any levels in skill '" + toTitleCase(matchedSkillId) + "'."), false);
@@ -260,7 +261,7 @@ public class TomePendingActionManager {
     }
 
     private static boolean processAmountInput(ServerPlayerEntity player, PendingTomeAction action, String input) {
-        int currentLevel = SkillLevelingMod.getInstance().getSkillLevel(player, action.categoryId, action.skillId);
+        int currentLevel = SkillLevelingMod.getInstance().getBaseSkillLevel(player, action.categoryId, action.skillId);
 
         int amount;
         if (input.equals("all")) {
@@ -279,6 +280,19 @@ public class TomePendingActionManager {
 
         if (amount < 1 || amount > currentLevel) {
             player.sendMessage(Text.literal("§cInvalid amount. Please enter 1-" + currentLevel + " or 'all'."), false);
+            return true;
+        }
+
+        // ATOMIC CHECK: Verify if refunding 'amount' levels is possible
+        // Calculate target level: currentLevel - amount
+        int targetLevel = currentLevel - amount;
+        var blockers = SkillLevelingMod.getInstance().getSkillLevelingManager()
+                .checkPrerequisites(player, action.categoryId, action.skillId, targetLevel);
+
+        if (!blockers.isEmpty()) {
+            String joined = String.join(", ", blockers);
+            player.sendMessage(Text.translatable("skillleveling.refund.blocked_by_prereq", joined)
+                    .formatted(net.minecraft.util.Formatting.RED), false);
             return true;
         }
 

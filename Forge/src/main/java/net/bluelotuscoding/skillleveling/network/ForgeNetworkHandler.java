@@ -51,11 +51,21 @@ public class ForgeNetworkHandler implements NetworkHandler {
 
     @Override
     public void sendToPlayer(SyncSkillLevelPacket packet, ServerPlayerEntity player) {
+        try {
+            SkillLevelingMod.getInstance().getLogger().info("Sending SyncSkillLevelPacket to " + player.getName().getString());
+        } catch (Exception ignored) {
+        }
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     @Override
     public void sendToPlayer(SyncSkillDescriptionsPacket packet, ServerPlayerEntity player) {
+        try {
+            SkillLevelingMod.getInstance().getLogger().info("Sending SyncSkillDescriptionsPacket to " + player.getName().getString()
+                    + " -> " + packet.getDefinitionId() + " (levels=" + packet.getLevelDescriptions().size() + ", extras="
+                    + packet.getLevelExtraDescriptions().size() + ")");
+        } catch (Exception ignored) {
+        }
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 }

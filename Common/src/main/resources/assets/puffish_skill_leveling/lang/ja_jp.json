@@ -9,4 +9,5 @@
   "skillleveling.command.needs_params": "スキルの進行には特定のスキルパラメータが必要です",
   "skillleveling.command.use_gui": "スキルとやり取りするにはコアスキルGUIを使用してください",
   "skillleveling.command.player_only": "このコマンドはプレイヤーのみが使用できます"
+  ,"skillleveling.refund.blocked_by_prereq": "返還を行えません：次のスキルがこれに依存しているため、先に返還してください： %s"
 }

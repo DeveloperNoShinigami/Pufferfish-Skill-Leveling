@@ -36,13 +36,18 @@ public class ClientSkillDefinitionConfigMixin {
             ClientSkillDefinitionConfig self = (ClientSkillDefinitionConfig) (Object) this;
             String defId = self.id();
 
-            if (!ClientDescriptionStorage.hasDescriptions(defId)) {
-                return; // No custom descriptions, keep original
-            }
-
             Text originalDesc = cir.getReturnValue();
-            int currentLevel = ClientSkillLevelStorage.getLevelByDefinitionId(defId);
-            int maxLevel = ClientDescriptionStorage.getMaxLevel(defId);
+            int baseLevel = ClientSkillLevelStorage.getLevelByDefinitionId(defId);
+            int totalLevel = ClientSkillLevelStorage.getTotalLevelByDefinitionId(defId);
+            int bonusLevel = totalLevel - baseLevel;
+            int currentLevel = totalLevel;
+            int maxLevel = Math.max(ClientDescriptionStorage.getMaxLevel(defId),
+                    ClientSkillLevelStorage.getMaxLevelByDefinitionId(defId));
+
+            // If we have no level info and no descriptions, keep original
+            if (currentLevel <= 0 && !ClientDescriptionStorage.hasDescriptions(defId) && maxLevel <= 1) {
+                return;
+            }
 
             MutableText result = Text.empty();
 
@@ -52,26 +57,50 @@ public class ClientSkillDefinitionConfigMixin {
                 result.append(Text.literal("\n"));
             }
 
-            // 2. Add level indicator + dynamic description
-            if (currentLevel <= 0) {
-                // Not unlocked - show level 0/X only (no preview in main desc)
-                result.append(Text.literal("§7Level 0/" + maxLevel + "\n"));
-            } else {
-                // Unlocked - show current level
-                String levelIndicator = "§6Level " + currentLevel + "/" + maxLevel;
-                if (currentLevel >= maxLevel) {
-                    levelIndicator += " §c§lMAX";
-                }
-                result.append(Text.literal(levelIndicator + "\n"));
+            // 2. Add level indicator (Base + Bonus)
+            // ONLY show if maxLevel > 1 (leveled skill)
+            if (maxLevel > 1) {
+                if (currentLevel <= 0) {
+                    // Not unlocked - show level 0/X only
+                    result.append(Text.literal("§7Base Level: 0/" + maxLevel + "\n"));
+                } else {
+                    // Unlocked - show Base vs Bonus breakdown
+                    // COLOR FIX: Use Gold only for MAX level, Yellow/White for partial
+                    String color = (currentLevel >= maxLevel) ? "§6" : "§e";
+                    MutableText levelText = Text.literal(color + "Level " + currentLevel + "/" + maxLevel);
+                    if (currentLevel >= maxLevel && maxLevel > 0) {
+                        levelText.append(Text.literal(" §c§lMAX"));
+                    }
+                    result.append(levelText.append(Text.literal("\n")));
 
+                    // Show breakdown line ONLY for imbue-only skills
+                    if (ClientDescriptionStorage.isImbueOnly(defId)) {
+                        MutableText breakdown = Text.literal("§8(Base: " + baseLevel);
+                        if (bonusLevel > 0) {
+                            breakdown.append(Text.literal(" §b+ " + bonusLevel + " Gear"));
+                        }
+                        breakdown.append(Text.literal(")"));
+                        result.append(breakdown.append(Text.literal("\n")));
+                    }
+
+                    String customDesc = ClientDescriptionStorage.getDescription(defId, currentLevel);
+                    if (customDesc != null && !customDesc.isEmpty()) {
+                        result.append(Text.literal(customDesc + "\n"));
+                    }
+                }
+            } else if (ClientDescriptionStorage.hasDescriptions(defId)) {
+                // Fallback for single-level skills that might have custom descriptions
                 String customDesc = ClientDescriptionStorage.getDescription(defId, currentLevel);
                 if (customDesc != null && !customDesc.isEmpty()) {
                     result.append(Text.literal(customDesc + "\n"));
                 }
             }
 
-            // 3. ALWAYS add "Hold Shift" hint at the end (unless at max level)
-            if (currentLevel < maxLevel) {
+            // 3. Only add "Hold Shift" hint if additional extra descriptions exist
+            // for this definition. Avoid showing the hint when no extra data is
+            // available.
+            String nextLevelPreview = ClientDescriptionStorage.getExtraDescriptionSingle(defId, currentLevel);
+            if (nextLevelPreview != null && !nextLevelPreview.isEmpty() && currentLevel < maxLevel) {
                 result.append(Text.literal("§7§oHold Shift to see more info"));
             }
 
@@ -96,8 +125,11 @@ public class ClientSkillDefinitionConfigMixin {
             }
 
             Text originalExtra = cir.getReturnValue();
-            int currentLevel = ClientSkillLevelStorage.getLevelByDefinitionId(defId);
-            int maxLevel = ClientDescriptionStorage.getMaxLevel(defId);
+            int baseLevel = ClientSkillLevelStorage.getLevelByDefinitionId(defId);
+            int bonusLevel = ClientSkillLevelStorage.getEquipmentBonusByDefinitionId(defId);
+            int currentLevel = baseLevel + bonusLevel;
+            int maxLevel = Math.max(ClientDescriptionStorage.getMaxLevel(defId),
+                    ClientSkillLevelStorage.getMaxLevelByDefinitionId(defId));
 
             MutableText result = Text.empty();
 

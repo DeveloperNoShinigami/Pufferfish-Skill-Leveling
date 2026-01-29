@@ -100,6 +100,16 @@ public class SkillLevelingMod {
 
     public void setNetworkHandler(net.bluelotuscoding.skillleveling.network.NetworkHandler networkHandler) {
         this.networkHandler = networkHandler;
+        // Reset manager warning state so a previous null warning doesn't persist
+        try {
+            if (this.skillLevelingManager != null) {
+                java.lang.reflect.Field f = this.skillLevelingManager.getClass()
+                        .getDeclaredField("networkHandlerNullWarned");
+                f.setAccessible(true);
+                f.setBoolean(this.skillLevelingManager, false);
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     public net.bluelotuscoding.skillleveling.network.NetworkHandler getNetworkHandler() {
@@ -133,8 +143,23 @@ public class SkillLevelingMod {
     }
 
     /**
-     * Get the current level of a skill for a player
+     * Get the TOTAL skill level (Base + Equipment Bonus)
      */
+    public int getTotalSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        return skillLevelingManager.getTotalSkillLevel(player, categoryId, skillId);
+    }
+
+    /**
+     * Get only the base (purchased/persisted) skill level.
+     */
+    public int getBaseSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        return skillLevelingManager.getBaseSkillLevel(player, categoryId, skillId);
+    }
+
+    /**
+     * @deprecated Use {@link #getTotalSkillLevel} or {@link #getBaseSkillLevel}
+     */
+    @Deprecated
     public int getSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         return skillLevelingManager.getSkillLevel(player, categoryId, skillId);
     }

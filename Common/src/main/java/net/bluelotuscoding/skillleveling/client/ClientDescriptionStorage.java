@@ -14,6 +14,7 @@ public class ClientDescriptionStorage {
     private static final Map<String, Map<Integer, String>> levelExtraDescriptions = new HashMap<>();
     private static final Map<String, Boolean> mergeDescriptionFlags = new HashMap<>();
     private static final Map<String, Integer> maxLevels = new HashMap<>();
+    private static final Map<String, Boolean> imbueOnlyFlags = new HashMap<>();
 
     /**
      * Store level descriptions for a skill definition.
@@ -22,7 +23,8 @@ public class ClientDescriptionStorage {
             Map<Integer, String> descriptions,
             Map<Integer, String> extraDescriptions,
             boolean mergeDescription,
-            int maxLevel) {
+            int maxLevel,
+            boolean imbueOnly) {
         if (descriptions != null && !descriptions.isEmpty()) {
             levelDescriptions.put(definitionId, new HashMap<>(descriptions));
         }
@@ -31,6 +33,7 @@ public class ClientDescriptionStorage {
         }
         mergeDescriptionFlags.put(definitionId, mergeDescription);
         maxLevels.put(definitionId, maxLevel);
+        imbueOnlyFlags.put(definitionId, imbueOnly);
     }
 
     /**
@@ -124,6 +127,13 @@ public class ClientDescriptionStorage {
     }
 
     /**
+     * Check if a skill is imbue-only.
+     */
+    public static boolean isImbueOnly(String definitionId) {
+        return imbueOnlyFlags.getOrDefault(definitionId, false);
+    }
+
+    /**
      * Get description for a specific level - NEVER merges, always single level.
      */
     public static String getDescriptionSingle(String definitionId, int level) {
@@ -168,6 +178,7 @@ public class ClientDescriptionStorage {
         levelExtraDescriptions.remove(definitionId);
         mergeDescriptionFlags.remove(definitionId);
         maxLevels.remove(definitionId);
+        imbueOnlyFlags.remove(definitionId);
     }
 
     /**
@@ -178,5 +189,10 @@ public class ClientDescriptionStorage {
         levelExtraDescriptions.clear();
         mergeDescriptionFlags.clear();
         maxLevels.clear();
+        imbueOnlyFlags.clear();
+    }
+
+    public static java.util.Set<String> getAllKeys() {
+        return levelDescriptions.keySet();
     }
 }

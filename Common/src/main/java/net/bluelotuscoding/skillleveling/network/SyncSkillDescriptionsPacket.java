@@ -17,23 +17,27 @@ public class SyncSkillDescriptionsPacket {
     private final Map<Integer, String> levelExtraDescriptions;
     private final boolean mergeDescription;
     private final int maxLevel;
+    private final boolean imbueOnly;
 
     public SyncSkillDescriptionsPacket(String definitionId,
             Map<Integer, String> levelDescriptions,
             Map<Integer, String> levelExtraDescriptions,
             boolean mergeDescription,
-            int maxLevel) {
+            int maxLevel,
+            boolean imbueOnly) {
         this.definitionId = definitionId;
         this.levelDescriptions = levelDescriptions != null ? levelDescriptions : new HashMap<>();
         this.levelExtraDescriptions = levelExtraDescriptions != null ? levelExtraDescriptions : new HashMap<>();
         this.mergeDescription = mergeDescription;
         this.maxLevel = maxLevel;
+        this.imbueOnly = imbueOnly;
     }
 
     public static SyncSkillDescriptionsPacket decode(PacketByteBuf buf) {
         String definitionId = buf.readString();
         int maxLevel = buf.readVarInt();
         boolean mergeDescription = buf.readBoolean();
+        boolean imbueOnly = buf.readBoolean();
 
         // Read level descriptions map
         int descCount = buf.readVarInt();
@@ -53,13 +57,15 @@ public class SyncSkillDescriptionsPacket {
             extraDescs.put(level, text);
         }
 
-        return new SyncSkillDescriptionsPacket(definitionId, levelDescs, extraDescs, mergeDescription, maxLevel);
+        return new SyncSkillDescriptionsPacket(definitionId, levelDescs, extraDescs, mergeDescription, maxLevel,
+                imbueOnly);
     }
 
     public void encode(PacketByteBuf buf) {
         buf.writeString(definitionId);
         buf.writeVarInt(maxLevel);
         buf.writeBoolean(mergeDescription);
+        buf.writeBoolean(imbueOnly);
 
         // Write level descriptions
         buf.writeVarInt(levelDescriptions.size());
@@ -81,12 +87,17 @@ public class SyncSkillDescriptionsPacket {
      * ClientDescriptionStorage.
      */
     public void handleClient() {
+        System.out.println("[SkillLeveling] Received descriptions for: "
+                + definitionId
+                + " (Levels: " + levelDescriptions.size() + ", Extras: "
+                + levelExtraDescriptions.size() + ")");
         ClientDescriptionStorage.setDescriptions(
                 definitionId,
                 levelDescriptions,
                 levelExtraDescriptions,
                 mergeDescription,
-                maxLevel);
+                maxLevel,
+                imbueOnly);
     }
 
     // Getters

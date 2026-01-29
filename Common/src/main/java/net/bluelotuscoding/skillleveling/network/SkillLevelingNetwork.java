@@ -17,11 +17,11 @@ import net.bluelotuscoding.skillleveling.SkillLevelingMod;
  * and client for seamless UI integration.
  */
 public class SkillLevelingNetwork {
-    
+
     // ================================================
     // NETWORK PACKET IDENTIFIERS
     // ================================================
-    
+
     /**
      * PACKET TYPES: Network packet identifiers for different sync operations
      * 
@@ -29,14 +29,16 @@ public class SkillLevelingNetwork {
      * to minimize network traffic and ensure efficient data transmission.
      */
     public static final Identifier SKILL_LEVEL_UPDATE = SkillLevelingMod.createIdentifier("skill_level_update");
-    public static final Identifier SKILL_DESCRIPTION_UPDATE = SkillLevelingMod.createIdentifier("skill_description_update");
-    public static final Identifier SKILL_PROGRESSION_UPDATE = SkillLevelingMod.createIdentifier("skill_progression_update");
+    public static final Identifier SKILL_DESCRIPTION_UPDATE = SkillLevelingMod
+            .createIdentifier("skill_description_update");
+    public static final Identifier SKILL_PROGRESSION_UPDATE = SkillLevelingMod
+            .createIdentifier("skill_progression_update");
     public static final Identifier FULL_SKILL_SYNC = SkillLevelingMod.createIdentifier("full_skill_sync");
-    
+
     // ================================================
     // SERVER-TO-CLIENT SYNCHRONIZATION
     // ================================================
-    
+
     /**
      * LEVEL UPDATE PACKET: Syncs individual skill level changes
      * 
@@ -49,14 +51,14 @@ public class SkillLevelingNetwork {
         private final String skillId;
         private final int currentLevel;
         private final int maxLevel;
-        
+
         public SkillLevelUpdatePacket(Identifier categoryId, String skillId, int currentLevel, int maxLevel) {
             this.categoryId = categoryId;
             this.skillId = skillId;
             this.currentLevel = currentLevel;
             this.maxLevel = maxLevel;
         }
-        
+
         /**
          * PACKET ENCODING: Writes packet data to network buffer
          * 
@@ -69,7 +71,7 @@ public class SkillLevelingNetwork {
             buf.writeVarInt(currentLevel);
             buf.writeVarInt(maxLevel);
         }
-        
+
         /**
          * PACKET DECODING: Reads packet data from network buffer
          * 
@@ -81,28 +83,28 @@ public class SkillLevelingNetwork {
             String skillId = buf.readString();
             int currentLevel = buf.readVarInt();
             int maxLevel = buf.readVarInt();
-            
+
             return new SkillLevelUpdatePacket(categoryId, skillId, currentLevel, maxLevel);
         }
-        
+
         // Getters for client-side processing
         public Identifier getCategoryId() {
             return categoryId;
         }
-        
+
         public String getSkillId() {
             return skillId;
         }
-        
+
         public int getCurrentLevel() {
             return currentLevel;
         }
-        
+
         public int getMaxLevel() {
             return maxLevel;
         }
     }
-    
+
     /**
      * DESCRIPTION UPDATE PACKET: Syncs skill description changes
      * 
@@ -115,18 +117,18 @@ public class SkillLevelingNetwork {
         private final java.util.Map<Integer, String> descriptions;
         private final java.util.Map<Integer, String> extraDescriptions;
         private final boolean mergeDescription;
-        
-        public SkillDescriptionUpdatePacket(Identifier categoryId, String skillId, 
-                                          java.util.Map<Integer, String> descriptions,
-                                          java.util.Map<Integer, String> extraDescriptions,
-                                          boolean mergeDescription) {
+
+        public SkillDescriptionUpdatePacket(Identifier categoryId, String skillId,
+                java.util.Map<Integer, String> descriptions,
+                java.util.Map<Integer, String> extraDescriptions,
+                boolean mergeDescription) {
             this.categoryId = categoryId;
             this.skillId = skillId;
             this.descriptions = descriptions;
             this.extraDescriptions = extraDescriptions;
             this.mergeDescription = mergeDescription;
         }
-        
+
         /**
          * DESCRIPTION ENCODING: Writes description data to network buffer
          * 
@@ -137,21 +139,21 @@ public class SkillLevelingNetwork {
             buf.writeIdentifier(categoryId);
             buf.writeString(skillId);
             buf.writeBoolean(mergeDescription);
-            
+
             // DESCRIPTION MAP ENCODING: Serialize level-to-description mappings
             buf.writeVarInt(descriptions.size());
             descriptions.forEach((level, desc) -> {
                 buf.writeVarInt(level);
                 buf.writeString(desc);
             });
-            
+
             buf.writeVarInt(extraDescriptions.size());
             extraDescriptions.forEach((level, desc) -> {
                 buf.writeVarInt(level);
                 buf.writeString(desc);
             });
         }
-        
+
         /**
          * DESCRIPTION DECODING: Reads description data from network buffer
          * 
@@ -162,7 +164,7 @@ public class SkillLevelingNetwork {
             Identifier categoryId = buf.readIdentifier();
             String skillId = buf.readString();
             boolean mergeDescription = buf.readBoolean();
-            
+
             // DESCRIPTION MAP DECODING: Deserialize level-to-description mappings
             int descCount = buf.readVarInt();
             java.util.Map<Integer, String> descriptions = new java.util.HashMap<>();
@@ -171,7 +173,7 @@ public class SkillLevelingNetwork {
                 String desc = buf.readString();
                 descriptions.put(level, desc);
             }
-            
+
             int extraDescCount = buf.readVarInt();
             java.util.Map<Integer, String> extraDescriptions = new java.util.HashMap<>();
             for (int i = 0; i < extraDescCount; i++) {
@@ -179,36 +181,37 @@ public class SkillLevelingNetwork {
                 String desc = buf.readString();
                 extraDescriptions.put(level, desc);
             }
-            
-            return new SkillDescriptionUpdatePacket(categoryId, skillId, descriptions, extraDescriptions, mergeDescription);
+
+            return new SkillDescriptionUpdatePacket(categoryId, skillId, descriptions, extraDescriptions,
+                    mergeDescription);
         }
-        
+
         // Getters for client-side processing
         public Identifier getCategoryId() {
             return categoryId;
         }
-        
+
         public String getSkillId() {
             return skillId;
         }
-        
+
         public java.util.Map<Integer, String> getDescriptions() {
             return descriptions;
         }
-        
+
         public java.util.Map<Integer, String> getExtraDescriptions() {
             return extraDescriptions;
         }
-        
+
         public boolean isMergeDescription() {
             return mergeDescription;
         }
     }
-    
+
     // ================================================
     // SYNCHRONIZATION HELPERS
     // ================================================
-    
+
     /**
      * PLAYER SYNC: Sends current skill data to specific player
      * 
@@ -218,47 +221,49 @@ public class SkillLevelingNetwork {
     public static void syncPlayerSkillData(ServerPlayerEntity player) {
         var addon = SkillLevelingMod.getInstance();
         var manager = addon.getSkillLevelingManager();
-        
+
         // SKILL ITERATION: Send data for all skills with level progression
         net.puffish.skillsmod.api.SkillsAPI.streamCategories().forEach(category -> {
             category.streamSkills().forEach(skill -> {
                 // LEVEL DATA SYNC: Send current level information
                 if (manager.hasSkillData(player, category.getId(), skill.getId())) {
-                    int currentLevel = manager.getSkillLevel(player, category.getId(), skill.getId());
+                    int currentLevel = manager.getTotalSkillLevel(player, category.getId(), skill.getId());
                     int maxLevel = manager.getMaxLevel(category.getId(), skill.getId());
-                    
+
                     sendSkillLevelUpdate(player, category.getId(), skill.getId(), currentLevel, maxLevel);
-                    
+
                     // DESCRIPTION DATA SYNC: Send description information
                     sendSkillDescriptionUpdate(player, category.getId(), skill.getId());
                 }
             });
         });
     }
-    
+
     /**
      * LEVEL UPDATE TRANSMISSION: Sends single skill level update
      * 
      * TRANSMISSION MECHANICS: Packages and sends skill level change to client
      * for immediate UI update without full resynchronization.
      */
-    public static void sendSkillLevelUpdate(ServerPlayerEntity player, Identifier categoryId, String skillId, int currentLevel, int maxLevel) {
-        // Note: In a real implementation, this would use the mod loader's networking system
+    public static void sendSkillLevelUpdate(ServerPlayerEntity player, Identifier categoryId, String skillId,
+            int currentLevel, int maxLevel) {
+        // Note: In a real implementation, this would use the mod loader's networking
+        // system
         // For now, we'll implement the packet structure for future integration
-        
+
         var packet = new SkillLevelUpdatePacket(categoryId, skillId, currentLevel, maxLevel);
-        
+
         // FUTURE IMPLEMENTATION: Send packet via Fabric/Forge networking
         // FabricNetworking.send(player, SKILL_LEVEL_UPDATE, packet);
         // or
         // ForgeNetworking.send(player, SKILL_LEVEL_UPDATE, packet);
-        
+
         // LOGGING: Track network updates for debugging
         var logger = SkillLevelingMod.getInstance().getLogger();
         logger.debug("Sending skill level update to " + player.getName().getString()
-                    + ": " + categoryId + ":" + skillId + " = " + currentLevel + "/" + maxLevel);
+                + ": " + categoryId + ":" + skillId + " = " + currentLevel + "/" + maxLevel);
     }
-    
+
     /**
      * DESCRIPTION UPDATE TRANSMISSION: Sends skill description data
      * 
@@ -268,23 +273,24 @@ public class SkillLevelingNetwork {
     public static void sendSkillDescriptionUpdate(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         var addon = SkillLevelingMod.getInstance();
         var manager = addon.getSkillLevelingManager();
-        
+
         // DESCRIPTION COLLECTION: Gather all description data for skill
         var descriptions = manager.getDescriptions(categoryId, skillId);
         var extraDescriptions = manager.getExtraDescriptions(categoryId, skillId);
         boolean mergeDescription = manager.shouldMergeDescriptions(categoryId, skillId);
-        
-        var packet = new SkillDescriptionUpdatePacket(categoryId, skillId, descriptions, extraDescriptions, mergeDescription);
-        
+
+        var packet = new SkillDescriptionUpdatePacket(categoryId, skillId, descriptions, extraDescriptions,
+                mergeDescription);
+
         // FUTURE IMPLEMENTATION: Send packet via mod loader networking
         // NetworkingAPI.send(player, SKILL_DESCRIPTION_UPDATE, packet);
-        
+
         // LOGGING: Track description updates for debugging
         var logger = SkillLevelingMod.getInstance().getLogger();
         logger.debug("Sending skill description update to " + player.getName().getString()
-                    + ": " + categoryId + ":" + skillId + " (merge=" + mergeDescription + ")");
+                + ": " + categoryId + ":" + skillId + " (merge=" + mergeDescription + ")");
     }
-    
+
     /**
      * BULK SYNC: Sends all skill data to player at once
      * 
@@ -295,17 +301,17 @@ public class SkillLevelingNetwork {
         // SYNC LOGGING: Track full synchronization events
         var logger = SkillLevelingMod.getInstance().getLogger();
         logger.info("Performing full skill data sync for " + player.getName().getString());
-        
+
         // COMPLETE SYNC: Send all available skill data
         syncPlayerSkillData(player);
-        
+
         logger.debug("Full skill data sync completed for " + player.getName().getString());
     }
-    
+
     // ================================================
     // CLIENT-SIDE PACKET HANDLERS (FUTURE IMPLEMENTATION)
     // ================================================
-    
+
     /**
      * CLIENT PACKET PROCESSING: Handles incoming skill level updates
      * 
@@ -315,13 +321,13 @@ public class SkillLevelingNetwork {
     public static void handleSkillLevelUpdate(SkillLevelUpdatePacket packet) {
         // FUTURE IMPLEMENTATION: Process on client side
         // SkillLevelingClient.updateSkillLevel(
-        //     packet.getCategoryId(),
-        //     packet.getSkillId(),
-        //     packet.getCurrentLevel(),
-        //     packet.getMaxLevel()
+        // packet.getCategoryId(),
+        // packet.getSkillId(),
+        // packet.getCurrentLevel(),
+        // packet.getMaxLevel()
         // );
     }
-    
+
     /**
      * CLIENT DESCRIPTION PROCESSING: Handles incoming description updates
      * 
@@ -331,11 +337,11 @@ public class SkillLevelingNetwork {
     public static void handleSkillDescriptionUpdate(SkillDescriptionUpdatePacket packet) {
         // FUTURE IMPLEMENTATION: Process on client side
         // SkillLevelingClient.updateSkillDescriptions(
-        //     packet.getCategoryId(),
-        //     packet.getSkillId(),
-        //     packet.getDescriptions(),
-        //     packet.getExtraDescriptions(),
-        //     packet.isMergeDescription()
+        // packet.getCategoryId(),
+        // packet.getSkillId(),
+        // packet.getDescriptions(),
+        // packet.getExtraDescriptions(),
+        // packet.isMergeDescription()
         // );
     }
 }

@@ -1,0 +1,6 @@
+{
+    "parent": "minecraft:item/generated",
+    "textures": {
+        "layer0": "puffish_skill_leveling:item/sigil_of_imbuement"
+    }
+}

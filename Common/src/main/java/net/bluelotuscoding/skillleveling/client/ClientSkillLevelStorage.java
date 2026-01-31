@@ -159,13 +159,11 @@ public class ClientSkillLevelStorage {
                 String imbueSkill = imbueNbt.getString("SkillId");
 
                 if (imbueCategory != null && !imbueCategory.isEmpty()) {
-                    // Normalize both IDs for robust comparison (handles namespace:path variants)
-                    String normalizedTarget = categoryId.contains(":") ? categoryId
-                            : "skillleveling_template:" + categoryId;
-                    String normalizedImbue = imbueCategory.contains(":") ? imbueCategory
-                            : "skillleveling_template:" + imbueCategory;
+                    // Use robust Identifier comparison
+                    var targetId = net.minecraft.util.Identifier.tryParse(categoryId);
+                    var itemCatId = net.minecraft.util.Identifier.tryParse(imbueCategory);
 
-                    if (normalizedTarget.equals(normalizedImbue) && skillId.equals(imbueSkill)) {
+                    if (targetId != null && targetId.equals(itemCatId) && skillId.equals(imbueSkill)) {
                         int level = imbueNbt.contains("Level") ? imbueNbt.getInt("Level") : 1;
                         bonus += level;
                     }

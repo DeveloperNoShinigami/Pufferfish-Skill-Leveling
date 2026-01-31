@@ -1,0 +1,38 @@
+{
+    "lootable_berserker": {
+        "definition": "lootable_berserker",
+        "x": 0,
+        "y": 0,
+        "root": true
+    },
+    "imbued_vitality": {
+        "definition": "imbued_vitality",
+        "x": 64,
+        "y": 0,
+        "root": true
+    },
+    "imbued_haste": {
+        "definition": "imbued_haste",
+        "x": 128,
+        "y": 0,
+        "root": true
+    },
+    "imbued_protection": {
+        "definition": "imbued_protection",
+        "x": 192,
+        "y": 0,
+        "root": true
+    },
+    "imbued_toughness": {
+        "definition": "imbued_toughness",
+        "x": 0,
+        "y": 64,
+        "root": true
+    },
+    "imbued_swiftness": {
+        "definition": "imbued_swiftness",
+        "x": 64,
+        "y": 64,
+        "root": true
+    }
+}

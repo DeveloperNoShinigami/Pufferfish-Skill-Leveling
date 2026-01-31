@@ -43,5 +43,17 @@
   "skillleveling.tome.mastered": "§cYou have already mastered this skill!",
   "skillleveling.tome.learn_success": "§a✦ You learned %s! (Level %d)",
   "skillleveling.tome.learn_fail": "§cFailed to learn the skill. Prerequisites may not be met.",
-  "skillleveling.refund.blocked_by_prereq": "Cannot refund: the following skills depend on this and must be refunded first: %s"
+  "skillleveling.refund.blocked_by_prereq": "Cannot refund: the following skills depend on this and must be refunded first: %s",
+  "item.puffish_skill_leveling.sigil_of_imbuement": "Sigil of Imbuement",
+  "item.puffish_skill_leveling.sigil_of_imbuement.desc1": "Opens a skill slot on equipment (max 3)",
+  "item.puffish_skill_leveling.sigil_of_imbuement.desc2": "\"The vessel awaits its power.\"",
+  "item.puffish_skill_leveling.tome_of_cleansing": "Tome of Cleansing",
+  "item.puffish_skill_leveling.tome_of_cleansing.desc1": "Extract an imbued skill from equipment",
+  "item.puffish_skill_leveling.tome_of_cleansing.desc2": "\"Release what no longer serves you.\"",
+  "skillleveling.cleansing.select_skill": "Select a skill to extract:",
+  "skillleveling.cleansing.success": "Extracted %s from equipment!",
+  "skillleveling.cleansing.no_skills": "This equipment has no imbued skills.",
+  "skillleveling.imbue.no_slots": "No empty skill slots available. Use a Sigil of Imbuement first.",
+  "skillleveling.imbue.max_slots": "Equipment already has maximum skill slots.",
+  "skillleveling.imbue.slot_opened": "Opened skill slot %d on equipment!"
 }

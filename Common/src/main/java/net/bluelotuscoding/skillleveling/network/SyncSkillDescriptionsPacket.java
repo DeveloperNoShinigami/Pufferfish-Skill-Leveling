@@ -17,27 +17,27 @@ public class SyncSkillDescriptionsPacket {
     private final Map<Integer, String> levelExtraDescriptions;
     private final boolean mergeDescription;
     private final int maxLevel;
-    private final boolean imbueOnly;
+    private final String lootMode;
 
     public SyncSkillDescriptionsPacket(String definitionId,
             Map<Integer, String> levelDescriptions,
             Map<Integer, String> levelExtraDescriptions,
             boolean mergeDescription,
             int maxLevel,
-            boolean imbueOnly) {
+            String lootMode) {
         this.definitionId = definitionId;
         this.levelDescriptions = levelDescriptions != null ? levelDescriptions : new HashMap<>();
         this.levelExtraDescriptions = levelExtraDescriptions != null ? levelExtraDescriptions : new HashMap<>();
         this.mergeDescription = mergeDescription;
         this.maxLevel = maxLevel;
-        this.imbueOnly = imbueOnly;
+        this.lootMode = lootMode;
     }
 
     public static SyncSkillDescriptionsPacket decode(PacketByteBuf buf) {
         String definitionId = buf.readString();
         int maxLevel = buf.readVarInt();
         boolean mergeDescription = buf.readBoolean();
-        boolean imbueOnly = buf.readBoolean();
+        String lootMode = buf.readString();
 
         // Read level descriptions map
         int descCount = buf.readVarInt();
@@ -58,14 +58,14 @@ public class SyncSkillDescriptionsPacket {
         }
 
         return new SyncSkillDescriptionsPacket(definitionId, levelDescs, extraDescs, mergeDescription, maxLevel,
-                imbueOnly);
+                lootMode);
     }
 
     public void encode(PacketByteBuf buf) {
         buf.writeString(definitionId);
         buf.writeVarInt(maxLevel);
         buf.writeBoolean(mergeDescription);
-        buf.writeBoolean(imbueOnly);
+        buf.writeString(lootMode != null ? lootMode : "");
 
         // Write level descriptions
         buf.writeVarInt(levelDescriptions.size());
@@ -97,7 +97,7 @@ public class SyncSkillDescriptionsPacket {
                 levelExtraDescriptions,
                 mergeDescription,
                 maxLevel,
-                imbueOnly);
+                lootMode);
     }
 
     // Getters

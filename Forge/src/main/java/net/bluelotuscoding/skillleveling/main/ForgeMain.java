@@ -1,8 +1,10 @@
 package net.bluelotuscoding.skillleveling.main;
 
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.item.SigilOfImbuementItem;
 import net.bluelotuscoding.skillleveling.item.SkillTomeItem;
 import net.bluelotuscoding.skillleveling.item.TomeItem;
+import net.bluelotuscoding.skillleveling.item.TomeOfCleansingItem;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
 import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
 import net.minecraft.item.Item;
@@ -42,6 +44,10 @@ public class ForgeMain {
                         "tome_of_greater_clear_mind", ModItems::createTomeOfGreaterClearMind);
         public static final RegistryObject<SkillTomeItem> SKILL_TOME = ITEMS.register(
                         "skill_tome", ModItems::createSkillTome);
+        public static final RegistryObject<SigilOfImbuementItem> SIGIL_OF_IMBUEMENT = ITEMS.register(
+                        "sigil_of_imbuement", ModItems::createSigilOfImbuement);
+        public static final RegistryObject<TomeOfCleansingItem> TOME_OF_CLEANSING = ITEMS.register(
+                        "tome_of_cleansing", ModItems::createTomeOfCleansing);
 
         // Deferred Register for creative tabs
         public static final DeferredRegister<ItemGroup> CREATIVE_TABS = DeferredRegister.create(
@@ -85,11 +91,12 @@ public class ForgeMain {
         }
 
         private void setup(FMLCommonSetupEvent event) {
-                // Initializing ModItems references
                 ModItems.TOME_OF_PROGRESSION = TOME_OF_PROGRESSION.get();
                 ModItems.TOME_OF_CLEAR_MIND = TOME_OF_CLEAR_MIND.get();
                 ModItems.TOME_OF_GREATER_CLEAR_MIND = TOME_OF_GREATER_CLEAR_MIND.get();
                 ModItems.SKILL_TOME = SKILL_TOME.get();
+                ModItems.SIGIL_OF_IMBUEMENT = SIGIL_OF_IMBUEMENT.get();
+                ModItems.TOME_OF_CLEANSING = TOME_OF_CLEANSING.get();
 
                 // Initialize and register the Forge network channel
                 net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler.init();

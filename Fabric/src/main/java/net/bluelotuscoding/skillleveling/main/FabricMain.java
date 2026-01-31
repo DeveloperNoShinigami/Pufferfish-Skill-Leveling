@@ -61,6 +61,16 @@ public class FabricMain implements ModInitializer {
                                 ModItems.SKILL_TOME_ID,
                                 ModItems.createSkillTome());
 
+                ModItems.SIGIL_OF_IMBUEMENT = Registry.register(
+                                Registries.ITEM,
+                                ModItems.SIGIL_OF_IMBUEMENT_ID,
+                                ModItems.createSigilOfImbuement());
+
+                ModItems.TOME_OF_CLEANSING = Registry.register(
+                                Registries.ITEM,
+                                ModItems.TOME_OF_CLEANSING_ID,
+                                ModItems.createTomeOfCleansing());
+
                 // Register groups
                 Registry.register(Registries.ITEM_GROUP, BASE_TOMES_KEY, BASE_TOMES_GROUP);
                 Registry.register(Registries.ITEM_GROUP, SkillLevelingMod.createIdentifier("skill_tomes"),

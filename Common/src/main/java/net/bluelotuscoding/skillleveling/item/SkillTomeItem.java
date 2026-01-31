@@ -106,20 +106,20 @@ public class SkillTomeItem extends Item {
             return TypedActionResult.fail(stack);
         }
 
-        // Create identifier for category - handle both full identifiers and simple
-        // names
-        Identifier catId = categoryId.contains(":") ? new Identifier(categoryId)
-                : new Identifier("skillleveling_template", categoryId);
+        // Create identifier for category - use manager's normalizeCategoryId to resolve
+        // the actual registered category (handles cases where categoryId is just the
+        // path
+        // like "additional_skills" instead of full
+        // "skillleveling_test:additional_skills")
+        Identifier rawCatId = new Identifier(categoryId);
+        Identifier catId = manager.normalizeCategoryId(rawCatId);
+
+        SkillLevelingMod.getInstance().getLogger()
+                .debug("[SkillTome] Resolving category: raw=" + rawCatId + " -> normalized=" + catId);
 
         // Check current BASE level for tome usage
         int currentLevel = manager.getBaseSkillLevel(serverPlayer, catId, skillId);
         int maxLevel = manager.getMaxLevel(catId, skillId);
-
-        // Final fallback: try search without template prefix if not found
-        if (maxLevel <= 0 && !categoryId.contains(":")) {
-            catId = new Identifier(SkillLevelingMod.MOD_ID, categoryId);
-            maxLevel = manager.getMaxLevel(catId, skillId);
-        }
 
         if (maxLevel <= 0) {
             // Skill not found or doesn't support leveling

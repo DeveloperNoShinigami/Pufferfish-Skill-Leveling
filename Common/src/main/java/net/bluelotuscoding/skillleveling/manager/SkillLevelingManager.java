@@ -10,7 +10,6 @@ import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
 
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
@@ -137,10 +136,10 @@ public class SkillLevelingManager {
             java.util.Map<Integer, String> levelDescriptions,
             java.util.Map<Integer, String> levelExtraDescriptions,
             boolean mergeDescription, int maxLevel) {
-        boolean imbueOnly = false;
+        String lootMode = "";
         var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(definitionId);
         if (config != null && config.lootMode != null) {
-            imbueOnly = config.lootMode.equals("imbue_only");
+            lootMode = config.lootMode;
         }
 
         try {
@@ -161,7 +160,7 @@ public class SkillLevelingManager {
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillDescriptionsPacket(
                                 definitionId, levelDescriptions, levelExtraDescriptions, mergeDescription, maxLevel,
-                                imbueOnly),
+                                lootMode),
                         player);
             } else {
                 if (!networkHandlerNullWarned) {
@@ -359,7 +358,21 @@ public class SkillLevelingManager {
         // Sync all skill levels and descriptions to client for UI display
         syncAllSkillsToPlayer(player);
 
+        // PRE-SEED REWARD COUNTS: Initialize each reward's internal count tracker with
+        // the player's current level BEFORE refreshing. This prevents commands from
+        // re-triggering on world rejoin (oldCount will match newCount during refresh).
+        for (var entry : perLevelRewardsRewards.entrySet()) {
+            Identifier categoryId = entry.getKey();
+            for (var skillEntry : entry.getValue().entrySet()) {
+                String skillId = skillEntry.getKey();
+                PerLevelRewardsReward plr = skillEntry.getValue();
+                int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
+                plr.initializeCount(player.getUuid(), totalLevel);
+            }
+        }
+
         // REFRESH REWARDS: Ensure imbued bonuses apply their attribute modifiers etc.
+        // Now that counts are pre-seeded, this won't re-trigger commands.
         refreshAllRewards(player);
     }
 
@@ -402,18 +415,39 @@ public class SkillLevelingManager {
      * Get the PerLevelRewardsReward for a specific skill
      */
     public Optional<PerLevelRewardsReward> getPerLevelRewardsReward(Identifier categoryId, String skillId) {
-        var catMap = perLevelRewardsRewards.get(categoryId);
+        var catMap = findCategoryRewards(categoryId);
         if (catMap != null && catMap.containsKey(skillId)) {
             return Optional.of(catMap.get(skillId));
         }
 
         // Lazy load and try again
         ensureConfigurationsLoaded();
-        catMap = perLevelRewardsRewards.get(categoryId);
+        catMap = findCategoryRewards(categoryId);
         if (catMap != null) {
             return Optional.ofNullable(catMap.get(skillId));
         }
         return Optional.empty();
+    }
+
+    /**
+     * Robust category lookup with namespace fallback for configurations.
+     */
+    private Map<String, PerLevelRewardsReward> findCategoryRewards(Identifier categoryId) {
+        if (categoryId == null)
+            return null;
+
+        // Direct hit
+        var catMap = perLevelRewardsRewards.get(categoryId);
+        if (catMap != null)
+            return catMap;
+
+        // Fallback: search by path
+        for (var entry : perLevelRewardsRewards.entrySet()) {
+            if (entry.getKey().getPath().equals(categoryId.getPath())) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
     /**
@@ -492,21 +526,23 @@ public class SkillLevelingManager {
                 continue;
             }
 
-            NbtCompound nbt = stack.getNbt();
-            if (nbt != null && nbt.contains("SkillLevelingImbued", net.minecraft.nbt.NbtElement.COMPOUND_TYPE)) {
-                NbtCompound imbueNbt = nbt.getCompound("SkillLevelingImbued");
-                String imbueCategory = imbueNbt.getString("CategoryId");
-                String imbueSkill = imbueNbt.getString("SkillId");
+            // Use ImbuedSkillHelper to get all skills on the item (multi-skill support)
+            List<net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper.ImbuedSkill> skills = net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper
+                    .getSkills(stack);
 
-                if (imbueCategory != null && !imbueCategory.isEmpty()) {
-                    String normalizedImbueCategory = imbueCategory.contains(":") ? imbueCategory
-                            : "skillleveling_template:" + imbueCategory;
-                    String normalizedTargetCategory = categoryId.toString(); // Identifier.toString() always includes
-                                                                             // namespace
+            for (var imbuedSkill : skills) {
+                if (imbuedSkill.skillId.equals(skillId)) {
+                    // Category matching with namespace flexibility
+                    Identifier targetCategoryId = categoryId;
+                    Identifier itemCategoryId = Identifier.tryParse(imbuedSkill.categoryId);
 
-                    if (normalizedTargetCategory.equals(normalizedImbueCategory) && skillId.equals(imbueSkill)) {
-                        int level = imbueNbt.contains("Level") ? imbueNbt.getInt("Level") : 1;
-                        bonus += level;
+                    boolean categoryMatch = targetCategoryId.equals(itemCategoryId) ||
+                            (itemCategoryId != null && targetCategoryId.getPath().equals(itemCategoryId.getPath()) &&
+                                    (itemCategoryId.getNamespace().equals("minecraft")
+                                            || itemCategoryId.getNamespace().equals("puffish_skills")));
+
+                    if (categoryMatch) {
+                        bonus += imbuedSkill.level;
                     }
                 }
             }
@@ -847,24 +883,35 @@ public class SkillLevelingManager {
     public boolean setSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
         var category = SkillsAPI.getCategory(categoryId);
         if (category.isEmpty()) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("[setSkillLevel] FAILED: Category not found: " + categoryId);
             return false;
         }
 
         var skill = category.get().getSkill(skillId);
         if (skill.isEmpty()) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("[setSkillLevel] FAILED: Skill not found: " + skillId + " in category " + categoryId);
             return false;
         }
 
         int maxLevel = getMaxLevel(categoryId, skillId);
+        SkillLevelingMod.getInstance().getLogger().info("[setSkillLevel] Max level for " + skillId + ": " + maxLevel);
 
         if (level < 0 || level > maxLevel) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("[setSkillLevel] FAILED: Level " + level + " out of bounds (max=" + maxLevel + ")");
             return false;
         }
 
         int currentBaseLevel = getBaseSkillLevel(player, categoryId, skillId);
+        SkillLevelingMod.getInstance().getLogger()
+                .info("[setSkillLevel] Current base level: " + currentBaseLevel + ", target level: " + level);
 
         // If we're setting a level higher than current, check requirements
         if (level > currentBaseLevel && !canAdvanceToLevel(player, categoryId, skillId, level)) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("[setSkillLevel] FAILED: canAdvanceToLevel returned false for " + skillId);
             return false;
         }
 
@@ -971,13 +1018,25 @@ public class SkillLevelingManager {
     private boolean canAdvanceToLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
         // Check if player meets level requirements (using our custom prerequisite
         // check)
-        if (!checkSkillPrerequisites(player.getUuid(), categoryId, skillId)) {
+        boolean prereqMet = checkSkillPrerequisites(player.getUuid(), categoryId, skillId);
+        if (!prereqMet) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("[canAdvanceToLevel] FAILED: Prerequisites not met for " + skillId);
             return false;
         }
 
         // Check if player can afford the point cost
-        return net.bluelotuscoding.skillleveling.points.SkillPointManager.canAffordLevel(player, categoryId, skillId,
-                level);
+        boolean canAfford = net.bluelotuscoding.skillleveling.points.SkillPointManager.canAffordLevel(player,
+                categoryId, skillId, level);
+        if (!canAfford) {
+            SkillLevelingMod.getInstance().getLogger()
+                    .warn("[canAdvanceToLevel] FAILED: Cannot afford level " + level + " for " + skillId);
+            return false;
+        }
+
+        SkillLevelingMod.getInstance().getLogger()
+                .info("[canAdvanceToLevel] SUCCESS: All checks passed for " + skillId + " at level " + level);
+        return true;
     }
 
     private void triggerLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
@@ -1233,8 +1292,9 @@ public class SkillLevelingManager {
         // Check if current level meets requirement
         boolean met = currentLevel >= prerequisite.getLevel();
 
-        SkillLevelingMod.getInstance().getLogger().debug("Checking prerequisite " + prerequisite.getSkillId()
-                + ": current level " + currentLevel + ", required level " + prerequisite.getLevel() + ", met: " + met);
+        SkillLevelingMod.getInstance().getLogger().debug("[PREREQ] Checking " + prerequisite.getSkillId() +
+                " (Cat: " + categoryId + "): current=" + currentLevel + ", required=" + prerequisite.getLevel()
+                + ", met=" + met);
 
         return met;
     }
@@ -1495,7 +1555,9 @@ public class SkillLevelingManager {
             var playerData = getPlayerDataMethod.invoke(skillsMod, player);
 
             if (playerData instanceof net.bluelotuscoding.skillleveling.mixin_interface.PlayerDataExtension playerExt) {
-                var categoryData = playerExt.addon$getCategoryData(categoryId);
+                // Normalize ID to handle namespace changes (legacy support)
+                Identifier normalizedId = normalizeCategoryId(categoryId);
+                var categoryData = playerExt.addon$getCategoryData(normalizedId);
                 if (categoryData instanceof net.bluelotuscoding.skillleveling.mixin_interface.CategoryDataExtension catExt) {
                     return catExt;
                 }
@@ -1504,6 +1566,27 @@ public class SkillLevelingManager {
             SkillLevelingMod.getInstance().getLogger().error("Failed to get CategoryData extension: " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Resolves the current registry category ID from a potentially legacy ID
+     * (path-based matching).
+     */
+    public Identifier normalizeCategoryId(Identifier categoryId) {
+        if (categoryId == null)
+            return null;
+
+        // Direct hit
+        if (SkillsAPI.getCategory(categoryId).isPresent()) {
+            return categoryId;
+        }
+
+        // Path search fallback for namespace migrations
+        return SkillsAPI.streamCategories()
+                .filter(cat -> cat.getId().getPath().equals(categoryId.getPath()))
+                .map(net.puffish.skillsmod.api.Category::getId)
+                .findFirst()
+                .orElse(categoryId);
     }
 
     /**

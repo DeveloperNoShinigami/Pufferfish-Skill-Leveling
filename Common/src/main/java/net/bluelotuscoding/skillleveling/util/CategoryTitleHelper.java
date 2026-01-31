@@ -29,8 +29,7 @@ public class CategoryTitleHelper {
             return titleCache.get(categoryIdStr);
         }
 
-        Identifier id = categoryIdStr.contains(":") ? new Identifier(categoryIdStr)
-                : new Identifier("skillleveling_template", categoryIdStr);
+        Identifier id = new Identifier(categoryIdStr);
 
         Text title = null;
 

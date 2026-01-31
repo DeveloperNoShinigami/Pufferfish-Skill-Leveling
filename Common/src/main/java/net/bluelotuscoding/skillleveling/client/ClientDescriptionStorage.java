@@ -14,7 +14,7 @@ public class ClientDescriptionStorage {
     private static final Map<String, Map<Integer, String>> levelExtraDescriptions = new HashMap<>();
     private static final Map<String, Boolean> mergeDescriptionFlags = new HashMap<>();
     private static final Map<String, Integer> maxLevels = new HashMap<>();
-    private static final Map<String, Boolean> imbueOnlyFlags = new HashMap<>();
+    private static final Map<String, String> lootModes = new HashMap<>();
 
     /**
      * Store level descriptions for a skill definition.
@@ -24,7 +24,7 @@ public class ClientDescriptionStorage {
             Map<Integer, String> extraDescriptions,
             boolean mergeDescription,
             int maxLevel,
-            boolean imbueOnly) {
+            String lootMode) {
         if (descriptions != null && !descriptions.isEmpty()) {
             levelDescriptions.put(definitionId, new HashMap<>(descriptions));
         }
@@ -33,7 +33,7 @@ public class ClientDescriptionStorage {
         }
         mergeDescriptionFlags.put(definitionId, mergeDescription);
         maxLevels.put(definitionId, maxLevel);
-        imbueOnlyFlags.put(definitionId, imbueOnly);
+        lootModes.put(definitionId, lootMode != null ? lootMode : "");
     }
 
     /**
@@ -126,11 +126,22 @@ public class ClientDescriptionStorage {
         return maxLevels.getOrDefault(definitionId, 1);
     }
 
+    public static String getLootMode(String definitionId) {
+        return lootModes.getOrDefault(definitionId, "");
+    }
+
     /**
      * Check if a skill is imbue-only.
      */
     public static boolean isImbueOnly(String definitionId) {
-        return imbueOnlyFlags.getOrDefault(definitionId, false);
+        return "imbue_only".equals(getLootMode(definitionId));
+    }
+
+    /**
+     * Check if a skill is tome-only.
+     */
+    public static boolean isTomeOnly(String definitionId) {
+        return "tome_only".equals(getLootMode(definitionId));
     }
 
     /**
@@ -178,7 +189,7 @@ public class ClientDescriptionStorage {
         levelExtraDescriptions.remove(definitionId);
         mergeDescriptionFlags.remove(definitionId);
         maxLevels.remove(definitionId);
-        imbueOnlyFlags.remove(definitionId);
+        lootModes.remove(definitionId);
     }
 
     /**
@@ -189,7 +200,7 @@ public class ClientDescriptionStorage {
         levelExtraDescriptions.clear();
         mergeDescriptionFlags.clear();
         maxLevels.clear();
-        imbueOnlyFlags.clear();
+        lootModes.clear();
     }
 
     public static java.util.Set<String> getAllKeys() {

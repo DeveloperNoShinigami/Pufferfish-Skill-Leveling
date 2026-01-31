@@ -13,7 +13,8 @@
 		"ServerChatMixin",
 		"AnvilScreenHandlerMixin",
 		"LivingEntityMixin",
-		"ServerPlayNetworkHandlerMixin"
+		"ServerPlayNetworkHandlerMixin",
+		"ServerPlayerEntityMixin"
 	],
 	"client": [
 		"ClientSkillDefinitionConfigMixin",

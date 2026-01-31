@@ -7,6 +7,7 @@ import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
 import net.bluelotuscoding.skillleveling.config.LeveledConfigStorage;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -56,6 +57,11 @@ public abstract class SkillDefinitionConfigMixin {
         rootObject.get("loot_mode");
         rootObject.get("category_id");
         rootObject.get("enchantment_levels");
+        rootObject.get("enchantment_cost");
+        rootObject.get("imbuement_levels");
+        rootObject.get("imbuement_cost");
+        rootObject.get("slot_opening_cost");
+        rootObject.get("cleansing_cost");
 
         // Inject them into per_level_rewards reward data if they are missing there
         rootObject.getArray("rewards").ifSuccess(rewardsArray -> {
@@ -159,15 +165,124 @@ public abstract class SkillDefinitionConfigMixin {
                                     .flatMap(e -> e.getAsString().getSuccess())
                                     .orElse(null);
 
-                            int enchantmentLevels = rootObject.get("enchantment_levels").getSuccess()
-                                    .flatMap(e -> e.getAsInt().getSuccess())
-                                    .orElse(0);
+                            // Parse enchantment cost options (supports enchantment_cost and legacy
+                            // enchantment_levels)
+                            LeveledConfigStorage.EnchantmentCostConfig enchantmentCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
+                            var costResult = rootObject.get("enchantment_cost").getSuccess()
+                                    .or(() -> rootObject.get("enchantment_levels").getSuccess());
+
+                            if (costResult.isPresent()) {
+                                var costElem = costResult.get().getJson();
+                                if (costElem.isJsonPrimitive()) {
+                                    var primitive = costElem.getAsJsonPrimitive();
+                                    if (primitive.isNumber()) {
+                                        enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
+                                                primitive.getAsInt());
+                                    } else if (primitive.isString()) {
+                                        enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
+                                                primitive.getAsString());
+                                    }
+                                } else if (costElem.isJsonArray()) {
+                                    var arrValue = costElem.getAsJsonArray();
+                                    int[] values = new int[arrValue.size()];
+                                    for (int i = 0; i < arrValue.size(); i++) {
+                                        values[i] = arrValue.get(i).getAsInt();
+                                    }
+                                    enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(values);
+                                } else if (costElem.isJsonObject()) {
+                                    var obj = costElem.getAsJsonObject();
+                                    if (obj.has("type") && obj.get("type").isJsonPrimitive()) {
+                                        String costType = obj.get("type").getAsString();
+                                        var dataObjResult = obj.get("data");
+                                        if (dataObjResult != null && dataObjResult.isJsonObject()) {
+                                            var dataObj = dataObjResult.getAsJsonObject();
+                                            if ("expression".equals(costType) && dataObj.has("expression")) {
+                                                enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
+                                                        dataObj.get("expression").getAsString());
+                                            } else if ("array".equals(costType) && dataObj.has("values")) {
+                                                var arrValue = dataObj.get("values").getAsJsonArray();
+                                                int[] values = new int[arrValue.size()];
+                                                for (int i = 0; i < arrValue.size(); i++) {
+                                                    values[i] = arrValue.get(i).getAsInt();
+                                                }
+                                                enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
+                                                        values);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Parse imbuement cost options
+                            LeveledConfigStorage.EnchantmentCostConfig imbuementCost = null;
+                            var imbueResult = rootObject.get("imbuement_cost").getSuccess()
+                                    .or(() -> rootObject.get("imbuement_levels").getSuccess());
+
+                            if (imbueResult.isPresent()) {
+                                imbuementCost = parseEnchantmentCost(imbueResult.get().getJson());
+                            }
+
+                            // Parse slot opening cost
+                            LeveledConfigStorage.EnchantmentCostConfig slotOpeningCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
+                            var slotOpeningResult = rootObject.get("slot_opening_cost").getSuccess();
+                            if (slotOpeningResult.isPresent()) {
+                                slotOpeningCost = parseEnchantmentCost(slotOpeningResult.get().getJson());
+                            }
+
+                            // Parse cleansing cost
+                            LeveledConfigStorage.EnchantmentCostConfig cleansingCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
+                            var cleansingResult = rootObject.get("cleansing_cost").getSuccess();
+                            if (cleansingResult.isPresent()) {
+                                cleansingCost = parseEnchantmentCost(cleansingResult.get().getJson());
+                            }
 
                             LeveledConfigStorage.put(id,
                                     new LeveledConfigStorage.LeveledConfig(maxLevels, points, merge,
-                                            requiredSkillsList, lootMode, categoryId, enchantmentLevels));
+                                            requiredSkillsList, lootMode, categoryId, enchantmentCost, imbuementCost,
+                                            slotOpeningCost, cleansingCost));
                         });
             });
         });
+    }
+
+    @Unique
+    private static LeveledConfigStorage.EnchantmentCostConfig parseEnchantmentCost(
+            com.google.gson.JsonElement json) {
+        if (json.isJsonPrimitive()) {
+            var primitive = json.getAsJsonPrimitive();
+            if (primitive.isNumber()) {
+                return new LeveledConfigStorage.EnchantmentCostConfig(primitive.getAsInt());
+            } else if (primitive.isString()) {
+                return new LeveledConfigStorage.EnchantmentCostConfig(primitive.getAsString());
+            }
+        } else if (json.isJsonArray()) {
+            var arrValue = json.getAsJsonArray();
+            int[] values = new int[arrValue.size()];
+            for (int i = 0; i < arrValue.size(); i++) {
+                values[i] = arrValue.get(i).getAsInt();
+            }
+            return new LeveledConfigStorage.EnchantmentCostConfig(values);
+        } else if (json.isJsonObject()) {
+            var obj = json.getAsJsonObject();
+            if (obj.has("type") && obj.get("type").isJsonPrimitive()) {
+                String costType = obj.get("type").getAsString();
+                var dataObjResult = obj.get("data");
+                if (dataObjResult != null && dataObjResult.isJsonObject()) {
+                    var dataObj = dataObjResult.getAsJsonObject();
+                    if ("expression".equals(costType) && dataObj.has("expression")) {
+                        return new LeveledConfigStorage.EnchantmentCostConfig(
+                                dataObj.get("expression").getAsString());
+                    } else if ("array".equals(costType) && dataObj.has("values")) {
+                        var arrValue = dataObj.get("values").getAsJsonArray();
+                        int[] values = new int[arrValue.size()];
+                        for (int i = 0; i < arrValue.size(); i++) {
+                            values[i] = arrValue.get(i).getAsInt();
+                        }
+                        return new LeveledConfigStorage.EnchantmentCostConfig(values);
+                    }
+                }
+            }
+        }
+        return LeveledConfigStorage.EnchantmentCostConfig.FREE;
     }
 }

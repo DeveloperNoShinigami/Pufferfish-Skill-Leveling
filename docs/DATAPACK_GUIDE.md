@@ -104,7 +104,10 @@ Each skill in `definitions.json` must follow this structure:
 | `descriptions` | object | — | Level-specific descriptions (keyed by level number) |
 | `extra_descriptions` | object | — | Preview text for next level (keyed by level number) |
 | `prerequisite_skills` | array | — | Skills required before this one can be unlocked |
-| `enchantment_levels` | integer | 0 | Experience level cost per level for anvil combining |
+| `enchantment_levels` | integer/string | 0 | XP level cost for anvil combining. Supports expressions (e.g., `"level * 5"`) |
+| `imbuement_cost` | integer/string | — | XP level cost for manual imbuing. Supports expressions. |
+| `slot_opening_cost` | integer/string | 0 | XP level cost for opening a skill slot with a Sigil. Supports expressions (level is slot #). |
+| `cleansing_cost` | integer/string | 0 | XP level cost for extracting a skill with a Tome of Cleansing. Supports expressions (level is skill level). |
 
 ### Skill Types
 
@@ -115,6 +118,9 @@ Each skill in `definitions.json` must follow this structure:
 
 > [!TIP]
 > **Base Skill Support**: You can use `puffish_skills:default` skills with the Skill Tome and Imbuement systems! The addon treats standard skills as having a `max_skill_level` of 1, allowing you to imbue base Pufferfish attribute modifiers onto gear.
+
+> [!TIP]
+> **Namespace Flexibility**: Skill data is stored in player NBT and matched by category **path** (not full ID). This means you can rename your namespace (e.g., from `mymod:combat` to `newmod:combat`) without losing player progress!
 
 ---
 
@@ -258,19 +264,40 @@ Cannot be purchased in the skill tree; only obtainable via Skill Tomes.
 }
 ```
 
-### Imbue-Only Skill
-Cannot be directly learned; must be applied to equipment via anvil.
-
 ```json
 {
     "imbued_strength": {
         "loot_mode": "imbue_only",
         "title": "Imbued Strength",
         "description": "Apply to equipment for +2 damage",
+        "slot_opening_cost": "level * 10",
+        "cleansing_cost": 5,
         ...
     }
 }
 ```
+
+---
+
+## Multi-Skill System
+
+Equipment can hold up to 3 different skills simultaneously.
+
+### Skill Slots
+Before imbuing a skill, equipment must have an **Open Skill Slot**.
+- Use a **Sigil of Imbuement** in an anvil with any piece of gear to open a slot.
+- Maximum 3 slots per item.
+- Slot opening cost is defined by `slot_opening_cost` in any skill within the category.
+
+### Imbuing & Upgrading
+- **Empty Slot + Skill Tome**: Imbues the skill at the tome's level.
+- **Matching Skill + Matching Tome**: Upgrades the existing imbued skill by 1 level (up to `max_skill_level`).
+
+### Cleansing (Extraction)
+- Use a **Tome of Cleansing** in an anvil with imbued gear to extract a skill.
+- The skill is returned as a **Skill Tome** at its current level.
+- The skill slot remains open on the gear.
+- Extraction cost is defined by `cleansing_cost` for that specific skill.
 
 ---
 

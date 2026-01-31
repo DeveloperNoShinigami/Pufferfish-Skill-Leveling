@@ -19,7 +19,10 @@ Skills can have any number of levels (1, 2, 3, ... N), each granting cumulative 
 | `descriptions` | object | — | Level-specific descriptions (e.g., `"1": "Level 1 desc"`) |
 | `extra_descriptions` | object | — | Preview text for next level |
 | `prerequisite_skills` | array | — | Required skills before unlocking |
-| `enchantment_levels` | integer | 0 | XP cost per level for combining tomes |
+| `enchantment_levels` | integer/string | 0 | XP level cost for anvil combining. Supports expressions. |
+| `imbuement_cost` | integer/string | — | XP level cost for manual imbuing. Supports expressions. |
+| `slot_opening_cost` | integer/string | 0 | XP level cost for opening a skill slot with a Sigil. |
+| `cleansing_cost` | integer/string | 0 | XP level cost for extracting a skill with a Tome of Cleansing. |
 
 ### Skill Types
 
@@ -108,6 +111,28 @@ Skills marked as `"loot_mode": "imbue_only"` cannot be directly learned. Instead
 
 ---
 
+## Multi-Skill System
+
+Equipment can now hold multiple different skills through a slot-based system.
+
+### Sigil of Imbuement
+- **Function**: Opens a skill slot on equipment (max 3)
+- **Item ID**: `puffish_skill_leveling:sigil_of_imbuement`
+- **Use**: Combine with any gear in an anvil.
+
+### Tome of Cleansing
+- **Function**: Extracts one imbued skill from equipment and returns it as a Skill Tome
+- **Item ID**: `puffish_skill_leveling:tome_of_cleansing`
+- **Use**: Combine with imbued gear in an anvil.
+
+### Behavior
+- **Slotted Imbuing**: Skills are imbued into open slots.
+- **Upgrading**: Using a matching Skill Tome on gear with the same skill upgrades its level.
+- **Flexible Extraction**: Cleansing keeps the slot open for a new skill.
+- **Summed Bonuses**: Attributes from all imbued skills stack on the item.
+
+---
+
 ## Loot Modes
 
 | Mode | Behavior |
@@ -140,7 +165,8 @@ All commands require operator permissions.
 This addon is designed to be **fully compatible** with the base Pufferfish Skills mod:
 
 - **Non-Invasive**: All features are opt-in via datapack configuration
-- **Parallel Storage**: Addon data is stored separately from base mod data
+- **Player NBT Storage**: Skill levels are saved directly in player data, ensuring progress moves with the player
+- **Namespace Flexibility**: Data is matched by category **path**, so you can change namespaces without losing progress
 - **Graceful Fallback**: If the addon is removed, base mod functionality continues
 - **Mixin Safety**: All mixins use `require = 0` to prevent crashes if methods don't exist
 

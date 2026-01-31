@@ -84,7 +84,8 @@
 This addon is designed to be **fully compatible** with the base Pufferfish Skills mod:
 
 - **Non-Invasive**: All features are opt-in via datapack
-- **Parallel Storage**: Addon data stored separately from base mod
+- **Player NBT Storage**: Skill levels saved directly in player data
+- **Namespace Flexibility**: Data matched by category path, so you can rename namespaces
 - **Graceful Fallback**: Removing the addon doesn't break base mod functionality
 - **Mod-Friendly**: Attribute sync works with any mod using Minecraft's attribute system
 

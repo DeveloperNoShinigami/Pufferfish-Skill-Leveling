@@ -1,8 +1,10 @@
 package net.bluelotuscoding.skillleveling.registry;
 
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.item.SigilOfImbuementItem;
 import net.bluelotuscoding.skillleveling.item.SkillTomeItem;
 import net.bluelotuscoding.skillleveling.item.TomeItem;
+import net.bluelotuscoding.skillleveling.item.TomeOfCleansingItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -20,12 +22,16 @@ public class ModItems {
         public static final Identifier TOME_GREATER_CLEAR_MIND_ID = SkillLevelingMod
                         .createIdentifier("tome_of_greater_clear_mind");
         public static final Identifier SKILL_TOME_ID = SkillLevelingMod.createIdentifier("skill_tome");
+        public static final Identifier SIGIL_OF_IMBUEMENT_ID = SkillLevelingMod.createIdentifier("sigil_of_imbuement");
+        public static final Identifier TOME_OF_CLEANSING_ID = SkillLevelingMod.createIdentifier("tome_of_cleansing");
 
         // Item instances - these will be populated during platform registration
         public static TomeItem TOME_OF_PROGRESSION;
         public static TomeItem TOME_OF_CLEAR_MIND;
         public static TomeItem TOME_OF_GREATER_CLEAR_MIND;
         public static SkillTomeItem SKILL_TOME;
+        public static SigilOfImbuementItem SIGIL_OF_IMBUEMENT;
+        public static TomeOfCleansingItem TOME_OF_CLEANSING;
 
         /**
          * Create the Tome of Progression item.
@@ -71,6 +77,26 @@ public class ModItems {
         }
 
         /**
+         * Create the Sigil of Imbuement item.
+         */
+        public static SigilOfImbuementItem createSigilOfImbuement() {
+                return new SigilOfImbuementItem(
+                                new Item.Settings()
+                                                .maxCount(16)
+                                                .rarity(Rarity.EPIC));
+        }
+
+        /**
+         * Create the Tome of Cleansing item.
+         */
+        public static TomeOfCleansingItem createTomeOfCleansing() {
+                return new TomeOfCleansingItem(
+                                new Item.Settings()
+                                                .maxCount(16)
+                                                .rarity(Rarity.EPIC));
+        }
+
+        /**
          * Populates the Base Tomes creative tab.
          */
         public static void fillBaseTomesTab(Consumer<ItemStack> entries) {
@@ -82,6 +108,12 @@ public class ModItems {
                 }
                 if (TOME_OF_GREATER_CLEAR_MIND != null) {
                         entries.accept(new ItemStack(TOME_OF_GREATER_CLEAR_MIND));
+                }
+                if (TOME_OF_CLEANSING != null) {
+                        entries.accept(new ItemStack(TOME_OF_CLEANSING));
+                }
+                if (SIGIL_OF_IMBUEMENT != null) {
+                        entries.accept(new ItemStack(SIGIL_OF_IMBUEMENT));
                 }
         }
 

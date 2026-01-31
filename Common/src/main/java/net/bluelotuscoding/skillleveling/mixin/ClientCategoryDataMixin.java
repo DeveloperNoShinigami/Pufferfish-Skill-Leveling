@@ -70,6 +70,7 @@ public abstract class ClientCategoryDataMixin {
      * Intercept getSkillState on the client to:
      * - Show UNLOCKED (highlighted) at max level
      * - Show AFFORDABLE/AVAILABLE below max level for re-purchase
+     * - Ensure imbue_only/tome_only skills stay UNLOCKED and don't look buyable
      */
     @Inject(method = "getSkillState", at = @At("HEAD"), cancellable = true)
     private void onGetSkillState(ClientSkillConfig skill, CallbackInfoReturnable<Skill.State> cir) {
@@ -79,37 +80,47 @@ public abstract class ClientCategoryDataMixin {
 
         String categoryId = config.id().toString();
         String skillId = skill.id();
+        String defId = skill.definitionId();
 
-        // 1. Get current levels and max level
+        // 1. Get current levels and max level using robust lookups
+        int baseLevel = ClientSkillLevelStorage.getLevelByDefinitionId(defId);
         int bonus = ClientSkillLevelStorage.getEquipmentBonus(categoryId, skillId);
-        int baseLevel = ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)
-                ? ClientSkillLevelStorage.getBaseLevel(categoryId, skillId)
-                : 0;
-
-        // Use ClientDescriptionStorage as the source of truth for max level
-        // as it's populated for all skills regardless of player progress.
-        int maxLevel = net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage
-                .getMaxLevel(skill.definitionId());
         int totalLevel = baseLevel + bonus;
 
+        // Use the same robust max level logic as tooltips
+        int maxLevel = Math.max(
+                net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.getMaxLevel(defId),
+                ClientSkillLevelStorage.getMaxLevel(categoryId, skillId));
+
         // 2. Decide State
+
+        // IF THE SKILL IS AT MAX LEVEL - Always show as UNLOCKED (Green/Gold)
         if (totalLevel >= maxLevel && maxLevel > 0) {
-            // AT MAX LEVEL - show as UNLOCKED (highlighted/completed)
             cir.setReturnValue(Skill.State.UNLOCKED);
             return;
         }
 
-        // 3. If not maxed, but we have some progress
-        if (totalLevel > 0 || ClientSkillLevelStorage.hasLevelInfo(categoryId, skillId)) {
+        // IF WE HAVE PROGRESS (either base level or gear)
+        if (totalLevel > 0 || baseLevel > 0) {
             if (baseLevel < maxLevel) {
-                // Not at max base level yet - show as purchasable
+                // Not at max base level yet.
+                // But should it look buyable? (Yellow border)
+                // NO if it's loot-only.
+                if (net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.isImbueOnly(defId) ||
+                        net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.isTomeOnly(defId)) {
+                    // Just show as active/unlocked, but not "purchasable"
+                    cir.setReturnValue(Skill.State.UNLOCKED);
+                    return;
+                }
+
+                // Show as purchasable (Yellow/White border)
                 if (isAffordable(skill)) {
                     cir.setReturnValue(Skill.State.AFFORDABLE);
                 } else {
                     cir.setReturnValue(Skill.State.AVAILABLE);
                 }
             } else {
-                // Base level is maxed, but total isn't (maybe gear penalty? or just maxed)
+                // Base level is maxed, it's fully unlocked
                 cir.setReturnValue(Skill.State.UNLOCKED);
             }
         }

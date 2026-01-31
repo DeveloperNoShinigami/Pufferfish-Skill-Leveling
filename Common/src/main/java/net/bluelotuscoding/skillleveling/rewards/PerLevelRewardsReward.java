@@ -146,6 +146,16 @@ public class PerLevelRewardsReward implements Reward {
     }
 
     /**
+     * PRE-SEED COUNT: Initialize the player's count without triggering any rewards.
+     * This must be called on player join BEFORE any refreshAllRewards call to
+     * ensure
+     * that oldCount == newCount during refresh, preventing commands from re-firing.
+     */
+    public void initializeCount(UUID playerId, int level) {
+        counts.put(playerId, level);
+    }
+
+    /**
      * Check if all skill prerequisites are met for a given player
      */
     public boolean arePrerequisitesMet(UUID playerId) {
@@ -557,7 +567,8 @@ public class PerLevelRewardsReward implements Reward {
         var uuid = player.getUuid();
         int newCount = context.getCount();
         int oldCount = counts.getOrDefault(uuid, 0);
-        counts.put(uuid, newCount);
+        // IMPORTANT: Don't overwrite counts yet - we need oldCount preserved for
+        // reversion logic!
 
         SkillLevelingMod.getInstance().getLogger()
                 .info("[REWARD DEBUG] Updating skill " + skillId + " for " + player.getName().getString()
@@ -572,7 +583,10 @@ public class PerLevelRewardsReward implements Reward {
         // This ensures existing rewards are REMOVED (reverted) when prerequisites are
         // lost.
         int effectiveNewCount = (prerequisitesMet || allowPartialRewards) ? newCount : 0;
-        int effectiveOldCount = counts.getOrDefault(uuid, 0);
+        // REVERSION FIX: Use the REAL old count, not re-read from already-overwritten
+        // map
+        int effectiveOldCount = oldCount;
+        // NOW we can safely update the counts map
         counts.put(uuid, effectiveNewCount);
 
         if (!prerequisitesMet) {

@@ -1,5 +1,6 @@
 package net.bluelotuscoding.skillleveling.mixin;
 
+import net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -15,6 +16,7 @@ import java.util.List;
 
 /**
  * Mixin to add skill information to tooltips for items imbued with skills.
+ * Supports the new multi-skill slot system.
  */
 @Mixin(ItemStack.class)
 public abstract class ItemTooltipMixin {
@@ -24,25 +26,38 @@ public abstract class ItemTooltipMixin {
         ItemStack stack = (ItemStack) (Object) this;
         NbtCompound nbt = stack.getNbt();
 
-        if (nbt != null && nbt.contains("SkillLevelingImbued")) {
-            NbtCompound imbuedNbt = nbt.getCompound("SkillLevelingImbued");
-            String skillId = imbuedNbt.getString("SkillId");
-            // CategoryId is also stored but usually not needed for basic display
+        if (nbt == null || !nbt.contains("SkillLevelingImbued")) {
+            return;
+        }
 
-            if (skillId != null && !skillId.isEmpty()) {
-                List<Text> tooltip = cir.getReturnValue();
+        List<Text> tooltip = cir.getReturnValue();
 
-                // Convert snake_case to Title Case
-                String displayName = convertToTitleCase(skillId);
-                int level = imbuedNbt.contains("Level") ? imbuedNbt.getInt("Level") : 1;
+        // Migrate old format if needed (for display purposes)
+        ImbuedSkillHelper.migrateOldFormat(stack);
 
-                tooltip.add(Text.literal(" "));
-                // CONCISE TOOLTIP: [ Skill Name ] +N level(s)
-                tooltip.add(Text.literal("[ " + displayName + " ] ")
-                        .formatted(Formatting.GOLD)
-                        .append(Text.literal("+" + level + (level == 1 ? " level" : " levels"))
-                                .formatted(Formatting.AQUA)));
-            }
+        // Get slot count and skills
+        int slots = ImbuedSkillHelper.getSlotCount(stack);
+        List<ImbuedSkillHelper.ImbuedSkill> skills = ImbuedSkillHelper.getSkills(stack);
+
+        // Add spacing
+        tooltip.add(Text.literal(" "));
+
+        // Show slot info if slots exist
+        if (slots > 0) {
+            int usedSlots = skills.size();
+            tooltip.add(Text.literal("◈ Skill Slots: ")
+                    .formatted(Formatting.DARK_PURPLE)
+                    .append(Text.literal(usedSlots + "/" + slots)
+                            .formatted(usedSlots >= slots ? Formatting.RED : Formatting.GREEN)));
+        }
+
+        // Show each imbued skill
+        for (ImbuedSkillHelper.ImbuedSkill skill : skills) {
+            String displayName = convertToTitleCase(skill.skillId);
+            tooltip.add(Text.literal("  ◆ " + displayName + " ")
+                    .formatted(Formatting.GOLD)
+                    .append(Text.literal("+" + skill.level)
+                            .formatted(Formatting.AQUA)));
         }
     }
 

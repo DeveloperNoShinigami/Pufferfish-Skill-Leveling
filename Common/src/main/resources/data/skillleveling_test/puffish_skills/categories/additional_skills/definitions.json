@@ -1,0 +1,447 @@
+{
+    "lootable_berserker": {
+        "type": "puffish_skills:default",
+        "category_id": "additional_skills",
+        "loot_mode": "tome_only",
+        "title": "Lootable Berserker",
+        "description": "Increases damage at low health. (Found only in Tomes)",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:iron_axe"
+            }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 0,
+        "enchantment_levels": 10,
+        "descriptions": {
+            "1": "Level 1: +10% Damage",
+            "2": "Level 2: +20% Damage",
+            "3": "Level 3: +30% Damage"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "lootable_berserker",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.attack_damage",
+                                    "value": 0.1,
+                                    "operation": "multiply_total"
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.attack_damage",
+                                    "value": 0.2,
+                                    "operation": "multiply_total"
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.attack_damage",
+                                    "value": 0.3,
+                                    "operation": "multiply_total"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "lootable_berserker_icon"
+        }
+    },
+    "imbued_vitality": {
+        "type": "puffish_skills:default",
+        "category_id": "additional_skills",
+        "loot_mode": "imbue_only",
+        "title": "Imbued Vitality",
+        "description": "Increases maximum health. (Can only be imbued onto equipment)",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:experience_bottle"
+            }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 0,
+        "enchantment_levels": "level ^ 2 * 5",
+        "imbuement_levels": "level ^ 2 * 2.5",
+        "slot_opening_cost": 0,
+        "cleansing_cost": 0,
+        "descriptions": {
+            "1": "Level 1: +2 Max Health",
+            "2": "Level 2: +4 Max Health",
+            "3": "Level 3: +6 Max Health",
+            "4": "Level 4: +8 Max Health",
+            "5": "Level 5: +10 Max Health"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "imbued_vitality",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.max_health",
+                                    "value": 2.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.max_health",
+                                    "value": 2.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.max_health",
+                                    "value": 2.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.max_health",
+                                    "value": 2.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.max_health",
+                                    "value": 2.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "imbued_vitality_icon"
+        }
+    },
+    "imbued_haste": {
+        "type": "puffish_skills:default",
+        "category_id": "additional_skills",
+        "loot_mode": "imbue_only",
+        "title": "Imbued Haste",
+        "description": "Increases attack speed. (Imbue only)",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:sugar"
+            }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 0,
+        "enchantment_levels": "level * 10",
+        "descriptions": {
+            "1": "+5% Attack Speed",
+            "2": "+10% Attack Speed",
+            "3": "+15% Attack Speed"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "imbued_haste",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.attack_speed",
+                                    "value": 0.05,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.attack_speed",
+                                    "value": 0.05,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.attack_speed",
+                                    "value": 0.05,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {}
+    },
+    "imbued_protection": {
+        "type": "puffish_skills:default",
+        "category_id": "additional_skills",
+        "loot_mode": "imbue_only",
+        "title": "Imbued Protection",
+        "description": "Increases armor. (Imbue only)",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:iron_chestplate"
+            }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 0,
+        "enchantment_levels": "level * 8",
+        "descriptions": {
+            "1": "+1 Armor",
+            "2": "+2 Armor",
+            "3": "+3 Armor",
+            "4": "+4 Armor",
+            "5": "+5 Armor"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "imbued_protection",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor",
+                                    "value": 1.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor",
+                                    "value": 1.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor",
+                                    "value": 1.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor",
+                                    "value": 1.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor",
+                                    "value": 1.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {}
+    },
+    "imbued_toughness": {
+        "type": "puffish_skills:default",
+        "category_id": "additional_skills",
+        "loot_mode": "imbue_only",
+        "title": "Imbued Toughness",
+        "description": "Increases armor toughness. (Imbue only)",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:diamond_chestplate"
+            }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 0,
+        "enchantment_levels": "level * 12",
+        "descriptions": {
+            "1": "+0.5 Toughness",
+            "2": "+1.0 Toughness",
+            "3": "+1.5 Toughness",
+            "4": "+2.0 Toughness",
+            "5": "+2.5 Toughness"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "imbued_toughness",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor_toughness",
+                                    "value": 0.5,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor_toughness",
+                                    "value": 0.5,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor_toughness",
+                                    "value": 0.5,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor_toughness",
+                                    "value": 0.5,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.armor_toughness",
+                                    "value": 0.5,
+                                    "operation": "addition"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {}
+    },
+    "imbued_swiftness": {
+        "type": "puffish_skills:default",
+        "category_id": "additional_skills",
+        "loot_mode": "imbue_only",
+        "title": "Imbued Swiftness",
+        "description": "Increases movement speed. (Imbue only)",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:feather"
+            }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 0,
+        "enchantment_levels": "level * 15",
+        "descriptions": {
+            "1": "+5% Speed",
+            "2": "+10% Speed",
+            "3": "+15% Speed"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "imbued_swiftness",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.movement_speed",
+                                    "value": 0.05,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.movement_speed",
+                                    "value": 0.05,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.movement_speed",
+                                    "value": 0.05,
+                                    "operation": "multiply_base"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {}
+    }
+}

@@ -242,4 +242,10 @@ public class SkillTomeItem extends Item {
         NbtCompound nbt = stack.getNbt();
         return nbt != null && nbt.contains(NBT_LEVEL) ? nbt.getInt(NBT_LEVEL) : 1;
     }
+
+    @Override
+    public boolean hasGlint(ItemStack stack) {
+        // Skill Tomes have the enchantment glint effect
+        return true;
+    }
 }

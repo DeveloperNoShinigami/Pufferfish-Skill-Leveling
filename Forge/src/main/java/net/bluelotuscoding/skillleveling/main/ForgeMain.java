@@ -48,6 +48,10 @@ public class ForgeMain {
                         "sigil_of_imbuement", ModItems::createSigilOfImbuement);
         public static final RegistryObject<TomeOfCleansingItem> TOME_OF_CLEANSING = ITEMS.register(
                         "tome_of_cleansing", ModItems::createTomeOfCleansing);
+        public static final RegistryObject<TomeOfCleansingItem> TOME_OF_CLEANSING_2 = ITEMS.register(
+                        "tome_of_cleansing_2", ModItems::createTomeOfCleansing2);
+        public static final RegistryObject<TomeOfCleansingItem> TOME_OF_CLEANSING_3 = ITEMS.register(
+                        "tome_of_cleansing_3", ModItems::createTomeOfCleansing3);
 
         // Deferred Register for creative tabs
         public static final DeferredRegister<ItemGroup> CREATIVE_TABS = DeferredRegister.create(
@@ -97,6 +101,8 @@ public class ForgeMain {
                 ModItems.SKILL_TOME = SKILL_TOME.get();
                 ModItems.SIGIL_OF_IMBUEMENT = SIGIL_OF_IMBUEMENT.get();
                 ModItems.TOME_OF_CLEANSING = TOME_OF_CLEANSING.get();
+                ModItems.TOME_OF_CLEANSING_2 = TOME_OF_CLEANSING_2.get();
+                ModItems.TOME_OF_CLEANSING_3 = TOME_OF_CLEANSING_3.get();
 
                 // Initialize and register the Forge network channel
                 net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler.init();

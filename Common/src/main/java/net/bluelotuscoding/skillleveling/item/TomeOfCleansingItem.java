@@ -13,21 +13,36 @@ import java.util.List;
 /**
  * Tome of Cleansing - Extracts an imbued skill from equipment.
  * 
- * When used in an anvil with imbued equipment:
- * - Player selects which skill to extract
- * - The skill is removed from the equipment
- * - A Skill Tome with the extracted skill is returned
- * - The skill slot remains open on the equipment
+ * Each tier targets a specific slot:
+ * - Tome of Cleansing (I): Slot 0 (first skill)
+ * - Tome of Cleansing II: Slot 1 (second skill)
+ * - Tome of Cleansing III: Slot 2 (third skill)
  */
 public class TomeOfCleansingItem extends Item {
 
-    public TomeOfCleansingItem(Settings settings) {
+    private final int targetSlot;
+
+    public TomeOfCleansingItem(Settings settings, int targetSlot) {
         super(settings);
+        this.targetSlot = targetSlot;
+    }
+
+    /**
+     * Gets the slot index this tome targets (0, 1, or 2).
+     */
+    public int getTargetSlot() {
+        return targetSlot;
     }
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
+
+        // Show which slot this tome targets (display as 1-indexed for players)
+        int displaySlot = targetSlot + 1;
+        tooltip.add(Text.translatable("item.puffish_skill_leveling.tome_of_cleansing.slot", displaySlot)
+                .formatted(Formatting.GOLD));
+
         tooltip.add(Text.translatable("item.puffish_skill_leveling.tome_of_cleansing.desc1")
                 .formatted(Formatting.GRAY));
         tooltip.add(Text.translatable("item.puffish_skill_leveling.tome_of_cleansing.desc2")

@@ -147,6 +147,32 @@ public class ImbuedSkillHelper {
     }
 
     /**
+     * Gets a skill by its slot index (0, 1, or 2).
+     * Returns null if the index is invalid or no skill exists at that slot.
+     */
+    public static ImbuedSkill getSkillByIndex(ItemStack stack, int index) {
+        List<ImbuedSkill> skills = getSkills(stack);
+        if (index < 0 || index >= skills.size()) {
+            return null;
+        }
+        return skills.get(index);
+    }
+
+    /**
+     * Removes a skill by its slot index (0, 1, or 2).
+     * Returns the removed skill data, or null if the index is invalid.
+     */
+    public static ImbuedSkill removeSkillByIndex(ItemStack stack, int index) {
+        List<ImbuedSkill> skills = getSkills(stack);
+        if (index < 0 || index >= skills.size()) {
+            return null;
+        }
+        ImbuedSkill removed = skills.remove(index);
+        saveSkills(stack, skills);
+        return removed;
+    }
+
+    /**
      * Upgrades a skill's level by 1.
      * Returns true if successful, false if skill not found.
      */

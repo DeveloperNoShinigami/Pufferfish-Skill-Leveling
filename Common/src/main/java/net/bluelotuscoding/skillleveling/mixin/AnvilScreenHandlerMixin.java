@@ -97,15 +97,14 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
             }
         }
 
-        // === 2. Tome of Cleansing + Imbued Gear → Extract Skill ===
-        if (slot2.getItem() instanceof TomeOfCleansingItem) {
-            List<ImbuedSkillHelper.ImbuedSkill> skills = ImbuedSkillHelper.getSkills(slot1);
-            if (!skills.isEmpty()) {
-                // For now, extract the first skill (UI selection will be added later)
-                ImbuedSkillHelper.ImbuedSkill skillToExtract = skills.get(0);
+        // === 2. Tome of Cleansing + Imbued Gear → Extract Skill (slot-targeted) ===
+        if (slot2.getItem() instanceof TomeOfCleansingItem cleansingItem) {
+            int targetSlot = cleansingItem.getTargetSlot();
+            ImbuedSkillHelper.ImbuedSkill skillToExtract = ImbuedSkillHelper.getSkillByIndex(slot1, targetSlot);
 
+            if (skillToExtract != null) {
                 ItemStack result = slot1.copy();
-                ImbuedSkillHelper.removeSkill(result, skillToExtract.skillId);
+                ImbuedSkillHelper.removeSkillByIndex(result, targetSlot);
 
                 // Create the refund tome
                 var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillToExtract.skillId);

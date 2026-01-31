@@ -28,7 +28,8 @@
 ### Skill Tomes
 - **Tome of Progression** — Advance any skill by 1 level
 - **Tome of Clear Mind** — Refund 1 skill level
-- **Skill Tome** — Lootable items that grant specific skills
+- **Tome of Cleansing (I, II, III)** — Targeted skill extraction from equipment
+- **Skill Tome** — Lootable items that grant specific skills (now with enchantment glint)
 
 ### Equipment Imbuing
 - Apply skills to equipment via anvil

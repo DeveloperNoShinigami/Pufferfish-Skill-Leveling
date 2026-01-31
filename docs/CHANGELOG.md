@@ -2,12 +2,13 @@
 
 All notable changes to the **Pufferfish Skill Leveling** mod will be documented in this file.
 
-## [2026-01-30] - Multi-Skill Imbuing System
+## [2026-01-30] - Multi-Skill Cleansing & Visual Polish
 
 ### Added
-- **Multi-Skill Slot System**: Equipment can now hold up to 3 different imbued skills simultaneously.
+- **Tiered Tome of Cleansing (I, II, III)**: New items that target specific equipment slots (1, 2, or 3) for targeted skill extraction.
+- **Skill Tome Enchantment Glint**: All Skill Tomes now feature a visual enchantment shimmer for better item recognition.
+- **Multi-Skill Slot System**: Equipment can now hold up to 3 different imbued skills simultaneously using Sigils of Imbuement.
 - **Sigil of Imbuement**: New item that opens skill slots on equipment (max 3 per item).
-- **Tome of Cleansing**: New item that extracts an imbued skill from equipment, returning it as a Skill Tome.
 - **Configurable Costs**: Added `slot_opening_cost` and `cleansing_cost` fields for datapack configuration.
 - **New Sample Skills**: Added `imbued_haste`, `imbued_protection`, `imbued_toughness`, and `imbued_swiftness` for testing.
 

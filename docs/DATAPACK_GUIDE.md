@@ -294,8 +294,11 @@ Before imbuing a skill, equipment must have an **Open Skill Slot**.
 - **Matching Skill + Matching Tome**: Upgrades the existing imbued skill by 1 level (up to `max_skill_level`).
 
 ### Cleansing (Extraction)
-- Use a **Tome of Cleansing** in an anvil with imbued gear to extract a skill.
-- The skill is returned as a **Skill Tome** at its current level.
+- Use a **Tome of Cleansing (I, II, or III)** in an anvil with imbued gear to extract a skill.
+- **Tome of Cleansing (I)** targets **Slot 1** (first added).
+- **Tome of Cleansing II** targets **Slot 2** (second added).
+- **Tome of Cleansing III** targets **Slot 3** (third added).
+- The skill is returned as a **Skill Tome** at its current level (preserving its `loot_mode`).
 - The skill slot remains open on the gear.
 - Extraction cost is defined by `cleansing_cost` for that specific skill.
 

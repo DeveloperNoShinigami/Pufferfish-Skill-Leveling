@@ -24,6 +24,10 @@ public class ModItems {
         public static final Identifier SKILL_TOME_ID = SkillLevelingMod.createIdentifier("skill_tome");
         public static final Identifier SIGIL_OF_IMBUEMENT_ID = SkillLevelingMod.createIdentifier("sigil_of_imbuement");
         public static final Identifier TOME_OF_CLEANSING_ID = SkillLevelingMod.createIdentifier("tome_of_cleansing");
+        public static final Identifier TOME_OF_CLEANSING_2_ID = SkillLevelingMod
+                        .createIdentifier("tome_of_cleansing_2");
+        public static final Identifier TOME_OF_CLEANSING_3_ID = SkillLevelingMod
+                        .createIdentifier("tome_of_cleansing_3");
 
         // Item instances - these will be populated during platform registration
         public static TomeItem TOME_OF_PROGRESSION;
@@ -32,6 +36,8 @@ public class ModItems {
         public static SkillTomeItem SKILL_TOME;
         public static SigilOfImbuementItem SIGIL_OF_IMBUEMENT;
         public static TomeOfCleansingItem TOME_OF_CLEANSING;
+        public static TomeOfCleansingItem TOME_OF_CLEANSING_2;
+        public static TomeOfCleansingItem TOME_OF_CLEANSING_3;
 
         /**
          * Create the Tome of Progression item.
@@ -87,13 +93,36 @@ public class ModItems {
         }
 
         /**
-         * Create the Tome of Cleansing item.
+         * Create the Tome of Cleansing item (targets slot 0).
          */
         public static TomeOfCleansingItem createTomeOfCleansing() {
                 return new TomeOfCleansingItem(
                                 new Item.Settings()
                                                 .maxCount(16)
-                                                .rarity(Rarity.EPIC));
+                                                .rarity(Rarity.EPIC),
+                                0); // Target slot 0
+        }
+
+        /**
+         * Create the Tome of Cleansing II item (targets slot 1).
+         */
+        public static TomeOfCleansingItem createTomeOfCleansing2() {
+                return new TomeOfCleansingItem(
+                                new Item.Settings()
+                                                .maxCount(16)
+                                                .rarity(Rarity.EPIC),
+                                1); // Target slot 1
+        }
+
+        /**
+         * Create the Tome of Cleansing III item (targets slot 2).
+         */
+        public static TomeOfCleansingItem createTomeOfCleansing3() {
+                return new TomeOfCleansingItem(
+                                new Item.Settings()
+                                                .maxCount(16)
+                                                .rarity(Rarity.EPIC),
+                                2); // Target slot 2
         }
 
         /**
@@ -111,6 +140,12 @@ public class ModItems {
                 }
                 if (TOME_OF_CLEANSING != null) {
                         entries.accept(new ItemStack(TOME_OF_CLEANSING));
+                }
+                if (TOME_OF_CLEANSING_2 != null) {
+                        entries.accept(new ItemStack(TOME_OF_CLEANSING_2));
+                }
+                if (TOME_OF_CLEANSING_3 != null) {
+                        entries.accept(new ItemStack(TOME_OF_CLEANSING_3));
                 }
                 if (SIGIL_OF_IMBUEMENT != null) {
                         entries.accept(new ItemStack(SIGIL_OF_IMBUEMENT));

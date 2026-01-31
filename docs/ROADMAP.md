@@ -19,10 +19,11 @@
 - [x] Single-Skill Imbuing via Anvil
 - [x] Multi-Skill Slot System (up to 3 per item)
 - [x] Sigil of Imbuement (opens slots)
-- [x] Tome of Cleansing (extracts skills)
+- [x] Tiered Tome of Cleansing (I, II, III) for targeted extraction
 - [x] Configurable Costs (`slot_opening_cost`, `cleansing_cost`)
 - [x] Correct `loot_mode` preservation on extraction
 - [x] Stacked attribute bonuses from multiple skills
+- [x] Visual feedback (Enchantment glint on Skill Tomes)
 
 ### Loot Modes
 - [x] `tome_only` - Learn only via tomes
@@ -35,15 +36,19 @@
 ---
 
 ## 🔄 In Progress / Testing
-- [ ] In-game testing of multi-skill extraction and imbuing edge cases
+- [ ] In-game testing of tiered extraction and imbuing edge cases
 - [ ] Comprehensive testing of new sample skills
 
 ---
 
 ## 🚀 Planned Features (Next Phase)
 
+### Custom Villager Integration
+- [ ] Implement **Skill Researcher** villager profession
+- [ ] Add trades for Sigils of Imbuement and Cleansing Tomes
+- [ ] Configure custom villager workstation
+
 ### Quality of Life
-- [ ] Skill selection UI for Tome of Cleansing (choose which skill to extract)
 - [ ] Tooltip preview for slot opening costs
 - [ ] Better visual feedback in anvil when imbuing/extracting
 

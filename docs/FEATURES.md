@@ -89,6 +89,7 @@ All attribute modifiers (health, damage, speed, armor, etc.) update **instantly*
 - **Function**: Grants +1 level to a specific pre-configured skill
 - **Item ID**: `puffish_skill_leveling:skill_tome`
 - **NBT**: Must contain `CategoryId` and `SkillId`
+- **Visuals**: Features an enchantment glint for a premium feel.
 
 ---
 
@@ -120,14 +121,14 @@ Equipment can now hold multiple different skills through a slot-based system.
 - **Item ID**: `puffish_skill_leveling:sigil_of_imbuement`
 - **Use**: Combine with any gear in an anvil.
 
-### Tome of Cleansing
-- **Function**: Extracts one imbued skill from equipment and returns it as a Skill Tome
-- **Item ID**: `puffish_skill_leveling:tome_of_cleansing`
+### Tome of Cleansing (I, II, III)
+- **Function**: Extracts one imbued skill from a specific slot (1, 2, or 3) and returns it as a Skill Tome.
+- **Item IDs**: 
+  - `puffish_skill_leveling:tome_of_cleansing` (Slot 1)
+  - `puffish_skill_leveling:tome_of_cleansing_2` (Slot 2)
+  - `puffish_skill_leveling:tome_of_cleansing_3` (Slot 3)
 - **Use**: Combine with imbued gear in an anvil.
-
-### Behavior
-- **Slotted Imbuing**: Skills are imbued into open slots.
-- **Upgrading**: Using a matching Skill Tome on gear with the same skill upgrades its level.
+- **Visuals**: Features an enchantment glint for easy identification.
 - **Flexible Extraction**: Cleansing keeps the slot open for a new skill.
 - **Summed Bonuses**: Attributes from all imbued skills stack on the item.
 

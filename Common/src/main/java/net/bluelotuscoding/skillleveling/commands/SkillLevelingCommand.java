@@ -43,7 +43,9 @@ public class SkillLevelingCommand {
                                                                                                                 .integer(1, 5))
                                                                                                 .executes(SkillLevelingCommand::setVillagerTier)))
                                                                 .then(CommandManager.literal("forceProfession")
-                                                                                .executes(SkillLevelingCommand::forceVillagerProfession)))
+                                                                                .executes(SkillLevelingCommand::forceVillagerProfession))
+                                                                .then(CommandManager.literal("reset")
+                                                                                .executes(SkillLevelingCommand::resetVillager)))
                                                 // GET: View current skill level
                                                 .then(CommandManager.literal("get")
                                                                 .then(CommandManager
@@ -771,6 +773,45 @@ public class SkillLevelingCommand {
                         return 1;
                 } else {
                         source.sendError(Text.literal("§cYou must be looking at a villager within 10 blocks!"));
+                        return 0;
+                }
+        }
+
+        /**
+         * Reset a villager's tier and experience
+         */
+        private static int resetVillager(CommandContext<ServerCommandSource> context)
+                        throws CommandSyntaxException {
+                var source = context.getSource();
+                ServerPlayerEntity player = source.getPlayer();
+                if (player == null) {
+                        source.sendError(Text.literal("Command must be run by a player"));
+                        return 0;
+                }
+
+                double reach = 10.0;
+                Vec3d start = player.getEyePos();
+                Vec3d direction = player.getRotationVec(1.0F);
+                Vec3d end = start.add(direction.x * reach, direction.y * reach, direction.z * reach);
+
+                EntityHitResult hit = ProjectileUtil.raycast(
+                                player, start, end,
+                                player.getBoundingBox().stretch(direction.multiply(reach)).expand(1.0),
+                                (entity) -> entity instanceof VillagerEntity v
+                                                && v.getVillagerData()
+                                                                .getProfession() == net.bluelotuscoding.skillleveling.registry.ModVillagers.SKILL_MASTER,
+                                reach * reach);
+
+                if (hit != null && hit.getEntity() instanceof VillagerEntity villager) {
+                        VillagerData data = villager.getVillagerData();
+                        villager.setVillagerData(data.withLevel(1));
+                        villager.setExperience(0);
+                        villager.getOffers().clear();
+                        source.sendMessage(Text.literal("§aReset Skill Master to Tier 1 with 0 experience."));
+                        return 1;
+                } else {
+                        source.sendError(Text
+                                        .literal("§cYou must be looking at a Skill Master villager within 10 blocks!"));
                         return 0;
                 }
         }

@@ -63,7 +63,7 @@ public class SkillMasterTradeLoader extends JsonDataLoader {
 
     private ItemStack parseItemStack(JsonObject json) {
         Identifier itemId = new Identifier(json.get("item").getAsString());
-        int count = json.has("count") ? json.get("count").getAsInt() : 1;
+        int count = json.has("count") ? Math.max(1, json.get("count").getAsInt()) : 1;
         net.minecraft.item.Item item = net.minecraft.registry.Registries.ITEM.get(itemId);
         return new ItemStack(item, count);
     }

@@ -443,5 +443,67 @@
             }
         ],
         "metadata": {}
+    },
+    "vibrant_luck": {
+        "type": "puffish_skills:default",
+        "category_id": "additional_skills",
+        "loot_mode": "both",
+        "title": "Vibrant Luck",
+        "description": "Increases luck. (Can be learned or imbued)",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:rabbit_foot"
+            }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 1,
+        "enchantment_levels": "level * 15",
+        "descriptions": {
+            "1": "Level 1: +1 Luck",
+            "2": "Level 2: +2 Luck",
+            "3": "Level 3: +3 Luck"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "vibrant_luck",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.luck",
+                                    "value": 1.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.luck",
+                                    "value": 1.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "generic.luck",
+                                    "value": 1.0,
+                                    "operation": "addition"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {}
     }
 }

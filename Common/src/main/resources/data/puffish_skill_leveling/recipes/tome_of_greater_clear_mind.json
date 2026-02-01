@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "puffish_skill_leveling:tome_of_clear_mind"
+        },
+        {
+            "item": "minecraft:diamond"
+        },
+        {
+            "item": "minecraft:amethyst_shard"
+        }
+    ],
+    "result": {
+        "item": "puffish_skill_leveling:tome_of_greater_clear_mind"
+    }
+}

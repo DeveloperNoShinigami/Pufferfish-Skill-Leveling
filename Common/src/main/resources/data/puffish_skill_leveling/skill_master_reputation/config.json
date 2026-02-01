@@ -1,0 +1,15 @@
+{
+    "baseExp": 5,
+    "bothModeBonus": 3,
+    "imbueOnlyBonus": 5,
+    "tierMultiplier": 2,
+    "masteryBonus": 2,
+    "maxMasteryBonus": 20,
+    "staticExp": {
+        "sigilProxy": 5,
+        "tomeOfClearMind": 10,
+        "tomeOfCleansing": 15,
+        "sigilOfImbuement": 50,
+        "tomeOfCleansingUpgrade": 25
+    }
+}

@@ -26,7 +26,7 @@ public class ForgeVillagerTrades {
                         // Level 1: Proxy Trade (Always required for profession stability)
                         List<TradeOffers.Factory> level1 = event.getTrades().computeIfAbsent(1,
                                         k -> new java.util.ArrayList<>());
-                        level1.add((entity, random) -> SkillMasterTradeProvider.createLevel1ProxyTrade());
+                        level1.add((entity, random) -> SkillMasterTradeProvider.createLevel1ProxyTrade(null, null));
 
                         SkillLevelingMod.getInstance().getLogger()
                                         .info("Added proxy trade to level 1 for Skill Master.");

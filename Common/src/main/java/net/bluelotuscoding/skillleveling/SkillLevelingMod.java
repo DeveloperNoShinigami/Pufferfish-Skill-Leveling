@@ -48,6 +48,7 @@ public class SkillLevelingMod {
     private final SkillsModEventHandler eventHandler;
     private final AddonLogger logger;
     private final net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader tradeLoader;
+    private final net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader reputationLoader;
     private net.bluelotuscoding.skillleveling.network.NetworkHandler networkHandler;
 
     private SkillLevelingMod() {
@@ -56,6 +57,7 @@ public class SkillLevelingMod {
         this.eventHandler = new SkillsModEventHandler(skillLevelingManager);
         this.logger = new AddonLogger();
         this.tradeLoader = new net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader();
+        this.reputationLoader = new net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader();
     }
 
     /**
@@ -128,6 +130,10 @@ public class SkillLevelingMod {
 
     public net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader getTradeLoader() {
         return tradeLoader;
+    }
+
+    public net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader getReputationLoader() {
+        return reputationLoader;
     }
 
     public static Identifier createIdentifier(String path) {

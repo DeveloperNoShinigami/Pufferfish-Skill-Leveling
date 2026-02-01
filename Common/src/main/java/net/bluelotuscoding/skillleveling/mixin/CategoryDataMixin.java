@@ -249,34 +249,40 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         int level = addon$getSkillLevel(skill.id());
         int maxLevel = addon$getMaxLevelFromDefinition(category, skill);
 
-        // Calculate total level including equipment bonuses for state decision
         int bonus = (addon$owner != null) ? SkillLevelingMod.getInstance().getSkillLevelingManager()
                 .calculateEquipmentBonus(addon$owner, category.id(), skill.id()) : 0;
         int totalLevel = level + bonus;
 
-        if (totalLevel >= maxLevel && maxLevel > 0) {
-            // Fully maxed out - show as UNLOCKED (highlighted gold)
+        // Mastery Check: ONLY show as UNLOCKED (Golden highlight) if at max level
+        if (maxLevel > 0 && totalLevel >= maxLevel) {
             cir.setReturnValue(Skill.State.UNLOCKED);
             return;
         }
 
-        // Purchasability Fix: If we haven't reached the max BASE level,
-        // it should still show as buyable even if gear bonuses make it active.
-        if (level < maxLevel) {
-            if (addon$owner != null && net.bluelotuscoding.skillleveling.points.SkillPointManager
-                    .canAffordLevel(addon$owner, category.id(), skill.id(), level + 1)) {
-                cir.setReturnValue(Skill.State.AFFORDABLE);
+        // Progression Check: If we have progress but not at max level
+        if (totalLevel > 0 || level > 0) {
+            // For loot-only skills (imbue_only, tome_only):
+            // Show as AVAILABLE (no golden highlight, no purchase border)
+            var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
+            if (leveledConfig != null && (level > 0) && leveledConfig.lootMode != null
+                    && (leveledConfig.lootMode.equals("tome_only") || leveledConfig.lootMode.equals("imbue_only"))) {
+                cir.setReturnValue(Skill.State.AVAILABLE);
                 return;
             }
-            cir.setReturnValue(Skill.State.AVAILABLE);
-            return;
-        }
 
-        // If base level is maxed but total isn't (maybe gear penalty? or just maxed
-        // base)
-        // it's active.
-        if (totalLevel > 0) {
-            cir.setReturnValue(Skill.State.UNLOCKED);
+            // For normal skills:
+            if (level < maxLevel) {
+                if (addon$owner != null && net.bluelotuscoding.skillleveling.points.SkillPointManager
+                        .canAffordLevel(addon$owner, category.id(), skill.id(), level + 1)) {
+                    cir.setReturnValue(Skill.State.AFFORDABLE);
+                } else {
+                    cir.setReturnValue(Skill.State.AVAILABLE);
+                }
+            } else {
+                // Base at max, but gear might be limiting or just base maxed - No golden
+                // highlight
+                cir.setReturnValue(Skill.State.AVAILABLE);
+            }
             return;
         }
     }

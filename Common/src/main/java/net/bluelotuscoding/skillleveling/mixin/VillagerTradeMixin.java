@@ -25,7 +25,7 @@ public abstract class VillagerTradeMixin {
                 .info("Villager interaction triggered for: " + player.getName().getString());
         if ((Object) this instanceof VillagerEntity villager && !villager.getWorld().isClient) {
             String prof = Registries.VILLAGER_PROFESSION.getId(villager.getVillagerData().getProfession()).toString();
-            SkillLevelingMod.getInstance().getLogger().info("Villager profession at interaction: " + prof);
+            SkillLevelingMod.getInstance().getLogger().info("Interaction with villager prof: " + prof);
 
             if (villager.getVillagerData().getProfession() == ModVillagers.SKILL_MASTER
                     && player instanceof ServerPlayerEntity serverPlayer) {

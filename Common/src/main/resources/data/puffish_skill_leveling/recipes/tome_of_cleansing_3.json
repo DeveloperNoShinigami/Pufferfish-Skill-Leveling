@@ -1,0 +1,14 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "puffish_skill_leveling:tome_of_cleansing_2"
+        },
+        {
+            "item": "minecraft:ender_eye"
+        }
+    ],
+    "result": {
+        "item": "puffish_skill_leveling:tome_of_cleansing_3"
+    }
+}

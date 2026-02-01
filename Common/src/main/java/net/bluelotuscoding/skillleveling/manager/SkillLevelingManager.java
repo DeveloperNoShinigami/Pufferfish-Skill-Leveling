@@ -1647,13 +1647,15 @@ public class SkillLevelingManager {
             var category = categoryOpt.get();
             category.streamSkills().forEach(skill -> {
                 String skillId = skill.getId();
-                // CRITICAL FIX: Use getSkillLevel instead of dataManager.getSkillLevel
-                int level = getSkillLevel(player, categoryId, skillId);
+                // CRITICAL FIX: Use getBaseSkillLevel for baseLevel, getSkillLevel for
+                // totalLevel
+                int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
+                int totalLevel = getSkillLevel(player, categoryId, skillId);
                 int maxLevel = getMaxLevel(categoryId, skillId);
 
                 // Sync ALL skills, even those at level 0, to ensure bonuses clear in UI
-                int totalLevel = getSkillLevel(player, categoryId, skillId);
-                syncSkillLevelToClient(player, categoryId, skillId, level, totalLevel, maxLevel);
+                syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel);
+
             });
         } catch (Exception e) {
             SkillLevelingMod.getInstance().getLogger()

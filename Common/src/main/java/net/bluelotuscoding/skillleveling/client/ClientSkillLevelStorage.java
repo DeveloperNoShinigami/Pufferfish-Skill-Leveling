@@ -152,20 +152,27 @@ public class ClientSkillLevelStorage {
                 continue;
             }
 
-            var nbt = stack.getNbt();
-            if (nbt != null && nbt.contains("SkillLevelingImbued", 10)) {
-                var imbueNbt = nbt.getCompound("SkillLevelingImbued");
-                String imbueCategory = imbueNbt.getString("CategoryId");
-                String imbueSkill = imbueNbt.getString("SkillId");
+            // Support new multi-slot format
+            var skills = net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper.getSkills(stack);
+            if (!skills.isEmpty()) {
+                for (var skill : skills) {
+                    if (skill.categoryId.equals(categoryId) && skill.skillId.equals(skillId)) {
+                        bonus += skill.level;
+                    }
+                }
+            } else {
+                // FALLBACK: Support old single-slot format
+                var nbt = stack.getNbt();
+                if (nbt != null && nbt.contains("SkillLevelingImbued", 10)) {
+                    var imbueNbt = nbt.getCompound("SkillLevelingImbued");
+                    String imbueCategory = imbueNbt.getString("CategoryId");
+                    String imbueSkill = imbueNbt.getString("SkillId");
 
-                if (imbueCategory != null && !imbueCategory.isEmpty()) {
-                    // Use robust Identifier comparison
-                    var targetId = net.minecraft.util.Identifier.tryParse(categoryId);
-                    var itemCatId = net.minecraft.util.Identifier.tryParse(imbueCategory);
-
-                    if (targetId != null && targetId.equals(itemCatId) && skillId.equals(imbueSkill)) {
-                        int level = imbueNbt.contains("Level") ? imbueNbt.getInt("Level") : 1;
-                        bonus += level;
+                    if (imbueCategory != null && !imbueCategory.isEmpty()) {
+                        if (imbueCategory.equals(categoryId) && skillId.equals(imbueSkill)) {
+                            int level = imbueNbt.contains("Level") ? imbueNbt.getInt("Level") : 1;
+                            bonus += level;
+                        }
                     }
                 }
             }

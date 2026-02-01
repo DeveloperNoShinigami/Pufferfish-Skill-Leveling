@@ -322,24 +322,25 @@ public abstract class SkillsModMixin {
             for (var skill : category.skills().getAll()) {
                 if (categoryData instanceof CategoryDataExtension ext) {
                     int level = ext.addon$getSkillLevel(skill.id());
-                    if (level > 0) {
-                        int maxLevel = 1;
-                        var defOpt = category.definitions().getById(skill.definitionId());
-                        if (defOpt.isPresent()) {
-                            for (var reward : defOpt.get().rewards()) {
-                                if (reward
-                                        .instance() instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
-                                    maxLevel = Math.max(maxLevel, plr.getMaxLevel());
-                                }
+                    int maxLevel = 1;
+                    var defOpt = category.definitions().getById(skill.definitionId());
+                    if (defOpt.isPresent()) {
+                        for (var reward : defOpt.get().rewards()) {
+                            if (reward
+                                    .instance() instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
+                                maxLevel = Math.max(maxLevel, plr.getMaxLevel());
                             }
                         }
-                        int totalLevel = mod.getSkillLevelingManager().getTotalSkillLevel(player, category.id(),
-                                skill.id());
-                        mod.getSkillLevelingManager().syncSkillLevelToClient(player, category.id(), skill.id(), level,
-                                totalLevel, maxLevel, skill.definitionId());
                     }
+                    int totalLevel = mod.getSkillLevelingManager().getTotalSkillLevel(player, category.id(),
+                            skill.id());
+
+                    // SYNC FIX: Sync all skills, even at level 0, to ensure gear bonuses show up
+                    mod.getSkillLevelingManager().syncSkillLevelToClient(player, category.id(), skill.id(), level,
+                            totalLevel, maxLevel, skill.definitionId());
                 }
             }
+
         } catch (Exception e) {
             SkillLevelingMod.getInstance().getLogger()
                     .error("Failed to sync skill levels on showCategory: " + e.getMessage());

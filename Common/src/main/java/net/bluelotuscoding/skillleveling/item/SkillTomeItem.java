@@ -183,6 +183,12 @@ public class SkillTomeItem extends Item {
         if (LOOT_MODE_IMBUE_ONLY.equals(lootMode)) {
             tooltip.add(
                     Text.translatable("item.puffish_skill_leveling.skill_tome.imbue_only").formatted(Formatting.RED));
+        } else if (LOOT_MODE_BOTH.equals(lootMode)) {
+            tooltip.add(
+                    Text.translatable("item.puffish_skill_leveling.skill_tome.both_mode").formatted(Formatting.GOLD));
+            tooltip.add(Text.translatable("item.puffish_skill_leveling.skill_tome.use_hint").formatted(
+                    Formatting.DARK_PURPLE,
+                    Formatting.ITALIC));
         } else {
             tooltip.add(Text.translatable("item.puffish_skill_leveling.skill_tome.use_hint").formatted(
                     Formatting.DARK_PURPLE,

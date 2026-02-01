@@ -4,23 +4,19 @@ import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
 import net.bluelotuscoding.skillleveling.registry.ModBlocks;
 import net.bluelotuscoding.skillleveling.registry.ModVillagers;
+import net.bluelotuscoding.skillleveling.registry.FabricCreativeTabs;
 import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
 import net.bluelotuscoding.skillleveling.data.SkillMasterTradeProvider;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper;
 import net.fabricmc.fabric.api.object.builder.v1.villager.VillagerProfessionBuilder;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.profiler.Profiler;
@@ -28,29 +24,14 @@ import net.minecraft.world.poi.PointOfInterestType;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReloader;
 import net.minecraft.resource.ResourceType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
+import net.minecraft.loot.LootPool;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.List;
 
 public class FabricMain implements ModInitializer {
-
-        public static final RegistryKey<ItemGroup> BASE_TOMES_KEY = RegistryKey.of(RegistryKeys.ITEM_GROUP,
-                        SkillLevelingMod.createIdentifier("base_tomes"));
-
-        public static final ItemGroup BASE_TOMES_GROUP = FabricItemGroup.builder()
-                        .icon(() -> new ItemStack(ModItems.TOME_OF_PROGRESSION))
-                        .displayName(Text.translatable("itemGroup.puffish_skill_leveling_base"))
-                        .entries((context, entries) -> {
-                                ModItems.fillBaseTomesTab(entries::add);
-                        })
-                        .build();
-
-        public static final ItemGroup SKILL_TOMES_GROUP = FabricItemGroup.builder()
-                        .icon(() -> new ItemStack(ModItems.SKILL_TOME))
-                        .displayName(Text.translatable("itemGroup.puffish_skill_leveling_tomes"))
-                        .entries((context, entries) -> {
-                                ModItems.fillSkillTomesTab(entries::add);
-                        })
-                        .build();
 
         @Override
         public void onInitialize() {
@@ -98,6 +79,11 @@ public class FabricMain implements ModInitializer {
                                 ModItems.TOME_OF_CLEANSING_3_ID,
                                 ModItems.createTomeOfCleansing3());
 
+                ModItems.BLANK_TOME = Registry.register(
+                                Registries.ITEM,
+                                ModItems.BLANK_TOME_ID,
+                                ModItems.createBlankTome());
+
                 // Register Block
                 ModBlocks.SKILL_SCRIBE_TABLE = Registry.register(
                                 Registries.BLOCK,
@@ -126,17 +112,34 @@ public class FabricMain implements ModInitializer {
                                                 .workSound(net.minecraft.sound.SoundEvents.ENTITY_VILLAGER_WORK_CARTOGRAPHER)
                                                 .build());
 
+                // Register Mob Drops
+                ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
+                        List<ItemStack> extraDrops = net.bluelotuscoding.skillleveling.util.LootHelper
+                                        .getDropsForEntity(entity, entity.getWorld().getRandom());
+                        for (ItemStack stack : extraDrops) {
+                                entity.dropStack(stack);
+                        }
+                });
+
+                // Register Loot Injection
+                LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
+                        if (source.isBuiltin()) {
+                                net.bluelotuscoding.skillleveling.util.LootHelper.injectChestLoot(id,
+                                                LootPool.builder().rolls(
+                                                                net.minecraft.loot.provider.number.ConstantLootNumberProvider
+                                                                                .create(1.0f)));
+                        }
+                });
+
                 // Register Proxy Trade (Required by Minecraft for career adoption)
                 net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper.registerVillagerOffers(
                                 ModVillagers.SKILL_MASTER, 1, factories -> {
                                         factories.add((entity, random) -> SkillMasterTradeProvider
-                                                        .createLevel1ProxyTrade());
+                                                        .createLevel1ProxyTrade(null, null));
                                 });
 
                 // Register groups
-                Registry.register(Registries.ITEM_GROUP, BASE_TOMES_KEY, BASE_TOMES_GROUP);
-                Registry.register(Registries.ITEM_GROUP, SkillLevelingMod.createIdentifier("skill_tomes"),
-                                SKILL_TOMES_GROUP);
+                FabricCreativeTabs.register();
 
                 // Register commands
                 CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
@@ -159,6 +162,27 @@ public class FabricMain implements ModInitializer {
                                                         Profiler applyProfiler, Executor prepareExecutor,
                                                         Executor applyExecutor) {
                                                 return SkillLevelingMod.getInstance().getTradeLoader().reload(
+                                                                synchronizer, manager,
+                                                                prepareProfiler, applyProfiler, prepareExecutor,
+                                                                applyExecutor);
+                                        }
+                                });
+
+                ResourceManagerHelper.get(ResourceType.SERVER_DATA)
+                                .registerReloadListener(new IdentifiableResourceReloadListener() {
+                                        @Override
+                                        public Identifier getFabricId() {
+                                                return SkillLevelingMod.createIdentifier("skill_master_reputation");
+                                        }
+
+                                        @Override
+                                        public CompletableFuture<Void> reload(
+                                                        ResourceReloader.Synchronizer synchronizer,
+                                                        ResourceManager manager,
+                                                        Profiler prepareProfiler,
+                                                        Profiler applyProfiler, Executor prepareExecutor,
+                                                        Executor applyExecutor) {
+                                                return SkillLevelingMod.getInstance().getReputationLoader().reload(
                                                                 synchronizer, manager,
                                                                 prepareProfiler, applyProfiler, prepareExecutor,
                                                                 applyExecutor);

@@ -2,12 +2,9 @@ package net.bluelotuscoding.skillleveling.registry;
 
 import com.google.common.collect.ImmutableSet;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
-import net.minecraft.block.BlockState;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.bluelotuscoding.skillleveling.registry.ModVillagers;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
 import net.minecraft.village.VillagerProfession;
 import net.minecraft.world.poi.PointOfInterestType;
 import net.minecraft.world.poi.PointOfInterestTypes;

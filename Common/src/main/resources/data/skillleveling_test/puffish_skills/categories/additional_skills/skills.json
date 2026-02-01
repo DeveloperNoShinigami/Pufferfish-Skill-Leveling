@@ -34,5 +34,11 @@
         "x": 64,
         "y": 64,
         "root": true
+    },
+    "vibrant_luck": {
+        "definition": "vibrant_luck",
+        "x": 128,
+        "y": 64,
+        "root": true
     }
 }

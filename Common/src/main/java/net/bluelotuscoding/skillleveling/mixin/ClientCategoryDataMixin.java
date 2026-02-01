@@ -83,9 +83,9 @@ public abstract class ClientCategoryDataMixin {
         String defId = skill.definitionId();
 
         // 1. Get current levels and max level using robust lookups
-        int baseLevel = ClientSkillLevelStorage.getLevelByDefinitionId(defId);
-        int bonus = ClientSkillLevelStorage.getEquipmentBonus(categoryId, skillId);
-        int totalLevel = baseLevel + bonus;
+        // SYNC FIX: Use totalLevel from storage instead of local calculation
+        int baseLevel = ClientSkillLevelStorage.getBaseLevel(categoryId, skillId);
+        int totalLevel = ClientSkillLevelStorage.getLevel(categoryId, skillId); // This returns total
 
         // Use the same robust max level logic as tooltips
         int maxLevel = Math.max(
@@ -94,34 +94,35 @@ public abstract class ClientCategoryDataMixin {
 
         // 2. Decide State
 
-        // IF THE SKILL IS AT MAX LEVEL - Always show as UNLOCKED (Green/Gold)
-        if (totalLevel >= maxLevel && maxLevel > 0) {
+        // Mastery Check: ONLY show as UNLOCKED (Golden highlight) if at max level
+        if (maxLevel > 0 && totalLevel >= maxLevel) {
             cir.setReturnValue(Skill.State.UNLOCKED);
             return;
         }
 
-        // IF WE HAVE PROGRESS (either base level or gear)
+        // Progression Check: If we have progress but not at max level
         if (totalLevel > 0 || baseLevel > 0) {
-            if (baseLevel < maxLevel) {
-                // Not at max base level yet.
-                // But should it look buyable? (Yellow border)
-                // NO if it's loot-only.
-                if (net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.isImbueOnly(defId) ||
-                        net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.isTomeOnly(defId)) {
-                    // Just show as active/unlocked, but not "purchasable"
-                    cir.setReturnValue(Skill.State.UNLOCKED);
-                    return;
-                }
+            // For loot-only skills (imbue_only, tome_only):
+            // Show as AVAILABLE (colorized icon, no golden highlight, no purchase border)
+            // if they are already Level 1+ but not maxed.
+            if (net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.isImbueOnly(defId) ||
+                    net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.isTomeOnly(defId)) {
+                cir.setReturnValue(Skill.State.AVAILABLE);
+                return;
+            }
 
-                // Show as purchasable (Yellow/White border)
+            // For normal skills:
+            // If not at max base level, show as buyable (BORDER)
+            if (baseLevel < maxLevel) {
                 if (isAffordable(skill)) {
                     cir.setReturnValue(Skill.State.AFFORDABLE);
                 } else {
                     cir.setReturnValue(Skill.State.AVAILABLE);
                 }
             } else {
-                // Base level is maxed, it's fully unlocked
-                cir.setReturnValue(Skill.State.UNLOCKED);
+                // Base level maxed (but Gear might be limiting it, or just base maxed)
+                // Show as colorized normal active
+                cir.setReturnValue(Skill.State.AVAILABLE);
             }
         }
     }

@@ -125,9 +125,9 @@ public class ClientSkillDefinitionConfigMixin {
             }
 
             Text originalExtra = cir.getReturnValue();
-            int baseLevel = ClientSkillLevelStorage.getLevelByDefinitionId(defId);
-            int bonusLevel = ClientSkillLevelStorage.getEquipmentBonusByDefinitionId(defId);
-            int currentLevel = baseLevel + bonusLevel;
+            int totalLevel = ClientSkillLevelStorage.getTotalLevelByDefinitionId(defId);
+            int currentLevel = totalLevel;
+
             int maxLevel = Math.max(ClientDescriptionStorage.getMaxLevel(defId),
                     ClientSkillLevelStorage.getMaxLevelByDefinitionId(defId));
 

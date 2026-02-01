@@ -7,10 +7,6 @@ import net.bluelotuscoding.skillleveling.item.TomeItem;
 import net.bluelotuscoding.skillleveling.item.TomeOfCleansingItem;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
 import net.minecraft.util.Rarity;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -20,8 +16,6 @@ import net.minecraftforge.registries.RegistryObject;
 public class ForgeItemRegistry {
         public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS,
                         SkillLevelingMod.MOD_ID);
-        public static final DeferredRegister<ItemGroup> CREATIVE_TABS = DeferredRegister
-                        .create(Registries.ITEM_GROUP.getKey(), SkillLevelingMod.MOD_ID);
 
         // Items
         public static final RegistryObject<TomeItem> TOME_OF_PROGRESSION = ITEMS
@@ -40,31 +34,16 @@ public class ForgeItemRegistry {
                         .register("tome_of_cleansing_2", ModItems::createTomeOfCleansing2);
         public static final RegistryObject<TomeOfCleansingItem> TOME_OF_CLEANSING_3 = ITEMS
                         .register("tome_of_cleansing_3", ModItems::createTomeOfCleansing3);
+        public static final RegistryObject<Item> BLANK_TOME = ITEMS
+                        .register("blank_tome", ModItems::createBlankTome);
 
         // Block Items
         public static final RegistryObject<Item> SKILL_SCRIBE_TABLE_ITEM = ITEMS.register("skill_scribe_table",
                         () -> new BlockItem(ForgeBlockRegistry.SKILL_SCRIBE_TABLE.get(),
                                         new Item.Settings().rarity(Rarity.RARE)));
 
-        // Creative Tabs
-        public static final RegistryObject<ItemGroup> BASE_TOMES_TAB = CREATIVE_TABS.register("base_tomes_tab",
-                        () -> ItemGroup.builder()
-                                        .icon(() -> new ItemStack(TOME_OF_PROGRESSION.get()))
-                                        .displayName(Text.translatable("itemGroup.puffish_skill_leveling_base"))
-                                        .entries((displayContext, entries) -> ModItems.fillBaseTomesTab(entries::add))
-                                        .build());
-
-        public static final RegistryObject<ItemGroup> SKILL_TOMES_TAB = CREATIVE_TABS.register("skill_tomes_tab",
-                        () -> ItemGroup.builder()
-                                        .withTabsBefore(BASE_TOMES_TAB.getId())
-                                        .icon(() -> new ItemStack(SKILL_TOME.get()))
-                                        .displayName(Text.translatable("itemGroup.puffish_skill_leveling_tomes"))
-                                        .entries((displayContext, entries) -> ModItems.fillSkillTomesTab(entries::add))
-                                        .build());
-
         public static void register(IEventBus bus) {
                 SkillLevelingMod.getInstance().getLogger().info("Initializing Forge Item Registry...");
                 ITEMS.register(bus);
-                CREATIVE_TABS.register(bus);
         }
 }

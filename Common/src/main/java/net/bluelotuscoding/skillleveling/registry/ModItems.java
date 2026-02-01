@@ -28,6 +28,7 @@ public class ModItems {
                         .createIdentifier("tome_of_cleansing_2");
         public static final Identifier TOME_OF_CLEANSING_3_ID = SkillLevelingMod
                         .createIdentifier("tome_of_cleansing_3");
+        public static final Identifier BLANK_TOME_ID = SkillLevelingMod.createIdentifier("blank_tome");
 
         // Item instances - these will be populated during platform registration
         public static TomeItem TOME_OF_PROGRESSION;
@@ -38,6 +39,7 @@ public class ModItems {
         public static TomeOfCleansingItem TOME_OF_CLEANSING;
         public static TomeOfCleansingItem TOME_OF_CLEANSING_2;
         public static TomeOfCleansingItem TOME_OF_CLEANSING_3;
+        public static Item BLANK_TOME;
         public static Item SKILL_SCRIBE_TABLE_ITEM;
 
         /**
@@ -127,9 +129,19 @@ public class ModItems {
         }
 
         /**
+         * Create the Blank Tome item.
+         */
+        public static Item createBlankTome() {
+                return new Item(new Item.Settings().maxCount(16).rarity(Rarity.COMMON));
+        }
+
+        /**
          * Populates the Base Tomes creative tab.
          */
         public static void fillBaseTomesTab(Consumer<ItemStack> entries) {
+                if (BLANK_TOME != null) {
+                        entries.accept(new ItemStack(BLANK_TOME));
+                }
                 if (TOME_OF_PROGRESSION != null) {
                         entries.accept(new ItemStack(TOME_OF_PROGRESSION));
                 }

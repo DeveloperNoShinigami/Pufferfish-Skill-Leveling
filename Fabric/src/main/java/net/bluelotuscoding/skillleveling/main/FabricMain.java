@@ -2,10 +2,18 @@ package net.bluelotuscoding.skillleveling.main;
 
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
+import net.bluelotuscoding.skillleveling.registry.ModBlocks;
+import net.bluelotuscoding.skillleveling.registry.ModVillagers;
 import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
+import net.bluelotuscoding.skillleveling.data.SkillMasterTradeProvider;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper;
+import net.fabricmc.fabric.api.object.builder.v1.villager.VillagerProfessionBuilder;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -13,6 +21,15 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Rarity;
+import net.minecraft.util.profiler.Profiler;
+import net.minecraft.world.poi.PointOfInterestType;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceReloader;
+import net.minecraft.resource.ResourceType;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public class FabricMain implements ModInitializer {
 
@@ -81,6 +98,41 @@ public class FabricMain implements ModInitializer {
                                 ModItems.TOME_OF_CLEANSING_3_ID,
                                 ModItems.createTomeOfCleansing3());
 
+                // Register Block
+                ModBlocks.SKILL_SCRIBE_TABLE = Registry.register(
+                                Registries.BLOCK,
+                                ModBlocks.SKILL_SCRIBE_TABLE_ID,
+                                ModBlocks.createSkillScribeTable());
+
+                // Register Block Item
+                ModItems.SKILL_SCRIBE_TABLE_ITEM = Registry.register(
+                                Registries.ITEM,
+                                ModBlocks.SKILL_SCRIBE_TABLE_ID,
+                                new net.minecraft.item.BlockItem(ModBlocks.SKILL_SCRIBE_TABLE,
+                                                new Item.Settings().rarity(Rarity.RARE)));
+
+                // Register POI
+                @SuppressWarnings("unused")
+                PointOfInterestType skillMasterPoi = PointOfInterestHelper.register(
+                                ModVillagers.SKILL_MASTER_ID, 1, 1, ModBlocks.SKILL_SCRIBE_TABLE);
+
+                // Register Profession
+                ModVillagers.SKILL_MASTER = Registry.register(
+                                Registries.VILLAGER_PROFESSION,
+                                ModVillagers.SKILL_MASTER_ID,
+                                VillagerProfessionBuilder.create()
+                                                .id(ModVillagers.SKILL_MASTER_ID)
+                                                .workstation(ModVillagers.SKILL_SCRIBE_TABLE_POI_KEY)
+                                                .workSound(net.minecraft.sound.SoundEvents.ENTITY_VILLAGER_WORK_CARTOGRAPHER)
+                                                .build());
+
+                // Register Proxy Trade (Required by Minecraft for career adoption)
+                net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper.registerVillagerOffers(
+                                ModVillagers.SKILL_MASTER, 1, factories -> {
+                                        factories.add((entity, random) -> SkillMasterTradeProvider
+                                                        .createLevel1ProxyTrade());
+                                });
+
                 // Register groups
                 Registry.register(Registries.ITEM_GROUP, BASE_TOMES_KEY, BASE_TOMES_GROUP);
                 Registry.register(Registries.ITEM_GROUP, SkillLevelingMod.createIdentifier("skill_tomes"),
@@ -90,5 +142,27 @@ public class FabricMain implements ModInitializer {
                 CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
                         SkillLevelingCommand.register(dispatcher);
                 });
+
+                // Register Resource Reload Listener
+                ResourceManagerHelper.get(ResourceType.SERVER_DATA)
+                                .registerReloadListener(new IdentifiableResourceReloadListener() {
+                                        @Override
+                                        public Identifier getFabricId() {
+                                                return SkillLevelingMod.createIdentifier("skill_master_trades");
+                                        }
+
+                                        @Override
+                                        public CompletableFuture<Void> reload(
+                                                        ResourceReloader.Synchronizer synchronizer,
+                                                        ResourceManager manager,
+                                                        Profiler prepareProfiler,
+                                                        Profiler applyProfiler, Executor prepareExecutor,
+                                                        Executor applyExecutor) {
+                                                return SkillLevelingMod.getInstance().getTradeLoader().reload(
+                                                                synchronizer, manager,
+                                                                prepareProfiler, applyProfiler, prepareExecutor,
+                                                                applyExecutor);
+                                        }
+                                });
         }
 }

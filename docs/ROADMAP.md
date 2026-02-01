@@ -38,15 +38,17 @@
 ## 🔄 In Progress / Testing
 - [ ] In-game testing of tiered extraction and imbuing edge cases
 - [ ] Comprehensive testing of new sample skills
+- [/] Implement **Skill Master** villager profession (Trading & Scaling)
+- [/] Loot table integration for dropping Skill Tomes and Blank Tomes
+- [/] Recipe support for crafting Blank Tomes, Sigils, and Cleansing Tomes
 
 ---
 
 ## 🚀 Planned Features (Next Phase)
 
 ### Custom Villager Integration
-- [ ] Implement **Skill Researcher** villager profession
-- [ ] Add trades for Sigils of Imbuement and Cleansing Tomes
-- [ ] Configure custom villager workstation
+- [x] Configure custom villager workstation (Skill Scribe Table)
+- [/] Advanced trade scaling (5-12 slots) and dynamic pricing
 
 ### Quality of Life
 - [ ] Tooltip preview for slot opening costs
@@ -57,8 +59,8 @@
 - [ ] Slot type restrictions (e.g., armor-only skills)
 
 ### Integration
-- [ ] Loot table integration for dropping pre-configured Skill Tomes
-- [ ] Recipe support for crafting Sigils and Cleansing Tomes
+- [/] Mob drop integration (tiered scaling)
+- [/] Structure chest integration (global)
 
 ---
 

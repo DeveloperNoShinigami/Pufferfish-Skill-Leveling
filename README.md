@@ -26,6 +26,7 @@
 - Dynamic tooltips show current level and progression
 
 ### Skill Tomes
+- **Blank Tome** — The foundation for all craftable tomes.
 - **Tome of Progression** — Advance any skill by 1 level
 - **Tome of Clear Mind** — Refund 1 skill level
 - **Tome of Cleansing (I, II, III)** — Targeted skill extraction from equipment

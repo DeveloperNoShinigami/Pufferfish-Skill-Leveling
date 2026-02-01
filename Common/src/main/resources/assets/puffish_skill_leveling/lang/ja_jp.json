@@ -8,6 +8,9 @@
   "skillleveling.command.enhanced": "マルチレベルの進行で強化されています！",
   "skillleveling.command.needs_params": "スキルの進行には特定のスキルパラメータが必要です",
   "skillleveling.command.use_gui": "スキルとやり取りするにはコアスキルGUIを使用してください",
-  "skillleveling.command.player_only": "このコマンドはプレイヤーのみが使用できます"
-  ,"skillleveling.refund.blocked_by_prereq": "返還を行えません：次のスキルがこれに依存しているため、先に返還してください： %s"
+  "skillleveling.command.player_only": "このコマンドはプレイヤーのみが使用できます",
+  "skillleveling.refund.blocked_by_prereq": "返還を行えません：次のスキルがこれに依存しているため、先に返還してください： %s",
+  "block.puffish_skill_leveling.skill_scribe_table": "技能の書記官のテーブル",
+  "block.puffish_skill_leveling.skill_scribe_table.use": "スキルマスターがここであなたを助けることができます...",
+  "entity.minecraft.villager.puffish_skill_leveling.skill_master": "スキルマスター"
 }

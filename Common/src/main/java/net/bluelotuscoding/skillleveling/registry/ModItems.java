@@ -38,6 +38,7 @@ public class ModItems {
         public static TomeOfCleansingItem TOME_OF_CLEANSING;
         public static TomeOfCleansingItem TOME_OF_CLEANSING_2;
         public static TomeOfCleansingItem TOME_OF_CLEANSING_3;
+        public static Item SKILL_SCRIBE_TABLE_ITEM;
 
         /**
          * Create the Tome of Progression item.
@@ -149,6 +150,9 @@ public class ModItems {
                 }
                 if (SIGIL_OF_IMBUEMENT != null) {
                         entries.accept(new ItemStack(SIGIL_OF_IMBUEMENT));
+                }
+                if (SKILL_SCRIBE_TABLE_ITEM != null) {
+                        entries.accept(new ItemStack(SKILL_SCRIBE_TABLE_ITEM));
                 }
         }
 

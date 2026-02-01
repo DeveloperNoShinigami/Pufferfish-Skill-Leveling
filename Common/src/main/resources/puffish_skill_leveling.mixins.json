@@ -14,7 +14,9 @@
 		"AnvilScreenHandlerMixin",
 		"LivingEntityMixin",
 		"ServerPlayNetworkHandlerMixin",
-		"ServerPlayerEntityMixin"
+		"ServerPlayerEntityMixin",
+		"VillageProfessionMixin",
+		"VillagerTradeMixin"
 	],
 	"client": [
 		"ClientSkillDefinitionConfigMixin",

@@ -13,6 +13,12 @@ import net.bluelotuscoding.skillleveling.mixin_interface.CategoryDataExtension;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.puffish.skillsmod.server.data.PlayerData;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.village.VillagerData;
 
 /**
  * Simplified commands for managing skill levels in the addon.
@@ -30,6 +36,14 @@ public class SkillLevelingCommand {
                 dispatcher.register(
                                 CommandManager.literal("skillleveling")
                                                 .requires(source -> source.hasPermissionLevel(2))
+                                                .then(CommandManager.literal("villager")
+                                                                .then(CommandManager.literal("setTier")
+                                                                                .then(CommandManager.argument("tier",
+                                                                                                IntegerArgumentType
+                                                                                                                .integer(1, 5))
+                                                                                                .executes(SkillLevelingCommand::setVillagerTier)))
+                                                                .then(CommandManager.literal("forceProfession")
+                                                                                .executes(SkillLevelingCommand::forceVillagerProfession)))
                                                 // GET: View current skill level
                                                 .then(CommandManager.literal("get")
                                                                 .then(CommandManager
@@ -684,6 +698,79 @@ public class SkillLevelingCommand {
                 } catch (Exception e) {
                         source.sendError(Text.literal("§cFailed to set category level: " + e.getMessage()));
                         SkillLevelingMod.getInstance().getLogger().error("setCategoryLevel error: " + e);
+                        return 0;
+                }
+        }
+
+        /**
+         * Set the tier of a Skill Master villager being looked at
+         */
+        private static int setVillagerTier(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+                var source = context.getSource();
+                ServerPlayerEntity player = source.getPlayer();
+                if (player == null) {
+                        source.sendError(Text.literal("Command must be run by a player"));
+                        return 0;
+                }
+                int tier = IntegerArgumentType.getInteger(context, "tier");
+
+                double reach = 10.0;
+                Vec3d start = player.getEyePos();
+                Vec3d direction = player.getRotationVec(1.0F);
+                Vec3d end = start.add(direction.x * reach, direction.y * reach, direction.z * reach);
+
+                EntityHitResult hit = ProjectileUtil.raycast(
+                                player, start, end,
+                                player.getBoundingBox().stretch(direction.multiply(reach)).expand(1.0),
+                                (entity) -> entity instanceof VillagerEntity v
+                                                && v.getVillagerData()
+                                                                .getProfession() == net.bluelotuscoding.skillleveling.registry.ModVillagers.SKILL_MASTER,
+                                reach * reach);
+
+                if (hit != null && hit.getEntity() instanceof VillagerEntity villager) {
+                        VillagerData data = villager.getVillagerData();
+                        villager.setVillagerData(data.withLevel(tier));
+                        // Clear current trades so they refresh with new tier
+                        villager.getOffers().clear();
+                        source.sendMessage(Text.literal("§aSet Skill Master tier to §e" + tier));
+                        return 1;
+                } else {
+                        source.sendError(Text
+                                        .literal("§cYou must be looking at a Skill Master villager within 10 blocks!"));
+                        return 0;
+                }
+        }
+
+        /**
+         * Force a villager to become a Skill Master
+         */
+        private static int forceVillagerProfession(CommandContext<ServerCommandSource> context)
+                        throws CommandSyntaxException {
+                var source = context.getSource();
+                ServerPlayerEntity player = source.getPlayer();
+                if (player == null) {
+                        source.sendError(Text.literal("Command must be run by a player"));
+                        return 0;
+                }
+
+                double reach = 10.0;
+                Vec3d start = player.getEyePos();
+                Vec3d direction = player.getRotationVec(1.0F);
+                Vec3d end = start.add(direction.x * reach, direction.y * reach, direction.z * reach);
+
+                EntityHitResult hit = ProjectileUtil.raycast(
+                                player, start, end,
+                                player.getBoundingBox().stretch(direction.multiply(reach)).expand(1.0),
+                                (entity) -> entity instanceof VillagerEntity,
+                                reach * reach);
+
+                if (hit != null && hit.getEntity() instanceof VillagerEntity villager) {
+                        villager.setVillagerData(villager.getVillagerData()
+                                        .withProfession(net.bluelotuscoding.skillleveling.registry.ModVillagers.SKILL_MASTER));
+                        source.sendMessage(Text.literal("§aForced villager to become a Skill Master!"));
+                        return 1;
+                } else {
+                        source.sendError(Text.literal("§cYou must be looking at a villager within 10 blocks!"));
                         return 0;
                 }
         }

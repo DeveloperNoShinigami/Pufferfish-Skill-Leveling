@@ -58,5 +58,8 @@
   "skillleveling.cleansing.no_skills": "This equipment has no imbued skills.",
   "skillleveling.imbue.no_slots": "No empty skill slots available. Use a Sigil of Imbuement first.",
   "skillleveling.imbue.max_slots": "Equipment already has maximum skill slots.",
-  "skillleveling.imbue.slot_opened": "Opened skill slot %d on equipment!"
+  "skillleveling.imbue.slot_opened": "Opened skill slot %d on equipment!",
+  "block.puffish_skill_leveling.skill_scribe_table": "Skill Scribe Table",
+  "block.puffish_skill_leveling.skill_scribe_table.use": "The Skill Master can help you here...",
+  "entity.minecraft.villager.puffish_skill_leveling.skill_master": "Skill Master"
 }

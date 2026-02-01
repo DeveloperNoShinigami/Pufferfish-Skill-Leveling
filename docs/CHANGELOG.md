@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to the **Pufferfish Skill Leveling** mod will be documented in this file.
+ 
+## [Unreleased] - Skill Master & Crafting Overhaul
+ 
+### Added
+- **Blank Tome**: New base crafting material registered to help structure tome progression.
+- **Crafting Recipes**: Full progression path for all base tomes (Progression, Clear Mind, Cleansing, Sigil) using Blank Tomes.
+- **Dynamic Villager Scaling**: Skill Master trades now scale from 5 to 12 slots based on tier.
+- **Intelligent Tome Levels**: Skill tomes offered by villagers now have levels that scale with the villager's tier (e.g., Tier 5 offers Max Level).
+- **Global Loot Tables**: Skill Tomes and Blank Tomes integrated into mob drops (Zombies, Wither Skeletons, etc.) and structure chests.
+- **Mastery Priority**: Villagers now prioritize offering skills the player hasn't learned yet.
+- **Tome Trade-In**: Players can now upgrade tomes through specialized villager trades.
+- **Mastery Feedback**: Added unique villager messages for players who have mastered available skills.
+ 
 
 ## [2026-01-30] - Multi-Skill Cleansing & Visual Polish
 

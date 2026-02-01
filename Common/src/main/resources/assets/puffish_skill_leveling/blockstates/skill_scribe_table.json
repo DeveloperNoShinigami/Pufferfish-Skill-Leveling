@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "": {
+            "model": "puffish_skill_leveling:block/skill_scribe_table"
+        }
+    }
+}

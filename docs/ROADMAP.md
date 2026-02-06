@@ -5,6 +5,7 @@
 ### Core System
 - [x] Multi-Level Skill Progression (`max_skill_level`, `points_per_level`)
 - [x] Per-Level Rewards System
+- [x] Session-Local Reward Protection (Join-time stability)
 - [x] Prerequisite Skills with Level Requirements
 - [x] Dynamic Tooltips with Level Info
 - [x] Real-Time Attribute Sync
@@ -50,12 +51,18 @@
 
 ---
 
+## 🧪 Implemented (Experimental - Needs Testing)
+*These features are implemented but not yet recommended for general use. They may change or be removed.*
+
+- [x] **Dynamic Cost Scaling**: Exponential cost multipliers for skills (`scaling_factor`).
+- [x] **Partial Rewards**: Logic to keep rewards active even if prerequisites are lost (`allow_partial_rewards`).
+- [x] **Reward Synergies**: Cross-category requirements within specific rewards (`prerequisite_skills` in Rewards).
+
+---
+
 ## 🚀 Planned Features (Next Phase)
 
 ### Progression Mechanics
-- [ ] **Dynamic Scaling Factor**: Exponential cost/effectiveness multipliers for skills (base mod feature integration)
-
-### Quality of Life
 - [ ] Tooltip preview for slot opening costs
 - [ ] Better visual feedback in anvil when imbuing/extracting
 
@@ -65,4 +72,4 @@
 
 ---
 
-*Last Updated: 2026-02-04*
+*Last Updated: 2026-02-06*

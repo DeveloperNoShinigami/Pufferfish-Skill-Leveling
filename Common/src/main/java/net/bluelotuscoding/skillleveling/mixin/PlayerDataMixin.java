@@ -1,5 +1,6 @@
 package net.bluelotuscoding.skillleveling.mixin;
 
+import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.puffish.skillsmod.server.data.PlayerData;
 import net.puffish.skillsmod.server.data.CategoryData;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -45,8 +46,12 @@ public abstract class PlayerDataMixin implements PlayerDataExtension {
         if (categoryData instanceof CategoryDataExtension ext) {
             if (addon$owner != null) {
                 ext.addon$setOwner(addon$owner);
+                // Also trigger reward initialization for newly loaded/created category
+                SkillLevelingMod.getInstance().getSkillLevelingManager()
+                        .initializeRewardsForCategory(addon$owner, category.id());
             }
             ext.addon$setCategoryId(category.id());
         }
     }
+
 }

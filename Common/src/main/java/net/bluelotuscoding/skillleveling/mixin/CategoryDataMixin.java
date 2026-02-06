@@ -492,6 +492,16 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                     }
                 }
             }
+
+            // JOIN-TIME INITIALIZATION: If we have an owner and category ID, initialize
+            // rewards immediately
+            // to prevent join-time re-triggering.
+            var owner = ext.addon$getOwner();
+            var categoryId = ext.addon$getCategoryId();
+            if (owner != null && categoryId != null) {
+                SkillLevelingMod.getInstance().getSkillLevelingManager()
+                        .initializeRewardsForCategory(owner, categoryId);
+            }
         }
     }
 

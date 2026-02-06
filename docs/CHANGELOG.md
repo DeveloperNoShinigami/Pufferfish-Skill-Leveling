@@ -4,12 +4,11 @@ All notable changes to the **Pufferfish Skill Leveling** mod will be documented 
  
 ## [2026-02-06] - Reward Logic Refinement & UI Polish
 
-### Fixed
+- **Reward Persistence Stability**: Finalized a robust, session-local initialization guard in `PerLevelRewardsReward`. This completely eliminates join-time re-triggering of commands/chat messages without needing complex global flags.
 - **Multi-Level Reward Triggering**: Fixed a critical bug where rewards for Level 2+ were not firing. Implemented manual trigger support in `CategoryDataMixin`.
-- **Reward Persistence**: Resolved a persistent issue where rewards (commands/effects) would re-trigger upon joining the server or reloading. Implemented state-based activation tracking in `PerLevelRewardsReward`.
 - **GUI Icon Cleanup**: Removed the "X/Y" level indicator text from skill icons to restore a clean, vanilla-like aesthetic as requested by the user.
 - **Hidden Skill Interaction**: Properly blocked mouse clicks on hidden and locked skills in the Skills screen, ensuring they are non-interactive until revealed.
-- **Prerequisite Accuracy**: Fixed Level 1 reward skipping by ensuring the leveling system initializes after Pufferfish's native unlock logic completes.
+- **0->1 Transition Correctness**: Fixed a bug where Level 1 rewards were sometimes skipped during purchase. Level 1 now triggers exactly once upon unlock or first-time join.
 
 ## [2026-02-04] - Visual Discovery & System Consolidation
 

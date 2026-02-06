@@ -150,20 +150,6 @@ Defined at the level of the skill definition.
 - **Interaction**: If the skill is `hidden`, these control when it appears.
 - **Scope**: Same category only.
 
-### 2. Per-Level (`required_skill`)
-Defined inside the `per_level_rewards` data.
-- **Controls**: Reward activation.
-- **Interaction**: If prerequisites are lost, the rewards are **deactivated** (or reverted).
-- **Scope**: **Cross-Category Support!** You can require level 5 in "Combat" for a "Mining" reward.
-
-```json
-"required_skill": [
-    { "skill_id": "sword_mastery", "level": 1, "category_id": "combat" }
-]
-```
-
----
-
 <a name="villager-system"></a>
 ## 7. The Skill Master & Village Dynamics
 

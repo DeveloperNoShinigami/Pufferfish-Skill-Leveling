@@ -39,22 +39,20 @@ Skills with `"hidden": true` are completely invisible in the skill tree until th
 
 ### Prerequisite System
 
-The addon provides **two distinct prerequisite types**:
+The addon provides **three distinct prerequisite layers**:
 
-#### Top-Level Prerequisites (`prerequisite_skills`)
-- **Location**: Root of skill definition
-- **Purpose**: Controls when skill icon appears and can be purchased
-- **Scope**: Same-category only
-- **Behavior**: Once purchased, skill stays even if prerequisites lost later
+#### 1. Top-Level Unlock (`prerequisite_skills`)
+- **Location**: Root of skill definition.
+- **Purpose**: Controls when the skill icon appears/unlocks in the tree.
+- **Behavior**: Once purchased, the skill is permanent regardless of prerequisite loss.
 
-#### Per-Level Prerequisites (`required_skill`)
-- **Location**: Inside `per_level_rewards` data
-- **Purpose**: Controls when rewards (attribute bonuses) are active
-- **Scope**: **Cross-category support** - require skills from ANY category
-- **Behavior**: Rewards deactivate immediately if prerequisites lost (skill stays purchased)
+#### 2. Level Progression Gates (`required_skill_for_level`)
+- **Location**: Root of skill definition.
+- **Purpose**: Blocks specific levels (e.g., Level 5 requires Sword Master 3).
+- **Behavior**: Prevents leveling up until requirements are met.
 
 > [!TIP]
-> Use top-level for tree structure, per-level for synergies between trees.
+> Use Top-Level for tree structure, and Progression Gates for mastery chains.
 
 ---
 

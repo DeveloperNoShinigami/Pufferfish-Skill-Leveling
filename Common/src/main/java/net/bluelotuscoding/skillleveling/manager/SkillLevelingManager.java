@@ -390,13 +390,7 @@ public class SkillLevelingManager {
         // the player's current level BEFORE refreshing. This prevents commands from
         // re-triggering on world rejoin (oldCount will match newCount during refresh).
         for (var entry : perLevelRewardsRewards.entrySet()) {
-            Identifier categoryId = entry.getKey();
-            for (var skillEntry : entry.getValue().entrySet()) {
-                String skillId = skillEntry.getKey();
-                PerLevelRewardsReward plr = skillEntry.getValue();
-                int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
-                plr.initializeCount(player.getUuid(), totalLevel);
-            }
+            initializeRewardsForCategory(player, entry.getKey());
         }
 
         // REFRESH REWARDS: Ensure imbued bonuses apply their attribute modifiers etc.
@@ -425,6 +419,20 @@ public class SkillLevelingManager {
 
     public void initializeSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         dataManager.setSkillLevel(player, categoryId, skillId, 1);
+    }
+
+    /**
+     * Initialize counts for all per-level rewards in a specific category.
+     * This is called during NBT loading to ensure we are ready for refreshes.
+     */
+    public void initializeRewardsForCategory(ServerPlayerEntity player, Identifier categoryId) {
+        var rewards = perLevelRewardsRewards.get(categoryId);
+        if (rewards != null) {
+            for (var entry : rewards.entrySet()) {
+                int totalLevel = getTotalSkillLevel(player, categoryId, entry.getKey());
+                entry.getValue().initializeCount(player.getUuid(), categoryId, totalLevel);
+            }
+        }
     }
 
     public void clearSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {

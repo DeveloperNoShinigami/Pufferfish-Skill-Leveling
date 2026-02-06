@@ -186,54 +186,38 @@ Require a skill from a completely different category:
 These gate **specific levels** of a skill behind other skill requirements. Use this when you want players to be able to start a skill but require additional prerequisites for higher levels.
 
 **Key Behaviors**:
-- Players can unlock and level the skill normally until they hit a gated level
-- The gate is checked when attempting to advance to that specific level
-- Supports **cross-category** requirements via the `category` field
-- Perfect for creating progression dependencies
+### 2. Level Gating (`required_skill_for_level`)
 
-#### Example: Gate Higher Levels
-This skill can be leveled to 2 freely, but level 3 requires another skill:
+You can block specific levels of a skill until other requirements are met. This is a **Progression Gate**. It supports both same-category and cross-category requirements.
 
 ```json
-"advanced_swordsmanship": {
-    "title": "Advanced Swordsmanship",
-    "max_skill_level": 5,
-    "required_skill_for_level": {
-        "3": [
-            { "skill": "basic_training", "min_level": 3 }
-        ],
-        "5": [
-            { "skill": "weapon_mastery", "min_level": 2 },
-            { "skill": "endurance", "min_level": 3, "category": "survival" }
-        ]
-    },
-    ...
+{
+    "advanced_warrior": {
+        "title": "Advanced Warrior",
+        "max_skill_level": 5,
+        "required_skill_for_level": {
+            "3": [
+                { "skill": "basic_training", "min_level": 3 }
+            ],
+            "5": [
+                { "skill": "weapon_mastery", "min_level": 2 },
+                { "skill": "endurance", "min_level": 3, "category": "survival" }
+            ]
+        },
+        ...
+    }
 }
 ```
 
 **Behavior**:
-- Levels 1-2: Available normally
-- Level 3: Requires `basic_training` at level 3 (same category)
-- Level 4: No additional requirements
-- Level 5: Requires both `weapon_mastery` level 2 AND `endurance` level 3 from survival category
+- **Levels 1-2**: Can be purchased as soon as the skill is unlocked.
+- **Level 3**: Purchase is blocked until `basic_training` reaches level 3 (assumed same category).
+- **Level 5**: Purchase is blocked until **BOTH** `weapon_mastery` (same category) level 2 AND `endurance` (from `survival` category) level 3 are met.
 
-#### Cross-Category Level Gating
-```json
-"elemental_mastery": {
-    "title": "Elemental Mastery",
-    "max_skill_level": 3,
-    "required_skill_for_level": {
-        "2": [
-            { "skill": "fire_affinity", "min_level": 2, "category": "magic" }
-        ],
-        "3": [
-            { "skill": "fire_affinity", "min_level": 5, "category": "magic" },
-            { "skill": "mana_pool", "min_level": 3, "category": "magic" }
-        ]
-    },
-    ...
-}
-```
+> [!TIP]
+> **Category Field**: If the `"category"` field is omitted, the addon looks in the same category as the current skill. To require a skill from a different tree, use the category's path ID (e.g., `"magic"`, `"combat"`, `"survival"`).
+
+---
 
 ---
 
@@ -595,6 +579,18 @@ Before imbuing a skill, equipment must have an **Open Skill Slot**.
 - The skill is returned as a **Skill Tome** at its current level (preserving its `loot_mode`).
 - The skill slot remains open on the gear.
 - Extraction cost is defined by `cleansing_cost` for that specific skill.
+
+---
+
+## Advanced Reward Configuration (`per_level_rewards`)
+
+The `puffish_skill_leveling:per_level_rewards` type supports additional fields within its `data` block for better description management.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `skill_id` | string | — | **Required**. Must match the skill's ID for internal tracking. |
+| `merge_description` | boolean | false | Consolidate level benefits into list-style tooltips. |
+| `levels` | object | — | **Required**. Keyed list of rewards (1, 2, 3...) |
 
 ---
 

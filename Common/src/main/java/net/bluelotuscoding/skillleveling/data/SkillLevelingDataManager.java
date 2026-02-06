@@ -29,8 +29,13 @@ public class SkillLevelingDataManager {
     // In-memory cache of skill level data
     private final Map<UUID, Map<Identifier, Map<String, Integer>>> playerSkillLevels;
 
+    // In-memory cache of activated reward levels (for persistence across restarts)
+    // UUID -> CategoryId -> SkillId -> Set of Levels
+    private final Map<UUID, Map<Identifier, Map<String, java.util.Set<Integer>>>> persistentActivatedLevels;
+
     public SkillLevelingDataManager() {
         this.playerSkillLevels = new ConcurrentHashMap<>();
+        this.persistentActivatedLevels = new ConcurrentHashMap<>();
     }
 
     /**
@@ -58,9 +63,8 @@ public class SkillLevelingDataManager {
      */
     public void savePlayerData(ServerPlayerEntity player) {
         var data = playerSkillLevels.get(player.getUuid());
-        if (data != null && !data.isEmpty()) {
-            saveToNbt(player, data);
-        }
+        var activated = persistentActivatedLevels.get(player.getUuid());
+        saveToNbt(player, data, activated);
     }
 
     /**
@@ -69,6 +73,7 @@ public class SkillLevelingDataManager {
     public void saveAll() {
         // Data is stored in player NBT, which is saved automatically by Minecraft
         playerSkillLevels.clear();
+        persistentActivatedLevels.clear();
     }
 
     /**
@@ -142,15 +147,42 @@ public class SkillLevelingDataManager {
      * NBT PERSISTENCE: Saves data to player NBT.
      */
     public void saveToNbt(ServerPlayerEntity player, Map<Identifier, Map<String, Integer>> data) {
-        if (data == null || data.isEmpty())
-            return;
+        saveToNbt(player, data, persistentActivatedLevels.get(player.getUuid()));
+    }
 
+    /**
+     * NBT PERSISTENCE: Saves data to player NBT.
+     */
+    public void saveToNbt(ServerPlayerEntity player, Map<Identifier, Map<String, Integer>> data,
+            Map<Identifier, Map<String, java.util.Set<Integer>>> activated) {
         net.minecraft.nbt.NbtCompound skillTag = new net.minecraft.nbt.NbtCompound();
-        for (var entry : data.entrySet()) {
-            net.minecraft.nbt.NbtCompound catTag = new net.minecraft.nbt.NbtCompound();
-            entry.getValue().forEach(catTag::putInt);
-            skillTag.put(entry.getKey().toString(), catTag);
+
+        if (data != null && !data.isEmpty()) {
+            net.minecraft.nbt.NbtCompound levelsTag = new net.minecraft.nbt.NbtCompound();
+            for (var entry : data.entrySet()) {
+                net.minecraft.nbt.NbtCompound catTag = new net.minecraft.nbt.NbtCompound();
+                entry.getValue().forEach(catTag::putInt);
+                levelsTag.put(entry.getKey().toString(), catTag);
+            }
+            skillTag.put("Levels", levelsTag);
         }
+
+        if (activated != null && !activated.isEmpty()) {
+            net.minecraft.nbt.NbtCompound activatedTag = new net.minecraft.nbt.NbtCompound();
+            for (var entry : activated.entrySet()) {
+                net.minecraft.nbt.NbtCompound catTag = new net.minecraft.nbt.NbtCompound();
+                for (var skillEntry : entry.getValue().entrySet()) {
+                    net.minecraft.nbt.NbtIntArray levelsArray = new net.minecraft.nbt.NbtIntArray(
+                            skillEntry.getValue().stream().toList());
+                    catTag.put(skillEntry.getKey(), levelsArray);
+                }
+                activatedTag.put(entry.getKey().toString(), catTag);
+            }
+            skillTag.put("ActivatedLevels", activatedTag);
+        }
+
+        if (skillTag.isEmpty())
+            return;
 
         // Use our custom accessor interface
         if (player instanceof SkillLevelHolder holder) {
@@ -169,11 +201,21 @@ public class SkillLevelingDataManager {
                     return null;
                 }
                 Map<Identifier, Map<String, Integer>> data = new ConcurrentHashMap<>();
+                Map<Identifier, Map<String, java.util.Set<Integer>>> activated = new ConcurrentHashMap<>();
 
-                for (String key : skillTag.getKeys()) {
+                // Support legacy format (v1 had everything at root of SkillLevelingData)
+                // New format: { Levels: {...}, ActivatedLevels: {...} }
+                net.minecraft.nbt.NbtCompound levelsTag = skillTag.contains("Levels", 10)
+                        ? skillTag.getCompound("Levels")
+                        : skillTag;
+
+                for (String key : levelsTag.getKeys()) {
+                    if (key.equals("ActivatedLevels"))
+                        continue; // Skip new tag if using old format
+
                     Identifier catId = Identifier.tryParse(key);
                     if (catId != null) {
-                        net.minecraft.nbt.NbtCompound catTag = skillTag.getCompound(key);
+                        net.minecraft.nbt.NbtCompound catTag = levelsTag.getCompound(key);
                         Map<String, Integer> skills = new ConcurrentHashMap<>();
                         for (String skillId : catTag.getKeys()) {
                             skills.put(skillId, catTag.getInt(skillId));
@@ -181,6 +223,27 @@ public class SkillLevelingDataManager {
                         data.put(catId, skills);
                     }
                 }
+
+                if (skillTag.contains("ActivatedLevels", 10)) {
+                    net.minecraft.nbt.NbtCompound activatedTag = skillTag.getCompound("ActivatedLevels");
+                    for (String catKey : activatedTag.getKeys()) {
+                        Identifier catId = Identifier.tryParse(catKey);
+                        if (catId != null) {
+                            net.minecraft.nbt.NbtCompound catTag = activatedTag.getCompound(catKey);
+                            Map<String, java.util.Set<Integer>> skills = new ConcurrentHashMap<>();
+                            for (String skillId : catTag.getKeys()) {
+                                java.util.Set<Integer> levels = new java.util.concurrent.CopyOnWriteArraySet<>();
+                                int[] array = catTag.getIntArray(skillId);
+                                for (int i : array)
+                                    levels.add(i);
+                                skills.put(skillId, levels);
+                            }
+                            activated.put(catId, skills);
+                        }
+                    }
+                }
+
+                persistentActivatedLevels.put(player.getUuid(), activated);
                 return data;
             } catch (Exception e) {
                 return null;
@@ -248,5 +311,24 @@ public class SkillLevelingDataManager {
             }
             saveToNbt(player, playerData);
         }
+    }
+
+    public java.util.Set<Integer> getActivatedLevels(UUID playerId, Identifier categoryId, String skillId) {
+        var playerMap = persistentActivatedLevels.get(playerId);
+        if (playerMap == null)
+            return null;
+        var catMap = playerMap.get(categoryId);
+        if (catMap == null)
+            return null;
+        return catMap.get(skillId);
+    }
+
+    public void setActivatedLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
+        persistentActivatedLevels.computeIfAbsent(player.getUuid(), k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(categoryId, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(skillId, k -> new java.util.concurrent.CopyOnWriteArraySet<>())
+                .add(level);
+
+        savePlayerData(player);
     }
 }

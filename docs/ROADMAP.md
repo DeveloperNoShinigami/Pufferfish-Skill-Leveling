@@ -40,10 +40,20 @@
 ### World Integration
 - [x] Tiered mob drop integration for Blank Tomes and Skill Tomes
 - [x] Global structure injection (Village, Dungeon, Nether, End)
+- [x] **Skill Master Houses**: Custom Jigsaw-based village buildings.
+- [x] **Structural Loot**: Skill Master Barrels with tiered progression loot.
+
+### Advanced Mechanics
+- [x] **Hidden Skills**: Visual discovery mode (invisible icons/tooltips until requirements met).
+- [x] **Enhanced Prerequisites**: Cross-category locking and specialized bypasses.
+- [x] **External Configuration**: Full datapack support for Trading, Reputation, and Loot.
 
 ---
 
 ## 🚀 Planned Features (Next Phase)
+
+### Progression Mechanics
+- [ ] **Dynamic Scaling Factor**: Exponential cost/effectiveness multipliers for skills (base mod feature integration)
 
 ### Quality of Life
 - [ ] Tooltip preview for slot opening costs
@@ -55,4 +65,4 @@
 
 ---
 
-*Last Updated: 2026-02-01*
+*Last Updated: 2026-02-04*

@@ -1,0 +1,37 @@
+
+> Configure project :Common
+Architectury Loom: 1.5.388
+This version of Architectury Loom is in beta! Please report any issues you encounter: https://github.com/architectury/architectury-loom/issues
+fabric-installer.json not found in dependencies!
+
+> Task :Common:compileJava FAILED
+C:\MinecraftModdingWorkspace\1.20.1 Mods\Pufferfish-Skill-Leveling-1.20.1_addon_version\Pufferfish-Skill-Leveling\Common\src\main\java\net\bluelotuscoding\skillleveling\mixin\StructurePoolMixin.java:13: warning: Cannot find target for @Shadow field in net.minecraft.structure.pool.StructurePool
+    @Shadow
+    ^
+C:\MinecraftModdingWorkspace\1.20.1 Mods\Pufferfish-Skill-Leveling-1.20.1_addon_version\Pufferfish-Skill-Leveling\Common\src\main\java\net\bluelotuscoding\skillleveling\mixin\StructurePoolAccessor.java:13: error: Could not locate @Accessor target f_210560_ in target net.minecraft.structure.pool.StructurePool
+    @Accessor("f_210560_")
+    ^
+C:\MinecraftModdingWorkspace\1.20.1 Mods\Pufferfish-Skill-Leveling-1.20.1_addon_version\Pufferfish-Skill-Leveling\Common\src\main\java\net\bluelotuscoding\skillleveling\mixin\StructurePoolAccessor.java:16: error: Could not locate @Accessor target f_210560_ in target net.minecraft.structure.pool.StructurePool
+    @Accessor("f_210560_")
+    ^
+C:\MinecraftModdingWorkspace\1.20.1 Mods\Pufferfish-Skill-Leveling-1.20.1_addon_version\Pufferfish-Skill-Leveling\Common\src\main\java\net\bluelotuscoding\skillleveling\mixin\StructurePoolAccessor.java:19: error: Could not locate @Accessor target f_210559_ in target net.minecraft.structure.pool.StructurePool
+    @Accessor("f_210559_")
+    ^
+C:\MinecraftModdingWorkspace\1.20.1 Mods\Pufferfish-Skill-Leveling-1.20.1_addon_version\Pufferfish-Skill-Leveling\Common\src\main\java\net\bluelotuscoding\skillleveling\mixin\StructurePoolAccessor.java:22: error: Could not locate @Accessor target f_210559_ in target net.minecraft.structure.pool.StructurePool
+    @Accessor("f_210559_")
+    ^
+4 errors
+1 warning
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':Common:compileJava'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+> Run with --info option to get more log output.
+> Run with --scan to get full insights.
+
+BUILD FAILED in 3s
+1 actionable task: 1 executed

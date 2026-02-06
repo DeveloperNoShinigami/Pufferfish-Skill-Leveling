@@ -1,6 +1,5 @@
 package net.bluelotuscoding.skillleveling.network;
 
-import net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage;
 import net.minecraft.network.PacketByteBuf;
 
 import java.util.HashMap;
@@ -18,19 +17,22 @@ public class SyncSkillDescriptionsPacket {
     private final boolean mergeDescription;
     private final int maxLevel;
     private final String lootMode;
+    private final java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prerequisites;
 
     public SyncSkillDescriptionsPacket(String definitionId,
             Map<Integer, String> levelDescriptions,
             Map<Integer, String> levelExtraDescriptions,
             boolean mergeDescription,
             int maxLevel,
-            String lootMode) {
+            String lootMode,
+            java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prerequisites) {
         this.definitionId = definitionId;
         this.levelDescriptions = levelDescriptions != null ? levelDescriptions : new HashMap<>();
         this.levelExtraDescriptions = levelExtraDescriptions != null ? levelExtraDescriptions : new HashMap<>();
         this.mergeDescription = mergeDescription;
         this.maxLevel = maxLevel;
         this.lootMode = lootMode;
+        this.prerequisites = prerequisites;
     }
 
     public static SyncSkillDescriptionsPacket decode(PacketByteBuf buf) {
@@ -57,8 +59,19 @@ public class SyncSkillDescriptionsPacket {
             extraDescs.put(level, text);
         }
 
+        // Read prerequisites
+        int prereqCount = buf.readVarInt();
+        java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prereqs = new java.util.ArrayList<>();
+        for (int i = 0; i < prereqCount; i++) {
+            String psId = buf.readString();
+            int pLevel = buf.readVarInt();
+            String pCatId = buf.readBoolean() ? buf.readString() : null;
+            prereqs.add(new net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite(psId,
+                    pLevel, pCatId));
+        }
+
         return new SyncSkillDescriptionsPacket(definitionId, levelDescs, extraDescs, mergeDescription, maxLevel,
-                lootMode);
+                lootMode, prereqs);
     }
 
     public void encode(PacketByteBuf buf) {
@@ -80,6 +93,21 @@ public class SyncSkillDescriptionsPacket {
             buf.writeVarInt(entry.getKey());
             buf.writeString(entry.getValue());
         }
+
+        // Write prerequisites
+        if (prerequisites != null) {
+            buf.writeVarInt(prerequisites.size());
+            for (var prereq : prerequisites) {
+                buf.writeString(prereq.getSkillId());
+                buf.writeVarInt(prereq.getLevel());
+                buf.writeBoolean(prereq.getCategoryId() != null);
+                if (prereq.getCategoryId() != null) {
+                    buf.writeString(prereq.getCategoryId());
+                }
+            }
+        } else {
+            buf.writeVarInt(0);
+        }
     }
 
     /**
@@ -87,17 +115,9 @@ public class SyncSkillDescriptionsPacket {
      * ClientDescriptionStorage.
      */
     public void handleClient() {
-        System.out.println("[SkillLeveling] Received descriptions for: "
-                + definitionId
-                + " (Levels: " + levelDescriptions.size() + ", Extras: "
-                + levelExtraDescriptions.size() + ")");
-        ClientDescriptionStorage.setDescriptions(
-                definitionId,
+        net.bluelotuscoding.skillleveling.client.ClientPacketHandler.handleSyncDescriptions(definitionId,
                 levelDescriptions,
-                levelExtraDescriptions,
-                mergeDescription,
-                maxLevel,
-                lootMode);
+                levelExtraDescriptions, mergeDescription, maxLevel, lootMode, prerequisites);
     }
 
     // Getters

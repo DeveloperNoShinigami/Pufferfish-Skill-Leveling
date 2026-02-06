@@ -13,7 +13,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Mixin(value = SkillDefinitionConfig.class, remap = false)
@@ -51,9 +53,12 @@ public abstract class SkillDefinitionConfigMixin {
         var mergeDescription = rootObject.get("merge_description").getSuccess();
         var descriptions = rootObject.get("descriptions").getSuccess();
         var extraDescriptions = rootObject.get("extra_descriptions").getSuccess();
-        var requiredSkill = rootObject.get("required_skill").getSuccess();
-        // Use getArray to properly consume the prerequisite_skills field
+        // Use getArray to properly consume the prerequisite fields
         rootObject.getArray("prerequisite_skills");
+        rootObject.getArray("required_skill");
+        // Consume required_skill_for_level (replaces old required_skill for per-level
+        // gating)
+        rootObject.get("required_skill_for_level");
         rootObject.get("loot_mode");
         rootObject.get("category_id");
         rootObject.get("enchantment_levels");
@@ -96,9 +101,6 @@ public abstract class SkillDefinitionConfigMixin {
                             if (extraDescriptions.isPresent() && !data.has("extra_descriptions")) {
                                 data.add("extra_descriptions", extraDescriptions.get().getJson());
                             }
-                            if (requiredSkill.isPresent() && !data.has("required_skill")) {
-                                data.add("required_skill", requiredSkill.get().getJson());
-                            }
 
                             // Ensure skill_id is set if missing
                             if (!data.has("skill_id")) {
@@ -121,6 +123,22 @@ public abstract class SkillDefinitionConfigMixin {
         }
 
         var typeString = typeResult.flatMap(e -> e.getAsString().getSuccess());
+
+        // Always parse "hidden" and "loot_mode" for all skills (including standard
+        // Pufferfish skills)
+        final boolean isLootable = rootObject.get("loot_mode").getSuccess().isPresent();
+        final boolean hidden = rootObject.get("hidden").getSuccess()
+                .flatMap(e -> e.getAsBoolean().getSuccess())
+                .orElse(false);
+
+        if (hidden || isLootable) {
+            // For standard skills, we only care about hidden and lootable status
+            if (typeString.isPresent() && !isAddonType(typeString.get())) {
+                LeveledConfigStorage.put(id,
+                        new LeveledConfigStorage.LeveledConfig(1, 0, false, null, null, isLootable, hidden));
+            }
+        }
+
         if (typeString.isEmpty() || !isAddonType(typeString.get())) {
             return;
         }
@@ -139,19 +157,96 @@ public abstract class SkillDefinitionConfigMixin {
                                     .flatMap(e -> e.getAsBoolean().getSuccess()).orElse(false);
 
                             List<LeveledConfigStorage.RequiredSkillEntry> requiredSkillsList = new ArrayList<>();
-                            rootObject.getArray("prerequisite_skills").ifSuccess(arr -> {
+
+                            // Parse both "prerequisite_skills" (Pufferfish-like) and "required_skill"
+                            // (Addon-like)
+                            var prereqsResult = rootObject.getArray("prerequisite_skills")
+                                    .getSuccess()
+                                    .or(() -> rootObject.getArray("required_skill").getSuccess());
+
+                            prereqsResult.ifPresent(arr -> {
                                 var jsonArr = arr.getJson();
                                 for (int i = 0; i < jsonArr.size(); i++) {
                                     var elem = jsonArr.get(i);
                                     if (elem.isJsonObject()) {
                                         var reqObj = elem.getAsJsonObject();
-                                        var skillIdElem = reqObj.get("skill");
-                                        var minLevelElem = reqObj.get("min_level");
-                                        if (skillIdElem != null && minLevelElem != null) {
+
+                                        // Support both "skill" and "skill_id"
+                                        var skillIdElem = reqObj.has("skill") ? reqObj.get("skill")
+                                                : reqObj.get("skill_id");
+
+                                        // Support "min_level", "level", and "max_level" (for backwards compatibility)
+                                        var minLevelElem = reqObj.has("min_level") ? reqObj.get("min_level")
+                                                : (reqObj.has("level") ? reqObj.get("level")
+                                                        : reqObj.get("max_level"));
+
+                                        if (skillIdElem != null && !skillIdElem.isJsonNull() && minLevelElem != null
+                                                && !minLevelElem.isJsonNull()) {
                                             String reqSkillId = skillIdElem.getAsString();
                                             int minLevel = minLevelElem.getAsInt();
-                                            requiredSkillsList.add(
-                                                    new LeveledConfigStorage.RequiredSkillEntry(reqSkillId, minLevel));
+
+                                            // Parse optional category for cross-category support (support both category
+                                            // and category_id)
+                                            String category = reqObj.has("category")
+                                                    ? reqObj.get("category").getAsString()
+                                                    : (reqObj.has("category_id")
+                                                            ? reqObj.get("category_id").getAsString()
+                                                            : null);
+
+                                            requiredSkillsList.add(new LeveledConfigStorage.RequiredSkillEntry(
+                                                    reqSkillId, minLevel, category));
+                                        }
+                                    }
+                                }
+                            });
+
+                            // Parse required_skill_for_level (level-gating prerequisites)
+                            Map<Integer, List<LeveledConfigStorage.RequiredSkillEntry>> levelPrereqs = new HashMap<>();
+                            rootObject.get("required_skill_for_level").getSuccess().ifPresent(levelReqElem -> {
+                                var levelReqJson = levelReqElem.getJson();
+                                if (levelReqJson.isJsonObject()) {
+                                    var levelReqObj = levelReqJson.getAsJsonObject();
+                                    for (var entry : levelReqObj.entrySet()) {
+                                        try {
+                                            int targetLevel = Integer.parseInt(entry.getKey());
+                                            List<LeveledConfigStorage.RequiredSkillEntry> prereqsForLevel = new ArrayList<>();
+                                            if (entry.getValue().isJsonArray()) {
+                                                var prereqArr = entry.getValue().getAsJsonArray();
+                                                for (int i = 0; i < prereqArr.size(); i++) {
+                                                    var prereqElem = prereqArr.get(i);
+                                                    if (prereqElem.isJsonObject()) {
+                                                        var prereqObj = prereqElem.getAsJsonObject();
+                                                        // Support both "skill" and "skill_id"
+                                                        var skillIdElem = prereqObj.has("skill")
+                                                                ? prereqObj.get("skill")
+                                                                : prereqObj.get("skill_id");
+
+                                                        var minLevelElem = prereqObj.has("min_level")
+                                                                ? prereqObj.get("min_level")
+                                                                : (prereqObj.has("level") ? prereqObj.get("level")
+                                                                        : prereqObj.get("max_level"));
+
+                                                        if (skillIdElem != null && !skillIdElem.isJsonNull()
+                                                                && minLevelElem != null && !minLevelElem.isJsonNull()) {
+                                                            String reqSkillId = skillIdElem.getAsString();
+                                                            int minLevel = minLevelElem.getAsInt();
+                                                            String category = prereqObj.has("category")
+                                                                    ? prereqObj.get("category").getAsString()
+                                                                    : (prereqObj.has("category_id")
+                                                                            ? prereqObj.get("category_id").getAsString()
+                                                                            : null);
+                                                            prereqsForLevel.add(
+                                                                    new LeveledConfigStorage.RequiredSkillEntry(
+                                                                            reqSkillId, minLevel, category));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            if (!prereqsForLevel.isEmpty()) {
+                                                levelPrereqs.put(targetLevel, prereqsForLevel);
+                                            }
+                                        } catch (NumberFormatException e) {
+                                            // Invalid level key, skip
                                         }
                                     }
                                 }
@@ -238,8 +333,9 @@ public abstract class SkillDefinitionConfigMixin {
 
                             LeveledConfigStorage.put(id,
                                     new LeveledConfigStorage.LeveledConfig(maxLevels, points, merge,
-                                            requiredSkillsList, lootMode, categoryId, enchantmentCost, imbuementCost,
-                                            slotOpeningCost, cleansingCost));
+                                            requiredSkillsList, levelPrereqs, lootMode, categoryId, enchantmentCost,
+                                            imbuementCost,
+                                            slotOpeningCost, cleansingCost, isLootable, hidden));
                         });
             });
         });

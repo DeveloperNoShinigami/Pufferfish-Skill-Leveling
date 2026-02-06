@@ -1,0 +1,134 @@
+{
+    "type": "minecraft:chest",
+    "pools": [
+        {
+            "rolls": {
+                "min": 4,
+                "max": 8
+            },
+            "comment": "Random materials used in tome crafting recipes",
+            "entries": [
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:paper",
+                    "weight": 25,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 1,
+                                "max": 8
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:emerald",
+                    "weight": 10,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 1,
+                                "max": 6
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:amethyst_shard",
+                    "weight": 5,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 1,
+                                "max": 6
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:gold_ingot",
+                    "weight": 10,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 1,
+                                "max": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:redstone",
+                    "weight": 15,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 2,
+                                "max": 8
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:experience_bottle",
+                    "weight": 5,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 1,
+                                "max": 3
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:milk_bucket",
+                    "weight": 15,
+                    "comment": "A crafting material for Tome of Clear Mind"
+                }
+            ]
+        },
+        {
+            "rolls": 1,
+            "comment": "Base Tome or rare Cleansing Tomes",
+            "entries": [
+                {
+                    "type": "minecraft:item",
+                    "name": "puffish_skill_leveling:blank_tome",
+                    "weight": 15
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "puffish_skill_leveling:tome_of_cleansing",
+                    "weight": 3
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "puffish_skill_leveling:tome_of_cleansing_2",
+                    "weight": 2
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "puffish_skill_leveling:tome_of_cleansing_3",
+                    "weight": 1
+                },
+                {
+                    "type": "minecraft:empty",
+                    "weight": 79
+                }
+            ]
+        }
+    ]
+}

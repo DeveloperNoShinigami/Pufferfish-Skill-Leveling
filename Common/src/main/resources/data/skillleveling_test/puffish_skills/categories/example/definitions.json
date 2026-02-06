@@ -178,10 +178,12 @@
         "min_level": 1
       },
       {
-        "skill": "test_mage",
-        "min_level": 1
+        "skill": "vibrant_luck",
+        "category": "additional_skills",
+        "min_level": 3
       }
     ],
+    "hidden": true,
     "max_skill_level": 3,
     "points_per_level": 2,
     "merge_description": false,
@@ -232,6 +234,123 @@
     ],
     "metadata": {
       "icon": "test_magic_swordsman_icon_id"
+    }
+  },
+  "test_advanced_warrior": {
+    "type": "puffish_skills:default",
+    "title": "Test Advanced Warrior",
+    "description": "Advanced combat skill with level-gated prerequisites",
+    "icon": {
+      "type": "item",
+      "data": {
+        "item": "minecraft:netherite_axe"
+      }
+    },
+    "size": 1.0,
+    "max_skill_level": 5,
+    "points_per_level": 1,
+    "prerequisite_skills": [
+      {
+        "skill": "test_warrior",
+        "min_level": 2
+      }
+    ],
+    "required_skill_for_level": {
+      "3": [
+        {
+          "skill": "test_mage",
+          "min_level": 1
+        }
+      ],
+      "5": [
+        {
+          "skill": "test_mage",
+          "min_level": 2
+        },
+        {
+          "skill": "imbued_vitality",
+          "min_level": 2,
+          "category": "additional_skills"
+        }
+      ]
+    },
+    "descriptions": {
+      "1": "Level 1: Basic advanced training (+2 HP)",
+      "2": "Level 2: Improved endurance (+4 HP)",
+      "3": "Level 3: Magic-infused strength (+6 HP, requires Test Mage 1)",
+      "4": "Level 4: Enhanced fortitude (+8 HP)",
+      "5": "Level 5: Ultimate warrior (+10 HP, requires Test Mage 2 & Imbued Vitality 2)"
+    },
+    "extra_descriptions": {
+      "0": "Level 1: Basic advanced training (+2 HP)",
+      "1": "Level 2: Improved endurance (+4 HP)",
+      "2": "Level 3: Magic-infused strength (+6 HP, requires Test Mage 1)",
+      "3": "Level 4: Enhanced fortitude (+8 HP)",
+      "4": "Level 5: Ultimate warrior (+10 HP, requires Test Mage 2 & Imbued Vitality 2)",
+      "5": "— MAXED OUT —"
+    },
+    "rewards": [
+      {
+        "type": "puffish_skill_leveling:per_level_rewards",
+        "data": {
+          "skill_id": "test_advanced_warrior",
+          "levels": {
+            "1": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.max_health",
+                  "value": 2,
+                  "operation": "addition"
+                }
+              }
+            ],
+            "2": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.max_health",
+                  "value": 4,
+                  "operation": "addition"
+                }
+              }
+            ],
+            "3": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.max_health",
+                  "value": 6,
+                  "operation": "addition"
+                }
+              }
+            ],
+            "4": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.max_health",
+                  "value": 8,
+                  "operation": "addition"
+                }
+              }
+            ],
+            "5": [
+              {
+                "type": "puffish_skills:attribute",
+                "data": {
+                  "attribute": "generic.max_health",
+                  "value": 10,
+                  "operation": "addition"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "icon": "test_advanced_warrior_icon_id"
     }
   }
 }

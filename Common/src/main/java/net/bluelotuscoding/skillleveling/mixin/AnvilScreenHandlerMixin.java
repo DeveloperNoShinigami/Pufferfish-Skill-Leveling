@@ -108,7 +108,10 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
 
                 // Create the refund tome
                 var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillToExtract.skillId);
-                String lootMode = config != null ? config.lootMode : SkillTomeItem.LOOT_MODE_BOTH;
+                if (config == null || config.lootMode == null)
+                    return; // If config or lootMode is null, we cannot determine the refund tome's loot
+                            // mode.
+                String lootMode = config.lootMode;
 
                 skillLeveling$cleansingRefundTome = SkillTomeItem.createSkillTome(
                         ModItems.SKILL_TOME,
@@ -149,8 +152,10 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
                         .getSkillLevelingManager();
 
                 if (manager != null) {
-                    net.minecraft.util.Identifier catId = new net.minecraft.util.Identifier(categoryId1);
-                    int maxLevel = manager.getMaxLevel(catId, skillId1);
+                    // Normalize category ID for config lookup and level check
+                    net.minecraft.util.Identifier normalizedCatId = manager
+                            .normalizeCategoryId(new net.minecraft.util.Identifier(categoryId1));
+                    int maxLevel = manager.getMaxLevel(normalizedCatId, skillId1);
 
                     if (level1 < maxLevel) {
                         String lootMode = SkillTomeItem.getLootMode(slot1);
@@ -161,6 +166,8 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
 
                         int enchantmentCost = 0;
                         var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId1);
+                        if (config == null || config.lootMode == null)
+                            return;
                         if (config != null && config.enchantmentCost != null) {
                             enchantmentCost = config.enchantmentCost.getCost(level1);
                         }
@@ -197,16 +204,19 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
                         var manager = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance()
                                 .getSkillLevelingManager();
                         if (manager != null) {
-                            net.minecraft.util.Identifier catId = new net.minecraft.util.Identifier(categoryId);
+                            net.minecraft.util.Identifier catId = manager
+                                    .normalizeCategoryId(new net.minecraft.util.Identifier(categoryId));
                             int maxLevel = manager.getMaxLevel(catId, skillId);
 
                             if (existingLevel < maxLevel) {
+                                var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+                                if (config == null || config.lootMode == null)
+                                    return;
                                 ImbuedSkillHelper.upgradeSkill(result, skillId);
 
                                 this.slots.get(2).setStack(result);
 
                                 int upgradeCost = 0;
-                                var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
                                 if (config != null && config.imbuementCost != null) {
                                     upgradeCost = config.imbuementCost.getCost(existingLevel + 1);
                                 }
@@ -226,6 +236,8 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
 
                         int imbuementCost = 0;
                         var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+                        if (config == null || config.lootMode == null)
+                            return;
                         if (config != null && config.imbuementCost != null) {
                             imbuementCost = config.imbuementCost.getCost(tomeLevel);
                         }

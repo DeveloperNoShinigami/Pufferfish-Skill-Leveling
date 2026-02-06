@@ -25,6 +25,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.List;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 
 @Mod(SkillLevelingMod.MOD_ID)
 public class ForgeMain {
@@ -63,6 +65,16 @@ public class ForgeMain {
                 event.addListener(SkillLevelingMod.getInstance().getReputationLoader());
         }
 
+        @SubscribeEvent
+        public void onServerStarting(ServerStartingEvent event) {
+                SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStarting(event.getServer());
+        }
+
+        @SubscribeEvent
+        public void onServerStopped(ServerStoppedEvent event) {
+                SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStopping(event.getServer());
+        }
+
         @Mod.EventBusSubscriber(modid = SkillLevelingMod.MOD_ID)
         public static class ForgeEvents {
 
@@ -73,6 +85,15 @@ public class ForgeMain {
                                         SkillLevelingMod.getInstance().getSkillLevelingManager()
                                                         .syncAllSkillsToPlayer(serverPlayer);
                                 }
+                        }
+                }
+
+                @SubscribeEvent
+                public static void onEquipmentChange(
+                                net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent event) {
+                        if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
+                                SkillLevelingMod.getInstance().getSkillLevelingManager()
+                                                .refreshAllRewards(serverPlayer);
                         }
                 }
 

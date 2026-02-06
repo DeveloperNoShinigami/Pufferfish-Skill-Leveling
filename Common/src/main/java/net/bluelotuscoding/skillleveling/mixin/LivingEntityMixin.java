@@ -21,6 +21,7 @@ public abstract class LivingEntityMixin {
      * require = 0 is used to prevent startup crashes if the method name doesn't
      * match
      * exactly in a specific loader/environment, though we aim for it to work.
+     * Uses delayed sync to ensure equipment state is fully updated.
      */
     @Inject(method = "onEquipStack", at = @At("RETURN"), require = 0)
     private void onEquipStackChange(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo ci) {
@@ -28,17 +29,21 @@ public abstract class LivingEntityMixin {
         if (entity != null && !entity.getWorld().isClient() && entity instanceof ServerPlayerEntity player) {
             var mod = SkillLevelingMod.getInstance();
             if (mod != null && mod.getSkillLevelingManager() != null) {
-                // Trigger a refresh of all skill rewards to account for potentially changed
-                // imbued levels
-                mod.getSkillLevelingManager().refreshAllRewards(player);
-                // REAL-TIME UI SYNC: Notify client to update its level cache and UI
-                mod.getSkillLevelingManager().syncAllSkillsToPlayer(player);
+                // Schedule sync for next tick to ensure equipment state is fully updated
+                player.getServer().execute(() -> {
+                    // Trigger a refresh of all skill rewards to account for potentially changed
+                    // imbued levels
+                    mod.getSkillLevelingManager().refreshAllRewards(player);
+                    // REAL-TIME UI SYNC: Notify client to update its level cache and UI
+                    mod.getSkillLevelingManager().syncAllSkillsToPlayer(player);
+                });
             }
         }
     }
 
     /**
      * Fallback for environments where onEquipStack is not available.
+     * Uses delayed sync for consistency.
      */
     @Inject(method = "equipStack", at = @At("RETURN"), require = 0)
     private void onEquipStack(EquipmentSlot slot, ItemStack stack, CallbackInfo ci) {
@@ -46,8 +51,11 @@ public abstract class LivingEntityMixin {
         if (entity != null && !entity.getWorld().isClient() && entity instanceof ServerPlayerEntity player) {
             var mod = SkillLevelingMod.getInstance();
             if (mod != null && mod.getSkillLevelingManager() != null) {
-                mod.getSkillLevelingManager().refreshAllRewards(player);
-                mod.getSkillLevelingManager().syncAllSkillsToPlayer(player);
+                // Schedule sync for next tick to ensure equipment state is fully updated
+                player.getServer().execute(() -> {
+                    mod.getSkillLevelingManager().refreshAllRewards(player);
+                    mod.getSkillLevelingManager().syncAllSkillsToPlayer(player);
+                });
             }
         }
     }

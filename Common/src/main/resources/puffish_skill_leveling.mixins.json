@@ -5,9 +5,7 @@
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
 		"SkillDefinitionConfigMixin",
-		"SkillsScreenMixin",
 		"CategoryDataMixin",
-		"ClientCategoryDataMixin",
 		"SkillsModMixin",
 		"PlayerDataMixin",
 		"ServerChatMixin",
@@ -20,7 +18,9 @@
 	],
 	"client": [
 		"ClientSkillDefinitionConfigMixin",
-		"ItemTooltipMixin"
+		"ItemTooltipMixin",
+		"SkillsScreenMixin",
+		"ClientCategoryDataMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -117,8 +117,10 @@ public class SkillLevelingDataManager {
                 playerData.remove(entry.getKey());
                 playerData.put(categoryId, data);
 
-                System.out.println("[SkillLeveling] Migrated category data for " + categoryId.getPath() +
-                        " from namespace " + entry.getKey().getNamespace() + " to " + categoryId.getNamespace());
+                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger().debug(
+                        "[SkillLeveling] Migrated category data for " + categoryId.getPath() +
+                                " from namespace " + entry.getKey().getNamespace() + " to "
+                                + categoryId.getNamespace());
 
                 return data;
             }

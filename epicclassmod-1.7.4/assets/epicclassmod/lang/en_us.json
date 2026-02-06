@@ -1,0 +1,723 @@
+{
+  "screen.epicclassmod.class_book": "Class Book",
+  "screen.epicclassmod.class_select": "Class Select",
+  "screen.epicclassmod.settings.title": "Settings",
+  "screen.epicclassmod.settings.hint": "Toggle the Mob Level system",
+  "screen.epicclassmod.settings.mob_level": "Mob Level",
+  "screen.epicclassmod.common.on": "ON",
+  "screen.epicclassmod.common.off": "OFF",
+
+  "gui.epicclassmod.profile": "Profile",
+  "gui.epicclassmod.button.select": "Select",
+  "gui.epicclassmod.class_select.title": "Choose Your Class",
+
+  "item.epicclassmod.job_compass": "Job Compass",
+  "item.epicclassmod.job_compass.mode": "Target:",
+  "item.epicclassmod.job_compass.hint": "Right-click: cycle & lock target",
+  "item.epicclassmod.job_compass.target_format": "Target: %s",
+
+  "class.epicclassmod.stat.health": "Health",
+  "class.epicclassmod.stat.attack": "Attack",
+  "class.epicclassmod.stat.magic_attack": "Magic Attack",
+  "class.epicclassmod.stat.defense": "Defense",
+  "class.epicclassmod.stat.speed": "Move Speed",
+  "class.epicclassmod.stat.attack_speed": "Attack Speed",
+  "class.epicclassmod.stat.mana.tooltip": "Increases mana.",
+  "class.epicclassmod.stat.mana_regen.tooltip": "Increases mana regeneration rate.",
+
+  "stat.epicclassmod.attack": "Attack",
+  "stat.epicclassmod.defense": "Defense",
+  "stat.epicclassmod.attackspeed": "Attack Speed",
+  "stat.epicclassmod.movespeed": "Move Speed",
+  "gui.epicclassmod.statpoints": "Stat Points",
+
+  "gui.epicclassmod.starting_items": "Starting Items",
+  "gui.epicclassmod.starting_items.none": "None",
+
+  "gui.epicclassmod.announce.title.warrior": "⚔ Swordsman",
+  "gui.epicclassmod.announce.title.paladin": "🛡 Paladin",
+  "gui.epicclassmod.announce.title.berserker": "🪓 Berserker",
+  "gui.epicclassmod.announce.title.sorcerer": "✨ Sorcerer",
+  "gui.epicclassmod.announce.title.reaper": "🌑 Reaper",
+  "gui.epicclassmod.announce.title.default": "Class Selected!",
+
+  "gui.epicclassmod.announce.subtitle.warrior": "Walk the path of a swordsman—flexible yet unbreakable like water!",
+  "gui.epicclassmod.announce.subtitle.paladin": "The path of a holy knight—protect allies with light and conviction!",
+  "gui.epicclassmod.announce.subtitle.berserker": "Wield endless rage and madness. Trade defense for overwhelming power and speed.",
+  "gui.epicclassmod.announce.subtitle.sorcerer": "Bend elements and inked grimoires—an intellectual master of the arcane.",
+  "gui.epicclassmod.announce.subtitle.reaper": "Dash through the dark and ambush with twin blades!",
+  "gui.epicclassmod.announce.subtitle.default": "Class selected!",
+
+  "gui.epicclassmod.passives": "Passives",
+
+  "gui.epicclassmod.class.water_hashira": "⚔ Water Hashira",
+  "gui.epicclassmod.class.warrior": "Warrior",
+  "gui.epicclassmod.class.paladin": "Paladin",
+  "gui.epicclassmod.class.berserker": "Berserker",
+  "gui.epicclassmod.class.reaper": "Reaper",
+  "gui.epicclassmod.class.sorcerer": "✨ Sorcerer",
+
+  "class.epicclassmod.warrior.title": "Swordsman",
+  "class.epicclassmod.paladin.title": "Paladin",
+  "class.epicclassmod.berserker.title": "Berserker",
+  "class.epicclassmod.reaper.title": "Reaper",
+  "class.epicclassmod.sorcerer.title": "Sorcerer",
+  "class.epicclassmod.archer.title": "Wind Stalker",
+
+  "class.epicclassmod.warrior.select_desc": "Head of the Yamato clan, splitting battlefields with a silent flash.",
+  "class.epicclassmod.paladin.select_desc": "A holy warrior blessed by light, protecting allies with conviction and condemning evil.",
+  "class.epicclassmod.berserker.select_desc": "A fighter who wields endless rage and madness. Sacrifices defense for overwhelming offense and explosive speed.",
+  "class.epicclassmod.reaper.select_desc": "A rogue who strikes from the shadows with twin daggers. Specializes in agility and relentless combos.",
+  "class.epicclassmod.sorcerer.select_desc": "A master of arcane formulae and elemental focus, wielding canes and grimoires to bend storms and sigils to their will.",
+  "class.epicclassmod.archer.select_desc": "An archer who masters precise shots and agile movement. With bow and arrows, they pierce weaknesses and control the battlefield.",
+
+  "class.epicclassmod.warrior.note1": "As the head of the Yamato clan,",
+  "class.epicclassmod.warrior.note2": "you honor the way of duty,",
+  "class.epicclassmod.warrior.note3": "temper your blade with silent breath,",
+  "class.epicclassmod.warrior.note4": "seize the tide of battle,",
+  "class.epicclassmod.warrior.note5": "strike in a flash,",
+  "class.epicclassmod.warrior.note6": "cleave hostility without a sound,",
+  "class.epicclassmod.warrior.note7": "and at last claim the ultimate blade, \"Yamato\".",
+  "class.epicclassmod.warrior.weapon1": "Class Weapon",
+  "class.epicclassmod.warrior.weapon2": "Katana",
+"class.epicclassmod.warrior.effect1": "Still Recovery",
+"class.epicclassmod.warrior.effect2": "Piercing Blade",
+"class.epicclassmod.warrior.effect3": "Issen",
+"class.epicclassmod.warrior.effect4": "Volt Leap",
+"class.epicclassmod.warrior.effect1.desc": "Stand still for 5s to restore 30% HP.",
+"class.epicclassmod.warrior.effect2.desc": "Low chance to deal bonus armor-piercing damage.",
+"class.epicclassmod.warrior.effect3.desc": "After a short pause, your first hit deals bonus damage.",
+"class.epicclassmod.warrior.effect4.desc": "Build 4 stacks by attacking. Press F to blink right in front of the target.",
+
+  "class.epicclassmod.paladin.note1": "The sacred guardian of the order,",
+  "class.epicclassmod.paladin.note2": "defends allies with light,",
+  "class.epicclassmod.paladin.note3": "and punishes evil.",
+  "class.epicclassmod.paladin.note4": "Standing firm with unshaken resolve,",
+  "class.epicclassmod.paladin.note5": "with an oath,",
+  "class.epicclassmod.paladin.note6": "wields the holy shield \"Aegis Ward\"",
+  "class.epicclassmod.paladin.note7": "and dominates the battlefield.",
+  "class.epicclassmod.paladin.weapon1": "Class Weapon",
+  "class.epicclassmod.paladin.weapon2": "Shield",
+  "class.epicclassmod.paladin.effect1": "Shield of Light",
+  "class.epicclassmod.paladin.effect2": "Hand of Relic",
+  "class.epicclassmod.paladin.effect3": "Aura of Guard",
+"class.epicclassmod.paladin.effect4": "Sanctuary",
+  "class.epicclassmod.paladin.effect1.desc": "+0.5 Armor while holding a shield.",
+  "class.epicclassmod.paladin.effect2.desc": "Offhand item loses 30% less durability.",
+  "class.epicclassmod.paladin.effect3.desc": "+1.5 Armor and Heal to allies within 10 blocks while blocking.",
+  "class.epicclassmod.paladin.effect4.desc": "Build 10 attack stacks, then press F to activate Sanctuary. Players inside recover health.",
+
+  "class.epicclassmod.berserker.note1": "Incarnation of endless fury,",
+  "class.epicclassmod.berserker.note2": "slaughters foes with",
+  "class.epicclassmod.berserker.note3": "madness and might.",
+  "class.epicclassmod.berserker.note4": "Abandoning defense,",
+  "class.epicclassmod.berserker.note5": "with a vow bound in blood,",
+  "class.epicclassmod.berserker.note6": "the berserker’s axe",
+  "class.epicclassmod.berserker.note7": "sets the field ablaze.",
+  "class.epicclassmod.berserker.weapon1": "Class Weapon",
+  "class.epicclassmod.berserker.weapon2": "Greatsword",
+
+"class.epicclassmod.berserker.effect1": "Blood Vow",
+  "class.epicclassmod.berserker.effect2": "Mad Endurance",
+  "class.epicclassmod.berserker.effect3": "Blood Heal",
+  "class.epicclassmod.berserker.effect4": "Last Stand",
+
+  "class.epicclassmod.berserker.effect1.desc": "Always active: Attack Damage +0.2, Armor -0.2.",
+  "class.epicclassmod.berserker.effect2.desc": "At 30% HP or less: Armor +0.5 for 10s.",
+  "class.epicclassmod.berserker.effect3.desc": "On kill: 20% orb. Absorb within 2 blocks to heal 0.5 hearts.",
+  "class.epicclassmod.berserker.effect4.desc": "On lethal hit: 7s invulnerable and +50% attack speed, then you die.",
+
+  "class.epicclassmod.reaper.note1": "At the edge of darkness,",
+  "class.epicclassmod.reaper.note2": "footsteps fade and breath folds,",
+  "class.epicclassmod.reaper.note3": "binding shadows to twin blades.",
+  "class.epicclassmod.reaper.note4": "One opening, three wounds,",
+  "class.epicclassmod.reaper.note5": "cutting front from the back,",
+  "class.epicclassmod.reaper.note6": "stealing breath in silence,",
+  "class.epicclassmod.reaper.note7": "and perfecting the Night’s Waltz.",
+  "class.epicclassmod.reaper.weapon1": "Class Weapon",
+  "class.epicclassmod.reaper.weapon2": "Daggers (Dual)",
+
+"class.epicclassmod.reaper.effect1": "Backstab",
+  "class.epicclassmod.reaper.effect2": "Kill Rush",
+  "class.epicclassmod.reaper.effect3": "Assassin’s Instinct",
+"class.epicclassmod.reaper.effect4": "Smoke Veil",
+
+  "class.epicclassmod.reaper.effect1.desc": "Attacking from behind grants a bonus first strike. After triggering, it cannot trigger again for 6 seconds.",
+  "class.epicclassmod.reaper.effect2.desc": "Killing an enemy grants increased movement speed and attack speed for 6 seconds.",
+  "class.epicclassmod.reaper.effect3.desc": "Backstab does not apply to ranged attacks such as arrows.",
+ "class.epicclassmod.reaper.effect4.desc": "Consume 15 stacks and press F to enter stealth for 3 seconds. While stealthed, mobs cannot detect you.",
+
+
+  "class.epicclassmod.sorcerer.note1": "In quiet focus,",
+  "class.epicclassmod.sorcerer.note2": "you align breath to sigils,",
+  "class.epicclassmod.sorcerer.note3": "and call the elements to the page.",
+  "class.epicclassmod.sorcerer.note4": "Lightning becomes memory, frost becomes will,",
+  "class.epicclassmod.sorcerer.note5": "and flame bends to calculation.",
+  "class.epicclassmod.sorcerer.note6": "At the staff’s tip the world’s grain appears,",
+  "class.epicclassmod.sorcerer.note7": "and the ‘storm that remembers’ is complete.",
+  "class.epicclassmod.sorcerer.weapon1": "Class Weapon",
+  "class.epicclassmod.sorcerer.weapon2": "Staff / Grimoire",
+  
+"class.epicclassmod.sorcerer.effect1": "Blink",
+"class.epicclassmod.sorcerer.effect1.desc": "Press F to teleport, consuming 50 mana.",
+
+"class.epicclassmod.sorcerer.effect2": "Minor Flow",
+"class.epicclassmod.sorcerer.effect2.desc": "Mana regeneration is increased by 2% at all times.",
+
+"class.epicclassmod.sorcerer.effect3": "Stillness Recovery",
+"class.epicclassmod.sorcerer.effect3.desc": "After standing still for 7 seconds, mana regeneration is increased by 50%.",
+
+"class.epicclassmod.sorcerer.effect4": "Arcane Ward",
+"class.epicclassmod.sorcerer.effect4.desc": "Reduces fire, explosion, poison, and wither damage by 5%.",
+
+
+
+   
+    "class.epicclassmod.archer.note1": "Reading the wind of an ancient forest,",
+    "class.epicclassmod.archer.note2": "choosing the bowstring with a single breath,",
+    "class.epicclassmod.archer.note3": "tempering arrows with starlight,",
+    "class.epicclassmod.archer.note4": "they take aim at hearts from afar.",
+    "class.epicclassmod.archer.note5": "With one silent shot, they rule the battlefield,",
+    "class.epicclassmod.archer.note6": "riding the grain of the wind, moving like a shadow,",
+    "class.epicclassmod.archer.note7": "until at last they forge a pact with the 'Millennial Longbow'.",
+  
+    "class.epicclassmod.archer.weapon1": "Class Weapon",
+    "class.epicclassmod.archer.weapon2": "Bow",
+  
+    "class.epicclassmod.archer.effect1": "Millennial Focus",
+    "class.epicclassmod.archer.effect2": "Piercing Arrow",
+    "class.epicclassmod.archer.effect3": "Gale Volley",
+    "class.epicclassmod.archer.effect4": "Hunter's Mark",
+  
+    "class.epicclassmod.archer.effect1.desc": "Stand still 3s to boost your next ranged hit (once).",
+    "class.epicclassmod.archer.effect2.desc": "Small chance to deal piercing bonus damage.",
+    "class.epicclassmod.archer.effect3.desc": "Consecutive shots grant stacking attack speed briefly.",
+    "class.epicclassmod.archer.effect4.desc": "First hit marks the target; marked foes take extra damage.",
+
+  "gui.epicclassmod.quests": "Quests",
+  "gui.epicclassmod.quests.main": "Main Quests",
+  "gui.epicclassmod.quests.job": "Job Quest",
+  "gui.epicclassmod.quests.sub": "Sub Quests",
+  "gui.epicclassmod.quests.requirement": "Requirement",
+  "gui.epicclassmod.quests.requirement.prefix": "Bring:",
+  "gui.epicclassmod.quests.rewards": "Rewards",
+  "gui.epicclassmod.quest.complete": "Complete",
+  "gui.epicclassmod.quest.completed": "(Completed)",
+  "gui.epicclassmod.quest.req_not_met": "Requirements not met.",
+  "gui.epicclassmod.quest.completed_toast": "%s completed!",
+  "gui.epicclassmod.quest.abandon": "Abandon",
+  "gui.epicclassmod.quest.abandoned_toast": "%s abandoned!",
+  "gui.epicclassmod.quest.big_complete.title": "\"%s\" Complete!",
+  "gui.epicclassmod.quest.big_complete.subtitle": "Rewards granted.",
+
+ 
+
+  "gui.epicclassmod.quest.wh.job.1": "Vow of Water",
+  "gui.epicclassmod.quest.wh.job.1.body": "In stillness, clear the edge with a single breath. When water and blade become one, the path opens.",
+  "gui.epicclassmod.quest.wh.job.1.require": "Water Bucket ×1",
+  "gui.epicclassmod.quest.wh.job.1.reward": "Water Bucket ×1, Iron Sword ×1",
+
+  "gui.epicclassmod.quest.pal.job.1": "Aegis of Dawn",
+  "gui.epicclassmod.quest.pal.job.1.body": "A guardian of light begins with a shield. Grasp it with resolve and stand before the dark.",
+  "gui.epicclassmod.quest.pal.job.1.require": "Shield ×1",
+  "gui.epicclassmod.quest.pal.job.1.reward": "Shield ×1, Golden Apple ×1",
+
+  "gui.epicclassmod.quest.berserker.job.1": "Oath of Blood",
+  "gui.epicclassmod.quest.berserker.job.1.body": "Heat from wounds tempers steel. Grip your great-axe and count your breath. When rage guides your arm, shields cease to matter.",
+  "gui.epicclassmod.quest.berserker.job.1.require": "Iron Axe ×1",
+  "gui.epicclassmod.quest.berserker.job.1.reward": "Iron Axe ×1, Steak ×4",
+
+  "gui.epicclassmod.quest.sub.1": "Tool Grooming",
+  "gui.epicclassmod.quest.sub.1.body": "Loosen your hands with simple materials and return to routine.",
+  "gui.epicclassmod.quest.sub.1.require": "Stick ×16",
+  "gui.epicclassmod.quest.sub.2": "Start of Records",
+  "gui.epicclassmod.quest.sub.2.body": "To hold a fleeting thought, begin with a single sheet.",
+  "gui.epicclassmod.quest.sub.2.require": "Paper ×8",
+  "gui.epicclassmod.quest.sub.3": "Sticky Solution",
+  "gui.epicclassmod.quest.sub.3.body": "When things must stay put, viscosity is the answer.",
+  "gui.epicclassmod.quest.sub.3.require": "Slimeball ×5",
+  "gui.epicclassmod.quest.sub.4": "Basic Mining",
+  "gui.epicclassmod.quest.sub.4.body": "Read the earth’s grain and grasp your first pickaxe.",
+  "gui.epicclassmod.quest.sub.4.require": "Iron Pickaxe ×1",
+
+  "gui.epicclassmod.quest.sub.paraglider.title": "Wind on My Back",
+  "gui.epicclassmod.quest.sub.paraglider.body": "The old wanderer spoke of a cloth that catches the breath of the sky. \"With this, cliffs become roads,\" he grinned. Craft or obtain a paraglider and feel the world tilt beneath your feet. The first leap is the hardest—after that, you’ll chase horizons.",
+  "gui.epicclassmod.quest.sub.paraglider.require": "Obtain a Paraglider",
+
+  "gui.epicclassmod.quest.sub.enchant_table.title": "Words that Bite",
+  "gui.epicclassmod.quest.sub.enchant_table.body": "A librarian muttered of letters that sink into steel and sing in battle. Build an Enchanting Table, trace the glyphs, and let power soak into your gear like ink into paper. Knowledge is a blade—sharpen it.",
+  "gui.epicclassmod.quest.sub.enchant_table.require": "Craft or obtain an Enchanting Table",
+
+  "gui.epicclassmod.quest.sub.saddle.title": "First Mount",
+  "gui.epicclassmod.quest.sub.saddle.body": "Every hero remembers the first time the ground rushed past faster than footsteps could carry. Find a saddle, earn a steed’s trust, and ride until the wind can’t keep up.",
+  "gui.epicclassmod.quest.sub.saddle.require": "Obtain a Saddle",
+
+  "gui.epicclassmod.quest.sub.ink_paper_bone.title": "Ink, Paper, and Bones",
+  "gui.epicclassmod.quest.sub.ink_paper_bone.summary": "The archive is running out of supplies. Gather 30 Paper, 5 Ink Sacs, and 3 Bones.",
+  "gui.epicclassmod.quest.sub.ink_paper_bone.require": "Paper x30 / Ink Sac x5 / Bone x3",
+  "dialogue.ecm.sub.ink_paper_bone.p1": "We need a lot of paper to preserve the village records.",
+  "dialogue.ecm.sub.ink_paper_bone.p2": "Could you also bring some ink sacs and a few bones?",
+  "dialogue.ecm.sub.ink_paper_bone.p3": "Please help—we'll make sure you're properly rewarded!",
+
+  "gui.epicclassmod.quest.sub.lumber_supply.title": "Lumber Supply",
+  "gui.epicclassmod.quest.sub.lumber_supply.summary": "The forge and builders are short on wood. Bring 32 Oak Logs and 16 Birch Logs.",
+  "gui.epicclassmod.quest.sub.lumber_supply.require": "Oak Log x32 / Birch Log x16",
+  "dialogue.ecm.sub.lumber_supply.p1": "Repairs and new builds have spiked timber demand.",
+  "dialogue.ecm.sub.lumber_supply.p2": "Oak for the basics, birch for clean-looking pillars.",
+  "dialogue.ecm.sub.lumber_supply.p3": "Bring them in and you’ll be well compensated!",
+
+  "gui.epicclassmod.quest.sub.herbal_supplies.title": "Herbal Supplies",
+  "gui.epicclassmod.quest.sub.herbal_supplies.summary": "We need ingredients for tonics. Bring 12 Sugar, 6 Glass Bottles, and 6 Dandelions.",
+  "gui.epicclassmod.quest.sub.herbal_supplies.require": "Sugar x12 / Glass Bottle x6 / Dandelion x6",
+  "dialogue.ecm.sub.herbal_supplies.p1": "The healers want to brew more medicine, but we’re low on ingredients.",
+  "dialogue.ecm.sub.herbal_supplies.p2": "Sugar for the base, bottles for storage—and fragrant dandelions.",
+  "dialogue.ecm.sub.herbal_supplies.p3": "With your help, we can treat patients much faster.",
+
+  "gui.epicclassmod.quest.sub.quarry_materials.title": "Quarry Materials",
+  "gui.epicclassmod.quest.sub.quarry_materials.summary": "The stoneworks ran out of stock. Bring 64 Cobblestone and 16 Coal.",
+  "gui.epicclassmod.quest.sub.quarry_materials.require": "Cobblestone x64 / Coal x16",
+  "dialogue.ecm.sub.quarry_materials.p1": "The quarry’s been slammed and raw stock is gone.",
+  "dialogue.ecm.sub.quarry_materials.p2": "We need bulk cobblestone and coal to fire the kilns.",
+  "dialogue.ecm.sub.quarry_materials.p3": "Help us restock and we’ll make it worth your while.",
+
+  "gui.epicclassmod.quest.sub.farm_provisions.title": "Farm Provisions",
+  "gui.epicclassmod.quest.sub.farm_provisions.summary": "Local farms are short on basics. Bring 32 Wheat and 16 Carrots.",
+  "gui.epicclassmod.quest.sub.farm_provisions.require": "Wheat x32 / Carrot x16",
+  "dialogue.ecm.sub.farm_provisions.p1": "The fields are good, but the barns are running lean.",
+  "dialogue.ecm.sub.farm_provisions.p2": "We need wheat to stretch the feed—and carrots for the work mules.",
+  "dialogue.ecm.sub.farm_provisions.p3": "Help us restock and we’ll pay you fairly.",
+
+  "gui.epicclassmod.quest.sub.hunter_contract.title": "Hunter Contract",
+  "gui.epicclassmod.quest.sub.hunter_contract.summary": "Cull monsters and bring their remains.",
+  "gui.epicclassmod.quest.sub.hunter_contract.require": "• 16 Rotten Flesh\n• 12 Bones\n• 8 String",
+  "dialogue.ecm.sub.hunter_contract.p1": "Tracks ring the fields like a noose; claw marks on fences, tufts of fur in the ditches—something has been testing our nerve each dusk.",
+  "dialogue.ecm.sub.hunter_contract.p2": "Cull the pack and bring proof of the hunt—fangs, hides, or whatever the beasts leave behind—so the bell can ring calm instead of alarm.",
+  "dialogue.ecm.sub.hunter_contract.p3": "When the night passes without scratching on our doors, the town will sleep deep; your steps will write the last line of this threat.",
+
+  "gui.epicclassmod.quest.sub.fishing_supply.title": "Fishing Supply",
+  "gui.epicclassmod.quest.sub.fishing_supply.summary": "The fishmonger needs fresh catches.",
+  "gui.epicclassmod.quest.sub.fishing_supply.require": "• 6 Salmon\n• 6 Cod\n• 3 Pufferfish",
+  "dialogue.ecm.sub.fishing_supply.p1": "The nets came up light all week; the market mutters and the tavern keeper is counting empty plates with a frown.",
+  "dialogue.ecm.sub.fishing_supply.p2": "We need a proper haul—salmon, cod, even the odd puffer if fortune smiles—packed on ice and ready before the sun climbs high.",
+  "dialogue.ecm.sub.fishing_supply.p3": "Work the inlets at first light, follow the circling gulls, and stow the catch clean; return before noon and we’ll pay promptly and loudly.",
+
+  "gui.epicclassmod.quest.sub.librarian_restock.title": "Librarian Restock",
+  "gui.epicclassmod.quest.sub.librarian_restock.summary": "Help restock books and paper.",
+  "gui.epicclassmod.quest.sub.librarian_restock.require": "• 32 Paper\n• 6 Books",
+  "dialogue.ecm.sub.librarian_restock.p1": "Shelves sag with dust where books should stand; ideas need paper and ink the way lungs need air.",
+  "dialogue.ecm.sub.librarian_restock.p2": "Bring fine sheets, sturdy bindings, and fresh ink—texts worth keeping deserve spines that won’t surrender to handling.",
+  "dialogue.ecm.sub.librarian_restock.p3": "When the lanterns are lit, the copyists will work until the bell tolls twice; by morning, knowledge will have a roof again.",
+
+  "gui.epicclassmod.quest.sub.redstone_courier.title": "Redstone Courier",
+  "gui.epicclassmod.quest.sub.redstone_courier.summary": "Deliver redstone parts to a tinkerer.",
+  "gui.epicclassmod.quest.sub.redstone_courier.require": "• 32 Redstone Dust\n• 4 Iron Ingots\n• 8 Redstone Torches",
+  "dialogue.ecm.sub.redstone_courier.p1": "The lift stalls, repeaters misfire, and miners glare at the ceiling as if it owes them time; our circuits are starving.",
+  "dialogue.ecm.sub.redstone_courier.p2": "Deliver dust, torches, and solid iron fittings so the tinkerer can tune the heartbeat of the shafts back into rhythm.",
+  "dialogue.ecm.sub.redstone_courier.p3": "Handle the crates gently, test every connection twice, and keep flame clear of powder; precision is the difference between rescue and regret.",
+
+  "gui.epicclassmod.quest.sub.glassworks_order.title": "Glassworks Order",
+  "gui.epicclassmod.quest.sub.glassworks_order.summary": "Bulk sand needed for the kiln.",
+  "gui.epicclassmod.quest.sub.glassworks_order.require": "• 64 Sand\n• 16 Coal",
+  "dialogue.ecm.sub.glassworks_order.p1": "The kiln yawns for sand and coal, its throat warm and impatient; windows for half the town are overdue.",
+  "dialogue.ecm.sub.glassworks_order.p2": "We need clean grains, steady fuel, and careful hands—clarity is born from patience, not fury.",
+  "dialogue.ecm.sub.glassworks_order.p3": "Mind the heat, keep ash from the melt, and stack the panes like secrets; deliver them unscarred and the sun will finally visit our halls.",
+
+  "gui.epicclassmod.quest.sub.stonemason_help.title": "Stonemason Help",
+  "gui.epicclassmod.quest.sub.stonemason_help.summary": "Sturdy stone for sturdy homes.",
+  "gui.epicclassmod.quest.sub.stonemason_help.require": "• 64 Cobblestone\n• 32 Stone",
+  "dialogue.ecm.sub.stonemason_help.p1": "Foundations whisper through every wall; if the base is honest, the house doesn’t lie later.",
+  "dialogue.ecm.sub.stonemason_help.p2": "Bring cobble for grit and smooth stone for grace; square every edge so corners carry the weight without complaint.",
+  "dialogue.ecm.sub.stonemason_help.p3": "Watch for silverfish lurking in the seams, lay mortar like a promise, and we’ll make the town stand a little taller.",
+
+  "gui.epicclassmod.quest.sub.bakers_basket.title": "Baker’s Basket",
+  "gui.epicclassmod.quest.sub.bakers_basket.summary": "Ingredients for a town feast.",
+  "gui.epicclassmod.quest.sub.bakers_basket.require": "• 24 Wheat\n• 8 Eggs\n• 6 Sugar",
+  "dialogue.ecm.sub.bakers_basket.p1": "A warm loaf can turn a hard week soft; the feast won’t happen unless ovens sing again.",
+  "dialogue.ecm.sub.bakers_basket.p2": "Gather wheat, eggs, and sugar—simple things that become miracles when the dough stops arguing under your palms.",
+  "dialogue.ecm.sub.bakers_basket.p3": "Bring the goods before dusk; we’ll bake for the night watch and the weary both, and save a slice of pie for the bravest courier.",
+
+  "gui.epicclassmod.quest.sub.alchemist_aid.title": "Alchemist Aid",
+  "gui.epicclassmod.quest.sub.alchemist_aid.summary": "Brewing stock is running low.",
+  "gui.epicclassmod.quest.sub.alchemist_aid.require": "• 8 Nether Wart\n• 4 Blaze Powder",
+  "dialogue.ecm.sub.alchemist_aid.p1": "The cauldrons mutter and the racks look bare; a good brew needs more than luck and leftover fumes.",
+  "dialogue.ecm.sub.alchemist_aid.p2": "Nether wart for the base, blaze powder for the spark, clean bottles for the finish—label every vial so panic never drinks by mistake.",
+  "dialogue.ecm.sub.alchemist_aid.p3": "Measure twice, step back when it glows, and return with supplies; tonight’s mixture is tomorrow’s mercy in a glass.",
+
+  "gui.epicclassmod.quest.sub.nether_scouting.title": "Nether Scouting",
+  "gui.epicclassmod.quest.sub.nether_scouting.summary": "Survey dangerous fragments from the Nether.",
+  "gui.epicclassmod.quest.sub.nether_scouting.require": "• 32 Netherrack\n• 12 Nether Quartz\n• 2 Magma Cream",
+  "dialogue.ecm.sub.nether_scouting.p1": "The Nether hums like a hive and pretends it’s a road; don’t believe it—mark your path or be swallowed by your own footsteps.",
+  "dialogue.ecm.sub.nether_scouting.p2": "Bring netherrack, quartz, and any safe samples you can pry loose without trading your boots to the lava.",
+  "dialogue.ecm.sub.nether_scouting.p3": "Eat before you go, stare at nothing that stares back, and return before dusk; bravery is boldest when it comes home.",
+
+  "gui.epicclassmod.quest.sub.frontier_outpost.title": "Frontier Outpost",
+  "gui.epicclassmod.quest.sub.frontier_outpost.summary": "Supplies to raise a border outpost.",
+  "gui.epicclassmod.quest.sub.frontier_outpost.require": "• 64 Oak Planks\n• 32 Torches\n• 16 Ladders",
+  "dialogue.ecm.sub.frontier_outpost.p1": "Bandits prod at the edges of our map, looking for a seam to pull; the frontier needs a nail, not a wish.",
+  "dialogue.ecm.sub.frontier_outpost.p2": "We’ll raise an outpost with planks, ladders, and stubborn will—high ground first, torches second, and a bell that can argue with distance.",
+  "dialogue.ecm.sub.frontier_outpost.p3": "Build with your back to the wind and your eyes on the ridge; by sundown, let there be a light that says we’re here tomorrow too.",
+
+
+"dialogue.ecm.job_master.warrior.p1": "…Outlander. Your aura is unlike those of this land. Tell me—what does your blade swing for? Honor, vengeance, or the struggle to survive? I am Ryu-en, once the kingdom’s sword, a man who walked through countless battlefields. Now I am only a master. I have been waiting for someone like you. The place you must set foot in is the Nether’s §6Wastelands§r… a land where red sand and ash still breathe. In its darkness, §c‘Ignis’§r has risen again—an existence forged of flame and hatred, eager to turn everything into cinders.",
+"dialogue.ecm.job_master.warrior.p2": "§cIgnis§r bears the shape of a man, yet his heart has already become a corrupted flame. His sword is stained with searing fire, leaving ash and pain on all it touches. Many tried to bring him down—none returned from the blaze. The ruins he guards still boil with crimson smoke and resentment in the heat of the Nether §6Wastelands§r. But you may be different. Facing §cIgnis§r is not merely a fight—it is the moment your soul is tested. Overcome fear, and prove your will can become a true blade.",
+"dialogue.ecm.job_master.warrior.p3_final": "…Good. Descend into the Nether §6Wastelands§r and defeat §cIgnis§r. Bring §e‘Ignis’s Sword’§r and lay it before me. That will be the proof you pierced the inferno and returned. Then I will acknowledge you as a true swordsman and entrust you with the legendary blade §6‘Yamato’§r. This holy sword was forged a thousand years ago with human will and courage. Only the unwavering can wield it in full. Remember—swinging a sword is not enough. If your heart falters, its edge will cut you instead. Break through the ash and flames of the Nether §6Wastelands§r and return. Then your blade will carry not mere steel, but the §6‘Soul of Yamato’§r.",
+
+"dialogue.ecm.job_master.paladin.p1": "…Traveler from another world, the desert wind has guided you here. Your eyes tremble with fear—yet I see a light that will not go out. I am Serra. I once fought in a god’s name, but the god fell silent, and I learned to trust myself. A true Paladin follows not a god’s shadow, but the light they choose. Your destination is the violet labyrinth hidden on the End’s outer islands: the §5‘Ruined Citadel’§r. Without the §5Eye of Void§r, you cannot even grasp the path—an abandoned sanctuary tangled in the End’s remnants.",
+"dialogue.ecm.job_master.paladin.p2": "Within the §5Ruined Citadel§r, traps and monsters fill every corridor. Snares hide in the walls and floors, and the void-worm §5Endermaptera§r swarms within. Deeper still, §5Ender Golems§r block the way in each combat chamber. And at the lowest level, the moment you approach the central altar… the §c‘Ender Guardian’§r awakens. It soon ignores projectiles, and in its second phase it shatters the arena floor to cast you into the void. At the heart of that rift lies a metal of trial: §e‘Void Spellweave Ingot’§r — §7(Void Spellweave Ingot)§r. A metal stitched from the boundary of light and darkness, the proof that judges a Paladin’s oath.",
+"dialogue.ecm.job_master.paladin.p3_final": "…Good. Cross to the End’s outer islands and find the §5Ruined Citadel§r. Push past traps and hordes, defeat the §5Ender Golems§r, and face the §cEnder Guardian§r awakened at the lowest altar. When the battle ends, place the §e‘Void Spellweave Ingot’§r before me. It will be your trial—and your proof of salvation. Return, and I will grant you the legendary holy sword §6‘Angel’s Shortsword’§r. Remember—the Paladin’s blade is not judgment, but mercy. If you can choose an unextinguished light even in darkness… then you will become light itself.",
+
+"dialogue.ecm.job_master.reaper.p1": "Shh… quietly. Death hears footsteps. You’re not of this world. I am Noah—once a divine executioner, discarded by the apostles of light. Now they call me the ‘Mediator of Death.’ The Reaper’s path walks the border between darkness and light. We follow neither justice nor salvation. We accept the weight of fate—and tie off its end. I see that cold resolve in your eyes. But it is not enough. To wield death, you must first learn to love it. Death is not fear. It is balance, cycle, and the silent truth.",
+"dialogue.ecm.job_master.reaper.p2": "In a forgotten abyss—within ruins where time has rotted—there is a being sealed away. They call it §c‘The Remnant’§r. Once a calamity that swallowed a kingdom, it now stirs again, leaving only broken memories and curses behind. Its body is not flesh, but relics stitched together, and the earth screams with every step it takes. At the core of that horror remains a single proof: §e‘Remnant Skull’§r — §7(remnant skull)§r. Layers of millennia of resentment and silence are piled within it. Anyone who faces it will glimpse their own end first. The Reaper’s trial is not simply cutting down an enemy—it is understanding an existence, and accepting its death. Survival is not the goal—returning without being erased is the goal.",
+"dialogue.ecm.job_master.reaper.p3_final": "…If you have resolve, go. Head to the sealed ruins where §cThe Remnant§r crouches. A place where the world’s memories decay, where even a breath returns as an echo. Defeat it, and bring back the §e‘Remnant Skull’§r. It is proof you faced your fear—the true rite of passage for a Reaper. Return, and I will grant you the twin-bladed shadow—§6‘Wraith Dual Swords’§r (§7dual sword§r). These blades cleave the boundary between life and death. One cuts life; the other reaps souls. They are the Reaper’s symbol—the end of the scales. Do not forget: death is not your enemy. It is your companion, and the oldest truth. If you can carry that truth, your shadow will bloom again. From that day on, you will be one who walks with death.",
+
+"dialogue.ecm.job_master.berserker.p1": "Hahaha! You’re not one of this land’s humans. That gaze… I can’t forget it. The eyes of madmen who set battlefields ablaze. I am Krog—one who has passed through countless wars, once called the ‘Incarnation of Rage.’ My blade’s edge has hardened with blood, and my heart still remembers the drums of battle. Do you feel it? The heat of blood boiling within this world’s cold. That is where the Berserker’s soul awakens. But remember—rage is a sword. Easy to swing, but if you cannot control it, it will pierce your own heart. That is our fate.",
+"dialogue.ecm.job_master.berserker.p2": "Deep within the Nether lies an ancient forge called the §6‘Soul Forge’§r. In its main chamber, where black walls and fire breathe, a colossal §c‘Netherite Monstrosity’§r sleeps. The moment you draw near, the beast awakens—slamming the ground to split it open, hurling lava bombs to scorch the sky, and swallowing everything in bursts of flame. Steel and shields are paper before that inferno. And on its head is the hunter’s proof: §e‘Monstrous Horn’§r — §7(cataclysm:monstrous_horn)§r. Legends say that horn is crystallized ‘unbreakable rage.’ But the instant you seize it, your rage becomes just as heavy. Can you bear that weight?",
+"dialogue.ecm.job_master.berserker.p3_final": "Good. A true warrior does not run. Descend to the §6Soul Forge§r and awaken the sleeping §cNetherite Monstrosity§r. Endure the blasts of flame and the rain of lava, withstand the earth-splitting strikes, and crush that horror with your rage. Bring me the §e‘Monstrous Horn’§r, and I will 인정 you as a true Berserker. With that proof, I will grant you the legendary greatsword §6‘Ruins Greatsword’§r (§7ruinsgreatsword§r). This blade was forged from the ashes of a fallen civilization. But in a Berserker’s hands, it is no mere iron—it becomes the shape of rage, the symbol of will beyond human limits. Remember: rage is your power and your shackle. Break that chain and return as a storm. Then your name will become legend again.",
+
+"dialogue.ecm.job_master.sorcerer.p1": "The air… fears you. You are not of this land. In your soul, the light of another world flickers—an existence outside the gods’ design. That fracture is the door called ‘magic.’ I am Iris, one who deciphered ancient runes, the first sorcerer to step beyond divine order. In this world, magic is not a technique, but the language of existence. Existence speaks, and the sorcerer listens. Yet whoever understands that language reaches one truth—knowledge is not a blessing, but a curse.",
+"dialogue.ecm.job_master.sorcerer.p2": "Long ago, deep within a rift beneath the world, a mage was sealed away. He discovered the ‘language of creation’ before the gods and rewrote reality with it—only to be consumed by his own spells. Now he is trapped in the §cUnderground Abyss§r, living in endless illusions and whispers, forgetting even his own name. They call him the §c‘Sealed Mage’§r. They say whoever frees him inherits his power… but the truth is different. Only the one who kills him escapes the curse of magic. There is a relic left where his blood and mana tangled: §e‘Blood Staff’§r. A mark of a wicked contract that trades life for mana. The moment you claim it, your soul will be tested.",
+"dialogue.ecm.job_master.sorcerer.p3_final": "Good. Your fate is already decided. Find the §cSealed Mage§r in the abyss below and recover the §e‘Blood Staff’§r he guards. It is not a mere weapon—it is a forbidden tool that crosses the boundary between magic and life. Bring it to me, and I will grant you a blessing. Your mana circuits will be rewritten: §6Max Mana +500§r, and §bMana Regeneration greatly increased§r. But heed my warning. This power changes not only the flow of mana, but the weight of your soul. If you cannot endure it, your existence will scatter into the void. Magic is a sweet temptation, but its end always demands a price. If you still choose this path—you will no longer be an outsider. Your name will become a spell, and your breath will shake the world’s laws.",
+
+"dialogue.ecm.job_master.archer.p1": "…You have eyes that read the grain of the wind. Archers of this land learn only ‘aim.’ But you are different—your gaze hunts not a target, but the ‘flow.’ I am Seira, once captain of the kingdom’s scouts, who protected countless lives on the border between forest and war. Now I remain as a master, guiding lost arrows back onto the right trajectory. I have been waiting for someone like you. What you must seek is a massive fortress rising in a §bsnowy biome§r where blizzards never rest—§b‘The Frosted Prison’§r. §fSearch the snow terrain carefully§r—paths hide deep within the white land. If you carry an §bEye of Curse§r, the direction will become clearer.",
+"dialogue.ecm.job_master.archer.p2": "§bThe Frosted Prison§r is no ordinary stronghold. Draugr with black steel weapons guard its corridors, and hulking §bAptrgangr§r with great axes stand at the choke points. And on the lowest level, in the boss chamber where the ice itself seems to ring, §c‘Maledictus’§r awaits. A phantom general… swapping weapons as he attacks, building rage—each time it grows, his blows become more merciless. When that battle ends, one proof remains: §e‘Cursium Ingot’§r — §7(cataclysm:cursium_ingot)§r. A cursed metal, yet a material that tests an archer’s nerve. If you can take it in your hand, you have pierced frozen fear.",
+"dialogue.ecm.job_master.archer.p3_final": "…Good. Go to the §bsnowy biome§r and find §bThe Frosted Prison§r. Push through the Draugr horde, evade the axe of the §bAptrgangr§r, and defeat §cMaledictus§r on the lowest level. Then place the §e‘Cursium Ingot’§r §7(cataclysm:cursium_ingot)§r before me. That will be the proof you broke through the curse and returned. Then I will 인정 you as a true archer and entrust you with the legendary bow §6‘Nightfall Longbow’§r. (§7mortis§r) Remember—an arrow carries your heart the moment it leaves your hand. If your mind wavers, it will lose its mark and return to you. Steady your breath. End it with one shot. And come back.",
+
+"gui.epicclassmod.quest.job.warrior.body": "Ryu-en, once the kingdom’s sword, now awaits new disciples. He warns of §c‘Ignis’§r reborn in the Nether §6Wastelands§r, calling it the true trial. Defeat §cIgnis§r and bring back §e‘Ignis’s Sword’§r. Those who pierce the flames and return will be granted the legendary holy blade §6‘Yamato’§r. Only an unwavering will can make its edge truly shine.",
+"gui.epicclassmod.quest.job.paladin.body": "Serra chose her own light in a world where the gods fell silent. She speaks of the §5‘Ruined Citadel’§r hidden on the End’s outer islands, and the §c‘Ender Guardian’§r that awakens at its lowest altar. Overcome traps, §5Endermaptera§r, and §5Ender Golems§r, then recover the §e‘Void Spellweave Ingot’§r — §7(Void Spellweave Ingot)§r. Return, and you will receive the legendary holy sword §6‘Angel’s Shortsword’§r. A Paladin’s blade is not judgment, but mercy.",
+"gui.epicclassmod.quest.job.berserker.body": "Krog, the incarnation of rage, tells you of the §6‘Soul Forge’§r deep in the Nether. In its main chamber sleeps the colossal §c‘Netherite Monstrosity’§r, which awakens to trample all with flames and crushing blows. Bring back the §e‘Monstrous Horn’§r — §7(cataclysm:monstrous_horn)§r. Return, and you will be awarded the legendary greatsword §6‘Ruins Greatsword’§r (§7ruinsgreatsword§r). A true Berserker is not devoured by rage—master its weight, and become the storm.",
+"gui.epicclassmod.quest.job.reaper.body": "Noah, the mediator of death, speaks of sealed ruins where time has rotted away. There, the calamity that once devoured a kingdom—§c‘The Remnant’§r—stirs to awaken again. Defeat it and recover the §e‘Remnant Skull’§r — §7(remnant skull)§r. Return, and you will receive the twin-bladed shadow §6‘Wraith Dual Swords’§r (§7dual sword§r). Do not fear death—it is the Reaper’s first step.",
+"gui.epicclassmod.quest.job.sorcerer.body": "Iris, who deciphered ancient runes, warns you: in the world below, within the §cUnderground Abyss§r, the §c‘Sealed Mage’§r is imprisoned, and his legacy is a mark of curse. Recover the §e‘Blood Staff’§r. If you endure its power, you will be blessed with §6Max Mana +500§r and §bIncreased Mana Regeneration§r. Magic is a sweet temptation, but its end always demands a price.",
+"gui.epicclassmod.quest.job.archer.body": "Scout captain Seira tells you of a massive fortress in a §bsnowy biome§r where blizzards never cease: §b‘The Frosted Prison’§r. Draugr and the axe-wielding juggernaut §bAptrgangr§r block the way, and on the lowest level §c‘Maledictus’§r attacks as his rage builds. Defeat him and recover the §e‘Cursium Ingot’§r — §7(cataclysm:cursium_ingot)§r. Return, and you will be granted the legendary bow §6‘Nightfall Longbow’§r (§7mortis§r). A true Archer pierces fear—and ends it with one shot.",
+
+
+"gui.epicclassmod.quest.job.warrior": "⚔ Blade Through the Flame",
+"gui.epicclassmod.quest.job.warrior.require": "Obtain 1 Ignitium Ingot",
+"gui.epicclassmod.quest.job.paladin": "🛡 Light Forged in the Void",
+"gui.epicclassmod.quest.job.paladin.require": "Obtain Void Spellweave Ingot",
+"gui.epicclassmod.quest.job.berserker": "🩸 Unbreakable Wrath",
+"gui.epicclassmod.quest.job.berserker.require": "Obtain 1 Monstrous Horn",
+"gui.epicclassmod.quest.job.reaper": "☠ Skull of the Ashen Seal",
+"gui.epicclassmod.quest.job.reaper.require": "Obtain 1 Remnant Skull",
+"gui.epicclassmod.quest.job.sorcerer": "✨ A Spell Written in Blood",
+"gui.epicclassmod.quest.job.sorcerer.require": "Obtain 1 Blood Staff",
+"gui.epicclassmod.quest.job.archer": "🏹 Trail of the Last Glow",
+"gui.epicclassmod.quest.job.archer.require": "Obtain 1 Last Glow",
+
+
+  "gui.epicclassmod.dialogue.alreadyAccepted": "Anything else you need?",
+  "gui.epicclassmod.accept": "Accept",
+  "gui.epicclassmod.decline": "Decline",
+  "gui.epicclassmod.close": "Close",
+  "gui.epicclassmod.prev": "Previous",
+  "gui.epicclassmod.next": "Next",
+
+  "msg.epicclassmod.non_class_weapon.title": "⚠ Not a class weapon",
+  "msg.epicclassmod.non_class_weapon.body": "The %1$s in your hand does not align with the path of the %2$s. Attack Speed −70%%.",
+  "msg.epicclassmod.non_class_weapon.cleared": "Restriction lifted.",
+  "notice.nonclass_weapon_penalty": "Attack speed is reduced for this class.",
+  "notice.xp_gained": "XP +{0}",
+  "notice.level_up": "Level {0} \u2192 {1}",
+
+  "notice.level_up.title": "Level Up!",
+  "notice.level_up.subtitle": "%s \u2192 %s",
+  "notice.xp_gained.title": "XP Gained",
+  "notice.xp_gained.subtitle": "+%s XP",
+
+"npc.epicclassmod.job_master.warrior": "[Echo of the Blade, Ryuin]",
+"npc.epicclassmod.job_master.paladin": "[Oath of Dawnlight, Serra]",
+"npc.epicclassmod.job_master.berserker": "[Crimson War-Drums, Krog]",
+"npc.epicclassmod.job_master.reaper": "[Harvester of Dusk, Noa]",
+"npc.epicclassmod.job_master.sorcerer": "[Millennium Mage, Frieren]",
+"npc.epicclassmod.job_master.archer": "[Trace of the Wind, Seira]",
+
+  "hud.epicclassmod.combo": "%s Combo!",
+  "hud.epicclassmod.combo_singular": "%s Combo!",
+  "hud.epicclassmod.combo_label": "COMBO",
+  "hud.epicclassmod.combo_max": "MAX!",
+
+  "item.epicclassmod.job_compass.set.precise": "Target %1$s: %2$s, %3$s, %4$s (~%5$sm).",
+  "item.epicclassmod.job_compass.changed.precise": "Switched target → %1$s: %2$s, %3$s, %4$s (~%5$sm).",
+  "item.epicclassmod.job_compass.set.approx": "Target %1$s: around %2$s, ?, %3$s (~%4$sm). Move closer to reveal the exact location.",
+  "item.epicclassmod.job_compass.changed.approx": "Switched target → %1$s: around %2$s, ?, %3$s (~%4$sm). Move closer to reveal the exact location.",
+  "item.epicclassmod.job_compass.set.none": "Target %1$s: no known position.",
+  "item.epicclassmod.job_compass.changed.none": "Switched target → %1$s: no known position.",
+
+  "gui.epicclassmod.quests.none": "No accepted quests.",
+
+  
+  "class.epicclassmod.stat.attack.tooltip": "Increases attack damage.",
+  "class.epicclassmod.stat.defense.tooltip": "Improves defense (armor).",
+  "class.epicclassmod.stat.attack_speed.tooltip": "Increases attack speed.",
+  "class.epicclassmod.stat.move_speed.tooltip": "Increases movement speed.",
+  "class.epicclassmod.stat.luck.tooltip": "Improves luck (rare drops/crit).",
+
+  
+  "gui.epicclassmod.quest.already_done": "This quest is already completed.",
+  "gui.epicclassmod.quest.progress": "Progress: %s / %s",
+  "gui.epicclassmod.tooltip.reward_max_hp": "Max Health +%s",
+  "gui.epicclassmod.tooltip.reward_xp": "+%s XP",
+  "gui.epicclassmod.tooltip.require_item": "Required Item",
+
+  "class.epicclassmod.stat.health_regen.tooltip": "Slightly increases natural health regeneration (hearts per second).",
+
+    "gui.epicclassmod.quest.main.1": "A New Journey",
+    "gui.epicclassmod.quest.main.1.body": "Summoned to another world, you feel the air shift and the land breathe beneath a gray sky. Ancient magic whispers your name, calling you forward. It is time to forge your own path. Begin by gathering the basics of this land—dirt, oak logs, and sand. A sturdy leather armor set will guard your first steps as you learn to survive.",
+    "gui.epicclassmod.quest.main.1.require": "Dirt ×10, Oak Log ×10, Sand ×10",
+    "gui.epicclassmod.quest.main.1.reward": "Leather Armor Set (Helmet, Chestplate, Leggings, Boots), 100 XP, Max Health +2",
+
+    "gui.epicclassmod.quest.main.2": "First Steps to Survival",
+    "gui.epicclassmod.quest.main.2.body": "You’ve taken your first breath in this strange world—now you must learn to endure the night. Darkness is long, and small preparations decide life and death. A bed is more than comfort; it is a promise that you will see tomorrow. Apples give you the breath to recover, and seeds are a quiet investment in the days ahead. Set your foundations, and prepare for what comes next.",
+    "gui.epicclassmod.quest.main.2.require": "White Bed ×1, Apple ×5, Wheat Seeds ×12",
+    "gui.epicclassmod.quest.main.2.reward": "Stone Pickaxe ×1, Stone Axe ×1, 150 XP, Max Health +2",
+
+    "gui.epicclassmod.quest.main.3": "Threshold of Iron",
+    "gui.epicclassmod.quest.main.3.body": "Now you are ready to step beyond mere survival. The age of stone does not last long in a world like this. To face deeper darkness, you need a stronger promise—iron. It is not just metal, but proof that you can carve a path forward. Gather iron ingots, and you will be given tools worthy of the journey: fire to light your way, water to steady your steps, and iron to break the world open.",
+    "gui.epicclassmod.quest.main.3.require": "Iron Ingot ×25",
+    "gui.epicclassmod.quest.main.3.reward": "Coal ×10, Water Bucket ×1, Iron Pickaxe ×1, Enchanted Iron Shovel (Efficiency I, Unbreaking I) ×1, Enchanted Iron Hoe (Efficiency I, Unbreaking I) ×1, 200 XP, Max Health +2",
+
+    "dialogue.ecm.main.1.p1": "Hello, hero. You have been summoned to another world. This place lies under the rule of the tyrant Ender Dragon. But what you choose to do here is entirely up to you. You may build a home, farm the land, or stand and fight against your enemies. I will be your guide as you seek to break this world’s chains. I may not be of great help… but I will stay by your side to the end.",
+    "dialogue.ecm.main.1.p2": "\u00A7e\u00A7lPress [M]\u00A7r to open your profile, improve your stats, and manage your quests. \u00A7eYour choices from this moment will shape the fate of this world.\u00A7r",
+    "dialogue.ecm.main.1.p3_final": "This is not the world you once knew. Ancient magic and forgotten ruins lie dormant, and countless dangers await in this land of adventure. The winds of this world are calling your name… If you are ready, I will guide you to the first chapter of your true journey.\n\u00A76\u00A7lRequirements:\u00A7r Bring 10 Dirt, 10 Oak Logs, and 10 Sand.\n\u00A7b\u00A7lReward:\u00A7r A sturdy leather armor set — to protect your first steps.\n\u00A7d\u00A7lThere is only one path to greater strength — \u00A7rcomplete quests. Until we meet again.\u00A7r",
+
+    "dialogue.ecm.main.2.p1": "Good. By now you should be a little more accustomed to this world’s air. But to open the next chapter, you need the wisdom to survive. The night is long, and danger hides in the dark. If you want to endure, you must first secure a place to rest.",
+    "dialogue.ecm.main.2.p2": "A \u00A7ebed\u00A7r is more than comfort—it is a vow that you will wake to another day. And \u00A7efood\u00A7r is not just a meal; it is the breath that keeps your hands steady when fear comes close. Even \u00A7eseeds\u00A7r matter: what you plant today becomes the strength you will need tomorrow.",
+    "dialogue.ecm.main.2.p3_final": "So set your foundations first.\n\n\u00A76\u00A7lRequirements:\u00A7r White Bed ×1, Apple ×5, Wheat Seeds ×12\n\u00A7b\u00A7lReward:\u00A7r Stone Pickaxe ×1, Stone Axe ×1\n\nPrepare well, hero. The deeper road is waiting.\u00A7r",
+
+    "dialogue.ecm.main.3.p1": "Well done. You have learned how to rest, eat, and prepare for tomorrow. Now the world asks for something heavier than comfort: \u00A7eresolve\u00A7r.\nBeneath the surface, darkness thickens—and so does the reward.",
+    "dialogue.ecm.main.3.p2": "\u00A7eIron\u00A7r is not merely a material. It is the first true proof that you can break stone’s limits and step into harsher depths. Twenty-five ingots are not light to earn, but every piece is a step forward.",
+    "dialogue.ecm.main.3.p3_final": "Bring \u00A7eIron Ingot ×25\u00A7r.\n\n\u00A76\u00A7lRequirements:\u00A7r Iron Ingot ×25\n\u00A7b\u00A7lReward:\u00A7r Coal ×10, Water Bucket ×1, Iron Pickaxe ×1\n\u00A7b\u00A7lBonus:\u00A7r Enchanted Iron Shovel (Efficiency I, Unbreaking I) ×1, Enchanted Iron Hoe (Efficiency I, Unbreaking I) ×1\n\nThe earth will open its next door to you.\u00A7r",
+
+
+
+"gui.epicclassmod.quest.main.4": "Promise of the Green Field",
+"gui.epicclassmod.quest.main.4.body": "Your hands now remember the feel of stone. Yet survival in this world is not just about fighting or crafting. The land here gives life — and takes it away. This time, you must learn the rhythm of that cycle. Prepare §e5 Bread, 5 Cooked Porkchop, 5 Cooked Beef, 5 Cooked Chicken, 5 Cooked Mutton§f. The scent of fire and food brings comfort unchanged across worlds. On that humble table, your days gather warmth. When all is ready, you’ll receive §b1 of every seed§f — the form of waiting itself. For even here, patience remains the noblest act.",
+"gui.epicclassmod.quest.main.4.require": "Bread ×5, Cooked Porkchop ×5, Cooked Beef ×5, Cooked Chicken ×5, Cooked Mutton ×5",
+"gui.epicclassmod.quest.main.4.reward": "All seeds ×1 each",
+
+"dialogue.ecm.main.4.p1": "Your hands that once shaped stone now tend the fire. White smoke rises from roasting meat, its warmth gently softening the cold air. You watch the flame and think — perhaps you can truly live here. To live may simply mean letting your heart warm, little by little.",
+"dialogue.ecm.main.4.p2": "As you prepare §eBread and Meat§f, the warmth lingers on your fingertips. Fire dies, but its memory remains. What you cook is more than food — it’s a quiet promise to yourself. Through small, repeated acts, the heart grows steady, and light continues to comfort.",
+"dialogue.ecm.main.4.p3_final": "When your meal is complete, the earth will grant you §b1 of every seed§f. They are as small — and as precious — as a promise. One day, each seed will grow into a tree beneath which you may rest. Waiting is long, but never in vain. Even a seed sleeping in soil is merely waiting for spring.",
+
+
+"gui.epicclassmod.quest.main.5": "Vow of Steel",
+"gui.epicclassmod.quest.main.5.body": "Your days now blend into the rhythm of this world. You’ve learned to shape stone and temper fire — yet the nights remain cold, and the wind unkind. To endure the darkness, you’ll need a shell to shield your resolve. Gather §e30 Iron Ingots, 20 Coal, 10 Leather, 15 String§f and forge a §bFull Iron Armor Set§f. Steel is cold, but it never lies; its surface bears the mark of your time and effort. This armor is not merely protection — it is proof that you’ve learned to trust yourself.",
+"gui.epicclassmod.quest.main.5.require": "Iron Ingot ×30, Coal ×20, Leather ×10, String ×15",
+"gui.epicclassmod.quest.main.5.reward": "Full Iron Armor Set",
+
+"dialogue.ecm.main.5.p1": "The days of tending fire are over; cold air returns. A new dawn, sharper than before. Your fingers still hold warmth, but the wind is relentless. The world keeps moving, and you pause for a moment — wondering, ‘How much have I changed?’ The breeze whispers back: ‘Enough.’",
+"dialogue.ecm.main.5.p2": "§eIron, Coal, Leather, String§f — each a trace of your passing time. As you hammer, weave, and smelt, your spirit hardens alongside the metal. Steel is born only in fire, and so too is the will of a person. Even if your armor is imperfect, what matters is that it’s yours.",
+"dialogue.ecm.main.5.p3_final": "When you gather all materials, you’ll receive a §bFull Iron Armor Set§f. Its weight may feel strange at first, but soon it becomes familiar — even comforting. Steel may cool, but your warmth remains. The wind will stay cold, yet you can now walk through it. That is the vow of steel.",
+
+
+"gui.epicclassmod.quest.main.6": "Evolution of Tools",
+"gui.epicclassmod.quest.main.6.body": "With each day beneath your armor, your hands have learned how to reshape the world. You’ve tamed fire, forged steel, and guarded your heart. Now, it’s time to shape creation itself. Craft §eIron Pickaxe, Axe, Shovel, and Hoe§f. These are not mere tools, but reflections of your journey. Complete them all, and you’ll be rewarded with §b3 Diamonds§f — a gift born of the earth’s deepest pressure, quiet yet unbreakable.",
+"gui.epicclassmod.quest.main.6.require": "Iron Pickaxe, Iron Axe, Iron Shovel, Iron Hoe",
+"gui.epicclassmod.quest.main.6.reward": "Diamond ×3",
+
+"dialogue.ecm.main.6.p1": "After the vow of steel, your steps feel heavier, yet certain. The chill of metal no longer startles you, nor its ring. Still, your hands remain gentle. With them, you will shape the world anew. The earth remembers your touch.",
+"dialogue.ecm.main.6.p2": "§eIron Pickaxe, Axe, Shovel, Hoe§f — four forms that build not just survival, but life itself. As you dig, chop, and smooth the land, your rhythm aligns with this world. Simplicity, after all, is the truest bridge between worlds.",
+"dialogue.ecm.main.6.p3_final": "When all are complete, the earth will offer §b3 Diamonds§f. Stones forged in timeless pressure — much like human resolve. When that steadfast light rests in your hand, you’ll realize you’ve become just as enduring.",
+
+
+"gui.epicclassmod.quest.main.7": "Threshold of Magic",
+"gui.epicclassmod.quest.main.7.body": "Your hands now remember every texture of the world — stone, flame, and steel. From that memory, a new sensation awakens: the unseen current called magic. Gather §e3 Obsidian, 2 Diamonds, 20 Lapis Lazuli, and 1 Book§f to receive §b1 Enchanting Table§f. The flow of the world will shift — whispering back the knowledge and time you’ve built.",
+"gui.epicclassmod.quest.main.7.require": "Obsidian ×3, Diamond ×2, Lapis Lazuli ×20, Book ×1",
+"gui.epicclassmod.quest.main.7.reward": "Enchanting Table ×1",
+
+"dialogue.ecm.main.7.p1": "The tools you’ve crafted bear countless traces of your touch. Yet the world is not moved by what is seen alone. Winds sway leaves without form; hearts, too, move unseen.",
+"dialogue.ecm.main.7.p2": "§eObsidian, Diamond, Lapis, Book§f — each holds the memory of time. Gather them, and the world will pause to regard your will. Magic is not talent, but the echo of a heart that has endured.",
+"dialogue.ecm.main.7.p3_final": "When your materials are complete, you’ll receive §b1 Enchanting Table§f. Place your hands upon it — a calm light ripples outward. It is the threshold of knowledge. Breathe, and turn the next page.",
+
+
+"gui.epicclassmod.quest.main.8": "Compass of the Pathfinder",
+"gui.epicclassmod.quest.main.8.body": "Having crossed the threshold of magic, you now glimpse the vastness of this world. Yet vastness brings uncertainty. To walk forward, you’ll need a guide. Gather §e1 Spyglass, 1 Map, 3 Banners, and 40 Emeralds§f to forge a §bJob Compass§f. This compass does not merely point — its needle stirs toward destiny, people to meet, lessons to learn, and paths yet unseen.",
+"gui.epicclassmod.quest.main.8.require": "Spyglass ×1, Map ×1, Banner ×3, Emerald ×40",
+"gui.epicclassmod.quest.main.8.reward": "Job Compass ×1",
+
+"dialogue.ecm.main.8.p1": "Having glimpsed the light of magic, you now sense how wide the world truly is. Yet too many paths can be just as paralyzing as none. When lost, look to the sky — the wind always knows the way.",
+"dialogue.ecm.main.8.p2": "§eSpyglass, Map, Banner, Emerald§f — four symbols of an explorer’s heart: eyes to see, hands to remember, a flag to remain oneself, and light to sustain the dream. Gather them all, and you’ll never lose your way.",
+"dialogue.ecm.main.8.p3_final": "When all are complete, you’ll receive §b1 Job Compass§f. It may be more than a mere tool — perhaps the first whisper of a master waiting somewhere. The path stretches on, and along it, you will continue to grow.",
+
+
+"gui.epicclassmod.quest.main.9": "Gate of Fire",
+"gui.epicclassmod.quest.main.9.body": "Where the compass needle stops, flames dance. It is the boundary between worlds — where life and death meet. Prepare §e1 Water Bucket, 1 Lava Bucket, 2 Diamonds, and 30 Coal§f. The earth will grant §b10 Obsidian and 1 Flint and Steel§f — the key to ignite a new world.",
+"gui.epicclassmod.quest.main.9.require": "Water Bucket ×1, Lava Bucket ×1, Diamond ×2, Coal ×30",
+"gui.epicclassmod.quest.main.9.reward": "Obsidian ×10, Flint and Steel ×1",
+
+"dialogue.ecm.main.9.p1": "The compass that once guided you now points toward flame. Fire is peril — yet also the beginning of change. Your hands no longer hesitate. You see not the fire, but the world within it.",
+"dialogue.ecm.main.9.p2": "§eWater, Lava, Diamond, Coal§f — opposites that must meet to open the gate. When conflict finds harmony, the world allows passage. In flame, water endures; in water, flame survives. Balance — the quiet truth of this world.",
+"dialogue.ecm.main.9.p3_final": "When your materials are gathered, you’ll receive §b10 Obsidian and 1 Flint and Steel§f. Light it, and the air will change. Beyond the gate lies nothing… yet you will know — something is waiting for you there.",
+
+
+"gui.epicclassmod.quest.main.10": "Ancient Ember",
+"gui.epicclassmod.quest.main.10.body": "Beyond the Gate of Fire lies the world’s heart. The air is heavy, and the flame breathes within ashes. Seek the source of that fire — gather §e1 Ancient Debris§f to obtain §b1 Netherite Ingot§f, a metal that has never cooled, forged by endless heat and time.",
+"gui.epicclassmod.quest.main.10.require": "Ancient Debris ×1",
+"gui.epicclassmod.quest.main.10.reward": "Netherite Ingot ×1",
+
+"dialogue.ecm.main.10.p1": "Past the gate, you find not blazing fire, but solemn stillness. Here, flames no longer burn — they remember. True fire is silent, and you’ve come to understand why.",
+"dialogue.ecm.main.10.p2": "§eAncient Debris§f — not mere ore, but time itself. Within it sleeps a flame that has never died. That ember will awaken in your hands.",
+"dialogue.ecm.main.10.p3_final": "Hold the fragment, and you’ll receive §b1 Netherite Ingot§f — metal that never cools, will that never fades. The flame moves once more into your heart, and the world’s pulse beats in rhythm with your own.",
+
+
+"gui.epicclassmod.quest.main.11": "Altar of the Nether",
+"gui.epicclassmod.quest.main.11.body": "With the ancient ember in hand, you now stand at the edge of shadow. As fire creates light, darkness opens new paths. Gather §e10 Blaze Rods and 1 Wither Skull§f to receive §b1 Nether Slab§f — the final piece of the altar, and the key to the abyss.",
+"gui.epicclassmod.quest.main.11.require": "Blaze Rod ×10, Wither Skull ×1",
+"gui.epicclassmod.quest.main.11.reward": "Nether Slab ×1",
+
+"dialogue.ecm.main.11.p1": "Having crossed the realm of fire, you now stand opposite its glow. Every light casts a shadow, and every shadow bears a name. This darkness isn’t fear — it’s memory, resting quietly.",
+"dialogue.ecm.main.11.p2": "§eBlaze Flame and Wither Skull§f — symbols of life and death. When they unite, the altar is complete. To stand upon it is to accept the dark without fear. Darkness, after all, has always been closer than light.",
+"dialogue.ecm.main.11.p3_final": "When you gather all, you’ll receive §b1 Nether Slab§f. As the altar completes, the air trembles and the wind shifts. But do not fear — this is not the end, but the sign of another beginning.",
+
+
+"gui.epicclassmod.quest.main.12": "Eye of Dimensions",
+"gui.epicclassmod.quest.main.12.body": "Standing upon the altar, you gaze at the sky. Worlds layer upon worlds, and at their edge lies another gate. Gather §e6 Ender Eyes, 6 Blaze Powder, 6 Obsidian, and 1 Netherite Ingot§f to craft §b12 Eyes of Ender§f. They will open the boundary between dimensions and reveal the final path.",
+"gui.epicclassmod.quest.main.12.require": "Ender Eye ×6, Blaze Powder ×6, Obsidian ×6, Netherite Ingot ×1",
+"gui.epicclassmod.quest.main.12.reward": "Eye of Ender ×12",
+
+"dialogue.ecm.main.12.p1": "The flame above the altar fades, but a new light rises — like a star, or perhaps your next step.",
+"dialogue.ecm.main.12.p2": "§eEnder Eye, Blaze Powder, Obsidian, Netherite§f — fragments of four realms. Only together can they open the dimensional gate. The boundary is thin, but a steadfast heart needs no fear.",
+"dialogue.ecm.main.12.p3_final": "When the materials are complete, you’ll receive §b12 Eyes of Ender§f. Gaze into them — they reflect the worlds beyond. Every step you’ve taken shines within that light.",
+
+
+"gui.epicclassmod.quest.main.13": "The Final Wings",
+"gui.epicclassmod.quest.main.13.body": "At last, you’ve reached the end of all worlds. Fire and shadow, time and wind — all have passed. Now the sky awaits your final trial. Gather §e3 Dragon’s Breath, 4 End Crystals, 6 Shulker Shells, and 1 Netherite Ingot§f. When complete, you’ll receive §b1 Elytra§f — wings of freedom granted only to those who have touched the heavens.",
+"gui.epicclassmod.quest.main.13.require": "Dragon’s Breath ×3, End Crystal ×4, Shulker Shell ×6, Netherite Ingot ×1",
+"gui.epicclassmod.quest.main.13.reward": "Elytra ×1",
+
+"dialogue.ecm.main.13.p1": "At the end of the path revealed by the eyes, you face the open sky. Countless seasons have passed, and your hands now bear the marks of time. All that remains is to rise.",
+"dialogue.ecm.main.13.p2": "§eDragon’s Breath, End Crystal, Shulker Shell, Netherite§f — relics found only at the world’s edge. The journey to gather them is long and harsh, yet in it, you find yourself complete.",
+"dialogue.ecm.main.13.p3_final": "When all is gathered, you’ll receive §b1 Elytra§f. As you spread your wings, the wind embraces you. You’ve left the laws of the earth and become one who walks the sky. The journey ends — but the world remains vast. Somewhere, another story begins.",
+
+
+
+
+
+
+"command.epicclassmod.class.reset": "Class selection has been reset.",
+"command.ecm.give_compass": "Gave you a Job Compass.",
+"command.ecm.jobnpc.list.header": "generated=%s",
+"command.ecm.jobnpc.list.line": "%s: %s",
+"command.ecm.jobnpc.list.null": "null",
+"command.ecm.jobnpc.ping": "Ping %s @ %s",
+"command.ecm.jobnpc.tp.not_found": "No saved position for class '%s'.",
+"command.ecm.jobnpc.tp.chunk_unloaded": "The chunk at that location isn’t loaded yet. Move closer or try again shortly.",
+"command.ecm.jobnpc.tp.terrain_unready": "Terrain at that location hasn’t been generated yet. Try again later or move closer.",
+"command.ecm.jobnpc.tp.success": "Teleported: %s @ %d, %d, %d",
+
+"screen.epicclassmod.settings.section.ui": "User Interface",
+"screen.epicclassmod.settings.quest_preview": "Quest Preview",
+
+"gui.epicclassmod.map": "Map",
+  "command.ecm.party.create": "Created a party. Members: %s",
+  "command.ecm.party.invite.not_found": "Player not found: %s",
+  "command.ecm.party.invite.failed": "Could not invite %s. (Maybe already in a party?)",
+  "command.ecm.party.invite.leader": "Invited %s to your party.",
+  "command.ecm.party.invite.target": "%s invited you to a party.",
+  "gui.epicclassmod.map.party": "Party",
+  "gui.epicclassmod.map.party.empty": "No party members.",
+  "gui.epicclassmod.map.area": "Current Area",
+
+  "gui.epicclassmod.map.party.title": "Party",
+  "gui.epicclassmod.map.party.invited": "Party invite",
+  "gui.epicclassmod.map.party.invited_from": "%1$s → %2$s",
+  "gui.epicclassmod.map.party.accept": "Accept",
+  "gui.epicclassmod.map.party.decline": "Decline",
+  "gui.epicclassmod.map.party.empty": "No party members.",
+
+  "gui.epicclassmod.map.party.teleport_to": "Teleport to %s",
+  "gui.epicclassmod.map.party.teleport_cost_label": "x1",
+  "gui.epicclassmod.map.party.teleport_confirm": "Confirm",
+  "gui.epicclassmod.map.party.teleport_cancel": "Cancel",
+
+  "command.ecm.party.leave.success": "You have left the party.",
+  "command.ecm.party.leave.failed": "You are not in a party.",
+  "command.ecm.party.disband.success": "The party has been disbanded.",
+  "command.ecm.party.disband.failed": "You are not the party leader.",
+
+   "gui.epicclassmod.map.party.help_title": "Party Commands",
+  "gui.epicclassmod.map.party.help_line1": "/ecm party create <partyname>  - Create a new party",
+  "gui.epicclassmod.map.party.help_line2": "/ecm invite <playername> <partyname>  - Invite a player",
+  "gui.epicclassmod.map.party.help_line3": "/ecm party leave  - Leave the current party",
+  "gui.epicclassmod.map.party.help_line4": "/ecm party disband  - Disband your party",
+  "gui.epicclassmod.map.party.help_tip": "💡 Right-click a member's name to teleport to them.",
+  "gui.epicclassmod.map.party.help_line5": "/ecm party kick <player> - kick a member",
+"gui.epicclassmod.map.party.help_line6": "Party members cannot damage each other.",
+
+  "command.ecm.party.kick.failed": "Failed to kick the member. (Are you the leader?)",
+"command.ecm.party.kick.success": "Kicked %s from the party.",
+
+"gui.epicclassmod.map.party.teleport_desc": "Consumes %s Ender Eyes to teleport.",
+
+ "msg.ecm.sub.too_many": "You already have too many side quests!",
+  "msg.ecm.sub.accepted": "You have accepted the side quest \"{0}\".",
+  "msg.ecm.sub.rejected": "You have rejected the side quest \"{0}\".",
+  "msg.epicclassmod.bers_last_stand": "[Berserker] Last Stand! You become invincible for 7 seconds, then die.",
+
+"gui.epicclassmod.map.party.action.title": "Party Member",
+"gui.epicclassmod.map.party.action.kick": "Kick from party",
+"gui.epicclassmod.map.party.action.teleport": "Teleport",
+"gui.epicclassmod.map.party.action.track": "Track position",
+"gui.epicclassmod.map.party.action.untrack": "Stop tracking",
+"gui.epicclassmod.map.party.action.disband": "Disband party",
+"gui.epicclassmod.map.party.action.leave": "Leave party",
+"gui.epicclassmod.map.party.action.cancel": "Cancel",
+
+"gui.epicclassmod.map.party.track_on": "Now tracking %s",
+"gui.epicclassmod.map.party.track_off": "Stopped tracking %s",
+
+"gui.epicclassmod.map.party.create_title": "Create Party",
+"gui.epicclassmod.map.party.create_placeholder": "Enter party name (7–12 characters)",
+"gui.epicclassmod.map.party.create_ok": "Create",
+"gui.epicclassmod.map.party.create_cancel": "Cancel",
+ "gui.epicclassmod.map.party.no_party": "You don't have a party yet.",
+  "gui.epicclassmod.map.party.invite_empty": "No players to invite.",
+  "gui.epicclassmod.map.party.invite_title": "Invite player",
+"msg.epicclassmod.sorc_dash_failed": "Not enough mana to dash!",
+"hud.epicclassmod.combo_label": "combo",
+"hud.epicclassmod.damage_label_short": "dmg",
+"screen.epicclassmod.settings.section.features": "Gameplay Features",
+
+"item.epicclassmod.ancient_journey": "Ancient Journey",
+"book.epicclassmod.ancient_journey.no_class": "The pages are empty.\n\nUntil you choose your path, the Ancient Journey cannot guide you.",
+"book.epicclassmod.ancient_journey.no_pos": "The path ahead is still hidden.\n\nNo landmark has yet been written for your journey.",
+"book.epicclassmod.ancient_journey.warrior": "The Warrior's path awaits.\n\nCoords:\nX: %1$s\nY: %2$s\nZ: %3$s\n\nGo there.",
+"book.epicclassmod.ancient_journey.paladin": "The Paladin's path awaits.\n\nCoords:\nX: %1$s\nY: %2$s\nZ: %3$s\n\nSeek the sanctuary.",
+"book.epicclassmod.ancient_journey.berserker": "The Berserker's path awaits.\n\nCoords:\nX: %1$s\nY: %2$s\nZ: %3$s\n\nHead to the battleground.",
+"book.epicclassmod.ancient_journey.reaper": "The Reaper's path awaits.\n\nCoords:\nX: %1$s\nY: %2$s\nZ: %3$s\n\nFind the master in shadows.",
+"book.epicclassmod.ancient_journey.sorcerer": "The Sorcerer's path awaits.\n\nCoords:\nX: %1$s\nY: %2$s\nZ: %3$s\n\nClimb the tower.",
+"book.epicclassmod.ancient_journey.archer": "The Archer's path awaits.\n\nCoords:\nX: %1$s\nY: %2$s\nZ: %3$s\n\nFind the master there.",
+
+
+"screen.epicclassmod.settings.job_weapon_restr": "Class Weapon Restriction",
+  "screen.epicclassmod.settings.party_hud": "Party HUD",
+  "screen.epicclassmod.settings.book_ui": "Book UI Scale",
+  "screen.epicclassmod.settings.hud_healthbar": "Health Bar Scale",
+  "screen.epicclassmod.settings.party_hud_size": "Party HUD Scale",
+  "screen.epicclassmod.settings.quest_preview_size": "Quest Preview Scale",
+  "screen.epicclassmod.common.scale_format": "x%s",
+
+  "gui.epicclassmod.passive.unlock_at": "Unlocks at Lv %s",
+  "gui.epicclassmod.passive.locked": "Locked",
+
+   "chat.epicclassmod.max_level": "§d§l✦✦✦ §b§lLEGEND AWAKENED §d§l✦✦✦\n§f%s§b has reached §e§lMAX LEVEL§b! §aCongratulations!\n§d§l✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦",
+
+     "msg.epicclassmod.war_blink_no_target": "You can only use this while aiming at a target.",
+  "msg.epicclassmod.war_blink_out_of_range": "The target is too far away. (Within 12 blocks)",
+  "msg.epicclassmod.war_blink_blocked": "You can't move to that position.",
+
+"gui.epicclassmod.stat_reset.title": "Reset Stats?",
+  "gui.epicclassmod.stat_reset.prompt": "Are you sure you want to erase your training and reclaim all stat points?",
+  "gui.epicclassmod.common.cancel": "Cancel",
+  "gui.epicclassmod.common.confirm": "Confirm"
+
+
+
+
+
+
+  
+
+
+
+
+}

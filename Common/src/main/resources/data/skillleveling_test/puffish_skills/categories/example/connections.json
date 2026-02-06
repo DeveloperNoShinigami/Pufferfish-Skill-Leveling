@@ -12,6 +12,10 @@
 			[
 				"test_mage",
 				"test_magic_swordsman"
+			],
+			[
+				"test_warrior",
+				"test_advanced_warrior"
 			]
 		]
 	}

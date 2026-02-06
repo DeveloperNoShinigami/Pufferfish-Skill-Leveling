@@ -1,0 +1,176 @@
+{
+  "screen.epicclassmod.class_book": "クラスブック",
+  "gui.epicclassmod.profile": "プロフィール",
+
+  "class.epicclassmod.warrior.note1": "ヤマト一族の長として、",
+  "class.epicclassmod.warrior.note2": "義の道を重んじ、",
+  "class.epicclassmod.warrior.note3": "静かな呼吸で刃を研ぎ、",
+  "class.epicclassmod.warrior.note4": "戦いの潮流を掴み、",
+  "class.epicclassmod.warrior.note5": "一閃で切り裂き、",
+  "class.epicclassmod.warrior.note6": "音もなく敵意を断ち、",
+  "class.epicclassmod.warrior.note7": "そして究極の刃『ヤマト』を手にする。",
+
+  "class.epicclassmod.warrior.weapon1": "クラス武器",
+  "class.epicclassmod.warrior.weapon2": "刀",
+
+  "class.epicclassmod.warrior.effect1": "静寂の回復",
+  "class.epicclassmod.warrior.effect2": "貫通の刃",
+  "class.epicclassmod.warrior.effect3": "一閃",
+  "class.epicclassmod.warrior.effect4": "予感",
+
+  "class.epicclassmod.paladin.effect1": "光の盾",
+  "class.epicclassmod.paladin.effect2": "聖遺の手",
+  "class.epicclassmod.paladin.effect3": "守護のオーラ",
+  "class.epicclassmod.paladin.effect4": "審判",
+
+  "class.epicclassmod.berserker.effect1": "血の狂気",
+  "class.epicclassmod.berserker.effect2": "狂戦士の耐久",
+  "class.epicclassmod.berserker.effect3": "怒りの加速",
+  "class.epicclassmod.berserker.effect4": "ラストスタンド",
+
+  "class.epicclassmod.warrior.effect1.desc": "5秒間静止するとHPを30%回復。",
+  "class.epicclassmod.warrior.effect2.desc": "低確率で防御を無視し追加ダメージ。",
+  "class.epicclassmod.warrior.effect3.desc": "攻撃していない後の初撃が追加ダメージを与える。",
+  "class.epicclassmod.warrior.effect4.desc": "初撃を低確率で回避する。",
+
+  "class.epicclassmod.paladin.effect1.desc": "盾を構えると防御力+0.5。",
+  "class.epicclassmod.paladin.effect2.desc": "オフハンドの耐久消耗が30%減少。",
+  "class.epicclassmod.paladin.effect3.desc": "防御中、10ブロック以内の味方に+1.5防御と回復。",
+  "class.epicclassmod.paladin.effect4.desc": "ウォーデン、エンダーマン、ドラゴン、ウィザー等に追加ダメージ。",
+
+  "class.epicclassmod.berserker.effect1.desc": "HP50%以下で攻撃力+0.2。",
+  "class.epicclassmod.berserker.effect2.desc": "HP30%以下で防御力+0.5。",
+  "class.epicclassmod.berserker.effect3.desc": "10秒以内に2体討伐で攻撃速度+0.03、移動速度+0.01（8秒間）。",
+  "class.epicclassmod.berserker.effect4.desc": "致死ダメージ時に7秒間無敵＆攻撃速度+50%、その後死亡（5日クールタイム）。",
+
+  "class.epicclassmod.reaper.effect1.desc": "連続攻撃でダメージが少しずつ上昇。",
+  "class.epicclassmod.reaper.effect2.desc": "二刀の短剣が出血を付与する。",
+  "class.epicclassmod.reaper.effect3.desc": "背後攻撃で少量のHP回復。",
+  "class.epicclassmod.reaper.effect4.desc": "回避後、短時間移動速度と被ダメ軽減。",
+
+  "class.epicclassmod.paladin.note1": "聖なる秩序の守護者は、",
+  "class.epicclassmod.paladin.note2": "光で仲間を守り、",
+  "class.epicclassmod.paladin.note3": "悪を討つ。",
+  "class.epicclassmod.paladin.note4": "揺るがぬ決意で立ち、",
+  "class.epicclassmod.paladin.note5": "誓いを胸に、",
+  "class.epicclassmod.paladin.note6": "聖盾『イージス・ウォード』を振るい、",
+  "class.epicclassmod.paladin.note7": "戦場を支配する。",
+
+  "class.epicclassmod.paladin.weapon1": "クラス武器",
+  "class.epicclassmod.paladin.weapon2": "盾",
+
+  "class.epicclassmod.berserker.note1": "尽きぬ怒りの化身、",
+  "class.epicclassmod.berserker.note2": "狂気と力で敵を屠る。",
+  "class.epicclassmod.berserker.note3": "防御を捨て、",
+  "class.epicclassmod.berserker.note4": "血の誓いに縛られた斧を握り、",
+  "class.epicclassmod.berserker.note5": "戦場を炎で包む。",
+
+  "class.epicclassmod.berserker.weapon1": "クラス武器",
+  "class.epicclassmod.berserker.weapon2": "大剣",
+
+  "screen.epicclassmod.class_select": "クラス選択",
+  "gui.epicclassmod.class_select.title": "クラスを選ぶ",
+  "gui.epicclassmod.button.select": "選択",
+
+  "class.epicclassmod.warrior.title": "剣士",
+  "class.epicclassmod.paladin.title": "パラディン",
+  "class.epicclassmod.berserker.title": "バーサーカー",
+
+  "class.epicclassmod.warrior.select_desc": "ヤマト一族の長。静寂の一閃で戦場を切り裂く。",
+  "class.epicclassmod.paladin.select_desc": "光に祝福された聖騎士。仲間を守り、悪を断つ。",
+  "class.epicclassmod.berserker.select_desc": "狂気と怒りを操る戦士。防御を捨て、圧倒的な攻撃と速度を得る。",
+
+  "class.epicclassmod.reaper.title": "リーパー",
+  "class.epicclassmod.reaper.select_desc": "影に潜み、双刃で襲いかかる暗殺者。敏捷と連撃に特化。",
+
+  "class.epicclassmod.reaper.note1": "闇の縁にて、",
+  "class.epicclassmod.reaper.note2": "足音を消し、息を潜め、",
+  "class.epicclassmod.reaper.note3": "影を刃に縛る。",
+  "class.epicclassmod.reaper.note4": "一瞬の隙に三つの傷、",
+  "class.epicclassmod.reaper.note5": "前後を断ち、",
+  "class.epicclassmod.reaper.note6": "沈黙の中で息を奪い、",
+  "class.epicclassmod.reaper.note7": "『夜の舞踏』を極める。",
+
+  "class.epicclassmod.reaper.weapon1": "クラス武器",
+  "class.epicclassmod.reaper.weapon2": "短剣（二刀）",
+
+  "class.epicclassmod.reaper.effect1": "影の舞",
+  "class.epicclassmod.reaper.effect2": "双牙",
+  "class.epicclassmod.reaper.effect3": "夜の収穫",
+  "class.epicclassmod.reaper.effect4": "ヴェールステップ",
+
+  "gui.epicclassmod.announce.title.reaper": "🌑 リーパー",
+  "gui.epicclassmod.announce.subtitle.reaper": "闇を駆け抜け、双刃で急襲せよ！",
+
+  "class.epicclassmod.stat.health": "体力",
+  "class.epicclassmod.stat.attack": "攻撃力",
+  "class.epicclassmod.stat.magic_attack": "魔法攻撃",
+  "class.epicclassmod.stat.defense": "防御力",
+  "class.epicclassmod.stat.speed": "移動速度",
+  "class.epicclassmod.stat.attack_speed": "攻撃速度",
+
+  "class.epicclassmod.speed.normal": "普通",
+  "class.epicclassmod.speed.fast": "速い",
+  "class.epicclassmod.speed.slow": "遅い",
+
+  "gui.epicclassmod.starting_items": "初期アイテム",
+  "gui.epicclassmod.starting_items.none": "なし",
+
+  "gui.epicclassmod.announce.title.warrior": "⚔ 剣士",
+  "gui.epicclassmod.announce.title.paladin": "🛡 パラディン",
+  "gui.epicclassmod.announce.title.Berserker": "🔮 バーサーカー",
+
+  "gui.epicclassmod.announce.subtitle.warrior": "剣士の道を歩め――水のように柔らかく、そして折れぬ心で！",
+  "gui.epicclassmod.announce.subtitle.paladin": "聖なる騎士の道――光と信念で仲間を守れ！",
+  "gui.epicclassmod.announce.subtitle.Berserker": "怒りと狂気を操り、防御を捨て圧倒的な力を得よ。",
+  "gui.epicclassmod.announce.subtitle.default": "クラスが選択されました！",
+
+  "gui.epicclassmod.class.water_hashira": "⚔ 水柱",
+  "gui.epicclassmod.class.paladin": "🛡 パラディン",
+  "gui.epicclassmod.class.berserker": "🪓 バーサーカー",
+
+  "gui.epicclassmod.quests": "クエスト",
+  "gui.epicclassmod.quests.main": "メインクエスト",
+  "gui.epicclassmod.quests.job": "ジョブクエスト",
+  "gui.epicclassmod.quests.sub": "サブクエスト",
+  "gui.epicclassmod.quests.requirement": "条件",
+  "gui.epicclassmod.quests.requirement.prefix": "必要：",
+  "gui.epicclassmod.quests.rewards": "報酬",
+
+  "gui.epicclassmod.quest.complete": "完了",
+  "gui.epicclassmod.quest.completed": "（完了済み）",
+  "gui.epicclassmod.quest.req_not_met": "条件が満たされていません。",
+  "gui.epicclassmod.quest.completed_toast": "%s を完了しました！",
+
+  "stat.epicclassmod.attack": "攻撃力",
+  "stat.epicclassmod.defense": "防御力",
+  "stat.epicclassmod.attackspeed": "攻撃速度",
+  "stat.epicclassmod.movespeed": "移動速度",
+  "gui.epicclassmod.statpoints": "ステータスポイント",
+
+  "msg.epicclassmod.non_class_weapon.title": "⚠ クラス武器ではありません",
+  "msg.epicclassmod.non_class_weapon.body": "手にした %1$s は %2$s の道に適していません。攻撃速度 −70%%。",
+  "msg.epicclassmod.non_class_weapon.cleared": "制限が解除されました。",
+  "gui.epicclassmod.class.warrior": "剣士",
+  "gui.epicclassmod.class.paladin": "パラディン",
+  "gui.epicclassmod.class.berserker": "バーサーカー",
+  "gui.epicclassmod.class.reaper": "リーパー",
+
+  "notice.nonclass_weapon_penalty": "このクラスでは攻撃速度が低下します。",
+  "notice.xp_gained": "経験値 +{0}",
+  "notice.level_up": "レベル {0} → {1}",
+
+  "screen.epicclassmod.settings.title": "設定",
+  "screen.epicclassmod.settings.hint": "モブレベルシステムの切り替え",
+  "screen.epicclassmod.settings.mob_level": "モブレベル",
+  "screen.epicclassmod.common.on": "オン",
+  "screen.epicclassmod.common.off": "オフ",
+
+  "class.epicclassmod.stat.mana.tooltip": "マナを増加させる。",
+  "class.epicclassmod.stat.mana_regen.tooltip": "マナ回復速度を上げる。",
+
+  "class.epicclassmod.stat.attack.tooltip": "攻撃力を上げる。",
+  "class.epicclassmod.stat.defense.tooltip": "防御力（アーマー）を高める。",
+  "class.epicclassmod.stat.attack_speed.tooltip": "攻撃速度を上げる。",
+  "class.epicclassmod.stat.move_speed.tooltip": "移動速度を上げる。"
+}

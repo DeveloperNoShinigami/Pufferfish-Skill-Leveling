@@ -93,6 +93,13 @@ public class SkillTomeItem extends Item {
         String lootMode = nbt.getString(NBT_LOOT_MODE);
         int tomeLevel = nbt.contains(NBT_LEVEL) ? nbt.getInt(NBT_LEVEL) : 1;
 
+        // Ensure this skill is actually supposed to be lootable
+        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+        if (config == null || config.lootMode == null) {
+            serverPlayer.sendMessage(Text.translatable("skillleveling.tome.unsupported_skill"), false);
+            return TypedActionResult.fail(stack);
+        }
+
         // Check if this is an "imbue_only" tome - can't be used directly
         if (LOOT_MODE_IMBUE_ONLY.equals(lootMode)) {
             serverPlayer.sendMessage(Text.translatable("skillleveling.tome.imbue_required"), false);
@@ -133,8 +140,8 @@ public class SkillTomeItem extends Item {
             return TypedActionResult.fail(stack);
         }
 
-        // Grant the specific skill level
-        boolean success = manager.setSkillLevel(serverPlayer, catId, skillId, tomeLevel);
+        // Grant the specific skill level - Bypass points for tome usage
+        boolean success = manager.setSkillLevel(serverPlayer, catId, skillId, tomeLevel, true);
 
         if (success) {
             String skillName = getSkillDisplayName(skillId);
@@ -238,7 +245,11 @@ public class SkillTomeItem extends Item {
      */
     public static String getLootMode(ItemStack stack) {
         NbtCompound nbt = stack.getNbt();
-        return nbt != null ? nbt.getString(NBT_LOOT_MODE) : LOOT_MODE_BOTH;
+        if (nbt == null || !nbt.contains(NBT_LOOT_MODE)) {
+            return LOOT_MODE_BOTH;
+        }
+        String mode = nbt.getString(NBT_LOOT_MODE);
+        return (mode == null || mode.isEmpty()) ? LOOT_MODE_BOTH : mode;
     }
 
     /**

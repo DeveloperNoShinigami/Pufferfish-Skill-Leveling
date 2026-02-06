@@ -15,5 +15,10 @@
 		"definition": "test_magic_swordsman",
 		"x": 32,
 		"y": 32
+	},
+	"test_advanced_warrior": {
+		"definition": "test_advanced_warrior",
+		"x": -64,
+		"y": 0
 	}
 }

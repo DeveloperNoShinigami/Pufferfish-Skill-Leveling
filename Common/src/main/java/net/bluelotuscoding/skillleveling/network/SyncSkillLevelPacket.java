@@ -2,7 +2,6 @@ package net.bluelotuscoding.skillleveling.network;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.bluelotuscoding.skillleveling.client.ClientSkillLevelStorage;
 
 public class SyncSkillLevelPacket {
     private final Identifier categoryId;
@@ -12,9 +11,10 @@ public class SyncSkillLevelPacket {
     private final int maxLevel;
     private final int pointsPerLevel;
     private final String definitionId;
+    private final boolean hidden;
 
     public SyncSkillLevelPacket(Identifier categoryId, String skillId, int baseLevel, int totalLevel, int maxLevel,
-            int pointsPerLevel, String definitionId) {
+            int pointsPerLevel, String definitionId, boolean hidden) {
         this.categoryId = categoryId;
         this.skillId = skillId;
         this.baseLevel = baseLevel;
@@ -22,6 +22,7 @@ public class SyncSkillLevelPacket {
         this.maxLevel = maxLevel;
         this.pointsPerLevel = pointsPerLevel;
         this.definitionId = definitionId;
+        this.hidden = hidden;
     }
 
     public void encode(PacketByteBuf buf) {
@@ -38,6 +39,7 @@ public class SyncSkillLevelPacket {
         if (definitionId != null) {
             buf.writeString(definitionId);
         }
+        buf.writeBoolean(hidden);
     }
 
     public static SyncSkillLevelPacket decode(PacketByteBuf buf) {
@@ -54,17 +56,14 @@ public class SyncSkillLevelPacket {
         if (buf.readBoolean()) {
             defId = buf.readString();
         }
-        return new SyncSkillLevelPacket(catId, sId, baseLevel, totalLevel, maxLevel, pPerLevel, defId);
+        boolean hidden = buf.readBoolean();
+        return new SyncSkillLevelPacket(catId, sId, baseLevel, totalLevel, maxLevel, pPerLevel, defId,
+                hidden);
     }
 
     public void handleClient() {
-        System.out.println("[SkillLeveling] Received level for: " + categoryId + ":" + skillId + " = Base "
-                + baseLevel + " (Total " + totalLevel + ")/" + maxLevel);
-        ClientSkillLevelStorage.setLevel(categoryId.toString(), skillId, baseLevel, totalLevel, maxLevel,
-                pointsPerLevel);
-        // Register definition mapping if provided
-        if (definitionId != null) {
-            ClientSkillLevelStorage.registerDefinitionMapping(definitionId, categoryId.toString(), skillId);
-        }
+        net.bluelotuscoding.skillleveling.client.ClientPacketHandler.handleSyncSkillLevel(categoryId, skillId,
+                baseLevel,
+                totalLevel, maxLevel, pointsPerLevel, definitionId, hidden);
     }
 }

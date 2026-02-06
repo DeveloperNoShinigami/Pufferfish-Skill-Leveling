@@ -152,11 +152,13 @@ All attribute changes (health, damage, speed, armor, etc.) update **instantly** 
 
 ## Loot Modes
 
-| Mode | Description |
-|------|-------------|
-| `tome_only` | Skill can only be learned via Skill Tomes |
-| `imbue_only` | Skill must be imbued onto equipment (cannot be directly learned) |
-| (default) | Standard behavior from base Puffish Skills |
+Controls how skills can be acquired:
+
+| Mode | Skill Tree | Imbuing | Use Case |
+|------|------------|---------|----------|
+| `"both"` (default) | ✅ | ✅ | Standard skills |
+| `"tome_only"` | ✅ | ❌ | Tree-exclusive (no equipment) |
+| `"imbue_only"` | ❌ | ✅ | Equipment-only enchantments |
 
 ---
 
@@ -167,8 +169,8 @@ All attribute changes (health, damage, speed, armor, etc.) update **instantly** 
 | `/skillleveling get <player> <category> <skill>` | View current skill level |
 | `/skillleveling set <player> <category> <skill> <level>` | Set skill to specific level |
 | `/skillleveling advance <player> <category> <skill>` | Advance skill by 1 level |
-| `/skillleveling refund one <player> <category> <skill>` | Refund 1 level |
-| `/skillleveling refund all <player> <category> <skill>` | Reset skill to 0 |
+| `/skillleveling refund <player> <category> <skill> [amount]` | Refund levels |
+| `/skillleveling refund <player> <category> <skill> all` | Reset skill to 0 |
 
 ---
 

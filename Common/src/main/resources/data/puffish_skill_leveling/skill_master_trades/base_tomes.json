@@ -1,0 +1,173 @@
+[
+    {
+        "tier": 1,
+        "input1": {
+            "item": "minecraft:emerald",
+            "count": 5
+        },
+        "input2": {
+            "item": "minecraft:book",
+            "count": 1
+        },
+        "output": {
+            "item": "puffish_skill_leveling:blank_tome",
+            "count": 1
+        },
+        "maxUses": 12,
+        "experience": 2,
+        "multiplier": 0.05,
+        "chance": 1.0
+    },
+    {
+        "tier": 1,
+        "input1": {
+            "item": "minecraft:emerald",
+            "count": 32
+        },
+        "input2": {
+            "item": "minecraft:gold_block",
+            "count": 1
+        },
+        "output": {
+            "item": "puffish_skill_leveling:sigil_of_imbuement",
+            "count": 1
+        },
+        "maxUses": 3,
+        "experience": 15,
+        "multiplier": 0.05,
+        "chance": 1.0
+    },
+    {
+        "tier": 2,
+        "input1": {
+            "item": "minecraft:emerald",
+            "count": 16
+        },
+        "input2": {
+            "item": "minecraft:book",
+            "count": 1
+        },
+        "output": {
+            "item": "puffish_skill_leveling:tome_of_clear_mind",
+            "count": 1
+        },
+        "maxUses": 4,
+        "experience": 10,
+        "multiplier": 0.05,
+        "chance": 1.0
+    },
+    {
+        "tier": 2,
+        "input1": {
+            "item": "minecraft:emerald",
+            "count": 24
+        },
+        "input2": {
+            "item": "minecraft:ghast_tear",
+            "count": 1
+        },
+        "output": {
+            "item": "puffish_skill_leveling:tome_of_cleansing",
+            "count": 1
+        },
+        "maxUses": 2,
+        "experience": 15,
+        "multiplier": 0.05,
+        "chance": 1.0
+    },
+    {
+        "tier": 3,
+        "input1": {
+            "item": "minecraft:emerald",
+            "count": 32
+        },
+        "input2": {
+            "item": "minecraft:ghast_tear",
+            "count": 1
+        },
+        "output": {
+            "item": "puffish_skill_leveling:tome_of_cleansing_2",
+            "count": 1
+        },
+        "maxUses": 3,
+        "experience": 20,
+        "multiplier": 0.05,
+        "chance": 1.0
+    },
+    {
+        "tier": 4,
+        "input1": {
+            "item": "minecraft:emerald",
+            "count": 48
+        },
+        "input2": {
+            "item": "minecraft:ghast_tear",
+            "count": 1
+        },
+        "output": {
+            "item": "puffish_skill_leveling:tome_of_cleansing_3",
+            "count": 1
+        },
+        "maxUses": 3,
+        "experience": 25,
+        "multiplier": 0.05,
+        "chance": 1.0
+    },
+    {
+        "tier": 4,
+        "input1": {
+            "item": "minecraft:emerald",
+            "count": 32
+        },
+        "input2": {
+            "item": "minecraft:book",
+            "count": 1
+        },
+        "output": {
+            "item": "puffish_skill_leveling:tome_of_greater_clear_mind",
+            "count": 1
+        },
+        "maxUses": 2,
+        "experience": 20,
+        "multiplier": 0.05,
+        "chance": 0.5
+    },
+    {
+        "tier": 5,
+        "input1": {
+            "item": "minecraft:emerald",
+            "count": 64
+        },
+        "input2": {
+            "item": "minecraft:gold_block",
+            "count": 1
+        },
+        "output": {
+            "item": "puffish_skill_leveling:tome_of_progression",
+            "count": 1
+        },
+        "maxUses": 3,
+        "experience": 50,
+        "multiplier": 0.05,
+        "chance": 1.0
+    },
+    {
+        "tier": 5,
+        "input1": {
+            "item": "minecraft:emerald",
+            "count": 32
+        },
+        "input2": {
+            "item": "minecraft:gold_block",
+            "count": 1
+        },
+        "output": {
+            "item": "puffish_skill_leveling:sigil_of_imbuement",
+            "count": 1
+        },
+        "maxUses": 3,
+        "experience": 50,
+        "multiplier": 0.05,
+        "chance": 0.5
+    }
+]

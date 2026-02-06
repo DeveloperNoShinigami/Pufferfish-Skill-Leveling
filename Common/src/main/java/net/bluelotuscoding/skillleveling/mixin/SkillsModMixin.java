@@ -72,10 +72,32 @@ public abstract class SkillsModMixin {
             if (categoryData instanceof CategoryDataExtension ext) {
                 int currentLevel = ext.addon$getSkillLevel(skillId);
 
+                // SUBSEQUENT LEVELING LOGIC (Level 1+)
+                // We only need to intervene if the skill is already unlocked (currentLevel > 0)
+                // OR if we need to block a specific loot_mode from being unlocked via the tree.
+
+                // 1. LOOT MODE BLOCKING: Block tree unlock for tome_only or imbue_only skills
+                var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+                if (leveledConfig == null) {
+                    var skillConfigOpt = categoryConfig.skills().getById(skillId);
+                    if (skillConfigOpt.isPresent()) {
+                        leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage
+                                .get(skillConfigOpt.get().definitionId());
+                    }
+                }
+
+                if (leveledConfig != null && !force && leveledConfig.lootMode != null) {
+                    if (leveledConfig.lootMode.equals("tome_only") || leveledConfig.lootMode.equals("imbue_only")) {
+                        ci.cancel();
+                        return;
+                    }
+                }
+
                 if (currentLevel > 0) {
                     // Already has levels - this is a subsequent unlock
                     // Check if we can add more levels
                     int maxLevel = ext.addon$getMaxLevelForSkill(skillId);
+                    // ... (keep existing subsequent unlock logic)
 
                     // Get max from PerLevelRewardsReward
                     var skillConfigOpt = categoryConfig.skills().getById(skillId);
@@ -93,6 +115,14 @@ public abstract class SkillsModMixin {
 
                     if (currentLevel >= maxLevel) {
                         ci.cancel(); // At max, can't unlock more
+                        return;
+                    }
+
+                    // Check level-specific prerequisites (required_skill_for_level)
+                    int targetLevel = currentLevel + 1;
+                    var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+                    if (!manager.checkLevelPrerequisites(player.getUuid(), categoryId, skillId, targetLevel, true)) {
+                        ci.cancel(); // Level prerequisites not met (message sent by manager)
                         return;
                     }
 

@@ -15,6 +15,7 @@ public class ClientDescriptionStorage {
     private static final Map<String, Boolean> mergeDescriptionFlags = new HashMap<>();
     private static final Map<String, Integer> maxLevels = new HashMap<>();
     private static final Map<String, String> lootModes = new HashMap<>();
+    private static final Map<String, java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite>> skillPrerequisites = new HashMap<>();
 
     /**
      * Store level descriptions for a skill definition.
@@ -24,7 +25,8 @@ public class ClientDescriptionStorage {
             Map<Integer, String> extraDescriptions,
             boolean mergeDescription,
             int maxLevel,
-            String lootMode) {
+            String lootMode,
+            java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prerequisites) {
         if (descriptions != null && !descriptions.isEmpty()) {
             levelDescriptions.put(definitionId, new HashMap<>(descriptions));
         }
@@ -34,6 +36,9 @@ public class ClientDescriptionStorage {
         mergeDescriptionFlags.put(definitionId, mergeDescription);
         maxLevels.put(definitionId, maxLevel);
         lootModes.put(definitionId, lootMode != null ? lootMode : "");
+        if (prerequisites != null && !prerequisites.isEmpty()) {
+            skillPrerequisites.put(definitionId, new java.util.ArrayList<>(prerequisites));
+        }
     }
 
     /**
@@ -130,6 +135,11 @@ public class ClientDescriptionStorage {
         return lootModes.getOrDefault(definitionId, "");
     }
 
+    public static java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> getPrerequisites(
+            String definitionId) {
+        return skillPrerequisites.get(definitionId);
+    }
+
     /**
      * Check if a skill is imbue-only.
      */
@@ -190,6 +200,7 @@ public class ClientDescriptionStorage {
         mergeDescriptionFlags.remove(definitionId);
         maxLevels.remove(definitionId);
         lootModes.remove(definitionId);
+        skillPrerequisites.remove(definitionId);
     }
 
     /**
@@ -201,6 +212,7 @@ public class ClientDescriptionStorage {
         mergeDescriptionFlags.clear();
         maxLevels.clear();
         lootModes.clear();
+        skillPrerequisites.clear();
     }
 
     public static java.util.Set<String> getAllKeys() {

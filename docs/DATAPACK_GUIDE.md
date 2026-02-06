@@ -100,14 +100,308 @@ Each skill in `definitions.json` must follow this structure:
 | `points_per_level` | integer | 1 | Skill points cost per level |
 | `category_id` | string | — | Category this skill belongs to |
 | `loot_mode` | string | — | `"tome_only"` or `"imbue_only"` |
+| `hidden` | boolean | false | If true, skill stays invisible until prerequisites are met |
 | `merge_description` | boolean | false | Accumulate descriptions across levels |
 | `descriptions` | object | — | Level-specific descriptions (keyed by level number) |
 | `extra_descriptions` | object | — | Preview text for next level (keyed by level number) |
-| `prerequisite_skills` | array | — | Skills required before this one can be unlocked |
+| `prerequisite_skills` | array | — | Skills required before this icon appears/unlocks (Top-level) |
 | `enchantment_levels` | integer/string | 0 | XP level cost for anvil combining. Supports expressions (e.g., `"level * 5"`) |
 | `imbuement_cost` | integer/string | — | XP level cost for manual imbuing. Supports expressions. |
-| `slot_opening_cost` | integer/string | 0 | XP level cost for opening a skill slot with a Sigil. Supports expressions (level is slot #). |
-| `cleansing_cost` | integer/string | 0 | XP level cost for extracting a skill with a Tome of Cleansing. Supports expressions (level is skill level). |
+| `slot_opening_cost` | integer/string | 0 | XP level cost for opening a skill slot with a Sigil. Supports expressions |
+| `cleansing_cost` | integer/string | 0 | XP level cost for extracting a skill. Supports expressions |
+
+---
+
+## Prerequisites & Visual Discovery
+
+The addon provides **two distinct prerequisite systems** for different use cases.
+
+### Quick Comparison
+
+| Feature | `prerequisite_skills` | `required_skill_for_level` |
+|---------|----------------------|---------------------------|
+| **Location** | Root of skill definition | Root of skill definition |
+| **Purpose** | Controls skill unlock/purchase | Gates specific levels |
+| **Cross-Category** | ✅ Use `category` field | ✅ Use `category` field |
+| **When Checked** | Before skill can be purchased | Before advancing to a level |
+| **Use Case** | Lock skills behind others | Advanced skill requires other skills for higher levels |
+
+---
+
+### 1. Prerequisites for Unlock (`prerequisite_skills`)
+
+These control when a skill icon becomes visible and purchasable in the skill tree.
+
+**Key Behaviors**:
+- Skill is **locked** (or hidden if `hidden: true`) until ALL prerequisites are met
+- Once purchased, the skill **stays purchased** even if prerequisites are later lost
+- Supports **cross-category** requirements via the `category` field
+
+#### Basic Example (Same Category)
+```json
+"advanced_mining": {
+    "title": "Advanced Mining",
+    "prerequisite_skills": [
+        { "skill": "basic_mining", "min_level": 3 }
+    ],
+    "max_skill_level": 5,
+    ...
+}
+```
+
+#### Cross-Category Example ⭐
+Require a skill from a completely different category:
+
+```json
+"reinforced_tools": {
+    "title": "Reinforced Tools",
+    "prerequisite_skills": [
+        { "skill": "basic_mining", "min_level": 2 },
+        { "skill": "smithing", "min_level": 3, "category": "crafting" }
+    ],
+    ...
+}
+```
+
+> [!NOTE]
+> **Category ID Format**: Use the **category ID** (folder name under `puffish_skills/categories/`). For example, if your category is at `data/mymod/puffish_skills/categories/crafting/`, use `"category": "crafting"`. No namespace prefix needed.
+
+#### Multiple Prerequisites (All Required)
+```json
+"master_warrior": {
+    "title": "Master Warrior",
+    "prerequisite_skills": [
+        { "skill": "sword_training", "min_level": 5 },
+        { "skill": "shield_proficiency", "min_level": 3 },
+        { "skill": "combat_tactics", "min_level": 2, "category": "strategy" }
+    ],
+    ...
+}
+```
+
+---
+
+### 2. Prerequisites for Specific Levels (`required_skill_for_level`)
+
+These gate **specific levels** of a skill behind other skill requirements. Use this when you want players to be able to start a skill but require additional prerequisites for higher levels.
+
+**Key Behaviors**:
+- Players can unlock and level the skill normally until they hit a gated level
+- The gate is checked when attempting to advance to that specific level
+- Supports **cross-category** requirements via the `category` field
+- Perfect for creating progression dependencies
+
+#### Example: Gate Higher Levels
+This skill can be leveled to 2 freely, but level 3 requires another skill:
+
+```json
+"advanced_swordsmanship": {
+    "title": "Advanced Swordsmanship",
+    "max_skill_level": 5,
+    "required_skill_for_level": {
+        "3": [
+            { "skill": "basic_training", "min_level": 3 }
+        ],
+        "5": [
+            { "skill": "weapon_mastery", "min_level": 2 },
+            { "skill": "endurance", "min_level": 3, "category": "survival" }
+        ]
+    },
+    ...
+}
+```
+
+**Behavior**:
+- Levels 1-2: Available normally
+- Level 3: Requires `basic_training` at level 3 (same category)
+- Level 4: No additional requirements
+- Level 5: Requires both `weapon_mastery` level 2 AND `endurance` level 3 from survival category
+
+#### Cross-Category Level Gating
+```json
+"elemental_mastery": {
+    "title": "Elemental Mastery",
+    "max_skill_level": 3,
+    "required_skill_for_level": {
+        "2": [
+            { "skill": "fire_affinity", "min_level": 2, "category": "magic" }
+        ],
+        "3": [
+            { "skill": "fire_affinity", "min_level": 5, "category": "magic" },
+            { "skill": "mana_pool", "min_level": 3, "category": "magic" }
+        ]
+    },
+    ...
+}
+```
+
+---
+
+### 3. Hidden Skills (`hidden`)
+
+Skills marked as `"hidden": true` are **completely invisible** in the skill tree until their **prerequisite_skills** are met.
+
+**What Gets Hidden**:
+- ✅ Skill icon
+- ✅ Skill connections (lines to/from)
+- ✅ Skill tooltip
+- ✅ Any indication the skill exists
+
+**When It Reveals**:
+- Automatically appears once ALL `prerequisite_skills` are satisfied
+- Creates a "discovery" moment for the player
+
+#### Example: Secret Skill
+```json
+"hidden_technique": {
+    "title": "???",
+    "hidden": true,
+    "prerequisite_skills": [
+        { "skill": "basic_training", "min_level": 5 },
+        { "skill": "advanced_training", "min_level": 3 }
+    ],
+    "descriptions": {
+        "0": "A secret technique revealed only to the dedicated.",
+        "1": "You have unlocked the hidden power!"
+    },
+    ...
+}
+```
+
+> [!TIP]
+> **Design Pattern**: Use hidden skills for prestige content, Easter eggs, or reward players who fully explore a branch of the tree.
+
+---
+
+### Combining Both Prerequisite Types
+
+For maximum control, use BOTH types together:
+
+```json
+"ultimate_power": {
+    "title": "Ultimate Power",
+    "hidden": true,
+    "max_skill_level": 5,
+    "prerequisite_skills": [
+        { "skill": "power_training", "min_level": 5 }
+    ],
+    "required_skill_for_level": {
+        "3": [
+            { "skill": "mana_well", "min_level": 2, "category": "magic" }
+        ],
+        "5": [
+            { "skill": "mana_well", "min_level": 5, "category": "magic" },
+            { "skill": "combat_mastery", "min_level": 3, "category": "combat" }
+        ]
+    },
+    ...
+}
+```
+
+**Behavior**:
+1. Skill is **invisible** until `power_training` reaches level 5 (prerequisite_skills)
+2. Once visible, player can **purchase** the skill and level to 2
+3. Level 3 requires `mana_well` level 2 from magic category
+4. Level 5 requires BOTH `mana_well` level 5 AND `combat_mastery` level 3
+
+---
+
+## Loot Mode System
+
+The `loot_mode` field controls **how a skill can be acquired and used**. This affects both skill tree interaction and Skill Master villager trades.
+
+### Available Modes
+
+| Mode | Skill Tree | Imbuing | Villager Trades | Use Case |
+|------|------------|---------|-----------------|----------|
+| `"both"` (default) | ✅ Can purchase | ✅ Can imbue | Shows in all trades | Standard skills |
+| `"tome_only"` | ✅ Can purchase | ❌ Cannot imbue | Tome trades only | Tree-exclusive skills |
+| `"imbue_only"` | ❌ Cannot purchase | ✅ Can imbue | Imbue trades only | Equipment-exclusive skills |
+
+### Example: Imbue-Only Skill (Equipment Exclusive)
+
+This skill can ONLY be acquired through imbuing onto equipment - it won't appear in the skill tree for purchase:
+
+```json
+"flame_enchant": {
+    "title": "Flame Enchantment",
+    "loot_mode": "imbue_only",
+    "max_skill_level": 3,
+    "points_per_level": 0,
+    "descriptions": {
+        "1": "Weapon deals +1 fire damage",
+        "2": "Weapon deals +2 fire damage",
+        "3": "Weapon deals +3 fire damage"
+    },
+    "rewards": [...]
+}
+```
+
+### Example: Tome-Only Skill (Tree Exclusive)
+
+This skill can be unlocked in the tree but cannot be imbued onto equipment:
+
+```json
+"passive_regen": {
+    "title": "Passive Regeneration",
+    "loot_mode": "tome_only",
+    "max_skill_level": 5,
+    "points_per_level": 2,
+    "descriptions": {
+        "1": "Slowly regenerate health",
+        "5": "Rapidly regenerate health"
+    },
+    "rewards": [...]
+}
+```
+
+> [!TIP]
+> **Villager Behavior**: The Skill Master villager respects loot modes. Imbue-only skills appear in Sigil/equipment trades, while tome-only skills appear in Skill Tome trades.
+
+---
+
+## Datapack Registry Extensions
+
+The addon looks for additional configuration files in these paths:
+
+### 1. Skill Master Reputation Config
+
+**Path**: `data/puffish_skill_leveling/skill_master_reputation/config.json`
+
+Controls Skill Master trading prices, experience gains, and upgrade logic.
+
+```json
+{
+    "experience_settings": {
+        "base_experience_per_trade": 5,
+        "bonus_for_both_mode_skills": 3,
+        "bonus_for_imbue_only_skills": 5,
+        "experience_multiplier_per_villager_tier": 2,
+        "experience_bonus_per_mastered_skill": 2,
+        "maximum_mastery_experience_bonus": 20
+    },
+    "static_experience_rewards": {
+        "sigil_proxy_trade": 5,
+        "tome_of_clear_mind": 10,
+        "tome_of_cleansing": 15,
+        "sigil_of_imbuement": 50,
+        "tome_of_cleansing_upgrade": 25
+    },
+    "dynamic_trade_settings": {
+        "special_upgrade_trade_base_chance": 0.1,
+        "special_upgrade_trade_max_chance": 0.25,
+        "tome_price_multiplier_at_level_1": 1.2,
+        "tome_price_multiplier_at_max_level": 0.5,
+        "tome_upgrade_price_multiplier": 0.6
+    }
+}
+```
+
+### 2. Custom Trades (`data/puffish_skill_leveling/trades/*.json`)
+Define non-tome trades for the Skill Master.
+
+### 3. Structural Loot (`data/puffish_skill_leveling/loot_tables/chests/skill_master_barrels.json`)
+Configure what players find in the Skill Master houses.
 
 ### Skill Types
 
@@ -155,7 +449,7 @@ You can require players to have other skills at specific levels before unlocking
 | `max_level` | integer | Maximum level allowed (optional) |
 
 > [!NOTE]
-> **Same-Category Only**: Prerequisites currently only work within the same category. Cross-category prerequisites are planned for a future release (see [Roadmap](./ROADMAP.md)).
+> **Cross-Category Support**: Per-level prerequisites (`required_skill`) fully support cross-category requirements. You can require levels in one category (e.g., `combat`) to activate rewards in another (e.g., `mining`). Note that Top-Level prerequisites (`prerequisite_skills`) remain restricted to the same category.
 
 ---
 

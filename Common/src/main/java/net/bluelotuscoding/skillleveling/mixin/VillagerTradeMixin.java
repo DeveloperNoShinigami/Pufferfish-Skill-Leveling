@@ -22,10 +22,10 @@ public abstract class VillagerTradeMixin {
     @Inject(method = "interactMob", at = @At("HEAD"))
     private void onInteractMob(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         SkillLevelingMod.getInstance().getLogger()
-                .info("Villager interaction triggered for: " + player.getName().getString());
+                .debug("Villager interaction triggered for: " + player.getName().getString());
         if ((Object) this instanceof VillagerEntity villager && !villager.getWorld().isClient) {
             String prof = Registries.VILLAGER_PROFESSION.getId(villager.getVillagerData().getProfession()).toString();
-            SkillLevelingMod.getInstance().getLogger().info("Interaction with villager prof: " + prof);
+            SkillLevelingMod.getInstance().getLogger().debug("Interaction with villager prof: " + prof);
 
             if (villager.getVillagerData().getProfession() == ModVillagers.SKILL_MASTER
                     && player instanceof ServerPlayerEntity serverPlayer) {
@@ -33,7 +33,7 @@ public abstract class VillagerTradeMixin {
                 int level = villager.getVillagerData().getLevel();
 
                 net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                        .info("Preparing dynamic trades for Skill Master (Level " + level + ") for player "
+                        .debug("Preparing dynamic trades for Skill Master (Level " + level + ") for player "
                                 + serverPlayer.getName().getString());
 
                 // Cast to Merchant to safely access getOffers()
@@ -44,7 +44,7 @@ public abstract class VillagerTradeMixin {
                 SkillMasterTradeProvider.fillTrades(villager, trades, level, serverPlayer);
 
                 net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                        .info("Prepared " + trades.size() + " trades.");
+                        .debug("Prepared " + trades.size() + " trades.");
             }
         }
     }

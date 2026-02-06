@@ -1,0 +1,141 @@
+{
+    "type": "minecraft:chest",
+    "pools": [
+        {
+            "rolls": 1,
+            "entries": [
+                {
+                    "type": "minecraft:item",
+                    "name": "puffish_skill_leveling:blank_tome",
+                    "weight": 20
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:emerald",
+                    "weight": 30,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 1,
+                                "max": 5
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "puffish_skill_leveling:tome_of_progression",
+                    "weight": 2
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "puffish_skill_leveling:sigil_of_imbuement",
+                    "weight": 5
+                }
+            ]
+        },
+        {
+            "rolls": {
+                "min": 2,
+                "max": 4
+            },
+            "entries": [
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:cooked_chicken",
+                    "weight": 15,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": 8
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:bread",
+                    "weight": 20,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 2,
+                                "max": 6
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:apple",
+                    "weight": 10
+                }
+            ]
+        },
+        {
+            "rolls": {
+                "min": 2,
+                "max": 5
+            },
+            "entries": [
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:coal",
+                    "weight": 20,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 3,
+                                "max": 9
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:wheat_seeds",
+                    "weight": 25,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 2,
+                                "max": 8
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:iron_ingot",
+                    "weight": 10,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 1,
+                                "max": 3
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "minecraft:item",
+                    "name": "minecraft:paper",
+                    "weight": 30,
+                    "functions": [
+                        {
+                            "function": "minecraft:set_count",
+                            "count": {
+                                "min": 2,
+                                "max": 5
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

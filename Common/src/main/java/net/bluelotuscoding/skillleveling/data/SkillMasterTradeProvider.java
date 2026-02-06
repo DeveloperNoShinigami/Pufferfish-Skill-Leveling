@@ -23,14 +23,16 @@ import java.util.stream.Collectors;
 public class SkillMasterTradeProvider {
 
     public static void fillTrades(VillagerEntity villager, TradeOfferList trades, int tier, ServerPlayerEntity player) {
-        SkillLevelingMod.getInstance().getLogger().info("Filling trades for Skill Master at tier " + tier);
+        SkillLevelingMod.getInstance().getLogger().debug("Filling trades for Skill Master at tier " + tier);
 
         // 1. Add custom trades from datapacks
         var loader = SkillLevelingMod.getInstance().getTradeLoader();
         List<SkillMasterTradeLoader.TradeTemplate> customTemplates = loader.getCustomTradesForTier(tier);
         if (customTemplates != null) {
             for (var template : customTemplates) {
-                trades.add(template.createOffer());
+                if (villager.getWorld().getRandom().nextFloat() < template.chance) {
+                    trades.add(template.createOffer());
+                }
             }
         }
 
@@ -40,11 +42,7 @@ public class SkillMasterTradeProvider {
         if (tier == 5)
             maxSlots = 12;
 
-        // 3. Add Utility Trades
-        addOverhauledUtilityTrades(trades, tier, player);
-        SkillLevelingMod.getInstance().getLogger().info("Added utility trades. Total count: " + trades.size());
-
-        // 4. Add Trade-In Offers
+        // 3. Add Trade-In Offers
         addTradeInOffers(trades, tier, player);
 
         // 5. Add Tome Upgrade Offers (Tier 3+)
@@ -76,7 +74,7 @@ public class SkillMasterTradeProvider {
         for (var entry : entries.entrySet()) {
             String skillId = entry.getKey();
             var config = entry.getValue();
-            if (config.categoryId == null)
+            if (config.categoryId == null || config.lootMode == null)
                 continue;
 
             Identifier catId = new Identifier(config.categoryId);
@@ -88,23 +86,31 @@ public class SkillMasterTradeProvider {
         }
 
         if (availableSkills.isEmpty()) {
-            addFeaturedStarterTomes(trades, tier);
             return;
         }
 
-        // Priority: Unlearned skills first
-        List<SkillInfo> priorityList = availableSkills.stream()
-                .filter(s -> s.currentLevel == 0)
+        // PRIORITY SELECTION
+        // 1. Unlearned skills (Level 0)
+        List<SkillInfo> unlearned = availableSkills.stream().filter(s -> s.currentLevel == 0)
                 .collect(Collectors.toList());
-        Collections.shuffle(priorityList);
-
-        List<SkillInfo> fallbackList = availableSkills.stream()
-                .filter(s -> s.currentLevel > 0)
+        // 2. Rare skills of types the player HAS learned but hasn't maxed
+        List<SkillInfo> progression = availableSkills.stream().filter(s -> s.currentLevel > 0)
                 .collect(Collectors.toList());
-        Collections.shuffle(fallbackList);
 
-        List<SkillInfo> selection = new ArrayList<>(priorityList);
-        selection.addAll(fallbackList);
+        Collections.shuffle(unlearned);
+        Collections.shuffle(progression);
+
+        List<SkillInfo> selection = new ArrayList<>();
+        // Mix: 70% chance for unlearned/missing skills, 30% for progression
+        for (int i = 0; i < slotsToFill * 2; i++) {
+            if (player.getRandom().nextFloat() < 0.7f && !unlearned.isEmpty()) {
+                selection.add(unlearned.remove(0));
+            } else if (!progression.isEmpty()) {
+                selection.add(progression.remove(0));
+            } else if (!unlearned.isEmpty()) {
+                selection.add(unlearned.remove(0));
+            }
+        }
 
         int added = 0;
         for (SkillInfo info : selection) {
@@ -113,10 +119,16 @@ public class SkillMasterTradeProvider {
 
             int maxLevel = entries.get(info.skillId).maxLevels;
 
-            // TIER-BASED LEVEL SCALING
-            // Mapping 1-5 Tiers to 1-maxLevel
-            int minLevelForTier = (int) Math.ceil(maxLevel * ((tier - 1) / 5.0)) + 1;
-            int maxLevelForTier = (int) Math.ceil(maxLevel * (tier / 5.0));
+            // NEW MATH-BASED TIER SPLITTING
+            // Divided into 5 segments based on maxLevel
+            int maxLevelForTier = (int) Math.round(maxLevel * (tier / 5.0));
+            int minLevelForTier = (int) Math.round(maxLevel * ((tier - 1) / 5.0)) + 1;
+
+            // Ensure min <= max and T5 always hits maxLevel
+            if (tier == 5)
+                maxLevelForTier = maxLevel;
+            maxLevelForTier = Math.max(1, Math.min(maxLevelForTier, maxLevel));
+            minLevelForTier = Math.max(1, Math.min(minLevelForTier, maxLevelForTier));
 
             // Difference-based availability: only offer if player is below this tier's
             // range
@@ -131,68 +143,67 @@ public class SkillMasterTradeProvider {
             }
 
             int levelToOffer = minPossible + player.getRandom().nextInt(maxLevelForTier - minPossible + 1);
+            levelToOffer = Math.min(levelToOffer, maxLevel);
 
-            // Price scales primarily with emeralds
-            int basePrice = 8 + (levelToOffer * 4);
-            int price = basePrice + player.getRandom().nextInt(tier + 1);
-            price = Math.min(price, 64);
+            // SPECIAL UPGRADE CHANCE (Emeralds + Tome -> Upgrade)
+            SkillMasterReputationLoader repLoader = SkillLevelingMod.getInstance().getReputationLoader();
+            float upgradeChance = repLoader.calculateUpgradeChance(getPlayerMasteryCount(player));
 
-            int masteryCount = getPlayerMasteryCount(player);
-            // Use reputationLoader for standard tome trades
-            int exp = SkillLevelingMod.getInstance().getReputationLoader().calculateStandardExp(tier,
-                    info.lootMode, masteryCount);
+            if (tier >= 3 && info.currentLevel > 0 && player.getRandom().nextFloat() < upgradeChance) {
+                // ADD UPGRADE TRADE
+                int emeralds = calculateTomePrice(player.getRandom(), levelToOffer, maxLevel);
+                // Discounted price for upgrade
+                emeralds = (int) Math.ceil(emeralds * repLoader.tomeUpgradePriceMultiplier);
+                emeralds = Math.max(1, Math.min(emeralds, 64));
 
-            ItemStack tome = SkillTomeItem.createSkillTome(ModItems.SKILL_TOME, info.catId.toString(), info.skillId,
-                    info.lootMode, levelToOffer);
-            trades.add(
-                    new TradeOffer(new ItemStack(Items.EMERALD, price), new ItemStack(Items.BOOK), tome, 1, exp,
-                            0.05f));
+                ItemStack inputTome = SkillTomeItem.createSkillTome(ModItems.SKILL_TOME, info.catId.toString(),
+                        info.skillId, info.lootMode, info.currentLevel);
+                ItemStack outputTome = SkillTomeItem.createSkillTome(ModItems.SKILL_TOME, info.catId.toString(),
+                        info.skillId, info.lootMode, levelToOffer);
+
+                trades.add(new TradeOffer(new ItemStack(Items.EMERALD, emeralds), inputTome, outputTome, 1, 15, 0.05f));
+            } else {
+                // ADD STANDARD PURCHASE TRADE
+                int price = calculateTomePrice(player.getRandom(), levelToOffer, maxLevel);
+                int exp = repLoader.calculateStandardExp(tier, info.lootMode, getPlayerMasteryCount(player));
+
+                ItemStack tome = SkillTomeItem.createSkillTome(ModItems.SKILL_TOME, info.catId.toString(), info.skillId,
+                        info.lootMode, levelToOffer);
+                trades.add(
+                        new TradeOffer(new ItemStack(Items.EMERALD, price), new ItemStack(Items.BOOK), tome, 1, exp,
+                                0.05f));
+            }
             added++;
         }
     }
 
-    private static void addOverhauledUtilityTrades(TradeOfferList trades, int tier, ServerPlayerEntity player) {
-        int masteryCount = getPlayerMasteryCount(player);
-        var repLoader = SkillLevelingMod.getInstance().getReputationLoader();
+    private static int calculateTomePrice(net.minecraft.util.math.random.Random random, int level, int maxLevels) {
+        SkillMasterReputationLoader repLoader = SkillLevelingMod.getInstance().getReputationLoader();
 
-        // Level 1: Proxy / Variety Trade
-        if (tier >= 1) {
-            // ONLY add if not already overridden by datapack
-            trades.add(createLevel1ProxyTrade(player, trades));
+        // Base rate: 3-10 emeralds per level
+        int baseRate = 3 + random.nextInt(8);
+
+        // Pre-discount cap: level * baseRate capped at 64
+        int baseCost = Math.min(level * baseRate, 64);
+
+        // Scaling factor: 1.2 (120%) at level 1, dropping to 0.5 (50%) at maxLevel
+        float progress = (float) (level - 1) / Math.max(1, maxLevels - 1);
+        float multiplier = repLoader.tomePriceMultiplierLevel1
+                + (progress * (repLoader.tomePriceMultiplierMaxLevel - repLoader.tomePriceMultiplierLevel1));
+
+        int price = (int) Math.ceil(baseCost * multiplier);
+
+        // Ensure minimum 3-10 for level 1 trades (with the 1.2x multiplier)
+        if (level == 1) {
+            price = Math.max(price, (int) Math.ceil(baseRate * repLoader.tomePriceMultiplierLevel1));
         }
 
-        if (tier >= 2) {
-            if (!isItemAlreadyOffered(trades, ModItems.TOME_OF_CLEAR_MIND)) {
-                trades.add(new TradeOffer(new ItemStack(Items.EMERALD, 16), new ItemStack(Items.BOOK),
-                        new ItemStack(ModItems.TOME_OF_CLEAR_MIND), 12,
-                        repLoader.applyMasteryToStatic(repLoader.tomeOfClearMindExp, masteryCount), 0.05f));
-            }
-            if (!isItemAlreadyOffered(trades, ModItems.TOME_OF_CLEANSING)) {
-                trades.add(new TradeOffer(new ItemStack(Items.EMERALD, 24), new ItemStack(Items.GHAST_TEAR),
-                        new ItemStack(ModItems.TOME_OF_CLEANSING), 5,
-                        repLoader.applyMasteryToStatic(repLoader.tomeOfCleansingExp, masteryCount), 0.05f));
-            }
-        }
-
-        if (tier >= 5) {
-            // Rare chance (25%) for a Sigil at higher tiers if not already present
-            if (!isItemAlreadyOffered(trades, ModItems.SIGIL_OF_IMBUEMENT) && player.getRandom().nextFloat() < 0.25f) {
-                int emeralds = 25 + player.getRandom().nextInt(6); // 25-30
-                trades.add(new TradeOffer(new ItemStack(Items.EMERALD, emeralds), new ItemStack(Items.GOLD_BLOCK),
-                        new ItemStack(ModItems.SIGIL_OF_IMBUEMENT), 2,
-                        repLoader.applyMasteryToStatic(repLoader.sigilOfImbuementExp, masteryCount), 0.05f));
-            }
-        }
+        return Math.max(1, Math.min(price, 64));
     }
 
     private static void addTradeInOffers(TradeOfferList trades, int tier, ServerPlayerEntity player) {
-        if (tier >= 3) {
-            int masteryCount = getPlayerMasteryCount(player);
-            var repLoader = SkillLevelingMod.getInstance().getReputationLoader();
-            trades.add(new TradeOffer(new ItemStack(ModItems.TOME_OF_CLEANSING), new ItemStack(Items.EMERALD, 16),
-                    new ItemStack(ModItems.TOME_OF_CLEANSING_2), 5,
-                    repLoader.applyMasteryToStatic(repLoader.tomeOfCleansingUpgradeExp, masteryCount), 0.05f));
-        }
+        // Keep any special trade-in logic here if not covered by JSON
+        // For example, trading lower-tier items for materials, etc.
     }
 
     private static void checkAndNotifyMastery(ServerPlayerEntity player) {
@@ -223,66 +234,13 @@ public class SkillMasterTradeProvider {
         return count;
     }
 
-    private static void addFeaturedStarterTomes(TradeOfferList trades, int tier) {
-        var entriesMap = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.getAllEntries();
-        int count = 0;
-        for (var entry : entriesMap.entrySet()) {
-            var config = entry.getValue();
-            if (config.lootMode != null && config.categoryId != null && !"imbue_only".equals(config.lootMode)) {
-                ItemStack tome = SkillTomeItem.createSkillTome(ModItems.SKILL_TOME, config.categoryId, entry.getKey(),
-                        config.lootMode, 1);
-                trades.add(
-                        new TradeOffer(new ItemStack(Items.EMERALD, 5), new ItemStack(Items.BOOK), tome, 12, 5, 0.05f));
-                count++;
-                if (count >= 3)
-                    break;
-            }
-        }
-    }
-
-    public static TradeOffer createLevel1ProxyTrade(ServerPlayerEntity player, TradeOfferList existingTrades) {
-        int masteryCount = (player != null) ? getPlayerMasteryCount(player) : 0;
-        var repLoader = SkillLevelingMod.getInstance().getReputationLoader();
-
-        // Use Minecraft's random if player is present, otherwise use Java's Random
-        java.util.Random random = new java.util.Random();
-        if (player != null) {
-            // Note: In 1.20.1, player.getRandom() returns a RandomSource
-            // For simplicity in this logic, we'll just use java.util.Random
-            // but seeded by player's random if needed, or just standard random.
-        }
-
-        // POOL OF DYNAMIC TRADES
-        List<java.util.function.Supplier<TradeOffer>> pool = new ArrayList<>();
-
-        // 1. Sigil of Imbuement (Only if not already offered)
-        if (!isItemAlreadyOffered(existingTrades, ModItems.SIGIL_OF_IMBUEMENT)) {
-            pool.add(() -> {
-                int emeralds = 16 + random.nextInt(7); // 16-22
-                int gold = 2 + random.nextInt(3); // 2-4 Gold Ingots
-                int uses = 3 + random.nextInt(3); // 3-5 uses
-                return new TradeOffer(new ItemStack(Items.EMERALD, emeralds), new ItemStack(Items.GOLD_INGOT, gold),
-                        new ItemStack(ModItems.SIGIL_OF_IMBUEMENT), uses,
-                        repLoader.applyMasteryToStatic(repLoader.sigilProxyExp, masteryCount), 0.05f);
-            });
-        }
-
-        // Pick one randomly
-        if (!pool.isEmpty()) {
-            return pool.get(random.nextInt(pool.size())).get();
-        }
-
-        // Final fallback: emeralds for book
-        return new TradeOffer(new ItemStack(Items.EMERALD, 16), ItemStack.EMPTY, new ItemStack(Items.BOOK), 12, 5,
-                0.05f);
-    }
-
     /**
      * Adds upgrade trades: Emeralds + Tome(Level L) -> Tome(Level L+1).
      */
     private static void addTomeUpgradeTrades(ServerPlayerEntity player, TradeOfferList trades, int tier) {
         Map<String, LeveledConfigStorage.LeveledConfig> entries = LeveledConfigStorage.getAllEntries();
         SkillLevelingManager manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+        SkillMasterReputationLoader repLoader = SkillLevelingMod.getInstance().getReputationLoader();
         int added = 0;
         int maxUpgrades = 3;
 
@@ -292,7 +250,7 @@ public class SkillMasterTradeProvider {
 
             String skillId = entry.getKey();
             var config = entry.getValue();
-            if (config.categoryId == null)
+            if (config.categoryId == null || config.lootMode == null)
                 continue;
 
             Identifier catId = new Identifier(config.categoryId);
@@ -300,28 +258,30 @@ public class SkillMasterTradeProvider {
 
             // If player has the skill at level L, offer Level L+1 tome upgrade
             if (currentLevel > 0 && currentLevel < config.maxLevels) {
-                int emeralds = 8 + (currentLevel * 8); // Scale with level
+                int levelToOffer = currentLevel + 1;
+                int price = calculateTomePrice(player.getRandom(), levelToOffer, config.maxLevels);
+                price = (int) Math.ceil(price * repLoader.tomeUpgradePriceMultiplier);
+                price = Math.max(1, Math.min(price, 64));
 
                 ItemStack inputTome = SkillTomeItem.createSkillTome(ModItems.SKILL_TOME, config.categoryId, skillId,
                         config.lootMode, currentLevel);
                 ItemStack outputTome = SkillTomeItem.createSkillTome(ModItems.SKILL_TOME, config.categoryId, skillId,
-                        config.lootMode, currentLevel + 1);
+                        config.lootMode, levelToOffer);
 
-                trades.add(new TradeOffer(new ItemStack(Items.EMERALD, emeralds), inputTome, outputTome, 1, 10, 0.05f));
+                trades.add(new TradeOffer(new ItemStack(Items.EMERALD, price), inputTome, outputTome, 1, 10, 0.05f));
                 added++;
             }
         }
     }
 
-    private static boolean isItemAlreadyOffered(TradeOfferList trades, net.minecraft.item.Item item) {
-        if (trades == null)
-            return false;
-        for (var offer : trades) {
-            if (offer.getSellItem().getItem() == item) {
-                return true;
-            }
-        }
-        return false;
+    /**
+     * Minimal proxy trade to satisfy Minecraft's profession registration
+     * requirements.
+     * Actual trades are generated dynamically on interaction.
+     */
+    public static TradeOffer createLevel1ProxyTrade(ServerPlayerEntity player, TradeOfferList existingTrades) {
+        return new TradeOffer(new ItemStack(Items.EMERALD, 5), new ItemStack(Items.BOOK),
+                new ItemStack(ModItems.BLANK_TOME), 12, 2, 0.05f);
     }
 
     private static class SkillInfo {

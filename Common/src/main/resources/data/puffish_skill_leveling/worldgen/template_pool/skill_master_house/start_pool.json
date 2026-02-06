@@ -1,0 +1,15 @@
+{
+    "name": "puffish_skill_leveling:skill_master_house/start_pool",
+    "fallback": "minecraft:empty",
+    "elements": [
+        {
+            "weight": 1,
+            "element": {
+                "element_type": "minecraft:single_pool_element",
+                "location": "puffish_skill_leveling:village/skill_master_house",
+                "projection": "rigid",
+                "processors": "minecraft:empty"
+            }
+        }
+    ]
+}

@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,6 +72,29 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         return addon$skillLevels.getOrDefault(skillId, 0);
     }
 
+    /**
+     * Get skill level from any category (supports cross-category prerequisites)
+     */
+    @Unique
+    private int addon$getSkillLevelCrossCategory(String categoryIdStr, String skillId) {
+        if (categoryIdStr == null || categoryIdStr.isEmpty()) {
+            return addon$getSkillLevel(skillId);
+        }
+
+        if (addon$owner == null) {
+            return 0;
+        }
+
+        try {
+            net.minecraft.util.Identifier targetCategoryId = new net.minecraft.util.Identifier(categoryIdStr);
+            return net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance()
+                    .getSkillLevelingManager()
+                    .getTotalSkillLevel(addon$owner, targetCategoryId, skillId);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     @Override
     public void addon$setSkillLevel(String skillId, int level) {
         if (level <= 0) {
@@ -86,8 +110,14 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
             unlockedSkills.add(skillId);
             if (addon$owner != null) {
                 // Also update persistent data manager
-                SkillLevelingMod.getInstance().getSkillLevelingManager().getDataManager()
-                        .setSkillLevel(addon$owner, addon$categoryId, skillId, level);
+                var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+                manager.getDataManager().setSkillLevel(addon$owner, addon$categoryId, skillId, level);
+
+                // IMMEDIATE CLIENT SYNC: Notify client of level change so UI updates (mastery,
+                // reveal, etc)
+                int totalLevel = manager.getTotalSkillLevel(addon$owner, addon$categoryId, skillId);
+                int maxLevel = manager.getMaxLevel(addon$categoryId, skillId);
+                manager.syncSkillLevelToClient(addon$owner, addon$categoryId, skillId, level, totalLevel, maxLevel);
             }
         }
     }
@@ -132,18 +162,37 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     @Inject(method = "unlockSkill", at = @At("HEAD"), cancellable = true)
     private void onUnlockSkill(String id, CallbackInfo ci) {
         int currentLevel = addon$getSkillLevel(id);
-        addon$incrementSkillLevel(id);
+        int newLevel = currentLevel + 1;
 
         if (currentLevel > 0) {
             // This is a subsequent level-up (1→2, 2→3, etc)
-            // Cancel to prevent base rewards from firing again
-            // The skill is already in unlockedSkills Set, so original code would do nothing
-            // anyway
+            addon$setSkillLevel(id, newLevel);
+
+            // We MUST manually trigger rewards for Level 2+ since Pufferfish only triggers
+            // awards when a skill is first added to the unlockedSet.
+            if (addon$owner != null && addon$categoryId != null) {
+                var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+                manager.getPerLevelRewardsReward(addon$categoryId, id).ifPresent(reward -> {
+                    reward.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(addon$owner, newLevel,
+                            true));
+                });
+            }
+
+            // Cancel to prevent Pufferfish from seeing this as a new unlock (it isn't)
             ci.cancel();
         }
-        // If currentLevel == 0, this is first unlock - let original code run to:
-        // 1. Add to unlockedSkills Set
-        // 2. (The reward triggering happens in SkillsMod.tryUnlockSkill, not here)
+        // If currentLevel == 0, this is first unlock - let original code run first
+        // so Pufferfish's own reward triggers and set-addition work correctly.
+    }
+
+    /**
+     * Set level to 1 after successful first unlock.
+     */
+    @Inject(method = "unlockSkill", at = @At("RETURN"))
+    private void onUnlockSkillReturn(String id, CallbackInfo ci) {
+        if (addon$getSkillLevel(id) == 0 && unlockedSkills.contains(id)) {
+            addon$setSkillLevel(id, 1);
+        }
     }
 
     /**
@@ -169,75 +218,136 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
 
     /**
      * Intercept canUnlockSkill to allow re-purchase of multi-level skills
-     * and enforce required_skills prerequisites.
-     * CRITICAL: The original method returns false if skill is already unlocked.
-     * We must override this to allow purchasing additional levels.
+     * and enforce prerequisites and loot_mode blocks.
      */
     @Inject(method = "canUnlockSkill", at = @At("HEAD"), cancellable = true)
     private void onCanUnlockSkill(CategoryConfig category, SkillConfig skill, boolean force,
             CallbackInfoReturnable<Boolean> cir) {
-        int currentLevel = addon$getSkillLevel(skill.id());
+        int level = addon$getSkillLevel(skill.id());
         int maxLevel = addon$getMaxLevelFromDefinition(category, skill);
 
-        // Check required_skills prerequisites for FIRST unlock (level 0 → 1)
-        if (currentLevel == 0 && !force) {
-            var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
-            if (leveledConfig != null) {
-                // Check loot_mode
-                if (!force && leveledConfig.lootMode != null && (leveledConfig.lootMode.equals("tome_only")
-                        || leveledConfig.lootMode.equals("imbue_only"))) {
-                    cir.setReturnValue(false);
-                    return;
-                }
+        // Ensure owner is resolved if possible
+        if (addon$owner == null) {
+            SkillLevelingMod.getInstance().getSkillLevelingManager().getServer().ifPresent(server -> {
+                for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                    try {
+                        var skillsMod = net.puffish.skillsmod.SkillsMod.getInstance();
+                        var getPlayerDataMethod = net.puffish.skillsmod.SkillsMod.class
+                                .getDeclaredMethod("getPlayerData", ServerPlayerEntity.class);
+                        getPlayerDataMethod.setAccessible(true);
+                        var data = getPlayerDataMethod.invoke(skillsMod, player);
 
-                if (!leveledConfig.requiredSkills.isEmpty()) {
-                    for (var reqSkill : leveledConfig.requiredSkills) {
-                        int reqLevel = addon$getSkillLevel(reqSkill.skillId);
-                        if (reqLevel < reqSkill.minLevel) {
-                            // Prerequisite not met
-                            var owner = addon$getOwner();
-                            if (owner != null) {
-                                owner.sendMessage(net.minecraft.text.Text.literal(
-                                        "§cRequires " + reqSkill.skillId + " at Level " + reqSkill.minLevel
-                                                + " first!"),
-                                        false);
+                        if (data != null) {
+                            var getOrCreateMethod = net.puffish.skillsmod.server.data.PlayerData.class
+                                    .getDeclaredMethod("getOrCreateCategoryData",
+                                            net.puffish.skillsmod.config.CategoryConfig.class);
+                            getOrCreateMethod.setAccessible(true);
+                            var catData = getOrCreateMethod.invoke(data, category);
+                            if (catData == (Object) this) {
+                                addon$setOwner(player);
+                                break;
                             }
-                            cir.setReturnValue(false);
-                            return;
                         }
+                    } catch (Exception ignored) {
                     }
                 }
-
-                // Affordability check for first level
-                if (addon$owner != null && !net.bluelotuscoding.skillleveling.points.SkillPointManager
-                        .canAffordLevel(addon$owner, category.id(), skill.id(), 1)) {
-                    cir.setReturnValue(false);
-                    return;
-                }
-            }
+            });
         }
+        var owner = addon$owner;
 
-        if (currentLevel > 0) {
-            // Skill already has levels
-            if (currentLevel >= maxLevel) {
-                // At max level - can't unlock more
+        var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
+        if (leveledConfig != null && !force) {
+            // 1. Check loot_mode
+            if (leveledConfig.lootMode != null && (leveledConfig.lootMode.equals("tome_only")
+                    || leveledConfig.lootMode.equals("imbue_only"))) {
+
+                if (owner != null) {
+                    owner.sendMessage(
+                            net.minecraft.text.Text.literal(
+                                    "§8[§6Skill Leveling§8] §cThis skill cannot be learned via the skill tree."),
+                            false);
+                    SkillLevelingMod.getInstance().getSkillLevelingManager().sendCloseScreenPacket(owner);
+                }
                 cir.setReturnValue(false);
                 return;
             }
 
-            // Not at max level - allow re-purchase
-            // Force means admin/command usage - always allow
-            // Otherwise, check if player has enough points
-            if (!force) {
-                if (addon$owner != null && !net.bluelotuscoding.skillleveling.points.SkillPointManager
-                        .canAffordLevel(addon$owner, category.id(), skill.id(), currentLevel + 1)) {
+            // 2. Check BASE prerequisites (for level 0 -> 1)
+            if (level == 0 && !leveledConfig.requiredSkills.isEmpty()) {
+                List<String> missingPrereqs = new java.util.ArrayList<>();
+                List<String> metPrereqs = new java.util.ArrayList<>();
+
+                for (var reqSkill : leveledConfig.requiredSkills) {
+                    String reqCategoryId = reqSkill.categoryId != null ? reqSkill.categoryId
+                            : addon$categoryId.toString();
+                    int reqLevel = addon$getSkillLevelCrossCategory(reqCategoryId, reqSkill.skillId);
+
+                    String categoryDisplay = reqSkill.categoryId != null ? " (" + reqCategoryId + ")" : "";
+                    String prereqDesc = reqSkill.skillId + categoryDisplay + " Lv" + reqSkill.minLevel;
+
+                    if (reqLevel < reqSkill.minLevel) {
+                        missingPrereqs.add("§c✗ " + prereqDesc + " §7[Current: " + reqLevel + "]");
+                    } else {
+                        metPrereqs.add("§a✓ " + prereqDesc);
+                    }
+                }
+
+                if (!missingPrereqs.isEmpty()) {
+                    if (owner != null && !force) {
+                        StringBuilder msg = new StringBuilder("§8[§6Skill Leveling§8] §cPrerequisites not met:\n");
+                        for (String missing : missingPrereqs) {
+                            msg.append("§7 - ").append(missing).append("\n");
+                        }
+                        if (!metPrereqs.isEmpty()) {
+                            msg.append("§7Met:\n");
+                            for (String met : metPrereqs) {
+                                msg.append("§8 - ").append(met).append("\n");
+                            }
+                        }
+                        owner.sendMessage(net.minecraft.text.Text.literal(msg.toString().trim()), false);
+                        SkillLevelingMod.getInstance().getSkillLevelingManager().sendCloseScreenPacket(owner);
+                    }
                     cir.setReturnValue(false);
                     return;
                 }
             }
-            cir.setReturnValue(true);
+
+            // 3. Check PER-LEVEL prerequisites (for progression)
+            if (level > 0 && leveledConfig.requiredSkillsForLevel != null && !force) {
+                int targetLevel = level + 1;
+                var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+                if (owner != null) {
+                    // Purchase attempt check: use notify=true
+                    if (!manager.checkLevelPrerequisites(owner.getUuid(), category.id(), skill.id(), targetLevel,
+                            true)) {
+                        cir.setReturnValue(false);
+                        return;
+                    }
+                } else {
+                    // State check or owner unknown: use notify=false to avoid spam
+                    if (!manager.checkLevelPrerequisites(null, category.id(), skill.id(), targetLevel, false)) {
+                        // Note: we can't really check by UUID if UUID is null, but manager handles it
+                    }
+                }
+            }
         }
-        // If level is 0, let original method handle first unlock
+
+        // 4. Check Affordability (Unified for all levels)
+        if (!force) {
+            if (owner != null && !net.bluelotuscoding.skillleveling.points.SkillPointManager
+                    .canAffordLevel(owner, category.id(), skill.id(), level + 1)) {
+                // Optional: send message if not affordable? (Original code just returns false)
+                cir.setReturnValue(false);
+                return;
+            }
+        }
+
+        if (level >= maxLevel) {
+            cir.setReturnValue(false);
+            return;
+        }
+
+        cir.setReturnValue(true);
     }
 
     /**
@@ -249,9 +359,16 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         int level = addon$getSkillLevel(skill.id());
         int maxLevel = addon$getMaxLevelFromDefinition(category, skill);
 
-        int bonus = (addon$owner != null) ? SkillLevelingMod.getInstance().getSkillLevelingManager()
-                .calculateEquipmentBonus(addon$owner, category.id(), skill.id()) : 0;
-        int totalLevel = level + bonus;
+        int totalLevel;
+        if (addon$owner != null) {
+            int bonus = SkillLevelingMod.getInstance().getSkillLevelingManager()
+                    .calculateEquipmentBonus(addon$owner, category.id(), skill.id());
+            totalLevel = level + bonus;
+        } else {
+            // Fallback for client if needed (though ClientCategoryDataMixin usually handles
+            // it)
+            totalLevel = level;
+        }
 
         // Mastery Check: ONLY show as UNLOCKED (Golden highlight) if at max level
         if (maxLevel > 0 && totalLevel >= maxLevel) {
@@ -261,12 +378,13 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
 
         // Progression Check: If we have progress but not at max level
         if (totalLevel > 0 || level > 0) {
-            // For loot-only skills (imbue_only, tome_only):
-            // Show as AVAILABLE (no golden highlight, no purchase border)
             var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
-            if (leveledConfig != null && (level > 0) && leveledConfig.lootMode != null
+
+            // For loot-only skills (imbue_only, tome_only):
+            // Show as UNLOCKED if they are Level 1+ but not maxed (no border, active icon)
+            if (leveledConfig != null && leveledConfig.lootMode != null
                     && (leveledConfig.lootMode.equals("tome_only") || leveledConfig.lootMode.equals("imbue_only"))) {
-                cir.setReturnValue(Skill.State.AVAILABLE);
+                cir.setReturnValue(Skill.State.UNLOCKED);
                 return;
             }
 
@@ -279,9 +397,8 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                     cir.setReturnValue(Skill.State.AVAILABLE);
                 }
             } else {
-                // Base at max, but gear might be limiting or just base maxed - No golden
-                // highlight
-                cir.setReturnValue(Skill.State.AVAILABLE);
+                // Base at max, but total isn't (penalty) -> show as active
+                cir.setReturnValue(Skill.State.UNLOCKED);
             }
             return;
         }
@@ -305,7 +422,6 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     /**
      * Intercept getSpentPoints to properly calculate points spent including
      * multi-level skills.
-     * Uses points_per_level from PerLevelRewardsReward config, not base cost.
      */
     @Inject(method = "getSpentPoints", at = @At("HEAD"), cancellable = true)
     private void onGetSpentPoints(CategoryConfig category,
@@ -319,28 +435,23 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                 if (skillOpt.isPresent()) {
                     var defOpt = category.definitions().getById(skillOpt.get().definitionId());
                     if (defOpt.isPresent()) {
-                        // Get points_per_level from PerLevelRewardsReward, fallback to base cost
-                        int pointsPerLevel = defOpt.get().cost(); // Default fallback
+                        int pointsPerLevel = defOpt.get().cost();
 
-                        // Look for PerLevelRewardsReward to get actual points_per_level
                         for (var reward : defOpt.get().rewards()) {
                             if (reward.instance() instanceof PerLevelRewardsReward plr) {
                                 if (plr.getSkillId() == null || plr.getSkillId().equals(skillId)) {
-                                    // CALCULATE TOTAL COST by summing effective cost for each level
                                     int skillCost = 0;
                                     for (int i = 1; i <= level; i++) {
                                         skillCost += plr.getEffectivePointsPerLevel(i);
                                     }
                                     total += skillCost;
+                                    pointsPerLevel = -1; // Flag found
                                     break;
                                 }
                             }
                         }
 
-                        // Fallback if no PLR found (shouldn't happen for our skills, but for vanilla
-                        // ones)
-                        if (category.definitions().getById(skillOpt.get().definitionId()).get().rewards().stream()
-                                .noneMatch(r -> r.instance() instanceof PerLevelRewardsReward)) {
+                        if (pointsPerLevel != -1) {
                             total += pointsPerLevel * level;
                         }
                     }
@@ -352,8 +463,6 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
 
     /**
      * Intercept writeNbt to ensure our custom levels are saved.
-     * Since we're using the base mod's Map now, it's mostly for extra safety
-     * or custom tags.
      */
     @Inject(method = "writeNbt", at = @At("RETURN"))
     private void onWriteNbt(NbtCompound nbt, CallbackInfoReturnable<NbtCompound> cir) {
@@ -366,23 +475,17 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
 
     /**
      * Intercept read (static factory) to load skill levels.
-     * Note: This requires a different approach since read is static.
-     * We'll use an @Inject at RETURN to populate our map after construction.
      */
     @Inject(method = "read", at = @At("RETURN"))
     private static void onRead(NbtCompound nbt, CallbackInfoReturnable<CategoryData> cir) {
         var categoryData = cir.getReturnValue();
         if (categoryData instanceof CategoryDataExtension ext) {
-            // Load addon skill levels if present
             if (nbt.contains("addon_skill_levels", NbtElement.COMPOUND_TYPE)) {
                 var levelsNbt = nbt.getCompound("addon_skill_levels");
                 for (var key : levelsNbt.getKeys()) {
                     ext.addon$setSkillLevel(key, levelsNbt.getInt(key));
                 }
             } else {
-                // Backward compatibility: check base unlocked skills
-                // The base mod's read already populates its unlockedSkills set/map
-                // We just need to ensure our addon map matches it for level 1
                 for (String skillId : categoryData.getUnlockedSkillIds()) {
                     if (ext.addon$getSkillLevel(skillId) == 0) {
                         ext.addon$setSkillLevel(skillId, 1);
@@ -392,8 +495,6 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         }
     }
 
-    // ===== Helper Methods =====
-
     @Unique
     private int addon$getMaxLevelFromDefinition(CategoryConfig category, SkillConfig skill) {
         var definitionOpt = category.definitions().getById(skill.definitionId());
@@ -402,11 +503,7 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         }
         var definition = definitionOpt.get();
 
-        // Default max level is 1 (single unlock like original mod)
-        // PerLevelRewardsReward can define higher max levels
         int maxLevel = 1;
-
-        // Check for PerLevelRewardsReward which defines max level
         for (var reward : definition.rewards()) {
             var inst = reward.instance();
             if (inst instanceof PerLevelRewardsReward plr) {
@@ -415,7 +512,6 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                 }
             }
         }
-
         return maxLevel;
     }
 }

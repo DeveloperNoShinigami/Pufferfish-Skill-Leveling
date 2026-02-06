@@ -2,6 +2,36 @@
 
 All notable changes to the **Pufferfish Skill Leveling** mod will be documented in this file.
  
+## [2026-02-06] - Reward Logic Refinement & UI Polish
+
+### Fixed
+- **Multi-Level Reward Triggering**: Fixed a critical bug where rewards for Level 2+ were not firing. Implemented manual trigger support in `CategoryDataMixin`.
+- **Reward Persistence**: Resolved a persistent issue where rewards (commands/effects) would re-trigger upon joining the server or reloading. Implemented state-based activation tracking in `PerLevelRewardsReward`.
+- **GUI Icon Cleanup**: Removed the "X/Y" level indicator text from skill icons to restore a clean, vanilla-like aesthetic as requested by the user.
+- **Hidden Skill Interaction**: Properly blocked mouse clicks on hidden and locked skills in the Skills screen, ensuring they are non-interactive until revealed.
+- **Prerequisite Accuracy**: Fixed Level 1 reward skipping by ensuring the leveling system initializes after Pufferfish's native unlock logic completes.
+
+## [2026-02-04] - Visual Discovery & System Consolidation
+
+### Added
+- **Hidden Skills Feature**: Skills can now be set as `"hidden": true`. They remain completely invisible (icons, connections, and tooltips) in the UI until their prerequisites are met.
+- **Enhanced Prerequisite System**: Added `required_skill` support for cross-category skill requirements and specialized loot-mode bypasses.
+- **Datapack-driven Villager Trades**: Replaced hardcoded villager trades with a flexible JSON system (`puffish_skill_leveling/trades/`).
+- **Skill Master Reputation Config**: Added `puffish_skill_leveling/reputation.json` to configure trading prices, experience gains, and upgrade chances.
+- **Village House Integration**: Added custom Jigsaw-based houses for Skill Master villagers in Plains, Desert, Savanna, Snowy, and Taiga villages.
+- **Skill Master Barrels**: New structural loot containers found in Skill Master houses with tiered progression rewards.
+
+### Changed
+- **Logging Policy**: Silenced excessive runtime logs. Info logs are now reserved for initialization/registration, while gameplay events use Debug level (disabled by default).
+- **Attribute Reward Stability**: Implemented deterministic UUID injection for `AttributeRewards` to ensure modifiers persist correctly through config reloads and server restarts.
+
+### Fixed
+- **Tome Progression XP**: Fixed a critical bug where Tomes of Progression would fail to detect current Pufferfish XP, correctly granting the exact amount needed for next level.
+- **Hidden Skill Persistence**: Fixed a bug in `ClientSkillLevelStorage` where the hidden flag was lost when a skill's level was reset to 0.
+- **Client Prerequisite Caching**: Improved efficiency of client-side prerequisite checks in the UI screen mixins.
+
+---
+
 ## [2026-02-01] - Skill Master & Registry Overhaul
 
 ### Added

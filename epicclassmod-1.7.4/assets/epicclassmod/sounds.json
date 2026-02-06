@@ -1,0 +1,10 @@
+{
+  "lobby_christmas": {
+    "sounds": [
+      {
+        "name": "epicclassmod:lobby_christmas",
+        "stream": true
+      }
+    ]
+  }
+}

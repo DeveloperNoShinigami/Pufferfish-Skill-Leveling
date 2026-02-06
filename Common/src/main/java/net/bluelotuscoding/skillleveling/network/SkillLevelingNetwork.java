@@ -300,7 +300,7 @@ public class SkillLevelingNetwork {
     public static void sendFullSkillSync(ServerPlayerEntity player) {
         // SYNC LOGGING: Track full synchronization events
         var logger = SkillLevelingMod.getInstance().getLogger();
-        logger.info("Performing full skill data sync for " + player.getName().getString());
+        logger.debug("Performing full skill data sync for " + player.getName().getString());
 
         // COMPLETE SYNC: Send all available skill data
         syncPlayerSkillData(player);

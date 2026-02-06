@@ -56,40 +56,51 @@ public class LeveledConfigStorage {
         public final int pointsPerLevel;
         public final boolean mergeDescription;
         public final List<RequiredSkillEntry> requiredSkills;
+        public final Map<Integer, List<RequiredSkillEntry>> requiredSkillsForLevel;
         public final String lootMode;
         public final String categoryId;
         public final EnchantmentCostConfig enchantmentCost;
         public final EnchantmentCostConfig imbuementCost;
         public final EnchantmentCostConfig slotOpeningCost;
         public final EnchantmentCostConfig cleansingCost;
+        public final boolean isLootable;
+        public final boolean hidden;
 
         public LeveledConfig(int maxLevels, int pointsPerLevel, boolean mergeDescription, String lootMode,
-                String categoryId) {
-            this(maxLevels, pointsPerLevel, mergeDescription, new ArrayList<>(), lootMode, categoryId,
+                String categoryId, boolean isLootable, boolean hidden) {
+            this(maxLevels, pointsPerLevel, mergeDescription, new ArrayList<>(), new HashMap<>(), lootMode, categoryId,
                     EnchantmentCostConfig.FREE, EnchantmentCostConfig.FREE, EnchantmentCostConfig.FREE,
-                    EnchantmentCostConfig.FREE);
+                    EnchantmentCostConfig.FREE, isLootable, hidden);
         }
 
         public LeveledConfig(int maxLevels, int pointsPerLevel, boolean mergeDescription, String lootMode,
-                String categoryId, EnchantmentCostConfig enchantmentCost, EnchantmentCostConfig imbuementCost) {
-            this(maxLevels, pointsPerLevel, mergeDescription, new ArrayList<>(), lootMode, categoryId, enchantmentCost,
-                    imbuementCost, EnchantmentCostConfig.FREE, EnchantmentCostConfig.FREE);
+                String categoryId, EnchantmentCostConfig enchantmentCost, EnchantmentCostConfig imbuementCost,
+                boolean isLootable, boolean hidden) {
+            this(maxLevels, pointsPerLevel, mergeDescription, new ArrayList<>(), new HashMap<>(), lootMode, categoryId,
+                    enchantmentCost,
+                    imbuementCost, EnchantmentCostConfig.FREE, EnchantmentCostConfig.FREE, isLootable,
+                    hidden);
         }
 
         public LeveledConfig(int maxLevels, int pointsPerLevel, boolean mergeDescription,
-                List<RequiredSkillEntry> requiredSkills, String lootMode, String categoryId,
+                List<RequiredSkillEntry> requiredSkills, Map<Integer, List<RequiredSkillEntry>> requiredSkillsForLevel,
+                String lootMode, String categoryId,
                 EnchantmentCostConfig enchantmentCost, EnchantmentCostConfig imbuementCost,
-                EnchantmentCostConfig slotOpeningCost, EnchantmentCostConfig cleansingCost) {
+                EnchantmentCostConfig slotOpeningCost, EnchantmentCostConfig cleansingCost, boolean isLootable,
+                boolean hidden) {
             this.maxLevels = maxLevels;
             this.pointsPerLevel = pointsPerLevel;
             this.mergeDescription = mergeDescription;
             this.requiredSkills = requiredSkills != null ? requiredSkills : new ArrayList<>();
+            this.requiredSkillsForLevel = requiredSkillsForLevel != null ? requiredSkillsForLevel : new HashMap<>();
             this.lootMode = lootMode;
             this.categoryId = categoryId;
             this.enchantmentCost = enchantmentCost != null ? enchantmentCost : EnchantmentCostConfig.FREE;
             this.imbuementCost = imbuementCost != null ? imbuementCost : this.enchantmentCost;
             this.slotOpeningCost = slotOpeningCost != null ? slotOpeningCost : EnchantmentCostConfig.FREE;
             this.cleansingCost = cleansingCost != null ? cleansingCost : EnchantmentCostConfig.FREE;
+            this.isLootable = isLootable;
+            this.hidden = hidden;
         }
     }
 
@@ -153,10 +164,16 @@ public class LeveledConfigStorage {
     public static class RequiredSkillEntry {
         public final String skillId;
         public final int minLevel;
+        public final String categoryId; // null means same category
 
         public RequiredSkillEntry(String skillId, int minLevel) {
+            this(skillId, minLevel, null);
+        }
+
+        public RequiredSkillEntry(String skillId, int minLevel, String categoryId) {
             this.skillId = skillId;
             this.minLevel = minLevel;
+            this.categoryId = categoryId;
         }
     }
 }

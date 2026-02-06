@@ -22,14 +22,27 @@ public class ForgeNetworkHandler implements NetworkHandler {
         CHANNEL.registerMessage(id++, SyncSkillLevelPacket.class, SyncSkillLevelPacket::encode,
                 SyncSkillLevelPacket::decode, (packet, contextSupplier) -> {
                     var context = contextSupplier.get();
-                    context.enqueueWork(packet::handleClient);
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(packet::handleClient);
+                    }
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
 
         CHANNEL.registerMessage(id++, SyncSkillDescriptionsPacket.class, SyncSkillDescriptionsPacket::encode,
                 SyncSkillDescriptionsPacket::decode, (packet, contextSupplier) -> {
                     var context = contextSupplier.get();
-                    context.enqueueWork(packet::handleClient);
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(packet::handleClient);
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, CloseSkillScreenPacket.class, CloseSkillScreenPacket::encode,
+                CloseSkillScreenPacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(packet::handleClient);
+                    }
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
 
@@ -52,7 +65,8 @@ public class ForgeNetworkHandler implements NetworkHandler {
     @Override
     public void sendToPlayer(SyncSkillLevelPacket packet, ServerPlayerEntity player) {
         try {
-            SkillLevelingMod.getInstance().getLogger().info("Sending SyncSkillLevelPacket to " + player.getName().getString());
+            SkillLevelingMod.getInstance().getLogger()
+                    .debug("Sending SyncSkillLevelPacket to " + player.getName().getString());
         } catch (Exception ignored) {
         }
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
@@ -61,11 +75,18 @@ public class ForgeNetworkHandler implements NetworkHandler {
     @Override
     public void sendToPlayer(SyncSkillDescriptionsPacket packet, ServerPlayerEntity player) {
         try {
-            SkillLevelingMod.getInstance().getLogger().info("Sending SyncSkillDescriptionsPacket to " + player.getName().getString()
-                    + " -> " + packet.getDefinitionId() + " (levels=" + packet.getLevelDescriptions().size() + ", extras="
-                    + packet.getLevelExtraDescriptions().size() + ")");
+            SkillLevelingMod.getInstance().getLogger()
+                    .debug("Sending SyncSkillDescriptionsPacket to " + player.getName().getString()
+                            + " -> " + packet.getDefinitionId() + " (levels=" + packet.getLevelDescriptions().size()
+                            + ", extras="
+                            + packet.getLevelExtraDescriptions().size() + ")");
         } catch (Exception ignored) {
         }
+        CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    @Override
+    public void sendToPlayer(CloseSkillScreenPacket packet, ServerPlayerEntity player) {
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 }

@@ -56,6 +56,13 @@ public class SkillLevelingManager {
         return dataManager;
     }
 
+    /**
+     * Set the server instance for prerequisite checking
+     */
+    public void setServer(MinecraftServer server) {
+        this.server = server;
+    }
+
     // ================================================
     // REAL-TIME CLIENT SYNCHRONIZATION
     // ================================================
@@ -107,9 +114,16 @@ public class SkillLevelingManager {
         try {
             var networkHandler = SkillLevelingMod.getInstance().getNetworkHandler();
             if (networkHandler != null) {
+                boolean hidden = false;
+                var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage
+                        .get(definitionId != null ? definitionId : skillId);
+                if (config != null) {
+                    hidden = config.hidden;
+                }
+
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillLevelPacket(categoryId, skillId,
-                                baseLevel, totalLevel, maxLevel, pointsPerLevel, definitionId),
+                                baseLevel, totalLevel, maxLevel, pointsPerLevel, definitionId, hidden),
                         player);
 
             } else {
@@ -147,20 +161,34 @@ public class SkillLevelingManager {
             if (networkHandler != null) {
                 try {
                     SkillLevelingMod.getInstance().getLogger()
-                            .info("[DEBUG] Preparing to send descriptions to " + player.getName().getString() + " -> "
+                            .debug("[DEBUG] Preparing to send descriptions to " + player.getName().getString() + " -> "
                                     + definitionId + " (levels=" + levelDescriptions.size() + ", extras="
                                     + levelExtraDescriptions.size() + ")");
                 } catch (Exception ignored) {
                 }
                 try {
-                    SkillLevelingMod.getInstance().getLogger().info("[ADDON] Sending SyncSkillDescriptionsPacket to "
+                    SkillLevelingMod.getInstance().getLogger().debug("[ADDON] Sending SyncSkillDescriptionsPacket to "
                             + player.getName().getString() + " -> " + definitionId);
                 } catch (Exception ignored) {
                 }
+                java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prereqsList = new java.util.ArrayList<>();
+                if (config != null && !config.requiredSkills.isEmpty()) {
+                    for (var req : config.requiredSkills) {
+                        prereqsList.add(
+                                new net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite(
+                                        req.skillId, req.minLevel, req.categoryId));
+                    }
+                }
+                // Also check rewards for advanced prerequisites
+                var reward = getPerLevelRewardsRewardByDefinitionId(definitionId);
+                if (reward.isPresent()) {
+                    prereqsList.addAll(reward.get().getRequiredSkills());
+                }
+
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillDescriptionsPacket(
                                 definitionId, levelDescriptions, levelExtraDescriptions, mergeDescription, maxLevel,
-                                lootMode),
+                                lootMode, prereqsList),
                         player);
             } else {
                 if (!networkHandlerNullWarned) {
@@ -190,7 +218,7 @@ public class SkillLevelingManager {
         int syncedSkills = 0;
         try {
             SkillLevelingMod.getInstance().getLogger()
-                    .info("[ADDON] Starting full skill sync for player " + player.getName().getString()
+                    .debug("[ADDON] Starting full skill sync for player " + player.getName().getString()
                             + " (registered skills="
                             + perLevelRewardsRewards.values().stream().mapToInt(m -> m.size()).sum() + ")");
         } catch (Exception ignored) {
@@ -248,7 +276,7 @@ public class SkillLevelingManager {
 
                     try {
                         SkillLevelingMod.getInstance().getLogger()
-                                .info("[ADDON] Preparing descriptions for " + categoryId + "/" + skillId + " -> def="
+                                .debug("[ADDON] Preparing descriptions for " + categoryId + "/" + skillId + " -> def="
                                         + definitionId + " (levels=" + levelDescsSafe.size() + ", extras="
                                         + extraDescsSafe.size() + ")");
                     } catch (Exception ignored) {
@@ -298,7 +326,7 @@ public class SkillLevelingManager {
 
         if (syncedSkills > 0) {
             SkillLevelingMod.getInstance().getLogger()
-                    .info("Synchronized " + syncedSkills + " skill levels and descriptions for player "
+                    .debug("Synchronized " + syncedSkills + " skill levels and descriptions for player "
                             + player.getName().getString());
         }
     }
@@ -430,6 +458,34 @@ public class SkillLevelingManager {
     }
 
     /**
+     * Get the PerLevelRewardsReward for a specific skill definition ID.
+     * Searches across all categories.
+     */
+    public Optional<PerLevelRewardsReward> getPerLevelRewardsRewardByDefinitionId(String definitionId) {
+        if (definitionId == null) {
+            return Optional.empty();
+        }
+
+        for (var entry : perLevelRewardsRewards.entrySet()) {
+            var reward = entry.getValue().get(definitionId);
+            if (reward != null) {
+                return Optional.of(reward);
+            }
+        }
+
+        // Try lazy load
+        ensureConfigurationsLoaded();
+        for (var entry : perLevelRewardsRewards.entrySet()) {
+            var reward = entry.getValue().get(definitionId);
+            if (reward != null) {
+                return Optional.of(reward);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
      * Robust category lookup with namespace fallback for configurations.
      */
     private Map<String, PerLevelRewardsReward> findCategoryRewards(Identifier categoryId) {
@@ -487,6 +543,19 @@ public class SkillLevelingManager {
     public int getTotalSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
         int bonusLevel = calculateEquipmentBonus(player, categoryId, skillId);
+
+        if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.requireUnlockForImbuing && baseLevel == 0
+                && bonusLevel > 0) {
+            // Check if skill is imbue_only
+            var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+            if (config != null && "imbue_only".equals(config.lootMode)) {
+                return bonusLevel;
+            }
+            // For all other skills (default, tome_only, both), return 0 if not unlocked in
+            // tree
+            return 0;
+        }
+
         return baseLevel + bonusLevel;
     }
 
@@ -532,14 +601,13 @@ public class SkillLevelingManager {
 
             for (var imbuedSkill : skills) {
                 if (imbuedSkill.skillId.equals(skillId)) {
-                    // Category matching with namespace flexibility
-                    Identifier targetCategoryId = categoryId;
+                    // Standardized category matching using Identifier logic.
+                    // We allow path-matching if the item category has no namespace (defaults to
+                    // minecraft).
                     Identifier itemCategoryId = Identifier.tryParse(imbuedSkill.categoryId);
-
-                    boolean categoryMatch = targetCategoryId.equals(itemCategoryId) ||
-                            (itemCategoryId != null && targetCategoryId.getPath().equals(itemCategoryId.getPath()) &&
-                                    (itemCategoryId.getNamespace().equals("minecraft")
-                                            || itemCategoryId.getNamespace().equals("puffish_skills")));
+                    boolean categoryMatch = itemCategoryId != null && (categoryId.equals(itemCategoryId) ||
+                            (itemCategoryId.getNamespace().equals("minecraft") &&
+                                    categoryId.getPath().equals(itemCategoryId.getPath())));
 
                     if (categoryMatch) {
                         bonus += imbuedSkill.level;
@@ -667,7 +735,7 @@ public class SkillLevelingManager {
             return;
         }
 
-        SkillLevelingMod.getInstance().getLogger().info("[CONFIG LOAD] Starting configuration discovery...");
+        SkillLevelingMod.getInstance().getLogger().info("[ADDON] [CONFIG LOAD] Starting configuration discovery...");
 
         try {
             var mod = net.puffish.skillsmod.SkillsMod.getInstance();
@@ -682,7 +750,8 @@ public class SkillLevelingManager {
             for (var category : net.puffish.skillsmod.api.SkillsAPI.streamCategories().toList()) {
                 try {
                     Identifier categoryId = category.getId();
-                    SkillLevelingMod.getInstance().getLogger().info("[CONFIG LOAD] Processing category: " + categoryId);
+                    SkillLevelingMod.getInstance().getLogger()
+                            .debug("[CONFIG LOAD] Processing category: " + categoryId);
                     categoryCount++;
 
                     var getCategoryMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("getCategory",
@@ -799,6 +868,9 @@ public class SkillLevelingManager {
         // Lazy-load configurations if not yet loaded
         ensureConfigurationsLoaded();
 
+        // NORMALIZE: Ensure IDs from NBT/Command match registered registry IDs
+        categoryId = normalizeCategoryId(categoryId);
+
         var category = SkillsAPI.getCategory(categoryId);
         if (category.isEmpty()) {
             SkillLevelingMod.getInstance().getLogger().warn("[TOME DEBUG] Category not found: " + categoryId);
@@ -822,7 +894,7 @@ public class SkillLevelingManager {
         int newBaseLevel = currentBaseLevel + 1;
         int maxLevel = getMaxLevel(categoryId, skillId);
 
-        SkillLevelingMod.getInstance().getLogger().info("[TOME DEBUG] Advancing " + skillId + ": currentBase="
+        SkillLevelingMod.getInstance().getLogger().debug("[TOME DEBUG] Advancing " + skillId + ": currentBase="
                 + currentBaseLevel + ", newBase=" + newBaseLevel + ", max=" + maxLevel + ", bypass="
                 + bypassPrerequisites);
 
@@ -833,7 +905,7 @@ public class SkillLevelingManager {
         }
 
         // Check if advancement is allowed (skip if bypassing prerequisites)
-        if (!bypassPrerequisites && !canAdvanceToLevel(player, categoryId, skillId, newBaseLevel)) {
+        if (!bypassPrerequisites && !canAdvanceToLevel(player, categoryId, skillId, newBaseLevel, false)) {
             SkillLevelingMod.getInstance().getLogger()
                     .warn("Cannot advance " + skillId + ": requirements not met and not bypassing");
             return false;
@@ -881,6 +953,17 @@ public class SkillLevelingManager {
      * Set a specific level for a skill for a player
      */
     public boolean setSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
+        return setSkillLevel(player, categoryId, skillId, level, false);
+    }
+
+    /**
+     * Set a specific level for a skill for a player with optional point bypass.
+     */
+    public boolean setSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level,
+            boolean bypassPoints) {
+        // NORMALIZE: Ensure IDs from NBT/Command match registered registry IDs
+        categoryId = normalizeCategoryId(categoryId);
+
         var category = SkillsAPI.getCategory(categoryId);
         if (category.isEmpty()) {
             SkillLevelingMod.getInstance().getLogger()
@@ -896,7 +979,7 @@ public class SkillLevelingManager {
         }
 
         int maxLevel = getMaxLevel(categoryId, skillId);
-        SkillLevelingMod.getInstance().getLogger().info("[setSkillLevel] Max level for " + skillId + ": " + maxLevel);
+        SkillLevelingMod.getInstance().getLogger().debug("[setSkillLevel] Max level for " + skillId + ": " + maxLevel);
 
         if (level < 0 || level > maxLevel) {
             SkillLevelingMod.getInstance().getLogger()
@@ -906,10 +989,10 @@ public class SkillLevelingManager {
 
         int currentBaseLevel = getBaseSkillLevel(player, categoryId, skillId);
         SkillLevelingMod.getInstance().getLogger()
-                .info("[setSkillLevel] Current base level: " + currentBaseLevel + ", target level: " + level);
+                .debug("[setSkillLevel] Current base level: " + currentBaseLevel + ", target level: " + level);
 
         // If we're setting a level higher than current, check requirements
-        if (level > currentBaseLevel && !canAdvanceToLevel(player, categoryId, skillId, level)) {
+        if (level > currentBaseLevel && !canAdvanceToLevel(player, categoryId, skillId, level, bypassPoints)) {
             SkillLevelingMod.getInstance().getLogger()
                     .warn("[setSkillLevel] FAILED: canAdvanceToLevel returned false for " + skillId);
             return false;
@@ -1016,8 +1099,12 @@ public class SkillLevelingManager {
     }
 
     private boolean canAdvanceToLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        // Check if player meets level requirements (using our custom prerequisite
-        // check)
+        return canAdvanceToLevel(player, categoryId, skillId, level, false);
+    }
+
+    private boolean canAdvanceToLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level,
+            boolean bypassPoints) {
+        // Check if player meets UNLOCK requirements (top-level prerequisite_skills)
         boolean prereqMet = checkSkillPrerequisites(player.getUuid(), categoryId, skillId);
         if (!prereqMet) {
             SkillLevelingMod.getInstance().getLogger()
@@ -1025,17 +1112,28 @@ public class SkillLevelingManager {
             return false;
         }
 
-        // Check if player can afford the point cost
-        boolean canAfford = net.bluelotuscoding.skillleveling.points.SkillPointManager.canAffordLevel(player,
-                categoryId, skillId, level);
-        if (!canAfford) {
+        // Check if player meets LEVEL requirements (required_skill_for_level)
+        boolean levelPrereqMet = checkLevelPrerequisites(player.getUuid(), categoryId, skillId, level, false);
+        if (!levelPrereqMet) {
             SkillLevelingMod.getInstance().getLogger()
-                    .warn("[canAdvanceToLevel] FAILED: Cannot afford level " + level + " for " + skillId);
+                    .warn("[canAdvanceToLevel] FAILED: Level prerequisites not met for " + skillId + " at level "
+                            + level);
             return false;
         }
 
+        // Check if player can afford the point cost
+        if (!bypassPoints) {
+            boolean canAfford = net.bluelotuscoding.skillleveling.points.SkillPointManager.canAffordLevel(player,
+                    categoryId, skillId, level);
+            if (!canAfford) {
+                SkillLevelingMod.getInstance().getLogger()
+                        .warn("[canAdvanceToLevel] FAILED: Cannot afford level " + level + " for " + skillId);
+                return false;
+            }
+        }
+
         SkillLevelingMod.getInstance().getLogger()
-                .info("[canAdvanceToLevel] SUCCESS: All checks passed for " + skillId + " at level " + level);
+                .debug("[canAdvanceToLevel] SUCCESS: All checks passed for " + skillId + " at level " + level);
         return true;
     }
 
@@ -1253,50 +1351,140 @@ public class SkillLevelingManager {
      * @return true if all prerequisites are met
      */
     public boolean checkSkillPrerequisites(UUID playerId, Identifier categoryId, String skillId) {
-        var reward = getPerLevelRewardsReward(categoryId, skillId);
-        if (reward.isEmpty()) {
-            return true; // No reward means no prerequisites
-        }
+        // Check prerequisites from LeveledConfigStorage (defined at skill root -
+        // prerequisite_skills)
+        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+        if (config != null && config.requiredSkills != null && !config.requiredSkills.isEmpty()) {
+            SkillLevelingMod.getInstance().getLogger().info(
+                    "[PREREQ_CHECK] Checking " + config.requiredSkills.size() + " prerequisites for skill: " + skillId);
 
-        var requiredSkills = reward.get().getRequiredSkills();
-        if (requiredSkills.isEmpty()) {
-            return true; // No prerequisites defined
-        }
+            for (var reqEntry : config.requiredSkills) {
+                // Determine category for prerequisite (supports cross-category via categoryId
+                // field)
+                Identifier reqCategoryId = categoryId; // Default to same category
+                if (reqEntry.categoryId != null && !reqEntry.categoryId.isEmpty()) {
+                    // Use the specified category ID - path only lookup
+                    SkillLevelingMod.getInstance().getLogger().info(
+                            "[PREREQ_CHECK] Cross-category prerequisite detected: " + reqEntry.categoryId);
+                    reqCategoryId = findCategoryByPath(reqEntry.categoryId);
+                    if (reqCategoryId == null) {
+                        SkillLevelingMod.getInstance().getLogger().warn(
+                                "[PREREQ_CHECK] Category not found for path: " + reqEntry.categoryId
+                                        + ", falling back to same category");
+                        reqCategoryId = categoryId; // Fallback to same category if not found
+                    } else {
+                        SkillLevelingMod.getInstance().getLogger().info(
+                                "[PREREQ_CHECK] Resolved category path '" + reqEntry.categoryId + "' to: "
+                                        + reqCategoryId);
+                    }
+                }
 
-        // Check each prerequisite
-        for (var prerequisite : requiredSkills) {
-            if (!checkSinglePrerequisite(playerId, categoryId, prerequisite)) {
-                SkillLevelingMod.getInstance().getLogger().debug("Prerequisite not met for " + skillId + ": "
-                        + prerequisite.getSkillId() + " level " + prerequisite.getLevel() + " required");
-                return false;
+                int currentLevel = getSkillLevelByUUID(playerId, reqCategoryId, reqEntry.skillId);
+                SkillLevelingMod.getInstance().getLogger().info(
+                        "[PREREQ_CHECK] Skill: " + reqEntry.skillId + " in category " + reqCategoryId +
+                                " - Required: " + reqEntry.minLevel + ", Current: " + currentLevel);
+
+                if (currentLevel < reqEntry.minLevel) {
+                    SkillLevelingMod.getInstance().getLogger().info(
+                            "[PREREQ_CHECK] FAILED: Skill " + skillId + " requires " + reqEntry.skillId +
+                                    " level " + reqEntry.minLevel + " (has " + currentLevel + ") in category "
+                                    + reqCategoryId);
+                    return false;
+                }
             }
         }
 
         return true;
     }
 
+    public void sendCloseScreenPacket(net.minecraft.server.network.ServerPlayerEntity player) {
+        var handler = SkillLevelingMod.getInstance().getNetworkHandler();
+        if (handler != null) {
+            handler.sendToPlayer(new net.bluelotuscoding.skillleveling.network.CloseSkillScreenPacket(), player);
+        }
+    }
+
     /**
-     * Check a single skill prerequisite
+     * Check level-specific prerequisites (required_skill_for_level)
+     * These gate specific levels of a skill behind other skill requirements.
      */
-    private boolean checkSinglePrerequisite(UUID playerId, Identifier defaultCategoryId,
-            PerLevelRewardsReward.SkillPrerequisite prerequisite) {
-        // Determine category (use specified category or default to current)
-        Identifier categoryId = defaultCategoryId;
-        if (prerequisite.getCategoryId() != null) {
-            categoryId = new Identifier(prerequisite.getCategoryId());
+    public boolean checkLevelPrerequisites(UUID playerId, Identifier categoryId, String skillId, int targetLevel,
+            boolean notify) {
+        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+        if (config == null || config.requiredSkillsForLevel == null || config.requiredSkillsForLevel.isEmpty()) {
+            return true; // No level-specific prerequisites
         }
 
-        // Get current skill level for the prerequisite skill
-        int currentLevel = getSkillLevelByUUID(playerId, categoryId, prerequisite.getSkillId());
+        // Check if there are prerequisites for this specific level
+        var prereqsForLevel = config.requiredSkillsForLevel.get(targetLevel);
+        if (prereqsForLevel == null || prereqsForLevel.isEmpty()) {
+            return true; // No prerequisites for this level
+        }
 
-        // Check if current level meets requirement
-        boolean met = currentLevel >= prerequisite.getLevel();
+        List<String> missingPrereqs = new ArrayList<>();
+        List<String> metPrereqs = new ArrayList<>();
 
-        SkillLevelingMod.getInstance().getLogger().debug("[PREREQ] Checking " + prerequisite.getSkillId() +
-                " (Cat: " + categoryId + "): current=" + currentLevel + ", required=" + prerequisite.getLevel()
-                + ", met=" + met);
+        for (var reqEntry : prereqsForLevel) {
+            // Determine category (supports cross-category via categoryId field)
+            Identifier reqCategoryId = categoryId;
+            if (reqEntry.categoryId != null && !reqEntry.categoryId.isEmpty()) {
+                reqCategoryId = findCategoryByPath(reqEntry.categoryId);
+                if (reqCategoryId == null) {
+                    reqCategoryId = categoryId;
+                }
+            }
 
-        return met;
+            int currentLevel = getSkillLevelByUUID(playerId, reqCategoryId, reqEntry.skillId);
+            String categoryDisplay = reqEntry.categoryId != null ? " (" + reqEntry.categoryId + ")" : "";
+            String prereqDesc = reqEntry.skillId + categoryDisplay + " Lv" + reqEntry.minLevel;
+
+            if (currentLevel < reqEntry.minLevel) {
+                missingPrereqs.add("§c✗ " + prereqDesc + " §7[Current: " + currentLevel + "]");
+
+                // Debug logging - ONLY log if notifying player
+                if (notify) {
+                    int base = 0;
+                    int bonus = 0;
+                    var player = server != null ? server.getPlayerManager().getPlayer(playerId) : null;
+                    if (player != null) {
+                        base = dataManager.getSkillLevel(player, reqCategoryId, reqEntry.skillId);
+                        bonus = calculateEquipmentBonus(player, reqCategoryId, reqEntry.skillId);
+                    }
+
+                    SkillLevelingMod.getInstance().getLogger().debug(
+                            "[LEVEL_PREREQ] Skill " + skillId + " level " + targetLevel +
+                                    " requires " + reqEntry.skillId + " level " + reqEntry.minLevel +
+                                    " (Found: " + currentLevel + " [Base: " + base + ", Bonus: " + bonus
+                                    + "]) in category "
+                                    + reqCategoryId);
+                }
+            } else {
+                metPrereqs.add("§a✓ " + prereqDesc);
+            }
+        }
+
+        if (!missingPrereqs.isEmpty()) {
+            if (notify && playerId != null && server != null) {
+                var player = server.getPlayerManager().getPlayer(playerId);
+                if (player != null) {
+                    StringBuilder msg = new StringBuilder("§8[§6Skill Leveling§8] §cLevel Prerequisites not met:\n");
+                    for (String missing : missingPrereqs) {
+                        msg.append("§7 - ").append(missing).append("\n");
+                    }
+                    if (!metPrereqs.isEmpty()) {
+                        msg.append("§Met:\n");
+                        for (String met : metPrereqs) {
+                            msg.append("§8 - ").append(met).append("\n");
+                        }
+                    }
+                    player.sendMessage(net.minecraft.text.Text.literal(msg.toString().trim()), false);
+                    sendCloseScreenPacket(player);
+                }
+            }
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -1401,7 +1589,7 @@ public class SkillLevelingManager {
             // Check if player is at max level (getRequired returns -1 or 0 when maxed)
             if (xpNeeded <= 0) {
                 SkillLevelingMod.getInstance().getLogger()
-                        .info("Tome of Progression: Player " + player.getName().getString()
+                        .debug("Tome of Progression: Player " + player.getName().getString()
                                 + " is already at max level for " + categoryId.getPath());
                 player.sendMessage(net.minecraft.text.Text.translatable(
                         "skillleveling.tome.max_level")
@@ -1410,7 +1598,7 @@ public class SkillLevelingManager {
             }
 
             // LOG XP FOR DEBUGGING
-            SkillLevelingMod.getInstance().getLogger().info(
+            SkillLevelingMod.getInstance().getLogger().debug(
                     "[TOME DEBUG] Before: Level=" + currentLevel
                             + ", TotalXP=" + totalXpNow
                             + ", XPNeededForNext=" + xpNeeded);
@@ -1427,7 +1615,7 @@ public class SkillLevelingManager {
             int newTotalXp = experience.getTotal(player);
             int expectedNextLevelXp = experience.getRequiredTotal(newLevel + 1);
 
-            SkillLevelingMod.getInstance().getLogger().info(
+            SkillLevelingMod.getInstance().getLogger().debug(
                     "[TOME DEBUG] After: Level=" + newLevel
                             + ", TotalXP=" + newTotalXp
                             + ", ExpectedLevel=" + (currentLevel + 1)
@@ -1461,7 +1649,7 @@ public class SkillLevelingManager {
         if (success) {
             syncCategoryPoints(player, categoryId);
             SkillLevelingMod.getInstance().getLogger()
-                    .info("Tome of Clear Mind: Player "
+                    .debug("Tome of Clear Mind: Player "
                             + player.getName().getString()
                             + " refunded 1 level of " + skillId + " (now level " + (currentLevel - 1) + ")");
         }
@@ -1507,7 +1695,7 @@ public class SkillLevelingManager {
         if (success) {
             syncCategoryPoints(player, categoryId, totalPointsToRefund);
             SkillLevelingMod.getInstance().getLogger()
-                    .info("Tome of Greater Clear Mind: Player "
+                    .debug("Tome of Greater Clear Mind: Player "
                             + player.getName().getString()
                             + " reset " + skillId + " from level " + currentLevel + " to 0");
         }
@@ -1587,6 +1775,31 @@ public class SkillLevelingManager {
                 .map(net.puffish.skillsmod.api.Category::getId)
                 .findFirst()
                 .orElse(categoryId);
+    }
+
+    /**
+     * Find a category by its path (without namespace) or full ID string.
+     */
+    public Identifier findCategoryByPath(String categoryPath) {
+        if (categoryPath == null || categoryPath.isEmpty()) {
+            return null;
+        }
+
+        // Support full ID as well
+        if (categoryPath.contains(":")) {
+            try {
+                Identifier id = new Identifier(categoryPath);
+                return normalizeCategoryId(id);
+            } catch (Exception e) {
+                // Not a valid identifier, fall through to path matching
+            }
+        }
+
+        return SkillsAPI.streamCategories()
+                .filter(cat -> cat.getId().getPath().equals(categoryPath))
+                .map(net.puffish.skillsmod.api.Category::getId)
+                .findFirst()
+                .orElse(null);
     }
 
     /**

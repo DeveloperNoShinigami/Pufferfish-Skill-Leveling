@@ -5,8 +5,10 @@ import net.puffish.skillsmod.client.config.skill.ClientSkillConfig;
 import net.puffish.skillsmod.client.config.ClientCategoryConfig;
 import net.puffish.skillsmod.api.Skill;
 import net.bluelotuscoding.skillleveling.client.ClientSkillLevelStorage;
+import net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -21,6 +23,9 @@ public abstract class ClientCategoryDataMixin {
 
     @Shadow
     private Map<String, Skill.State> skillStates;
+
+    @Unique
+    private final Map<String, Skill.State> addon$lastLoggedState = new java.util.HashMap<>();
 
     /**
      * Intercept getSpentPoints on the client to calculate correct spent points
@@ -83,48 +88,125 @@ public abstract class ClientCategoryDataMixin {
         String defId = skill.definitionId();
 
         // 1. Get current levels and max level using robust lookups
-        // SYNC FIX: Use totalLevel from storage instead of local calculation
         int baseLevel = ClientSkillLevelStorage.getBaseLevel(categoryId, skillId);
-        int totalLevel = ClientSkillLevelStorage.getLevel(categoryId, skillId); // This returns total
+        int bonus = ClientSkillLevelStorage.getEquipmentBonus(categoryId, skillId);
+        int totalLevel = baseLevel + bonus;
 
         // Use the same robust max level logic as tooltips
         int maxLevel = Math.max(
-                net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.getMaxLevel(defId),
+                ClientDescriptionStorage.getMaxLevel(defId),
                 ClientSkillLevelStorage.getMaxLevel(categoryId, skillId));
+
+        // State will be determined below, then we'll log if it changed
+        Skill.State determinedState = null;
+
+        // DYNAMIC PREREQUISITE CHECK: Skills deactivate and lock/hide when
+        // prerequisites are lost
+        if (defId != null) {
+            try {
+                boolean prereqsMet = addon$checkClientPrerequisites(categoryId, defId);
+                boolean hidden = ClientSkillLevelStorage.isHidden(categoryId, skillId);
+
+                // If prerequisites are NOT met, keep skill locked/hidden
+                if (!prereqsMet) {
+                    determinedState = Skill.State.LOCKED;
+                    addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
+                            "Prerequisites not met" + (hidden ? " (hidden)" : ""));
+                    cir.setReturnValue(determinedState);
+                    return;
+                }
+
+                // If prerequisites ARE met but skill is level 0 and was hidden,
+                // we MUST explicitly override the state to reveal it.
+                if (hidden && totalLevel == 0) {
+                    if (isAffordable(skill)) {
+                        determinedState = Skill.State.AFFORDABLE;
+                    } else {
+                        determinedState = Skill.State.AVAILABLE;
+                    }
+                    addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
+                            "Prerequisites met - REVEALING hidden skill");
+                    cir.setReturnValue(determinedState);
+                    return;
+                }
+            } catch (Exception e) {
+                // Ignore errors during early initialization
+            }
+        }
 
         // 2. Decide State
 
-        // Mastery Check: ONLY show as UNLOCKED (Golden highlight) if at max level
+        // Mastery Check: ONLY show as UNLOCKED (Golden) if TOTAL level reaches max
         if (maxLevel > 0 && totalLevel >= maxLevel) {
-            cir.setReturnValue(Skill.State.UNLOCKED);
+            determinedState = Skill.State.UNLOCKED;
+            addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
+                    "Mastered (total >= max)");
+            cir.setReturnValue(determinedState);
             return;
         }
 
-        // Progression Check: If we have progress but not at max level
-        if (totalLevel > 0 || baseLevel > 0) {
-            // For loot-only skills (imbue_only, tome_only):
-            // Show as AVAILABLE (colorized icon, no golden highlight, no purchase border)
-            // if they are already Level 1+ but not maxed.
-            if (net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.isImbueOnly(defId) ||
-                    net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.isTomeOnly(defId)) {
-                cir.setReturnValue(Skill.State.AVAILABLE);
+        // Progression Check: If we are below max level
+        if (totalLevel > 0 || baseLevel > 0 || !ClientSkillLevelStorage.isHidden(categoryId, skillId)) {
+            // If baseLevel < maxLevel, it might be buyable or just an active loot skill
+            if (baseLevel < maxLevel) {
+                // If it's a loot-only skill, it shouldn't look "buyable" (AFFORDABLE/AVAILABLE)
+                // in a way that suggests spending points if it's not possible.
+                // However, the user explicitly asked for the "affordable state" if not max.
+                if (isAffordable(skill)) {
+                    determinedState = Skill.State.AFFORDABLE;
+                } else {
+                    determinedState = Skill.State.AVAILABLE;
+                }
+                addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
+                        "In progress / Below max");
+                cir.setReturnValue(determinedState);
+                return;
+            } else {
+                // Base at max, but total might not be (penalty) - show UNLOCKED
+                determinedState = Skill.State.UNLOCKED;
+                addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
+                        "Base maxed");
+                cir.setReturnValue(determinedState);
                 return;
             }
+        }
+    }
 
-            // For normal skills:
-            // If not at max base level, show as buyable (BORDER)
-            if (baseLevel < maxLevel) {
-                if (isAffordable(skill)) {
-                    cir.setReturnValue(Skill.State.AFFORDABLE);
-                } else {
-                    cir.setReturnValue(Skill.State.AVAILABLE);
-                }
-            } else {
-                // Base level maxed (but Gear might be limiting it, or just base maxed)
-                // Show as colorized normal active
-                cir.setReturnValue(Skill.State.AVAILABLE);
+    @Unique
+    private void addon$logStateChangeIfNeeded(String skillId, Skill.State newState, int baseLevel, int bonus,
+            int totalLevel, int maxLevel, String reason) {
+        Skill.State lastState = addon$lastLoggedState.get(skillId);
+        if (lastState != newState) {
+            addon$lastLoggedState.put(skillId, newState);
+            net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger().debug(
+                    "[STATE_CHANGE] Skill: " + skillId + " | State: " + lastState + " -> " + newState
+                            + " | Base: " + baseLevel + " | Bonus: " + bonus + " | Total: " + totalLevel
+                            + " | Max: " + maxLevel + " | Reason: " + reason);
+        }
+    }
+
+    @Unique
+    private boolean addon$checkClientPrerequisites(String categoryId, String definitionId) {
+        var prereqs = ClientDescriptionStorage.getPrerequisites(definitionId);
+        if (prereqs == null || prereqs.isEmpty()) {
+            return true;
+        }
+
+        for (var req : prereqs) {
+            // Support cross-category prerequisites
+            String reqCategoryId = req.getCategoryId();
+            if (reqCategoryId == null || reqCategoryId.isEmpty()) {
+                reqCategoryId = categoryId; // Default to same category
+            }
+
+            // Use TOTAL level (base + equipment bonus) for prerequisite checking
+            int currentLevel = ClientSkillLevelStorage.getLevel(reqCategoryId, req.getSkillId());
+
+            if (currentLevel < req.getLevel()) {
+                return false;
             }
         }
+        return true;
     }
 
     @Shadow

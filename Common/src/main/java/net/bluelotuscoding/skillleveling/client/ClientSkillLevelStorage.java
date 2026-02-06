@@ -13,19 +13,60 @@ public class ClientSkillLevelStorage {
     private static final Map<String, Integer> totalSkillLevels = new ConcurrentHashMap<>();
     private static final Map<String, Integer> skillMaxLevels = new ConcurrentHashMap<>();
     private static final Map<String, Integer> skillPointsPerLevel = new ConcurrentHashMap<>();
+    private static final Map<String, Boolean> hiddenSkillFlags = new ConcurrentHashMap<>();
+
+    // Mapping from category path to the last seen full category ID (for shorthand
+    // resolution)
+    private static final Map<String, String> pathToFullCategory = new ConcurrentHashMap<>();
 
     // Mapping from definition ID to the key (for mixin lookups)
     private static final Map<String, String> definitionToKey = new ConcurrentHashMap<>();
 
     private static String getKey(String categoryId, String skillId) {
-        return categoryId + ":" + skillId;
+        if (categoryId == null || skillId == null) {
+            return "null:null";
+        }
+
+        // NORMALIZE CATEGORY ID: Use standard Identifier logic for normalization.
+        // We prefer the full namespaced ID if we've seen it before (dynamic
+        // resolution).
+        String resolvedCategory = categoryId;
+        if (!categoryId.contains(":")) {
+            // Shorthand ID: try to find a known full ID that matches this path
+            resolvedCategory = pathToFullCategory.getOrDefault(categoryId, categoryId);
+        } else {
+            try {
+                net.minecraft.util.Identifier id = net.minecraft.util.Identifier.tryParse(categoryId);
+                if (id != null && id.getNamespace().equals("minecraft")) {
+                    // "minecraft" namespace often means shorthand in NBT/config
+                    resolvedCategory = pathToFullCategory.getOrDefault(id.getPath(), categoryId);
+                }
+            } catch (Exception e) {
+                // Not a valid identifier, use as-is
+            }
+        }
+
+        return resolvedCategory + ":" + skillId;
     }
 
     public static void setLevel(String categoryId, String skillId, int baseLevel, int totalLevel, int maxLevel,
-            int pointsPerLevel) {
+            int pointsPerLevel, boolean hidden) {
+        // "Learn" the full category ID from current packet
+        if (categoryId != null && categoryId.contains(":")) {
+            try {
+                net.minecraft.util.Identifier id = net.minecraft.util.Identifier.tryParse(categoryId);
+                if (id != null) {
+                    pathToFullCategory.put(id.getPath(), categoryId);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
         String key = getKey(categoryId, skillId);
         if (baseLevel <= 0 && totalLevel <= 0) {
-            // Level 0 means skill is locked/reset - remove from cache
+            // Level 0 means skill is locked/reset - remove most info, but KEEP hidden
+            // status
+            // if we want to support hiding it until prerequisites are met.
             baseSkillLevels.remove(key);
             totalSkillLevels.remove(key);
             skillMaxLevels.remove(key);
@@ -36,6 +77,8 @@ public class ClientSkillLevelStorage {
             skillMaxLevels.put(key, maxLevel);
             skillPointsPerLevel.put(key, pointsPerLevel);
         }
+        // Always store hidden status if provided
+        hiddenSkillFlags.put(key, hidden);
     }
 
     /**
@@ -111,6 +154,10 @@ public class ClientSkillLevelStorage {
         return skillMaxLevels.getOrDefault(getKey(categoryId, skillId), 1);
     }
 
+    public static boolean isHidden(String categoryId, String skillId) {
+        return hiddenSkillFlags.getOrDefault(getKey(categoryId, skillId), false);
+    }
+
     public static boolean hasLevelInfo(String categoryId, String skillId) {
         return totalSkillLevels.containsKey(getKey(categoryId, skillId));
     }
@@ -133,15 +180,15 @@ public class ClientSkillLevelStorage {
         baseSkillLevels.keySet().removeIf(k -> k.startsWith(prefix));
         totalSkillLevels.keySet().removeIf(k -> k.startsWith(prefix));
         skillMaxLevels.keySet().removeIf(k -> k.startsWith(prefix));
+        hiddenSkillFlags.keySet().removeIf(k -> k.startsWith(prefix));
     }
 
     /**
      * Calculate equipment bonus on the client side.
      */
     public static int getEquipmentBonus(String categoryId, String skillId) {
-        var client = net.minecraft.client.MinecraftClient.getInstance();
-        var player = client.player;
-        if (player == null) {
+        Object playerObj = SideSafeClient.getPlayer();
+        if (!(playerObj instanceof net.minecraft.entity.player.PlayerEntity player)) {
             return 0;
         }
 
@@ -156,7 +203,23 @@ public class ClientSkillLevelStorage {
             var skills = net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper.getSkills(stack);
             if (!skills.isEmpty()) {
                 for (var skill : skills) {
-                    if (skill.categoryId.equals(categoryId) && skill.skillId.equals(skillId)) {
+                    // Path-aware matching for equipment: allows shorthand category in NBT
+                    // to match a full namespaced category in the tree.
+                    boolean skillMatch = skill.skillId.equals(skillId);
+                    boolean catMatch = skill.categoryId.equals(categoryId);
+
+                    if (!catMatch && !skill.categoryId.contains(":")) {
+                        // Try matching only paths if the item has no namespace
+                        try {
+                            net.minecraft.util.Identifier treeId = net.minecraft.util.Identifier.tryParse(categoryId);
+                            if (treeId != null && treeId.getPath().equals(skill.categoryId)) {
+                                catMatch = true;
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    if (skillMatch && catMatch) {
                         bonus += skill.level;
                     }
                 }
@@ -203,6 +266,7 @@ public class ClientSkillLevelStorage {
         totalSkillLevels.clear();
         skillMaxLevels.clear();
         skillPointsPerLevel.clear();
+        hiddenSkillFlags.clear();
         definitionToKey.clear();
     }
 }

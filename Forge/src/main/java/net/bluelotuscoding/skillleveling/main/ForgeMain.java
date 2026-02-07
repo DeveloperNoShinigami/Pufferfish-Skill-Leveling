@@ -125,8 +125,18 @@ public class ForgeMain {
                 ModItems.SIGIL_OF_IMBUEMENT = ForgeItemRegistry.SIGIL_OF_IMBUEMENT.get();
                 ModItems.BLANK_TOME = ForgeItemRegistry.BLANK_TOME.get();
                 ModItems.SKILL_SCRIBE_TABLE_ITEM = ForgeItemRegistry.SKILL_SCRIBE_TABLE_ITEM.get();
+                ModItems.SKILL_CHARM = ForgeItemRegistry.SKILL_CHARM.get();
 
                 ModBlocks.SKILL_SCRIBE_TABLE = ForgeBlockRegistry.SKILL_SCRIBE_TABLE.get();
                 ModVillagers.SKILL_MASTER = ForgeVillagerRegistry.SKILL_MASTER.get();
+
+                if (net.minecraftforge.fml.ModList.get().isLoaded("curios")) {
+                        SkillLevelingMod.getInstance().setEquipmentScanner(
+                                        new net.bluelotuscoding.skillleveling.forge.integration.CuriosScanner());
+                        MinecraftForge.EVENT_BUS.register(
+                                        new net.bluelotuscoding.skillleveling.forge.integration.CuriosIntegration());
+                        top.theillusivec4.curios.api.CuriosApi.registerCurio(ModItems.SKILL_CHARM,
+                                        new net.bluelotuscoding.skillleveling.forge.integration.CurioItemImpl());
+                }
         }
 }

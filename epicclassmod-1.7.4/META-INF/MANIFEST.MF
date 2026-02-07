@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Specification-Title: epicclassmod
-Specification-Vendor: Jaehoon
-Specification-Version: 1
-Implementation-Title: EpicFight Rise of Heroes 01.01
-Implementation-Version: 1.0.0
-Implementation-Vendor: Jaehoon
-Implementation-Timestamp: 2026-02-04T13:54:17+0900
-

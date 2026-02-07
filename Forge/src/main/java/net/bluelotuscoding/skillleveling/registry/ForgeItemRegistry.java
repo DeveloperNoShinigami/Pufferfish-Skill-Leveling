@@ -2,6 +2,7 @@ package net.bluelotuscoding.skillleveling.registry;
 
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.item.SigilOfImbuementItem;
+import net.bluelotuscoding.skillleveling.item.SkillCharmItem;
 import net.bluelotuscoding.skillleveling.item.SkillTomeItem;
 import net.bluelotuscoding.skillleveling.item.TomeItem;
 import net.bluelotuscoding.skillleveling.item.TomeOfCleansingItem;
@@ -36,6 +37,8 @@ public class ForgeItemRegistry {
                         .register("tome_of_cleansing_3", ModItems::createTomeOfCleansing3);
         public static final RegistryObject<Item> BLANK_TOME = ITEMS
                         .register("blank_tome", ModItems::createBlankTome);
+        public static final RegistryObject<SkillCharmItem> SKILL_CHARM = ITEMS
+                        .register("skill_charm", ModItems::createSkillCharm);
 
         // Block Items
         public static final RegistryObject<Item> SKILL_SCRIBE_TABLE_ITEM = ITEMS.register("skill_scribe_table",

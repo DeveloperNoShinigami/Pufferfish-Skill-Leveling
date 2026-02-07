@@ -50,6 +50,8 @@ public class SkillLevelingMod {
     private final net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader tradeLoader;
     private final net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader reputationLoader;
     private net.bluelotuscoding.skillleveling.network.NetworkHandler networkHandler;
+    private net.bluelotuscoding.skillleveling.integration.EquipmentScanner equipmentScanner = entity -> java.util.Collections
+            .emptyList();
 
     private SkillLevelingMod() {
         // INITIALIZE ADDON SYSTEMS: Set up our independent infrastructure
@@ -134,6 +136,14 @@ public class SkillLevelingMod {
 
     public net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader getReputationLoader() {
         return reputationLoader;
+    }
+
+    public void setEquipmentScanner(net.bluelotuscoding.skillleveling.integration.EquipmentScanner equipmentScanner) {
+        this.equipmentScanner = equipmentScanner;
+    }
+
+    public net.bluelotuscoding.skillleveling.integration.EquipmentScanner getEquipmentScanner() {
+        return equipmentScanner;
     }
 
     public static Identifier createIdentifier(String path) {

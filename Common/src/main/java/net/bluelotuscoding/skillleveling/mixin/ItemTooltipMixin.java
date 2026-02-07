@@ -45,7 +45,7 @@ public abstract class ItemTooltipMixin {
         // Show slot info if slots exist
         if (slots > 0) {
             int usedSlots = skills.size();
-            tooltip.add(Text.literal("◈ Skill Slots: ")
+            tooltip.add(Text.literal("◈ Equipment Slots: ")
                     .formatted(Formatting.DARK_PURPLE)
                     .append(Text.literal(usedSlots + "/" + slots)
                             .formatted(usedSlots >= slots ? Formatting.RED : Formatting.GREEN)));
@@ -54,7 +54,7 @@ public abstract class ItemTooltipMixin {
         // Show each imbued skill
         for (ImbuedSkillHelper.ImbuedSkill skill : skills) {
             String displayName = convertToTitleCase(skill.skillId);
-            tooltip.add(Text.literal("  ◆ " + displayName + " ")
+            tooltip.add(Text.literal("  ✦ " + displayName + " ")
                     .formatted(Formatting.GOLD)
                     .append(Text.literal("+" + skill.level)
                             .formatted(Formatting.AQUA)));

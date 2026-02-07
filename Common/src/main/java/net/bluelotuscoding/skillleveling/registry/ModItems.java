@@ -4,6 +4,7 @@ import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.item.SigilOfImbuementItem;
 import net.bluelotuscoding.skillleveling.item.SkillTomeItem;
 import net.bluelotuscoding.skillleveling.item.TomeItem;
+import net.bluelotuscoding.skillleveling.item.SkillCharmItem;
 import net.bluelotuscoding.skillleveling.item.TomeOfCleansingItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -29,6 +30,7 @@ public class ModItems {
         public static final Identifier TOME_OF_CLEANSING_3_ID = SkillLevelingMod
                         .createIdentifier("tome_of_cleansing_3");
         public static final Identifier BLANK_TOME_ID = SkillLevelingMod.createIdentifier("blank_tome");
+        public static final Identifier SKILL_CHARM_ID = SkillLevelingMod.createIdentifier("skill_charm");
 
         // Item instances - these will be populated during platform registration
         public static TomeItem TOME_OF_PROGRESSION;
@@ -41,6 +43,7 @@ public class ModItems {
         public static TomeOfCleansingItem TOME_OF_CLEANSING_3;
         public static Item BLANK_TOME;
         public static Item SKILL_SCRIBE_TABLE_ITEM;
+        public static SkillCharmItem SKILL_CHARM;
 
         /**
          * Create the Tome of Progression item.
@@ -136,6 +139,13 @@ public class ModItems {
         }
 
         /**
+         * Create the Skill Charm item.
+         */
+        public static SkillCharmItem createSkillCharm() {
+                return new SkillCharmItem(new Item.Settings().maxCount(1).rarity(Rarity.EPIC));
+        }
+
+        /**
          * Populates the Base Tomes creative tab.
          */
         public static void fillBaseTomesTab(Consumer<ItemStack> entries) {
@@ -166,6 +176,11 @@ public class ModItems {
                 if (SKILL_SCRIBE_TABLE_ITEM != null) {
                         entries.accept(new ItemStack(SKILL_SCRIBE_TABLE_ITEM));
                 }
+                if (SKILL_CHARM != null) {
+                        ItemStack blankCharm = new ItemStack(SKILL_CHARM);
+                        net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper.setSlotCount(blankCharm, 1);
+                        entries.accept(blankCharm);
+                }
         }
 
         /**
@@ -184,6 +199,23 @@ public class ModItems {
                                                 entries.accept(SkillTomeItem.createSkillTome(SKILL_TOME,
                                                                 config.categoryId,
                                                                 skillId, config.lootMode, level));
+                                        }
+                                }
+                        }
+                }
+                if (SKILL_CHARM != null) {
+                        // Add blank charm
+                        ItemStack blankCharm = new ItemStack(SKILL_CHARM);
+                        net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper.setSlotCount(blankCharm, 1);
+                        entries.accept(blankCharm);
+
+                        for (var entry : entriesMap.entrySet()) {
+                                String skillId = entry.getKey();
+                                var config = entry.getValue();
+                                if (config.lootMode != null && config.categoryId != null) {
+                                        for (int level = 1; level <= config.maxLevels; level++) {
+                                                entries.accept(SkillCharmItem.createSkillCharm(SKILL_CHARM,
+                                                                config.categoryId, skillId, level));
                                         }
                                 }
                         }

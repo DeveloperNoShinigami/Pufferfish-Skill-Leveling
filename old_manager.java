@@ -7,7 +7,6 @@ import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.Skill;
 import net.bluelotuscoding.skillleveling.data.SkillLevelingDataManager;
 import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
-import net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper;
 
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.minecraft.item.ItemStack;
@@ -391,7 +390,13 @@ public class SkillLevelingManager {
         // the player's current level BEFORE refreshing. This prevents commands from
         // re-triggering on world rejoin (oldCount will match newCount during refresh).
         for (var entry : perLevelRewardsRewards.entrySet()) {
-            initializeRewardsForCategory(player, entry.getKey());
+            Identifier categoryId = entry.getKey();
+            for (var skillEntry : entry.getValue().entrySet()) {
+                String skillId = skillEntry.getKey();
+                PerLevelRewardsReward plr = skillEntry.getValue();
+                int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
+                plr.initializeCount(player.getUuid(), totalLevel);
+            }
         }
 
         // REFRESH REWARDS: Ensure imbued bonuses apply their attribute modifiers etc.
@@ -420,20 +425,6 @@ public class SkillLevelingManager {
 
     public void initializeSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         dataManager.setSkillLevel(player, categoryId, skillId, 1);
-    }
-
-    /**
-     * Initialize counts for all per-level rewards in a specific category.
-     * This is called during NBT loading to ensure we are ready for refreshes.
-     */
-    public void initializeRewardsForCategory(ServerPlayerEntity player, Identifier categoryId) {
-        var rewards = perLevelRewardsRewards.get(categoryId);
-        if (rewards != null) {
-            for (var entry : rewards.entrySet()) {
-                int totalLevel = getTotalSkillLevel(player, categoryId, entry.getKey());
-                entry.getValue().initializeCount(player.getUuid(), totalLevel);
-            }
-        }
     }
 
     public void clearSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
@@ -551,35 +542,21 @@ public class SkillLevelingManager {
      */
     public int getTotalSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
+        int bonusLevel = calculateEquipmentBonus(player, categoryId, skillId);
 
-        int gearBonus = calculateGearBonus(player, categoryId, skillId);
-        int curioBonus = calculateCurioBonus(player, categoryId, skillId);
-
-        // Gating for regular Equipment (Gear)
         if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.requireUnlockForImbuing && baseLevel == 0
-                && gearBonus > 0) {
+                && bonusLevel > 0) {
             // Check if skill is imbue_only
             var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
-            if (config == null || !"imbue_only".equals(config.lootMode)) {
-                SkillLevelingMod.getInstance().getLogger()
-                        .debug("[SkillLeveling] Gear bonus skipped for " + skillId
-                                + ": base level 0 and unlock required");
-                gearBonus = 0;
+            if (config != null && "imbue_only".equals(config.lootMode)) {
+                return bonusLevel;
             }
+            // For all other skills (default, tome_only, both), return 0 if not unlocked in
+            // tree
+            return 0;
         }
 
-        // Gating for Curios
-        if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.requireUnlockForCurioImbuing && baseLevel == 0
-                && curioBonus > 0) {
-            SkillLevelingMod.getInstance().getLogger().debug(
-                    "[SkillLeveling] Curio bonus skipped for " + skillId + ": base level 0 and curio unlock required");
-            curioBonus = 0;
-        }
-
-        int bonusLevel = gearBonus + curioBonus;
-        int total = baseLevel + bonusLevel;
-
-        return total;
+        return baseLevel + bonusLevel;
     }
 
     /**
@@ -605,70 +582,40 @@ public class SkillLevelingManager {
     }
 
     /**
-     * Calculate additional skill levels granted by all equipped items.
+     * Calculate additional skill levels granted by equipped items.
+     * Scans main hand, off hand, and armor slots.
      */
     public int calculateEquipmentBonus(ServerPlayerEntity player, Identifier categoryId, String skillId) {
-        return calculateGearBonus(player, categoryId, skillId) + calculateCurioBonus(player, categoryId, skillId);
-    }
-
-    /**
-     * Calculate bonuses specifically from regular inventory/armor slots.
-     */
-    public int calculateGearBonus(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         int bonus = 0;
-        List<ItemStack> stacks = new ArrayList<>();
 
-        // Strictly EQUIPPED items only
-        player.getInventory().armor.forEach(stacks::add);
-        player.getInventory().offHand.forEach(stacks::add);
-        stacks.add(player.getMainHandStack());
-
-        for (ItemStack stack : stacks) {
-            int itemBonus = getBonusFromItem(stack, categoryId, skillId, "Gear");
-            if (itemBonus > 0) {
-                bonus += itemBonus;
+        // Scan all equipment slots
+        for (var slot : net.minecraft.entity.EquipmentSlot.values()) {
+            ItemStack stack = player.getEquippedStack(slot);
+            if (stack.isEmpty()) {
+                continue;
             }
-        }
-        return bonus;
-    }
 
-    /**
-     * Calculate bonuses specifically from Curio/Extra slots.
-     */
-    public int calculateCurioBonus(ServerPlayerEntity player, Identifier categoryId, String skillId) {
-        int bonus = 0;
-        var scanner = SkillLevelingMod.getInstance().getEquipmentScanner();
-        if (scanner != null) {
-            List<ItemStack> extra = scanner.getExtraEquipment(player);
-            if (extra != null && !extra.isEmpty()) {
-                for (ItemStack stack : extra) {
-                    bonus += getBonusFromItem(stack, categoryId, skillId, "Curio");
+            // Use ImbuedSkillHelper to get all skills on the item (multi-skill support)
+            List<net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper.ImbuedSkill> skills = net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper
+                    .getSkills(stack);
+
+            for (var imbuedSkill : skills) {
+                if (imbuedSkill.skillId.equals(skillId)) {
+                    // Standardized category matching using Identifier logic.
+                    // We allow path-matching if the item category has no namespace (defaults to
+                    // minecraft).
+                    Identifier itemCategoryId = Identifier.tryParse(imbuedSkill.categoryId);
+                    boolean categoryMatch = itemCategoryId != null && (categoryId.equals(itemCategoryId) ||
+                            (itemCategoryId.getNamespace().equals("minecraft") &&
+                                    categoryId.getPath().equals(itemCategoryId.getPath())));
+
+                    if (categoryMatch) {
+                        bonus += imbuedSkill.level;
+                    }
                 }
             }
         }
-        return bonus;
-    }
 
-    /**
-     * Helper to extract bonus from a single item stack.
-     */
-    private int getBonusFromItem(ItemStack stack, Identifier categoryId, String skillId, String source) {
-        if (stack.isEmpty())
-            return 0;
-
-        int bonus = 0;
-        List<ImbuedSkillHelper.ImbuedSkill> imbuedSkills = ImbuedSkillHelper.getSkills(stack);
-        for (ImbuedSkillHelper.ImbuedSkill imbued : imbuedSkills) {
-            if (imbued.skillId.equals(skillId)) {
-                // Check if category matches (flexible)
-                if (categoryId == null || categoryId.getPath().equals(imbued.categoryId)
-                        || categoryId.toString().equals(imbued.categoryId)) {
-                    bonus += imbued.level;
-                    SkillLevelingMod.getInstance().getLogger().debug("[SkillLeveling] Found " + source + " bonus for "
-                            + skillId + ": +" + imbued.level + " from " + stack.getItem().toString());
-                }
-            }
-        }
         return bonus;
     }
 
@@ -788,7 +735,7 @@ public class SkillLevelingManager {
             return;
         }
 
-        SkillLevelingMod.getInstance().getLogger().debug("[ADDON] [CONFIG LOAD] Starting configuration discovery...");
+        SkillLevelingMod.getInstance().getLogger().info("[ADDON] [CONFIG LOAD] Starting configuration discovery...");
 
         try {
             var mod = net.puffish.skillsmod.SkillsMod.getInstance();
@@ -845,7 +792,6 @@ public class SkillLevelingManager {
                                             var rewardInstance = rewardObj.getClass().getMethod("instance")
                                                     .invoke(rewardObj);
                                             if (rewardInstance instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
-                                                plr.setCachedCategoryId(categoryId);
                                                 registerPerLevelRewardsReward(categoryId, skillId, plr);
                                                 skillCount++;
                                                 SkillLevelingMod.getInstance().getLogger()
@@ -871,7 +817,7 @@ public class SkillLevelingManager {
                 }
             }
 
-            SkillLevelingMod.getInstance().getLogger().debug("[CONFIG LOAD] Discovery complete: " + categoryCount
+            SkillLevelingMod.getInstance().getLogger().info("[CONFIG LOAD] Discovery complete: " + categoryCount
                     + " categories, " + skillCount + " skills registered");
             configurationsLoaded = true;
             // Sync to all online players now that configs are loaded
@@ -1109,7 +1055,8 @@ public class SkillLevelingManager {
                 PerLevelRewardsReward plr = skillEntry.getValue();
 
                 int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
-
+                SkillLevelingMod.getInstance().getLogger()
+                        .debug("[REWARD] Refreshing " + skillId + " to level " + totalLevel);
                 // Trigger update with the new total level.
                 // Action is true here (even though it's a refresh) to force Pufferfish
                 // attribute rewards to re-evaluate and apply/revert attribute modifiers.
@@ -1121,9 +1068,6 @@ public class SkillLevelingManager {
         // This ensures that health, armor, and other visual attributes update in
         // real-time.
         syncPlayerAttributes(player);
-
-        // Ensure client gets the updated total levels immediately after a refresh.
-        syncAllSkillsToPlayer(player);
     }
 
     /**
@@ -1411,7 +1355,7 @@ public class SkillLevelingManager {
         // prerequisite_skills)
         var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
         if (config != null && config.requiredSkills != null && !config.requiredSkills.isEmpty()) {
-            SkillLevelingMod.getInstance().getLogger().debug(
+            SkillLevelingMod.getInstance().getLogger().info(
                     "[PREREQ_CHECK] Checking " + config.requiredSkills.size() + " prerequisites for skill: " + skillId);
 
             for (var reqEntry : config.requiredSkills) {
@@ -1420,7 +1364,7 @@ public class SkillLevelingManager {
                 Identifier reqCategoryId = categoryId; // Default to same category
                 if (reqEntry.categoryId != null && !reqEntry.categoryId.isEmpty()) {
                     // Use the specified category ID - path only lookup
-                    SkillLevelingMod.getInstance().getLogger().debug(
+                    SkillLevelingMod.getInstance().getLogger().info(
                             "[PREREQ_CHECK] Cross-category prerequisite detected: " + reqEntry.categoryId);
                     reqCategoryId = findCategoryByPath(reqEntry.categoryId);
                     if (reqCategoryId == null) {
@@ -1429,19 +1373,19 @@ public class SkillLevelingManager {
                                         + ", falling back to same category");
                         reqCategoryId = categoryId; // Fallback to same category if not found
                     } else {
-                        SkillLevelingMod.getInstance().getLogger().debug(
+                        SkillLevelingMod.getInstance().getLogger().info(
                                 "[PREREQ_CHECK] Resolved category path '" + reqEntry.categoryId + "' to: "
                                         + reqCategoryId);
                     }
                 }
 
                 int currentLevel = getSkillLevelByUUID(playerId, reqCategoryId, reqEntry.skillId);
-                SkillLevelingMod.getInstance().getLogger().debug(
+                SkillLevelingMod.getInstance().getLogger().info(
                         "[PREREQ_CHECK] Skill: " + reqEntry.skillId + " in category " + reqCategoryId +
                                 " - Required: " + reqEntry.minLevel + ", Current: " + currentLevel);
 
                 if (currentLevel < reqEntry.minLevel) {
-                    SkillLevelingMod.getInstance().getLogger().debug(
+                    SkillLevelingMod.getInstance().getLogger().info(
                             "[PREREQ_CHECK] FAILED: Skill " + skillId + " requires " + reqEntry.skillId +
                                     " level " + reqEntry.minLevel + " (has " + currentLevel + ") in category "
                                     + reqCategoryId);

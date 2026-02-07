@@ -89,15 +89,19 @@ public abstract class ClientCategoryDataMixin {
 
         // 1. Get current levels and max level using robust lookups
         int baseLevel = ClientSkillLevelStorage.getBaseLevel(categoryId, skillId);
-        int bonus = ClientSkillLevelStorage.getEquipmentBonus(categoryId, skillId);
-        int totalLevel = baseLevel + bonus;
+        // SYNC FIX: Use the total level synced from server instead of recalculating
+        // locally.
+        // This ensures Curio bonuses (which aren't scanned in the basic EquipmentSlot
+        // loop)
+        // are correctly reflected in the GUI state (Golden/Unlocked).
+        int totalLevel = ClientSkillLevelStorage.getLevel(categoryId, skillId);
 
         // Use the same robust max level logic as tooltips
         int maxLevel = Math.max(
                 ClientDescriptionStorage.getMaxLevel(defId),
                 ClientSkillLevelStorage.getMaxLevel(categoryId, skillId));
 
-        // State will be determined below, then we'll log if it changed
+        // State will be determined below
         Skill.State determinedState = null;
 
         // DYNAMIC PREREQUISITE CHECK: Skills deactivate and lock/hide when
@@ -110,8 +114,6 @@ public abstract class ClientCategoryDataMixin {
                 // If prerequisites are NOT met, keep skill locked/hidden
                 if (!prereqsMet) {
                     determinedState = Skill.State.LOCKED;
-                    addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
-                            "Prerequisites not met" + (hidden ? " (hidden)" : ""));
                     cir.setReturnValue(determinedState);
                     return;
                 }
@@ -124,8 +126,6 @@ public abstract class ClientCategoryDataMixin {
                     } else {
                         determinedState = Skill.State.AVAILABLE;
                     }
-                    addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
-                            "Prerequisites met - REVEALING hidden skill");
                     cir.setReturnValue(determinedState);
                     return;
                 }
@@ -139,8 +139,6 @@ public abstract class ClientCategoryDataMixin {
         // Mastery Check: ONLY show as UNLOCKED (Golden) if TOTAL level reaches max
         if (maxLevel > 0 && totalLevel >= maxLevel) {
             determinedState = Skill.State.UNLOCKED;
-            addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
-                    "Mastered (total >= max)");
             cir.setReturnValue(determinedState);
             return;
         }
@@ -151,37 +149,19 @@ public abstract class ClientCategoryDataMixin {
             if (baseLevel < maxLevel) {
                 // If it's a loot-only skill, it shouldn't look "buyable" (AFFORDABLE/AVAILABLE)
                 // in a way that suggests spending points if it's not possible.
-                // However, the user explicitly asked for the "affordable state" if not max.
                 if (isAffordable(skill)) {
                     determinedState = Skill.State.AFFORDABLE;
                 } else {
                     determinedState = Skill.State.AVAILABLE;
                 }
-                addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
-                        "In progress / Below max");
                 cir.setReturnValue(determinedState);
                 return;
             } else {
                 // Base at max, but total might not be (penalty) - show UNLOCKED
                 determinedState = Skill.State.UNLOCKED;
-                addon$logStateChangeIfNeeded(skillId, determinedState, baseLevel, bonus, totalLevel, maxLevel,
-                        "Base maxed");
                 cir.setReturnValue(determinedState);
                 return;
             }
-        }
-    }
-
-    @Unique
-    private void addon$logStateChangeIfNeeded(String skillId, Skill.State newState, int baseLevel, int bonus,
-            int totalLevel, int maxLevel, String reason) {
-        Skill.State lastState = addon$lastLoggedState.get(skillId);
-        if (lastState != newState) {
-            addon$lastLoggedState.put(skillId, newState);
-            net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger().debug(
-                    "[STATE_CHANGE] Skill: " + skillId + " | State: " + lastState + " -> " + newState
-                            + " | Base: " + baseLevel + " | Bonus: " + bonus + " | Total: " + totalLevel
-                            + " | Max: " + maxLevel + " | Reason: " + reason);
         }
     }
 

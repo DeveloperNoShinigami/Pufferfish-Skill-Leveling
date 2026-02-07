@@ -344,6 +344,11 @@ This skill can be unlocked in the tree but cannot be imbued onto equipment:
 
 ---
 
+### 3. Equipment Imbuing
+Skills with `"loot_mode": "imbue_only"` can be applied to equipment via an anvil. When worn, the equipment grants the skill's bonuses (indicated by a ✦ star in tooltips). When removed, the bonuses disappear instantly.
+
+---
+
 ## Datapack Registry Extensions
 
 The addon looks for additional configuration files in these paths:
@@ -577,7 +582,7 @@ Before imbuing a skill, equipment must have an **Open Skill Slot**.
 - **Tome of Cleansing II** targets **Slot 2** (second added).
 - **Tome of Cleansing III** targets **Slot 3** (third added).
 - The skill is returned as a **Skill Tome** at its current level (preserving its `loot_mode`).
-- The skill slot remains open on the gear.
+- The skill slot remains open on the gear (indicated as an **Equipment Slot** in tooltips).
 - Extraction cost is defined by `cleansing_cost` for that specific skill.
 
 ---

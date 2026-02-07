@@ -63,5 +63,10 @@
   "skillleveling.imbue.slot_opened": "Opened skill slot %d on equipment!",
   "block.puffish_skill_leveling.skill_scribe_table": "Skill Scribe Table",
   "block.puffish_skill_leveling.skill_scribe_table.use": "The Skill Master can help you here...",
-  "entity.minecraft.villager.puffish_skill_leveling.skill_master": "Skill Master"
+  "entity.minecraft.villager.puffish_skill_leveling.skill_master": "Skill Master",
+  "item.puffish_skill_leveling.skill_charm": "Skill Charm",
+  "item.puffish_skill_leveling.skill_charm.bonus": "%s",
+  "item.puffish_skill_leveling.skill_charm.hint": "Equip in a charm slot to gain this bonus",
+  "item.puffish_skill_leveling.skill_charm.unconfigured": "No Skill Applied",
+  "curios.identifier.skill_charm": "Skill Charm"
 }

@@ -77,7 +77,7 @@ public class ClientSkillDefinitionConfigMixin {
                     if (ClientDescriptionStorage.isImbueOnly(defId)) {
                         MutableText breakdown = Text.literal("§8(Base: " + baseLevel);
                         if (bonusLevel > 0) {
-                            breakdown.append(Text.literal(" §b+ " + bonusLevel + " Gear"));
+                            breakdown.append(Text.literal(" §b+ " + bonusLevel + " Equipment"));
                         }
                         breakdown.append(Text.literal(")"));
                         result.append(breakdown.append(Text.literal("\n")));

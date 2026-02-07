@@ -51,7 +51,7 @@ public class AddonLogger {
      * SILENCED by default to prevent log clogging.
      */
     public void debug(String message) {
-        // Enabled for troubleshooting
-        logger.info("[ADDON] [DEBUG] " + message);
+        // Disabled by default to prevent log clogging
+        // logger.info("[ADDON] [DEBUG] " + message);
     }
 }

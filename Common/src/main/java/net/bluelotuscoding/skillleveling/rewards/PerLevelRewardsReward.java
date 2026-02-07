@@ -12,7 +12,6 @@ import net.puffish.skillsmod.api.reward.RewardUpdateContext;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.config.skill.SkillRewardConfig;
-import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
 import net.puffish.skillsmod.util.DisposeContext;
 import net.puffish.skillsmod.util.LegacyUtils;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
@@ -186,28 +185,13 @@ public class PerLevelRewardsReward implements Reward {
      * PROTECTS against multiple calls in the same session to prevent join-time
      * re-triggering.
      */
-    public void initializeCount(UUID playerId, Identifier categoryId, int level) {
-        // Only load from NBT if we haven't already initialized this player in this
-        // session.
-        // This prevents Pufferfish from overwriting our "just activated" rewards during
-        // the burst of refresh calls on join.
-        if (counts.containsKey(playerId)) {
-            counts.put(playerId, level);
-            return;
-        }
-
+    public void initializeCount(UUID playerId, int level) {
         counts.put(playerId, level);
-        this.cachedCategoryId = categoryId;
-
         if (level > 0) {
-            var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
-            if (manager != null) {
-                var activated = manager.getDataManager().getActivatedLevels(playerId, categoryId, skillId);
-                activatedLevels.put(playerId, activated);
-            }
-
+            var activated = activatedLevels.computeIfAbsent(playerId, k -> new java.util.HashSet<>());
             var active = new java.util.HashSet<Integer>();
             for (int i = 1; i <= level; i++) {
+                activated.add(i);
                 active.add(i);
             }
             lastActiveLevels.put(playerId, active);
@@ -216,24 +200,106 @@ public class PerLevelRewardsReward implements Reward {
         }
     }
 
+    public void setCachedCategoryId(Identifier categoryId) {
+        this.cachedCategoryId = categoryId;
+    }
+
+    public boolean arePrerequisitesMet(UUID playerId) {
+        return arePrerequisitesMet(playerId, null);
+    }
+
+    /**
+     * Check if all skill prerequisites are met for a given player
+     */
+    private boolean arePrerequisitesMet(UUID playerId, Identifier categoryId) {
+        var mod = SkillLevelingMod.getInstance();
+        var manager = mod.getSkillLevelingManager();
+
+        if (manager == null) {
+            return true; // Fail safe
+        }
+        // LOOT MODE BYPASS: If the skill is lootable, bypass tree prerequisites.
+        // This ensures tomes and imbuing bonuses always provide rewards, as loot
+        // modes represent acquisition methods that ignore the standard tree gating.
+        if (skillId != null) {
+            var leveledCfg = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+            if (leveledCfg != null && leveledCfg.isLootable) {
+                return true;
+            }
+        }
+
+        if (requiredSkills.isEmpty()) {
+            return true;
+        }
+
+        // For prerequisite checking, we need to know which category this skill belongs
+        // to
+        // If it wasn't passed, we'll attempt to find it
+        if (categoryId == null) {
+            if (cachedCategoryId != null) {
+                categoryId = cachedCategoryId;
+            } else {
+                for (var categoryEntry : manager.getPerLevelRewardsRewards().entrySet()) {
+                    if (categoryEntry.getValue().containsValue(this)) {
+                        cachedCategoryId = categoryEntry.getKey();
+                        categoryId = cachedCategoryId;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (categoryId == null) {
+            mod.getLogger().warn("Could not determine category for skill " + (skillId != null ? skillId : "unknown")
+                    + " during prerequisite checking");
+            return false; // Fail safe
+        }
+
+        boolean result = manager.checkSkillPrerequisites(playerId, categoryId, skillId != null ? skillId : "unknown");
+
+        // Log if prerequisites are NOT met - helps identify hidden skill delay issues
+        if (!result) {
+            mod.getLogger().debug("[REWARD] Prerequisites NOT met for skill " + skillId + " in category " + categoryId);
+        }
+
+        return result;
+    }
+
     @Override
     public void update(RewardUpdateContext context) {
         var player = context.getPlayer();
         var uuid = player.getUuid();
+        int newCount = context.getCount();
 
-        Integer oldCount = counts.get(uuid);
-        int effectiveOldCount = (oldCount != null) ? oldCount : 0;
-        int effectiveNewCount = context.getCount();
+        var mod = SkillLevelingMod.getInstance();
+        var manager = mod.getSkillLevelingManager();
+
+        // Discover or use cached categoryId
+        if (cachedCategoryId == null && manager != null) {
+            for (var categoryEntry : manager.getPerLevelRewardsRewards().entrySet()) {
+                if (categoryEntry.getValue().containsValue(this)) {
+                    cachedCategoryId = categoryEntry.getKey();
+                    break;
+                }
+            }
+        }
+
+        // Check root prerequisites
+        boolean prerequisitesMet = arePrerequisitesMet(uuid, cachedCategoryId);
+
+        // Effective count logic: Handle prerequisite loss correctly.
+        int effectiveNewCount = (prerequisitesMet || allowPartialRewards) ? newCount : 0;
+        int effectiveOldCount = counts.getOrDefault(uuid, 0);
+
         counts.put(uuid, effectiveNewCount);
 
+        var previouslyActive = lastActiveLevels.getOrDefault(uuid, java.util.Collections.emptySet());
         var currentlyActive = new java.util.HashSet<Integer>();
 
         SkillLevelingMod.getInstance().getLogger()
                 .debug("[REWARD DEBUG] Updating skill " + skillId + " for " + player.getName().getString()
                         + ": old=" + effectiveOldCount + ", new=" + effectiveNewCount + ", action="
                         + context.isAction());
-
-        var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
 
         for (var entry : levelRewards.entrySet()) {
             int level = entry.getKey();
@@ -244,11 +310,19 @@ public class PerLevelRewardsReward implements Reward {
             }
 
             boolean isNowActive = (effectiveNewCount >= level && levelPrereqMet);
+            boolean wasPreviouslyActive = previouslyActive.contains(level);
+
             if (isNowActive)
                 currentlyActive.add(level);
 
+            boolean stateChanged = (isNowActive != wasPreviouslyActive);
+
+            // ACTION LOGIC: Only trigger rewards if something actually changed.
+            boolean action = context.isAction() && stateChanged;
+
             for (var reward : entry.getValue()) {
                 try {
+                    // Attributes re-apply whenever they are active OR if they changed state.
                     String type = reward.type().toString();
                     boolean isAttribute = type.equals("puffish_skills:attribute");
 
@@ -256,27 +330,31 @@ public class PerLevelRewardsReward implements Reward {
                     boolean effectiveAction;
 
                     if (isAttribute) {
-                        effectiveAction = isNowActive;
+                        effectiveAction = (isNowActive && (stateChanged || context.isAction()));
                     } else {
-                        var activated = activatedLevels.computeIfAbsent(uuid, k -> new java.util.HashSet<>());
-                        if (isNowActive && !activated.contains(level)) {
-                            activated.add(level);
-                            effectiveAction = true;
-                            if (manager != null && cachedCategoryId != null) {
-                                manager.getDataManager().setActivatedLevel(player, cachedCategoryId, skillId, level);
+                        // Commands/effects trigger ONLY on state change to active
+                        if (isNowActive && stateChanged && action) {
+                            var activated = activatedLevels.computeIfAbsent(uuid, k -> new java.util.HashSet<>());
+                            if (!activated.contains(level)) {
+                                activated.add(level);
+                                effectiveAction = true;
+                            } else {
+                                effectiveAction = false;
                             }
                         } else {
                             effectiveAction = false;
                         }
                     }
 
-                    reward.instance().update(new RewardUpdateContextImpl(player, count, effectiveAction));
+                    reward.instance().update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player,
+                            count, effectiveAction));
                 } catch (Exception e) {
                     SkillLevelingMod.getInstance().getLogger()
                             .error("Failed to apply reward for level " + level + ": " + e.getMessage());
                 }
             }
         }
+
         lastActiveLevels.put(uuid, currentlyActive);
     }
 

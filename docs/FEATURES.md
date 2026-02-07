@@ -93,6 +93,7 @@ The Skill Master follows standard villager leveling (Novice to Master):
 | Item | Behavior |
 |------|----------|
 | **Skill Tome** | Grants +1 level to a specific pre-configured skill. |
+| **Skill Charm** | Curio item that provides equipment slots for skill imbuing. |
 | **Sigil of Imbuement** | Opens a skill slot on equipment (up to 3 slots). |
 | **Tome of Progression** | Select and advance any skill by 1 level via GUI. |
 | **Tome of Clear Mind** | Refund 1 level of a selected skill via GUI. |
@@ -105,6 +106,7 @@ The Skill Master follows standard villager leveling (Novice to Master):
 
 - **Application**: Combine a Skill Tome and gear in an anvil.
 - **Requirement**: Skill must be defined in the datapack with appropriate `imbue_only` or `both` loot mode.
+- **Slots**: Most gear supports up to 3 slots (via Sigils). Skill Charms provide dedicated slots for charms.
 - **Stacking**: Multiple imbued skills on one item stack their attribute bonuses.
 - **Dynamic Sync**: Attribute changes (Health, Damage, MS) apply immediately when equipped.
 

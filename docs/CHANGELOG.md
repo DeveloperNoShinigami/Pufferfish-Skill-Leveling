@@ -2,6 +2,10 @@
 
 All notable changes to the **Pufferfish Skill Leveling** mod will be documented in this file.
  
+- **Curio Integration Finalization**: Fully integrated Skill Charms with the Curios API, allowing for dedicated charm slots and instant bonus activation. Fixed `CuriosScanner` API usage to correctly iterate and detect charms.
+- **Reward Trigger System Restoration**: Reverted the reward trigger system to the stable `stateChanged` logic. Removed the flawed `persistentActivatedLevels` persistence layer in `DataManager` that was causing "backwards" reward behavior (only firing on join). Rewards now fire immediately upon leveling up in a live session.
+- **Recursive Refund Fix**: Finalized the Tome of Greater Clear Mind logic to correctly refund all levels down to 0 while maintaining prerequisite integrity.
+
 ## [2026-02-06] - Reward Logic Refinement & UI Polish
 
 - **Reward Persistence Stability**: Finalized a robust, session-local initialization guard in `PerLevelRewardsReward`. This completely eliminates join-time re-triggering of commands/chat messages without needing complex global flags.

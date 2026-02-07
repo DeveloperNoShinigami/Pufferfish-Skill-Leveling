@@ -42,6 +42,10 @@
 - Apply skills to weapons and armor via the Anvil.
 - Bonuses update attribute stats (Hearts, Damage, etc.) in real-time.
 
+### Curios Integration
+- **Skill Charms**: Dedicated items that provide skill bonuses when placed in Curio slots.
+- **Auto-Sync**: Charms activate bonuses immediately upon equipping without needing base skill unlocks.
+
 ---
 
 ## 🎮 Staff Commands
@@ -67,6 +71,7 @@
 ---
 
 ## 🤝 Compatibility
+- **Curios API**: Full support for dedicated accessory slots and skill-imbued charms.
 - **Native Attribute Sync**: Works seamlessly with any mod using Minecraft's attributes.
 - **Clean NBT Storage**: Uses standard player data paths for maximum reliability.
 - **Namespace Agnostic**: Works across any namespace defined in your datapacks.

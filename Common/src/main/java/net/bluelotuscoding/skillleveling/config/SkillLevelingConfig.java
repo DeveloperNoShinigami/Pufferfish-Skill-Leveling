@@ -19,7 +19,10 @@ public class SkillLevelingConfig {
 
     // Config options
     public static boolean disableSkillMasterHouse = false;
-    public static boolean requireUnlockForImbuing = true; // Fix for "skills triggering without levels"
+    public static boolean requireUnlockForImbuing = false; // Whether regular gear bonuses require the base skill to be
+                                                           // unlocked
+    public static boolean requireUnlockForCurioImbuing = false; // Whether Curio bonuses require the base skill to be
+                                                                // unlocked
 
     public static void load(File configDir) {
         configFile = new File(configDir, "puffish_skill_leveling.json");
@@ -37,6 +40,9 @@ public class SkillLevelingConfig {
             if (json.has("require_unlock_for_imbuing")) {
                 requireUnlockForImbuing = json.get("require_unlock_for_imbuing").getAsBoolean();
             }
+            if (json.has("require_unlock_for_curio_imbuing")) {
+                requireUnlockForCurioImbuing = json.get("require_unlock_for_curio_imbuing").getAsBoolean();
+            }
         } catch (IOException e) {
             SkillLevelingMod.getInstance().getLogger().error("Failed to load config: " + e.getMessage());
         }
@@ -49,6 +55,7 @@ public class SkillLevelingConfig {
         JsonObject json = new JsonObject();
         json.addProperty("disable_skill_master_house", disableSkillMasterHouse);
         json.addProperty("require_unlock_for_imbuing", requireUnlockForImbuing);
+        json.addProperty("require_unlock_for_curio_imbuing", requireUnlockForCurioImbuing);
 
         try (FileWriter writer = new FileWriter(configFile)) {
             GSON.toJson(json, writer);

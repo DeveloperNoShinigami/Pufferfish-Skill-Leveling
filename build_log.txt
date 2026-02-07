@@ -1,0 +1,27 @@
+
+> Configure project :Common
+Architectury Loom: 1.5.388
+This version of Architectury Loom is in beta! Please report any issues you encounter: https://github.com/architectury/architectury-loom/issues
+fabric-installer.json not found in dependencies!
+
+> Task :Common:clean FAILED
+> Task :Forge:clean
+> Task :Fabric:clean
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':Common:clean'.
+> java.io.IOException: Unable to delete directory 'C:\MinecraftModdingWorkspace\1.20.1 Mods\Pufferfish-Skill-Leveling-1.20.1_addon_version\Pufferfish-Skill-Leveling\Common\build'
+    Failed to delete some children. This might happen because a process has files open or has its working directory set in the target directory.
+    - C:\MinecraftModdingWorkspace\1.20.1 Mods\Pufferfish-Skill-Leveling-1.20.1_addon_version\Pufferfish-Skill-Leveling\Common\build\devlibs\puffish_skill_leveling-0.17.1-1.20-common-dev.jar
+    - C:\MinecraftModdingWorkspace\1.20.1 Mods\Pufferfish-Skill-Leveling-1.20.1_addon_version\Pufferfish-Skill-Leveling\Common\build\devlibs
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s
+3 actionable tasks: 3 executed

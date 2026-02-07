@@ -29,3 +29,10 @@ mandatory=true
 versionRange="[0.17,)"
 ordering="AFTER"
 side="BOTH"
+
+[[dependencies.puffish_skill_leveling]]
+modId="curios"
+mandatory=false
+versionRange="[5.14,)"
+ordering="AFTER"
+side="BOTH"

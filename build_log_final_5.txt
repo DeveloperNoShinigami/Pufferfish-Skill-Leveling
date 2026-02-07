@@ -1,0 +1,80 @@
+
+> Configure project :Common
+Architectury Loom: 1.5.388
+This version of Architectury Loom is in beta! Please report any issues you encounter: https://github.com/architectury/architectury-loom/issues
+fabric-installer.json not found in dependencies!
+
+> Task :Fabric:processResources UP-TO-DATE
+> Task :Fabric:processTestResources NO-SOURCE
+> Task :Forge:processResources UP-TO-DATE
+> Task :Fabric:validateAccessWidener NO-SOURCE
+> Task :Forge:processTestResources NO-SOURCE
+> Task :Forge:validateAccessWidener NO-SOURCE
+
+> Task :Common:compileJava
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :Common:processResources UP-TO-DATE
+> Task :Common:classes
+> Task :Common:jar
+> Task :Common:sourcesJar
+> Task :Common:compileTestJava UP-TO-DATE
+> Task :Common:processTestResources NO-SOURCE
+> Task :Common:testClasses UP-TO-DATE
+
+> Task :Forge:compileJava
+C:\MinecraftModdingWorkspace\1.20.1 Mods\Pufferfish-Skill-Leveling-1.20.1_addon_version\Pufferfish-Skill-Leveling\Forge\src\main\java\net\bluelotuscoding\skillleveling\forge\integration\CuriosScanner.java:17: warning: [removal] getCuriosHandler(LivingEntity) in ICuriosHelper has been deprecated and marked for removal
+        CuriosApi.getCuriosHelper().getCuriosHandler(entity).ifPresent(handler -> {
+                                   ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+1 warning
+
+> Task :Common:remapSourcesJar
+Could not determine Mixin version for jar manifest
+
+> Task :Common:test
+> Task :Common:validateAccessWidener NO-SOURCE
+> Task :Common:check
+> Task :Forge:classes
+> Task :Forge:jar
+> Task :Forge:compileTestJava NO-SOURCE
+> Task :Forge:testClasses UP-TO-DATE
+> Task :Forge:checkstyleTest NO-SOURCE
+> Task :Forge:test NO-SOURCE
+
+> Task :Fabric:compileJava
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :Fabric:classes
+> Task :Fabric:jar
+> Task :Fabric:compileTestJava NO-SOURCE
+> Task :Fabric:testClasses UP-TO-DATE
+> Task :Fabric:checkstyleTest NO-SOURCE
+> Task :Fabric:test NO-SOURCE
+> Task :Common:remapJar
+> Task :Common:assemble
+> Task :Common:build
+> Task :Forge:remapJar
+> Task :Forge:remapSourcesJar SKIPPED
+> Task :Forge:assemble
+> Task :Fabric:remapJar
+> Task :Fabric:remapSourcesJar SKIPPED
+> Task :Fabric:assemble
+> Task :Forge:checkstyleMain
+> Task :Forge:check
+> Task :Forge:build
+> Task :Fabric:checkstyleMain
+> Task :Fabric:check
+> Task :Fabric:build
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 18s
+18 actionable tasks: 14 executed, 4 up-to-date

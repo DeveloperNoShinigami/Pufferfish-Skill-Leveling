@@ -72,7 +72,13 @@ public class ImbuedSkillHelper {
         if (nbt == null || !nbt.contains(NBT_ROOT)) {
             return 0;
         }
-        return nbt.getCompound(NBT_ROOT).getInt(NBT_SLOTS);
+        NbtCompound root = nbt.getCompound(NBT_ROOT);
+        if (root.contains(NBT_SLOTS)) {
+            return root.getInt(NBT_SLOTS);
+        } else if (root.contains("Slots")) {
+            return root.getInt("Slots");
+        }
+        return 0;
     }
 
     /**
@@ -98,12 +104,17 @@ public class ImbuedSkillHelper {
             return skills;
         }
         NbtCompound root = nbt.getCompound(NBT_ROOT);
-        if (!root.contains(NBT_SKILLS)) {
-            return skills;
+        NbtList skillList = null;
+        if (root.contains(NBT_SKILLS)) {
+            skillList = root.getList(NBT_SKILLS, 10);
+        } else if (root.contains("Skills")) {
+            skillList = root.getList("Skills", 10);
         }
-        NbtList skillList = root.getList(NBT_SKILLS, 10); // 10 = NbtCompound type
-        for (int i = 0; i < skillList.size(); i++) {
-            skills.add(ImbuedSkill.fromNbt(skillList.getCompound(i)));
+
+        if (skillList != null) {
+            for (int i = 0; i < skillList.size(); i++) {
+                skills.add(ImbuedSkill.fromNbt(skillList.getCompound(i)));
+            }
         }
         return skills;
     }

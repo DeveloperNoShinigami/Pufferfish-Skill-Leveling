@@ -5,6 +5,7 @@ plugins {
 
 repositories {
 	maven(url = "https://maven.puffish.net/")
+	maven(url = "https://maven.theillusivec4.top/")
 }
 
 base.archivesName.set("${project.properties["archives_base_name"]}")
@@ -23,6 +24,10 @@ dependencies {
 	mappings("net.fabricmc:yarn:${project.properties["yarn_mappings"]}:v2")
 
 	forge("net.minecraftforge:forge:${project.properties["minecraft_version"]}-${project.properties["forge_version"]}")
+
+	// Curios API - Compile against API, use full jar at runtime
+	modCompileOnly("top.theillusivec4.curios:curios-forge:5.14.1+1.20.1:api")
+	modRuntimeOnly("top.theillusivec4.curios:curios-forge:5.14.1+1.20.1")
 
 	// Dependency on the core Pufferfish Skills mod from maven repository
 	modImplementation("net.puffish:skillsmod:${project.properties["skills_version"]}:forge")

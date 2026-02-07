@@ -28,6 +28,9 @@
 - [x] Stacked attribute bonuses from multiple skills
 - [x] Visual feedback (Enchantment glint on Skill Tomes)
 
+### Integrations
+- [x] **Curios API Support**: Dedicated accessory slots for Skill Charms and auto-sync activation.
+
 ### Skill Master Villager (Overhauled)
 - [x] Workstation registration (Skill Scribe Table)
 - [x] **Dynamic trade scaling**: 5-12 slots across 5 tiers.
@@ -70,6 +73,9 @@
 - [ ] Skill compatibility restrictions (e.g., some skills can't coexist)
 - [ ] Slot type restrictions (e.g., armor-only skills)
 
+### World & Loot
+- [ ] **Apotheosis-style Skill Loot**: Automatically injecting randomized skills/imbuements into standard loot tables.
+
 ---
 
-*Last Updated: 2026-02-06*
+*Last Updated: 2026-02-07*

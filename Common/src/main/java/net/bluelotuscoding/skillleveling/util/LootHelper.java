@@ -1,6 +1,7 @@
 package net.bluelotuscoding.skillleveling.util;
 
 import net.bluelotuscoding.skillleveling.config.LeveledConfigStorage;
+import net.bluelotuscoding.skillleveling.data.GlobalLootConfig;
 import net.bluelotuscoding.skillleveling.item.SkillTomeItem;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
 import net.minecraft.entity.Entity;
@@ -22,34 +23,19 @@ public class LootHelper {
      */
     public static List<ItemStack> getDropsForEntity(Entity entity, Random random) {
         List<ItemStack> drops = new ArrayList<>();
-        EntityType<?> type = entity.getType();
+        String entityId = EntityType.getId(entity.getType()).toString();
+        var config = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getGlobalLootConfigLoader()
+                .getConfig();
 
-        // 1. Check for basic mobs (Zombies, Skeletons, Pillagers, Enderman)
-        if (isBasicMob(type)) {
-            // Rare chance for Blank Tome (2%)
-            if (random.nextFloat() < 0.02f) {
-                drops.add(new ItemStack(ModItems.BLANK_TOME));
-            }
-            // Very rare chance for Low Level Skill Tome (1%)
-            if (random.nextFloat() < 0.01f) {
-                ItemStack tome = createRandomSkillTome(1, 2, random);
-                if (!tome.isEmpty()) {
-                    drops.add(tome);
-                }
-            }
-        }
-
-        // 2. Check for elite mobs (Wither Skeletons, Piglins, Shulkers)
-        if (isEliteMob(type)) {
-            // Rare chance for Blank Tome (5%)
-            if (random.nextFloat() < 0.05f) {
-                drops.add(new ItemStack(ModItems.BLANK_TOME));
-            }
-            // Very rare chance for High Level Skill Tome (2%)
-            if (random.nextFloat() < 0.02f) {
-                ItemStack tome = createRandomSkillTome(3, 5, random);
-                if (!tome.isEmpty()) {
-                    drops.add(tome);
+        for (var group : config.entityDrops) {
+            if (group.entityTypes.contains(entityId)) {
+                for (var entry : group.entries) {
+                    if (entry.chance > 0 && random.nextFloat() < entry.chance) {
+                        ItemStack stack = createStackFromEntry(entry, random);
+                        if (!stack.isEmpty()) {
+                            drops.add(stack);
+                        }
+                    }
                 }
             }
         }
@@ -57,14 +43,26 @@ public class LootHelper {
         return drops;
     }
 
-    private static boolean isBasicMob(EntityType<?> type) {
-        return type == EntityType.ZOMBIE || type == EntityType.SKELETON ||
-                type == EntityType.PILLAGER || type == EntityType.ENDERMAN;
-    }
-
-    private static boolean isEliteMob(EntityType<?> type) {
-        return type == EntityType.WITHER_SKELETON || type == EntityType.PIGLIN ||
-                type == EntityType.SHULKER || type == EntityType.PIGLIN_BRUTE;
+    private static ItemStack createStackFromEntry(GlobalLootConfig.LootEntry entry, Random random) {
+        if ("skill_tome".equals(entry.type)) {
+            return createRandomSkillTome(entry.minLevel, entry.maxLevel, random);
+        } else {
+            Identifier itemId = new Identifier(entry.item);
+            var optionalItem = net.minecraft.registry.Registries.ITEM.getOrEmpty(itemId);
+            if (optionalItem.isPresent()) {
+                ItemStack stack = new ItemStack(optionalItem.get());
+                if (entry.nbt != null && !entry.nbt.isEmpty()) {
+                    try {
+                        stack.setNbt(net.minecraft.nbt.StringNbtReader.parse(entry.nbt));
+                    } catch (Exception e) {
+                        net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
+                                .error("Error parsing NBT for loot entry " + entry.item + ": " + e.getMessage());
+                    }
+                }
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     private static ItemStack createRandomSkillTome(int minLevel, int maxLevel, Random random) {
@@ -75,9 +73,10 @@ public class LootHelper {
         Collections.shuffle(entries);
         for (var entry : entries) {
             var config = entry.getValue();
+            // Any skill with a defined loot mode is "lootable" via tomes
             if (config.lootMode != null && config.categoryId != null) {
                 int level = minLevel + random.nextInt(maxLevel - minLevel + 1);
-                level = Math.min(level, config.maxLevels);
+                level = Math.max(1, Math.min(level, config.maxLevels));
                 return SkillTomeItem.createSkillTome(ModItems.SKILL_TOME, config.categoryId, entry.getKey(),
                         config.lootMode, level);
             }
@@ -87,26 +86,61 @@ public class LootHelper {
 
     /**
      * Logic for injecting into vanilla chest loot tables.
-     * minRolls/maxRolls determine how many chances we have per chest.
      */
     public static void injectChestLoot(Identifier id, LootPool.Builder builder) {
-        if (id.getPath().contains("chests/village") || id.getPath().contains("chests/simple_dungeon") ||
-                id.getPath().contains("chests/abandoned_mineshaft")) {
+        String lootTableId = id.toString();
+        var config = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getGlobalLootConfigLoader()
+                .getConfig();
 
-            // Basic structures: Blank Tomes (5% chance)
-            builder.with(ItemEntry.builder(ModItems.BLANK_TOME).weight(5));
-            // Basic structures: Lv1-2 Skill Tomes (2% chance)
-            // Note: Since Skill Tomes require random level/skill, we might need a custom
-            // LootFunction
-            // or just add the base unconfigured tome if we can't do complex logic here.
-            // For now, let's keep it simple or use a pre-configured loot table if possible.
-        }
+        for (var group : config.chestInjections) {
+            boolean match = false;
+            for (String target : group.containers) {
+                if (lootTableId.contains(target)) {
+                    match = true;
+                    break;
+                }
+            }
 
-        if (id.getPath().contains("chests/nether_fortress") || id.getPath().contains("chests/end_city") ||
-                id.getPath().contains("chests/ancient_city") || id.getPath().contains("chests/bastion_remnant")) {
+            if (match) {
+                for (var entry : group.entries) {
+                    if (entry.weight > 0) {
+                        if ("skill_tome".equals(entry.type)) {
+                            // Since we can't easily generate a random skill tome item inside a static
+                            // Builder during bootstrap,
+                            // we fallback to common items or we'd need a custom LootPoolEntry for true
+                            // randomness.
+                            // For now, let's add a placeholder or a very basic version if it's too complex
+                            // to do here.
+                            // IDEALLY: Use a custom LootFunction.
 
-            // Elite structures: Higher rarity or better items
-            builder.with(ItemEntry.builder(ModItems.BLANK_TOME).weight(10));
+                            // For Chest Injections, we'll use a trick: Inject the Skill Tome with a special
+                            // "randomize" function.
+                            // Actually, let's keep it simple for now as per user request: "jsut use our
+                            // items as a default".
+                            // If they want skill tomes in chests, we might need that custom function.
+
+                            builder.with(ItemEntry.builder(ModItems.SKILL_TOME)
+                                    .weight(entry.weight)
+                                    .apply(net.bluelotuscoding.skillleveling.loot.RandomizeSkillTomeLootFunction
+                                            .builder(entry.minLevel, entry.maxLevel)));
+                        } else {
+                            Identifier itemId = new Identifier(entry.item);
+                            var item = net.minecraft.registry.Registries.ITEM.get(itemId);
+                            if (item != null) {
+                                var itemEntry = ItemEntry.builder(item).weight(entry.weight);
+                                if (entry.nbt != null && !entry.nbt.isEmpty()) {
+                                    try {
+                                        itemEntry.apply(net.minecraft.loot.function.SetNbtLootFunction.builder(
+                                                net.minecraft.nbt.StringNbtReader.parse(entry.nbt)));
+                                    } catch (Exception ignored) {
+                                    }
+                                }
+                                builder.with(itemEntry);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

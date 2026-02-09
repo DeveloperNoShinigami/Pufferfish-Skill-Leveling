@@ -132,6 +132,7 @@ The Skill Master follows standard villager leveling (Novice to Master):
 
 ## Compatibility
 
+- **Curios API**: Full support for dedicated accessory slots and skill-imbued charms.
 - **Native Attribute Sync**: Compatible with any mod using Minecraft's attribute registry.
 - **Namespace Agnostic**: Works across any custom namespace in datapacks.
 - **Safe Mixins**: Uses non-intrusive injection points to ensure compatibility with other mods.

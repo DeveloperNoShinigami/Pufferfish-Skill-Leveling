@@ -1,0 +1,10 @@
+{
+    "title": "Combat",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:iron_sword"
+        }
+    },
+    "background": "textures/gui/advancements/backgrounds/stone.png"
+}

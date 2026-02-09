@@ -74,6 +74,10 @@ Each skill in `definitions.json` must follow this structure:
 }
 ```
 
+> [!IMPORTANT]
+> **Consistency Rule: Matched Titles & IDs**
+> Always ensure your skill's `title` is identical to its JSON key (the ID). This ensures clarity in commands and data tracking.
+
 > [!WARNING]
 > **The `metadata` field is required!** Even if empty, you must include `"metadata": {}` or the skill will fail to load.
 
@@ -81,15 +85,15 @@ Each skill in `definitions.json` must follow this structure:
 
 ## Field Reference
 
-### Core Fields (Required)
+### Core Fields (Mandatory)
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `type` | string | Skill type (see Skill Types below) |
-| `title` | string | Display name in the UI |
-| `description` | string | Short description |
-| `icon` | object | Icon configuration |
-| `rewards` | array | Array of reward definitions |
+| `type` | string | Defines behavior (`puffish_skills:default` or `puffish_skill_leveling:stackable`) |
+| `category_id` | string | Must match folder name. Required for Creative Tab Items. |
+| `title` | string | **Must** match the skill's JSON ID for consistency. |
+| `max_skill_level` | integer | Defines the progression ceiling. |
+| `points_per_level` | integer | Cost in skill points (**set to 0 for loot-only skills**). |
 | `metadata` | object | Extra metadata (**required**, can be empty: `{}`) |
 
 ### Addon Fields
@@ -98,7 +102,7 @@ Each skill in `definitions.json` must follow this structure:
 |-------|------|---------|-------------|
 | `max_skill_level` | integer | 1 | Maximum levels for this skill |
 | `points_per_level` | integer | 1 | Skill points cost per level |
-| `category_id` | string | — | Category this skill belongs to |
+| `category_id` | string | — | Category this skill belongs to (**Required** for Creative Tab items) |
 | `loot_mode` | string | — | `"tome_only"` or `"imbue_only"` |
 | `hidden` | boolean | false | If true, skill stays invisible until prerequisites are met |
 | `merge_description` | boolean | false | Accumulate descriptions across levels |
@@ -646,6 +650,7 @@ The `puffish_skill_leveling:per_level_rewards` type supports additional fields w
 | Wrong namespace in `skill_id` | Ensure `skill_id` in rewards matches the skill's key name |
 | Invalid item ID in icon | Use valid Minecraft item IDs (e.g., `minecraft:diamond`) |
 | Missing level in `levels` object | Define all levels from 1 to `max_skill_level` |
+| **Missing Creative Items** | ensure `category_id` is set to the category folder name (e.g., `"combat"`) |
 
 ---
 

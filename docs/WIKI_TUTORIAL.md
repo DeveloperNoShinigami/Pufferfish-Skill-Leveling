@@ -75,6 +75,7 @@ This is where the addon's magic happens. We add our custom fields to the standar
 ```json
 "warrior_strength": {
     "title": "Warrior Strength",
+    "category_id": "combat",
     "icon": { "type": "item", "data": { "item": "minecraft:iron_sword" } },
     "max_skill_level": 5,
     "points_per_level": 1,
@@ -193,6 +194,7 @@ We silence heavy gameplay logs to prevent server spam.
 1. **Attribute Modifier Mismatch**: Ensure you use the exact Minecraft attribute ID (e.g. `generic.max_health`).
 2. **Missing Metadata**: Every definition must have `"metadata": {}`.
 3. **Skill ID Error**: Double check that your reward `skill_id` matches `skills.json`.
+4. **Missing Creative Items**: Ensure `category_id` is set to the category folder name in your definitions.
 
 ---
 *Created for Pufferfish Skill Leveling v2.4.0+*

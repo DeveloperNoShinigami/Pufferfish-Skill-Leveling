@@ -19,19 +19,39 @@ public class LeveledConfigStorage {
     }
 
     public static LeveledConfig get(String skillId) {
-        if (skillId == null)
+        if (skillId == null) {
             return null;
+        }
 
-        // Direct hit
+        // 1. Exact match
         if (leveledConfigs.containsKey(skillId)) {
             return leveledConfigs.get(skillId);
         }
 
-        // Fallback: check if any key ends with this ID (handles
-        // namespace:category:skill ID variants)
-        String suffix = ":" + skillId;
+        // 2. Fuzzy match (ignore namespaces and handle potential path mismatches)
+        String skillPath = skillId;
+        if (skillId.contains(":")) {
+            skillPath = skillId.substring(skillId.indexOf(':') + 1);
+        }
+
         for (Map.Entry<String, LeveledConfig> entry : leveledConfigs.entrySet()) {
-            if (entry.getKey().endsWith(suffix)) {
+            String key = entry.getKey();
+            String keyPath = key;
+            if (key.contains(":")) {
+                keyPath = key.substring(key.indexOf(':') + 1);
+            }
+
+            // More aggressive matching:
+            // Match if:
+            // - Paths are identical
+            // - One is a suffix of the other (e.g. "offense/dragons_breath" matches
+            // "dragons_breath" or vice versa)
+            // - They match after stripping all slashes (fallback for some internal
+            // Pufferfish IDs)
+            if (skillPath.equals(keyPath) ||
+                    skillPath.endsWith("/" + keyPath) ||
+                    keyPath.endsWith("/" + skillPath) ||
+                    skillPath.replace("/", "").equals(keyPath.replace("/", ""))) {
                 return entry.getValue();
             }
         }

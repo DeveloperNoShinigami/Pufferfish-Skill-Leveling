@@ -45,6 +45,9 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     @Unique
     private net.minecraft.util.Identifier addon$categoryId;
 
+    @Unique
+    private final Map<String, Long> addon$paidLevels = new HashMap<>();
+
     // ===== CategoryDataExtension Implementation =====
 
     @Override
@@ -65,6 +68,20 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     @Override
     public net.minecraft.util.Identifier addon$getCategoryId() {
         return this.addon$categoryId;
+    }
+
+    @Override
+    public long addon$getPaidLevels(String skillId) {
+        return addon$paidLevels.getOrDefault(skillId, 0L);
+    }
+
+    @Override
+    public void addon$setPaidLevels(String skillId, long bits) {
+        if (bits == 0) {
+            addon$paidLevels.remove(skillId);
+        } else {
+            addon$paidLevels.put(skillId, bits);
+        }
     }
 
     @Override
@@ -105,6 +122,8 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                 SkillLevelingMod.getInstance().getSkillLevelingManager().getDataManager()
                         .clearSkillLevel(addon$owner, addon$categoryId, skillId);
             }
+            // Clear paid levels bitset
+            addon$paidLevels.remove(skillId);
         } else {
             addon$skillLevels.put(skillId, level);
             unlockedSkills.add(skillId);
@@ -164,25 +183,28 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         int currentLevel = addon$getSkillLevel(id);
         int newLevel = currentLevel + 1;
 
-        if (currentLevel > 0) {
-            // This is a subsequent level-up (1→2, 2→3, etc)
-            addon$setSkillLevel(id, newLevel);
+        // MANUALLY HANDLE ALL UNLOCKS (Level 0->1, 1->2, etc)
+        // We do this to ensure consistent behavior and to fix the issue where
+        // Pufferfish triggers rewards *before* we set our level to 1.
 
-            // We MUST manually trigger rewards for Level 2+ since Pufferfish only triggers
-            // awards when a skill is first added to the unlockedSet.
-            if (addon$owner != null && addon$categoryId != null) {
-                var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
-                manager.getPerLevelRewardsReward(addon$categoryId, id).ifPresent(reward -> {
-                    reward.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(addon$owner, newLevel,
-                            true));
-                });
-            }
+        addon$setSkillLevel(id, newLevel);
 
-            // Cancel to prevent Pufferfish from seeing this as a new unlock (it isn't)
-            ci.cancel();
+        // Mark this specific level as PAID since it came through unlockSkill (tree
+        // purchase)
+        long currentBits = addon$getPaidLevels(id);
+        addon$setPaidLevels(id, currentBits | (1L << newLevel));
+
+        if (addon$owner != null && addon$categoryId != null) {
+            var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+            manager.getPerLevelRewardsReward(addon$categoryId, id).ifPresent(reward -> {
+                reward.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(addon$owner, newLevel,
+                        true));
+            });
         }
-        // If currentLevel == 0, this is first unlock - let original code run first
-        // so Pufferfish's own reward triggers and set-addition work correctly.
+
+        // Cancel original Pufferfish unlock logic to prevent double-handling
+        // (We already added it to the set in setSkillLevel)
+        ci.cancel();
     }
 
     /**
@@ -210,6 +232,7 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     @Inject(method = "resetSkills", at = @At("HEAD"))
     private void onResetSkills(CallbackInfo ci) {
         addon$skillLevels.clear();
+        addon$paidLevels.clear();
         if (addon$owner != null && addon$categoryId != null) {
             SkillLevelingMod.getInstance().getSkillLevelingManager().getDataManager()
                     .resetCategorySkillLevels(addon$owner, addon$categoryId);
@@ -429,30 +452,45 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         int total = 0;
         for (var entry : addon$skillLevels.entrySet()) {
             String skillId = entry.getKey();
-            int level = entry.getValue();
-            if (level > 0) {
+            int currentLevel = entry.getValue();
+            if (currentLevel > 0) {
                 var skillOpt = category.skills().getById(skillId);
                 if (skillOpt.isPresent()) {
                     var defOpt = category.definitions().getById(skillOpt.get().definitionId());
                     if (defOpt.isPresent()) {
+                        long bits = addon$getPaidLevels(skillId);
                         int pointsPerLevel = defOpt.get().cost();
 
+                        // Check for PerLevelRewardsReward to handle dynamic point costs per level
+                        PerLevelRewardsReward foundPlr = null;
                         for (var reward : defOpt.get().rewards()) {
                             if (reward.instance() instanceof PerLevelRewardsReward plr) {
                                 if (plr.getSkillId() == null || plr.getSkillId().equals(skillId)) {
-                                    int skillCost = 0;
-                                    for (int i = 1; i <= level; i++) {
-                                        skillCost += plr.getEffectivePointsPerLevel(i);
-                                    }
-                                    total += skillCost;
-                                    pointsPerLevel = -1; // Flag found
+                                    foundPlr = plr;
                                     break;
                                 }
                             }
                         }
 
-                        if (pointsPerLevel != -1) {
-                            total += pointsPerLevel * level;
+                        if (foundPlr != null) {
+                            int skillCost = 0;
+                            // Only sum costs for levels that are marked as PAID in our bitset
+                            for (int i = 1; i <= currentLevel; i++) {
+                                if ((bits & (1L << i)) != 0) {
+                                    skillCost += foundPlr.getEffectivePointsPerLevel(i);
+                                }
+                            }
+                            total += skillCost;
+                        } else {
+                            // Fallback for default cost (e.g. if PerkLevelRewards is missing but cost is
+                            // set)
+                            int paidCount = 0;
+                            for (int i = 1; i <= currentLevel; i++) {
+                                if ((bits & (1L << i)) != 0) {
+                                    paidCount++;
+                                }
+                            }
+                            total += pointsPerLevel * paidCount;
                         }
                     }
                 }
@@ -471,6 +509,12 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
             levelsNbt.putInt(entry.getKey(), entry.getValue());
         }
         nbt.put("addon_skill_levels", levelsNbt);
+
+        NbtCompound paidNbt = new NbtCompound();
+        for (Map.Entry<String, Long> entry : addon$paidLevels.entrySet()) {
+            paidNbt.putLong(entry.getKey(), entry.getValue());
+        }
+        nbt.put("addon_paid_levels", paidNbt);
     }
 
     /**
@@ -489,6 +533,27 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                 for (String skillId : categoryData.getUnlockedSkillIds()) {
                     if (ext.addon$getSkillLevel(skillId) == 0) {
                         ext.addon$setSkillLevel(skillId, 1);
+                    }
+                }
+            }
+
+            if (nbt.contains("addon_paid_levels", NbtElement.COMPOUND_TYPE)) {
+                var paidNbt = nbt.getCompound("addon_paid_levels");
+                for (var key : paidNbt.getKeys()) {
+                    ext.addon$setPaidLevels(key, paidNbt.getLong(key));
+                }
+            } else {
+                // Migration: If no paid levels saved but we have skills, assume all current
+                // levels were paid
+                // (This matches old behavior where everything was assumed paid)
+                for (String skillId : categoryData.getUnlockedSkillIds()) {
+                    int level = ext.addon$getSkillLevel(skillId);
+                    if (level > 0) {
+                        long bits = 0;
+                        for (int i = 1; i <= level; i++) {
+                            bits |= (1L << i);
+                        }
+                        ext.addon$setPaidLevels(skillId, bits);
                     }
                 }
             }

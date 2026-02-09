@@ -1,0 +1,22 @@
+{
+    "toughness": {
+        "x": 0,
+        "y": 0,
+        "definition": "toughness"
+    },
+    "knockback_res": {
+        "x": 100,
+        "y": 0,
+        "definition": "knockback_res"
+    },
+    "hidden_mastery": {
+        "x": 0,
+        "y": 100,
+        "definition": "hidden_mastery"
+    },
+    "gated_power": {
+        "x": 100,
+        "y": 100,
+        "definition": "gated_power"
+    }
+}

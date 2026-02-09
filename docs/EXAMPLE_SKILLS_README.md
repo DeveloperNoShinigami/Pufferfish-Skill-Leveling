@@ -110,6 +110,9 @@ This document explains the new example skills that demonstrate the refactored pr
 8. Switch to `additional_skills` and level `imbued_vitality` to 2
 9. Return to `example` → Can now advance to level 5!
 
+> [!NOTE]
+> If you want these example skills to appear in the Creative Tab as Tomes/Charms, you must add `"category_id": "example"` to their definitions in `definitions.json`.
+
 ---
 
 ## Key Differences from Old System

@@ -4,7 +4,17 @@ All notable changes to the **Pufferfish Skill Leveling** mod will be documented 
  
 - **Curio Integration Finalization**: Fully integrated Skill Charms with the Curios API, allowing for dedicated charm slots and instant bonus activation. Fixed `CuriosScanner` API usage to correctly iterate and detect charms.
 - **Reward Trigger System Restoration**: Reverted the reward trigger system to the stable `stateChanged` logic. Removed the flawed `persistentActivatedLevels` persistence layer in `DataManager` that was causing "backwards" reward behavior (only firing on join). Rewards now fire immediately upon leveling up in a live session.
+- **Level 1 Reward Fix**: Resolved a critical regression where Level 1 rewards were skipped. Implemented manual reward triggering for the 0->1 transition in `CategoryDataMixin` to bypass Pufferfish's premature firing order.
 - **Recursive Refund Fix**: Finalized the Tome of Greater Clear Mind logic to correctly refund all levels down to 0 while maintaining prerequisite integrity.
+
+## [2026-02-07] - Modpack Integration & Cleanups
+
+- **Fixed**: `InvalidMixinException` in `ServerChatMixin` (Remapped Issue).
+- **Fixed**: `InvalidInjectionException` in `SkillsScreenMixin` (Crash Issue).
+- **Fixed**: Build errors by correcting `remap` settings for internal mixins (`PlayerDataMixin`, `CategoryDataMixin`).
+- **Fixed**: Level 1 reward triggering using manual unlock logic (Fixed "backwards" behavior).
+- **Fixed**: State stability in `PerLevelRewardsReward`.
+- **Removed**: "Targeted Tome Selection Mode" UI (temporarily) to resolve mixin crashes.
 
 ## [2026-02-06] - Reward Logic Refinement & UI Polish
 

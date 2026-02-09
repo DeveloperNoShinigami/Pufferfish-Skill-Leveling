@@ -1,0 +1,17 @@
+{
+    "strength": {
+        "x": 0,
+        "y": 0,
+        "definition": "strength"
+    },
+    "haste": {
+        "x": 100,
+        "y": 0,
+        "definition": "haste"
+    },
+    "dragons_breath": {
+        "x": 50,
+        "y": 100,
+        "definition": "dragons_breath"
+    }
+}

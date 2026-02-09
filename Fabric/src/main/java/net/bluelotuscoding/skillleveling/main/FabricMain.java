@@ -3,6 +3,7 @@ package net.bluelotuscoding.skillleveling.main;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
 import net.bluelotuscoding.skillleveling.registry.ModBlocks;
+import net.bluelotuscoding.skillleveling.registry.ModLootFunctions;
 import net.bluelotuscoding.skillleveling.registry.ModVillagers;
 import net.bluelotuscoding.skillleveling.registry.FabricCreativeTabs;
 import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
@@ -37,6 +38,9 @@ public class FabricMain implements ModInitializer {
         public void onInitialize() {
                 // Initialize common addon logic
                 SkillLevelingMod.init();
+
+                // Register Loot Functions
+                ModLootFunctions.register();
 
                 // Register items
                 ModItems.TOME_OF_PROGRESSION = Registry.register(
@@ -124,10 +128,13 @@ public class FabricMain implements ModInitializer {
                 // Register Loot Injection
                 LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
                         if (source.isBuiltin()) {
-                                net.bluelotuscoding.skillleveling.util.LootHelper.injectChestLoot(id,
-                                                LootPool.builder().rolls(
-                                                                net.minecraft.loot.provider.number.ConstantLootNumberProvider
-                                                                                .create(1.0f)));
+                                LootPool.Builder poolBuilder = LootPool.builder().rolls(
+                                                net.minecraft.loot.provider.number.ConstantLootNumberProvider
+                                                                .create(1.0f));
+                                net.bluelotuscoding.skillleveling.util.LootHelper.injectChestLoot(id, poolBuilder);
+
+                                // If the loot pool has entries, add it to the table
+                                tableBuilder.pool(poolBuilder);
                         }
                 });
 
@@ -186,6 +193,29 @@ public class FabricMain implements ModInitializer {
                                                                 synchronizer, manager,
                                                                 prepareProfiler, applyProfiler, prepareExecutor,
                                                                 applyExecutor);
+                                        }
+                                });
+
+                ResourceManagerHelper.get(ResourceType.SERVER_DATA)
+                                .registerReloadListener(new IdentifiableResourceReloadListener() {
+                                        @Override
+                                        public Identifier getFabricId() {
+                                                return SkillLevelingMod.createIdentifier("global_loot_configuration");
+                                        }
+
+                                        @Override
+                                        public CompletableFuture<Void> reload(
+                                                        ResourceReloader.Synchronizer synchronizer,
+                                                        ResourceManager manager,
+                                                        Profiler prepareProfiler,
+                                                        Profiler applyProfiler, Executor prepareExecutor,
+                                                        Executor applyExecutor) {
+                                                return SkillLevelingMod.getInstance().getGlobalLootConfigLoader()
+                                                                .reload(
+                                                                                synchronizer, manager,
+                                                                                prepareProfiler, applyProfiler,
+                                                                                prepareExecutor,
+                                                                                applyExecutor);
                                         }
                                 });
         }

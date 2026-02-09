@@ -68,6 +68,7 @@
 ### Progression Mechanics
 - [ ] Tooltip preview for slot opening costs
 - [ ] Better visual feedback in anvil when imbuing/extracting
+- [ ] **Deactivation Rewards (`locked`)**: Support for rewards that trigger when a skill hits Level 0 (deactivation hook).
 
 ### Advanced Imbuing
 - [ ] Skill compatibility restrictions (e.g., some skills can't coexist)
@@ -76,6 +77,11 @@
 ### World & Loot
 - [ ] **Apotheosis-style Skill Loot**: Automatically injecting randomized skills/imbuements into standard loot tables.
 
+### User Interface & Controls
+- [ ] **Toggle Skills**: Support for 4 custom keybinds to manually activate/deactivate skills.
+- [ ] **Timed Toggles**: Duration-based activation (`timed_toggle`) with `on_expiry` reward support.
+- [ ] **Re-implement Targeted Tome Selection Mode**: Restore functionality for Tomes that require selecting a specific skill (removed due to mixin crash).
+
 ---
 
-*Last Updated: 2026-02-07*
+*Last Updated: 2026-02-08*

@@ -47,4 +47,14 @@ public interface CategoryDataExtension {
     void addon$setCategoryId(net.minecraft.util.Identifier categoryId);
 
     net.minecraft.util.Identifier addon$getCategoryId();
+
+    /**
+     * Get a bitset (as long) of levels that were paid for with points.
+     */
+    long addon$getPaidLevels(String skillId);
+
+    /**
+     * Set the bitset of levels that were paid for with points.
+     */
+    void addon$setPaidLevels(String skillId, long bits);
 }

@@ -16,8 +16,11 @@ out/
 # Logs and Crash Reports
 *.log
 *.gz
-logs/
 crash-reports/
+crash_reports/
+docs/crash_reports/
+video_guide/
+docs/video_guide/
 
 # Minecraft Run directory
 **/run/
@@ -26,6 +29,7 @@ crash-reports/
 Pufferfish-Skill-Leveling-working version_f21508f/
 Pufferfish-Skill-Leveling-working version_f21508f_reference__features_only/
 puffish_skills-*_source_do_not_edit/
-
+video_guide/
+crash_reports/
 # Local build failure logs
 build_errors.txt

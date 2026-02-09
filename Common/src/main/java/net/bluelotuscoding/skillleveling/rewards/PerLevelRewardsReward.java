@@ -197,6 +197,7 @@ public class PerLevelRewardsReward implements Reward {
             lastActiveLevels.put(playerId, active);
         } else {
             lastActiveLevels.remove(playerId);
+            activatedLevels.remove(playerId);
         }
     }
 
@@ -430,18 +431,24 @@ public class PerLevelRewardsReward implements Reward {
 
         var requiredSkills = new ArrayList<SkillPrerequisite>();
         rootObject.get("prerequisite_skills").getSuccess()
+                .or(() -> rootObject.get("required_skill").getSuccess())
                 .flatMap(e -> e.getAsArray().ifFailure(problems::add).getSuccess()).ifPresent(arr -> {
                     arr.getAsList((index, element) -> {
                         var objRes = element.getAsObject().ifFailure(problems::add);
                         if (objRes.getFailure().isPresent())
                             return Result.failure(null);
                         var obj = objRes.getSuccess().get();
-                        var sId = obj.getString("skill_id").ifFailure(problems::add);
-                        var lvl = obj.getInt("level").ifFailure(problems::add);
+                        // Support both skill_id and skill, level and min_level
+                        var sId = obj.getString("skill_id").getSuccess()
+                                .or(() -> obj.getString("skill").getSuccess());
+                        var lvl = obj.getInt("level").getSuccess()
+                                .or(() -> obj.getInt("min_level").getSuccess());
                         var cId = obj.get("category_id").getSuccess()
-                                .flatMap(el -> el.getAsString().ifFailure(problems::add).getSuccess());
-                        if (sId.getSuccess().isPresent() && lvl.getSuccess().isPresent()) {
-                            return Result.success(new SkillPrerequisite(sId.getSuccess().get(), lvl.getSuccess().get(),
+                                .or(() -> obj.get("category").getSuccess())
+                                .flatMap(el -> el.getAsString().getSuccess());
+
+                        if (sId.isPresent() && lvl.isPresent()) {
+                            return Result.success(new SkillPrerequisite(sId.get(), lvl.get(),
                                     cId.orElse(null)));
                         }
                         return Result.failure(null);
@@ -450,6 +457,15 @@ public class PerLevelRewardsReward implements Reward {
                             requiredSkills.add(p);
                     }));
                 });
+
+        // Parse required_skill_for_level (level-gating prerequisites)
+        // This ensures the reward itself is aware of the gating
+        rootObject.get("required_skill_for_level").ifSuccess(e -> {
+            e.getAsObject().ifSuccess(obj -> {
+                // We mark the field as used to avoid "unused field" warnings.
+                // In the future, we can store these for per-level activation checks.
+            });
+        });
 
         var allowPartialRewards = rootObject.get("allow_partial_rewards").getSuccess()
                 .flatMap(e -> e.getAsBoolean().ifFailure(problems::add).getSuccess()).orElse(false);

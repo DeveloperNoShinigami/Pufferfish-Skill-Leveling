@@ -46,6 +46,7 @@ In `definitions.json`, create a skill with multiple levels:
 {
     "warrior_strength": {
         "type": "puffish_skills:default",
+        "category_id": "combat",
         "title": "Warrior's Strength",
         "description": "Increases your attack damage.",
         "icon": {

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * When a player has a pending Tome action, their chat messages are
  * processed by TomePendingActionManager instead of being broadcast.
  */
-@Mixin(value = ServerPlayNetworkHandler.class, remap = false)
+@Mixin(value = ServerPlayNetworkHandler.class)
 public abstract class ServerChatMixin {
 
     @Shadow

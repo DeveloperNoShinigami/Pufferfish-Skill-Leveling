@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * 
  * NOTE: Only target methods that exist in the ORIGINAL mod, not fork additions.
  */
-@Mixin(value = SkillsMod.class, remap = false)
+@Mixin(value = SkillsMod.class)
 public abstract class SkillsModMixin {
 
     /**

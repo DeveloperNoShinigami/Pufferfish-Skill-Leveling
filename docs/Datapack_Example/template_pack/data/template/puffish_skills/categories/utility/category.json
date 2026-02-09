@@ -1,0 +1,10 @@
+{
+    "title": "Utility",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:iron_pickaxe"
+        }
+    },
+    "background": "textures/gui/advancements/backgrounds/stone.png"
+}

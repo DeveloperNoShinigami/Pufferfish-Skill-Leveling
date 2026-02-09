@@ -21,17 +21,6 @@ import java.util.Optional;
 @Mixin(value = SkillDefinitionConfig.class, remap = false)
 public abstract class SkillDefinitionConfigMixin {
 
-    private static final String DEFAULT_TYPE = "puffish_skill_leveling:default";
-    private static final String STACKABLE_TYPE = "puffish_skill_leveling:stackable";
-
-    private static final String PUFFISH_DEFAULT_TYPE = "puffish_skills:default";
-    private static final String PUFFISH_STACKABLE_TYPE = "puffish_skills:stackable";
-
-    private static boolean isAddonType(String type) {
-        return DEFAULT_TYPE.equals(type) || STACKABLE_TYPE.equals(type)
-                || PUFFISH_DEFAULT_TYPE.equals(type) || PUFFISH_STACKABLE_TYPE.equals(type);
-    }
-
     @Inject(method = "parse(Ljava/lang/String;Lnet/puffish/skillsmod/api/json/JsonObject;Lnet/puffish/skillsmod/api/config/ConfigContext;)Lnet/puffish/skillsmod/api/util/Result;", at = @At("HEAD"))
     private static void onParseHead(String id, JsonObject rootObject, ConfigContext context,
             CallbackInfoReturnable<Result<Optional<SkillDefinitionConfig>, Problem>> cir) {
@@ -41,24 +30,14 @@ public abstract class SkillDefinitionConfigMixin {
             return;
         }
 
-        var typeString = typeResult.flatMap(e -> e.getAsString().getSuccess());
-        if (typeString.isEmpty() || !isAddonType(typeString.get())) {
-            return;
-        }
-
-        // Consume our fields to prevent "unused field" errors from Pufferfish
-        var maxSkillLevel = rootObject.get("max_skill_level").getSuccess();
-        var maxLevels = rootObject.get("max_levels").getSuccess();
-        var pointsPerLevel = rootObject.get("points_per_level").getSuccess();
-        var mergeDescription = rootObject.get("merge_description").getSuccess();
-        var descriptions = rootObject.get("descriptions").getSuccess();
-        var extraDescriptions = rootObject.get("extra_descriptions").getSuccess();
-        // Use getArray to properly consume the prerequisite fields
-        rootObject.getArray("prerequisite_skills");
-        rootObject.getArray("required_skill");
-        // Consume required_skill_for_level (replaces old required_skill for per-level
-        // gating)
-        rootObject.get("required_skill_for_level");
+        // Consume our custom fields and standard prerequisite fields to prevent
+        // "unused field" errors from Pufferfish for ALL skills.
+        rootObject.get("max_skill_level");
+        rootObject.get("max_levels");
+        rootObject.get("points_per_level");
+        rootObject.get("merge_description");
+        rootObject.get("descriptions");
+        rootObject.get("extra_descriptions");
         rootObject.get("loot_mode");
         rootObject.get("category_id");
         rootObject.get("enchantment_levels");
@@ -67,8 +46,17 @@ public abstract class SkillDefinitionConfigMixin {
         rootObject.get("imbuement_cost");
         rootObject.get("slot_opening_cost");
         rootObject.get("cleansing_cost");
+        rootObject.get("hidden");
+        rootObject.get("prerequisite_skills");
+        rootObject.get("required_skill");
+        rootObject.get("required_skill_for_level");
 
-        // Inject them into per_level_rewards reward data if they are missing there
+        // Use the raw GSON object for injection
+        var rawRoot = rootObject.getJson().getAsJsonObject();
+
+        // Inject them into per_level_rewards reward data if they are missing there.
+        // We do this for ALL skill types because any skill can contain this reward
+        // type.
         rootObject.getArray("rewards").ifSuccess(rewardsArray -> {
             var rewards = rewardsArray.getJson();
             for (int i = 0; i < rewards.size(); i++) {
@@ -82,24 +70,35 @@ public abstract class SkillDefinitionConfigMixin {
                         if (dataElement != null && dataElement.isJsonObject()) {
                             var data = dataElement.getAsJsonObject();
 
-                            // Inject missing fields from top level
-                            if (maxSkillLevel.isPresent() && !data.has("max_skill_level")) {
-                                data.add("max_skill_level", maxSkillLevel.get().getJson());
+                            // Inject missing fields from top level using raw GSON
+                            if (rawRoot.has("max_skill_level") && !data.has("max_skill_level")) {
+                                data.add("max_skill_level", rawRoot.get("max_skill_level"));
                             }
-                            if (maxLevels.isPresent() && !data.has("max_levels")) {
-                                data.add("max_levels", maxLevels.get().getJson());
+                            if (rawRoot.has("max_levels") && !data.has("max_levels")) {
+                                data.add("max_levels", rawRoot.get("max_levels"));
                             }
-                            if (pointsPerLevel.isPresent() && !data.has("points_per_level")) {
-                                data.add("points_per_level", pointsPerLevel.get().getJson());
+                            if (rawRoot.has("points_per_level") && !data.has("points_per_level")) {
+                                data.add("points_per_level", rawRoot.get("points_per_level"));
                             }
-                            if (mergeDescription.isPresent() && !data.has("merge_description")) {
-                                data.add("merge_description", mergeDescription.get().getJson());
+                            if (rawRoot.has("merge_description") && !data.has("merge_description")) {
+                                data.add("merge_description", rawRoot.get("merge_description"));
                             }
-                            if (descriptions.isPresent() && !data.has("descriptions")) {
-                                data.add("descriptions", descriptions.get().getJson());
+                            if (rawRoot.has("descriptions") && !data.has("descriptions")) {
+                                data.add("descriptions", rawRoot.get("descriptions"));
                             }
-                            if (extraDescriptions.isPresent() && !data.has("extra_descriptions")) {
-                                data.add("extra_descriptions", extraDescriptions.get().getJson());
+                            if (rawRoot.has("extra_descriptions") && !data.has("extra_descriptions")) {
+                                data.add("extra_descriptions", rawRoot.get("extra_descriptions"));
+                            }
+
+                            // Inject prerequisites into reward data
+                            if (rawRoot.has("prerequisite_skills") && !data.has("prerequisite_skills")) {
+                                data.add("prerequisite_skills", rawRoot.get("prerequisite_skills"));
+                            }
+                            if (rawRoot.has("required_skill") && !data.has("required_skill")) {
+                                data.add("required_skill", rawRoot.get("required_skill"));
+                            }
+                            if (rawRoot.has("required_skill_for_level") && !data.has("required_skill_for_level")) {
+                                data.add("required_skill_for_level", rawRoot.get("required_skill_for_level"));
                             }
 
                             // Ensure skill_id is set if missing
@@ -122,8 +121,6 @@ public abstract class SkillDefinitionConfigMixin {
             return;
         }
 
-        var typeString = typeResult.flatMap(e -> e.getAsString().getSuccess());
-
         // Always parse "hidden" and "loot_mode" for all skills (including standard
         // Pufferfish skills)
         final boolean isLootable = rootObject.get("loot_mode").getSuccess().isPresent();
@@ -131,212 +128,222 @@ public abstract class SkillDefinitionConfigMixin {
                 .flatMap(e -> e.getAsBoolean().getSuccess())
                 .orElse(false);
 
-        if (hidden || isLootable) {
-            // For standard skills, we only care about hidden and lootable status
-            if (typeString.isPresent() && !isAddonType(typeString.get())) {
-                LeveledConfigStorage.put(id,
-                        new LeveledConfigStorage.LeveledConfig(1, 0, false, null, null, isLootable, hidden));
-            }
-        }
-
-        if (typeString.isEmpty() || !isAddonType(typeString.get())) {
-            return;
-        }
+        // For standard skills, we still want to put them in storage if they have
+        // addon-specific features.
+        // We will continue below to parse more fields if available.
 
         Result<Optional<SkillDefinitionConfig>, Problem> result = cir.getReturnValue();
         result.getSuccess().ifPresent(optConfig -> {
             optConfig.ifPresent(config -> {
-                rootObject.get("max_skill_level").getSuccess()
-                        .or(() -> rootObject.get("max_levels").getSuccess())
+                int points = rootObject.get("points_per_level").getSuccess()
                         .flatMap(e -> e.getAsInt().getSuccess())
-                        .ifPresent(maxLevels -> {
-                            int points = rootObject.get("points_per_level").getSuccess()
-                                    .flatMap(e -> e.getAsInt().getSuccess())
-                                    .orElse(0);
-                            boolean merge = rootObject.get("merge_description").getSuccess()
-                                    .flatMap(e -> e.getAsBoolean().getSuccess()).orElse(false);
+                        .orElse(0);
+                boolean merge = rootObject.get("merge_description").getSuccess()
+                        .flatMap(e -> e.getAsBoolean().getSuccess()).orElse(false);
 
-                            List<LeveledConfigStorage.RequiredSkillEntry> requiredSkillsList = new ArrayList<>();
+                List<LeveledConfigStorage.RequiredSkillEntry> requiredSkillsList = new ArrayList<>();
 
-                            // Parse both "prerequisite_skills" (Pufferfish-like) and "required_skill"
-                            // (Addon-like)
-                            var prereqsResult = rootObject.getArray("prerequisite_skills")
-                                    .getSuccess()
-                                    .or(() -> rootObject.getArray("required_skill").getSuccess());
+                // Parse both "prerequisite_skills" (Pufferfish-like) and "required_skill"
+                // (Addon-like)
+                var prereqsResult = rootObject.getArray("prerequisite_skills")
+                        .getSuccess()
+                        .or(() -> rootObject.getArray("required_skill").getSuccess());
 
-                            prereqsResult.ifPresent(arr -> {
-                                var jsonArr = arr.getJson();
-                                for (int i = 0; i < jsonArr.size(); i++) {
-                                    var elem = jsonArr.get(i);
-                                    if (elem.isJsonObject()) {
-                                        var reqObj = elem.getAsJsonObject();
+                prereqsResult.ifPresent(arr -> {
+                    var jsonArr = arr.getJson();
+                    for (int i = 0; i < jsonArr.size(); i++) {
+                        var elem = jsonArr.get(i);
+                        if (elem.isJsonObject()) {
+                            var reqObj = elem.getAsJsonObject();
 
-                                        // Support both "skill" and "skill_id"
-                                        var skillIdElem = reqObj.has("skill") ? reqObj.get("skill")
-                                                : reqObj.get("skill_id");
+                            // Support both "skill" and "skill_id"
+                            var skillIdElem = reqObj.has("skill") ? reqObj.get("skill")
+                                    : reqObj.get("skill_id");
 
-                                        // Support "min_level", "level", and "max_level" (for backwards compatibility)
-                                        var minLevelElem = reqObj.has("min_level") ? reqObj.get("min_level")
-                                                : (reqObj.has("level") ? reqObj.get("level")
-                                                        : reqObj.get("max_level"));
+                            // Support "min_level", "level", and "max_level" (for backwards compatibility)
+                            var minLevelElem = reqObj.has("min_level") ? reqObj.get("min_level")
+                                    : (reqObj.has("level") ? reqObj.get("level")
+                                            : reqObj.get("max_level"));
 
-                                        if (skillIdElem != null && !skillIdElem.isJsonNull() && minLevelElem != null
-                                                && !minLevelElem.isJsonNull()) {
-                                            String reqSkillId = skillIdElem.getAsString();
-                                            int minLevel = minLevelElem.getAsInt();
+                            if (skillIdElem != null && !skillIdElem.isJsonNull() && minLevelElem != null
+                                    && !minLevelElem.isJsonNull()) {
+                                String reqSkillId = skillIdElem.getAsString();
+                                int minLevel = minLevelElem.getAsInt();
 
-                                            // Parse optional category for cross-category support (support both category
-                                            // and category_id)
-                                            String category = reqObj.has("category")
-                                                    ? reqObj.get("category").getAsString()
-                                                    : (reqObj.has("category_id")
-                                                            ? reqObj.get("category_id").getAsString()
-                                                            : null);
+                                // Parse optional category for cross-category support (support both category
+                                // and category_id)
+                                String category = reqObj.has("category")
+                                        ? reqObj.get("category").getAsString()
+                                        : (reqObj.has("category_id")
+                                                ? reqObj.get("category_id").getAsString()
+                                                : null);
 
-                                            requiredSkillsList.add(new LeveledConfigStorage.RequiredSkillEntry(
-                                                    reqSkillId, minLevel, category));
+                                requiredSkillsList.add(new LeveledConfigStorage.RequiredSkillEntry(
+                                        reqSkillId, minLevel, category));
+                            }
+                        }
+                    }
+                });
+
+                // Parse required_skill_for_level (level-gating prerequisites)
+                Map<Integer, List<LeveledConfigStorage.RequiredSkillEntry>> levelPrereqs = new HashMap<>();
+                rootObject.get("required_skill_for_level").getSuccess().ifPresent(levelReqElem -> {
+                    var levelReqJson = levelReqElem.getJson();
+                    if (levelReqJson.isJsonObject()) {
+                        var levelReqObj = levelReqJson.getAsJsonObject();
+                        for (var entry : levelReqObj.entrySet()) {
+                            try {
+                                int targetLevel = Integer.parseInt(entry.getKey());
+                                List<LeveledConfigStorage.RequiredSkillEntry> prereqsForLevel = new ArrayList<>();
+                                if (entry.getValue().isJsonArray()) {
+                                    var prereqArr = entry.getValue().getAsJsonArray();
+                                    for (int i = 0; i < prereqArr.size(); i++) {
+                                        var prereqElem = prereqArr.get(i);
+                                        if (prereqElem.isJsonObject()) {
+                                            var prereqObj = prereqElem.getAsJsonObject();
+                                            // Support both "skill" and "skill_id"
+                                            var skillIdElem = prereqObj.has("skill")
+                                                    ? prereqObj.get("skill")
+                                                    : prereqObj.get("skill_id");
+
+                                            var minLevelElem = prereqObj.has("min_level")
+                                                    ? prereqObj.get("min_level")
+                                                    : (prereqObj.has("level") ? prereqObj.get("level")
+                                                            : prereqObj.get("max_level"));
+
+                                            if (skillIdElem != null && !skillIdElem.isJsonNull()
+                                                    && minLevelElem != null && !minLevelElem.isJsonNull()) {
+                                                String reqSkillId = skillIdElem.getAsString();
+                                                int minLevel = minLevelElem.getAsInt();
+                                                String category = prereqObj.has("category")
+                                                        ? prereqObj.get("category").getAsString()
+                                                        : (prereqObj.has("category_id")
+                                                                ? prereqObj.get("category_id").getAsString()
+                                                                : null);
+                                                prereqsForLevel.add(
+                                                        new LeveledConfigStorage.RequiredSkillEntry(
+                                                                reqSkillId, minLevel, category));
+                                            }
                                         }
                                     }
                                 }
-                            });
-
-                            // Parse required_skill_for_level (level-gating prerequisites)
-                            Map<Integer, List<LeveledConfigStorage.RequiredSkillEntry>> levelPrereqs = new HashMap<>();
-                            rootObject.get("required_skill_for_level").getSuccess().ifPresent(levelReqElem -> {
-                                var levelReqJson = levelReqElem.getJson();
-                                if (levelReqJson.isJsonObject()) {
-                                    var levelReqObj = levelReqJson.getAsJsonObject();
-                                    for (var entry : levelReqObj.entrySet()) {
-                                        try {
-                                            int targetLevel = Integer.parseInt(entry.getKey());
-                                            List<LeveledConfigStorage.RequiredSkillEntry> prereqsForLevel = new ArrayList<>();
-                                            if (entry.getValue().isJsonArray()) {
-                                                var prereqArr = entry.getValue().getAsJsonArray();
-                                                for (int i = 0; i < prereqArr.size(); i++) {
-                                                    var prereqElem = prereqArr.get(i);
-                                                    if (prereqElem.isJsonObject()) {
-                                                        var prereqObj = prereqElem.getAsJsonObject();
-                                                        // Support both "skill" and "skill_id"
-                                                        var skillIdElem = prereqObj.has("skill")
-                                                                ? prereqObj.get("skill")
-                                                                : prereqObj.get("skill_id");
-
-                                                        var minLevelElem = prereqObj.has("min_level")
-                                                                ? prereqObj.get("min_level")
-                                                                : (prereqObj.has("level") ? prereqObj.get("level")
-                                                                        : prereqObj.get("max_level"));
-
-                                                        if (skillIdElem != null && !skillIdElem.isJsonNull()
-                                                                && minLevelElem != null && !minLevelElem.isJsonNull()) {
-                                                            String reqSkillId = skillIdElem.getAsString();
-                                                            int minLevel = minLevelElem.getAsInt();
-                                                            String category = prereqObj.has("category")
-                                                                    ? prereqObj.get("category").getAsString()
-                                                                    : (prereqObj.has("category_id")
-                                                                            ? prereqObj.get("category_id").getAsString()
-                                                                            : null);
-                                                            prereqsForLevel.add(
-                                                                    new LeveledConfigStorage.RequiredSkillEntry(
-                                                                            reqSkillId, minLevel, category));
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            if (!prereqsForLevel.isEmpty()) {
-                                                levelPrereqs.put(targetLevel, prereqsForLevel);
-                                            }
-                                        } catch (NumberFormatException e) {
-                                            // Invalid level key, skip
-                                        }
-                                    }
+                                if (!prereqsForLevel.isEmpty()) {
+                                    levelPrereqs.put(targetLevel, prereqsForLevel);
                                 }
-                            });
+                            } catch (NumberFormatException e) {
+                                // Invalid level key, skip
+                            }
+                        }
+                    }
+                });
 
-                            String lootMode = rootObject.get("loot_mode").getSuccess()
-                                    .flatMap(e -> e.getAsString().getSuccess())
-                                    .orElse(null);
+                String lootMode = rootObject.get("loot_mode").getSuccess()
+                        .flatMap(e -> e.getAsString().getSuccess())
+                        .orElse(null);
 
-                            String categoryId = rootObject.get("category_id").getSuccess()
-                                    .flatMap(e -> e.getAsString().getSuccess())
-                                    .orElse(null);
+                String categoryId = rootObject.get("category_id").getSuccess()
+                        .flatMap(e -> e.getAsString().getSuccess())
+                        .orElse(null);
 
-                            // Parse enchantment cost options (supports enchantment_cost and legacy
-                            // enchantment_levels)
-                            LeveledConfigStorage.EnchantmentCostConfig enchantmentCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
-                            var costResult = rootObject.get("enchantment_cost").getSuccess()
-                                    .or(() -> rootObject.get("enchantment_levels").getSuccess());
+                // Parse enchantment cost options (supports enchantment_cost and legacy
+                // enchantment_levels)
+                LeveledConfigStorage.EnchantmentCostConfig enchantmentCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
+                var costResult = rootObject.get("enchantment_cost").getSuccess()
+                        .or(() -> rootObject.get("enchantment_levels").getSuccess());
 
-                            if (costResult.isPresent()) {
-                                var costElem = costResult.get().getJson();
-                                if (costElem.isJsonPrimitive()) {
-                                    var primitive = costElem.getAsJsonPrimitive();
-                                    if (primitive.isNumber()) {
-                                        enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
-                                                primitive.getAsInt());
-                                    } else if (primitive.isString()) {
-                                        enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
-                                                primitive.getAsString());
-                                    }
-                                } else if (costElem.isJsonArray()) {
-                                    var arrValue = costElem.getAsJsonArray();
+                if (costResult.isPresent()) {
+                    var costElem = costResult.get().getJson();
+                    if (costElem.isJsonPrimitive()) {
+                        var primitive = costElem.getAsJsonPrimitive();
+                        if (primitive.isNumber()) {
+                            enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
+                                    primitive.getAsInt());
+                        } else if (primitive.isString()) {
+                            enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
+                                    primitive.getAsString());
+                        }
+                    } else if (costElem.isJsonArray()) {
+                        var arrValue = costElem.getAsJsonArray();
+                        int[] values = new int[arrValue.size()];
+                        for (int i = 0; i < arrValue.size(); i++) {
+                            values[i] = arrValue.get(i).getAsInt();
+                        }
+                        enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(values);
+                    } else if (costElem.isJsonObject()) {
+                        var obj = costElem.getAsJsonObject();
+                        if (obj.has("type") && obj.get("type").isJsonPrimitive()) {
+                            String costType = obj.get("type").getAsString();
+                            var dataObjResult = obj.get("data");
+                            if (dataObjResult != null && dataObjResult.isJsonObject()) {
+                                var dataObj = dataObjResult.getAsJsonObject();
+                                if ("expression".equals(costType) && dataObj.has("expression")) {
+                                    enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
+                                            dataObj.get("expression").getAsString());
+                                } else if ("array".equals(costType) && dataObj.has("values")) {
+                                    var arrValue = dataObj.get("values").getAsJsonArray();
                                     int[] values = new int[arrValue.size()];
                                     for (int i = 0; i < arrValue.size(); i++) {
                                         values[i] = arrValue.get(i).getAsInt();
                                     }
-                                    enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(values);
-                                } else if (costElem.isJsonObject()) {
-                                    var obj = costElem.getAsJsonObject();
-                                    if (obj.has("type") && obj.get("type").isJsonPrimitive()) {
-                                        String costType = obj.get("type").getAsString();
-                                        var dataObjResult = obj.get("data");
-                                        if (dataObjResult != null && dataObjResult.isJsonObject()) {
-                                            var dataObj = dataObjResult.getAsJsonObject();
-                                            if ("expression".equals(costType) && dataObj.has("expression")) {
-                                                enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
-                                                        dataObj.get("expression").getAsString());
-                                            } else if ("array".equals(costType) && dataObj.has("values")) {
-                                                var arrValue = dataObj.get("values").getAsJsonArray();
-                                                int[] values = new int[arrValue.size()];
-                                                for (int i = 0; i < arrValue.size(); i++) {
-                                                    values[i] = arrValue.get(i).getAsInt();
-                                                }
-                                                enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
-                                                        values);
-                                            }
-                                        }
-                                    }
+                                    enchantmentCost = new LeveledConfigStorage.EnchantmentCostConfig(
+                                            values);
                                 }
                             }
+                        }
+                    }
+                }
 
-                            // Parse imbuement cost options
-                            LeveledConfigStorage.EnchantmentCostConfig imbuementCost = null;
-                            var imbueResult = rootObject.get("imbuement_cost").getSuccess()
-                                    .or(() -> rootObject.get("imbuement_levels").getSuccess());
+                // Parse imbuement cost options
+                LeveledConfigStorage.EnchantmentCostConfig imbuementCost = null;
+                var imbueResult = rootObject.get("imbuement_cost").getSuccess()
+                        .or(() -> rootObject.get("imbuement_levels").getSuccess());
 
-                            if (imbueResult.isPresent()) {
-                                imbuementCost = parseEnchantmentCost(imbueResult.get().getJson());
-                            }
+                if (imbueResult.isPresent()) {
+                    imbuementCost = parseEnchantmentCost(imbueResult.get().getJson());
+                }
 
-                            // Parse slot opening cost
-                            LeveledConfigStorage.EnchantmentCostConfig slotOpeningCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
-                            var slotOpeningResult = rootObject.get("slot_opening_cost").getSuccess();
-                            if (slotOpeningResult.isPresent()) {
-                                slotOpeningCost = parseEnchantmentCost(slotOpeningResult.get().getJson());
-                            }
+                // Parse slot opening cost
+                LeveledConfigStorage.EnchantmentCostConfig slotOpeningCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
+                var slotOpeningResult = rootObject.get("slot_opening_cost").getSuccess();
+                if (slotOpeningResult.isPresent()) {
+                    slotOpeningCost = parseEnchantmentCost(slotOpeningResult.get().getJson());
+                }
 
-                            // Parse cleansing cost
-                            LeveledConfigStorage.EnchantmentCostConfig cleansingCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
-                            var cleansingResult = rootObject.get("cleansing_cost").getSuccess();
-                            if (cleansingResult.isPresent()) {
-                                cleansingCost = parseEnchantmentCost(cleansingResult.get().getJson());
-                            }
+                // Parse cleansing cost
+                LeveledConfigStorage.EnchantmentCostConfig cleansingCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
+                var cleansingResult = rootObject.get("cleansing_cost").getSuccess();
+                if (cleansingResult.isPresent()) {
+                    cleansingCost = parseEnchantmentCost(cleansingResult.get().getJson());
+                }
 
-                            LeveledConfigStorage.put(id,
-                                    new LeveledConfigStorage.LeveledConfig(maxLevels, points, merge,
-                                            requiredSkillsList, levelPrereqs, lootMode, categoryId, enchantmentCost,
-                                            imbuementCost,
-                                            slotOpeningCost, cleansingCost, isLootable, hidden));
-                        });
+                // 1. Determine if we should register this skill in the addon storage
+                boolean hasAddonFeatures = rootObject.get("max_skill_level").getSuccess().isPresent() ||
+                        rootObject.get("max_levels").getSuccess().isPresent() ||
+                        rootObject.get("points_per_level").getSuccess().isPresent() ||
+                        rootObject.get("hidden").getSuccess().isPresent() ||
+                        rootObject.get("loot_mode").getSuccess().isPresent() ||
+                        rootObject.get("category_id").getSuccess().isPresent() ||
+                        rootObject.get("enchantment_levels").getSuccess().isPresent() ||
+                        rootObject.get("enchantment_cost").getSuccess().isPresent() ||
+                        rootObject.get("imbuement_levels").getSuccess().isPresent() ||
+                        rootObject.get("imbuement_cost").getSuccess().isPresent() ||
+                        rootObject.get("slot_opening_cost").getSuccess().isPresent() ||
+                        rootObject.get("cleansing_cost").getSuccess().isPresent() ||
+                        rootObject.get("required_skill_for_level").getSuccess().isPresent() ||
+                        !requiredSkillsList.isEmpty();
+
+                if (hasAddonFeatures) {
+                    int finalMaxLevels = rootObject.get("max_skill_level").getSuccess()
+                            .or(() -> rootObject.get("max_levels").getSuccess())
+                            .flatMap(e -> e.getAsInt().getSuccess())
+                            .orElse(1); // Default to 1 for standard skills
+
+                    LeveledConfigStorage.put(id,
+                            new LeveledConfigStorage.LeveledConfig(finalMaxLevels, points, merge,
+                                    requiredSkillsList, levelPrereqs, lootMode, categoryId, enchantmentCost,
+                                    imbuementCost,
+                                    slotOpeningCost, cleansingCost, isLootable, hidden));
+                }
             });
         });
     }

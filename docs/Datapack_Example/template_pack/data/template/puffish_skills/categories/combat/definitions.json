@@ -1,0 +1,202 @@
+{
+    "vitality": {
+        "type": "puffish_skills:default",
+        "category_id": "combat",
+        "title": "Vitality",
+        "description": "Increases your maximum health.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:apple"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "points_per_level": 1,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +2 HP",
+            "2": "Level 2: +4 HP",
+            "3": "Level 3: +6 HP",
+            "4": "Level 4: +8 HP",
+            "5": "Level 5: +10 HP"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +2 Max HP",
+            "1": "Next Rank: +2 Max HP",
+            "2": "Next Rank: +2 Max HP",
+            "3": "Next Rank: +2 Max HP",
+            "4": "Next Rank: +2 Max HP",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "vitality",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 2.0
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 4.0
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 6.0
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 8.0
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 10.0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "vitality_icon_id"
+        }
+    },
+    "armor_plating": {
+        "type": "puffish_skill_leveling:stackable",
+        "category_id": "combat",
+        "title": "Armor Plating",
+        "description": "Stackable armor reinforcement.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:iron_ingot"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "points_per_level": 2,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Rank 1: +1 Armor",
+            "2": "Rank 2: +2 Armor",
+            "3": "Rank 3: +3 Armor",
+            "4": "Rank 4: +4 Armor",
+            "5": "Rank 5: +5 Armor & Steel Guard"
+        },
+        "extra_descriptions": {
+            "0": "Unlock Base Armor Boon",
+            "1": "Next Rank: +1 Armor",
+            "2": "Next Rank: +1 Armor",
+            "3": "Next Rank: +1 Armor",
+            "4": "Master Rank: Steel Guard",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skills:command",
+                "data": {
+                    "command": "say %player% is reinforcing their armor!"
+                }
+            },
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "armor_plating",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 1.0
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 2.0
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 3.0
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 4.0
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 5.0
+                                }
+                            },
+                            {
+                                "type": "puffish_skills:command",
+                                "data": {
+                                    "command": "effect give %player% minecraft:resistance 99999 0 true"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "armor_plating_icon_id"
+        }
+    }
+}

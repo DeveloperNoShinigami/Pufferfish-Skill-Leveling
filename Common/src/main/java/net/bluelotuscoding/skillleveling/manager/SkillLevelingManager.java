@@ -344,6 +344,7 @@ public class SkillLevelingManager {
         // Reload leveled skill configurations after datapack reload
         this.configurationsLoaded = false;
         this.perLevelRewardsRewards.clear();
+        net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.clear();
         ensureConfigurationsLoaded();
     }
 
@@ -976,6 +977,11 @@ public class SkillLevelingManager {
         if (ext != null) {
             ext.addon$setOwner(player);
             ext.addon$setCategoryId(categoryId);
+
+            // Mark the new level as PAID since advanceSkillLevel always deducts points
+            long bits = ext.addon$getPaidLevels(skillId);
+            ext.addon$setPaidLevels(skillId, bits | (1L << newBaseLevel));
+
             ext.addon$setSkillLevel(skillId, newBaseLevel);
         }
 
@@ -1059,6 +1065,16 @@ public class SkillLevelingManager {
         if (ext != null) {
             ext.addon$setOwner(player);
             ext.addon$setCategoryId(categoryId);
+
+            if (!bypassPoints) {
+                // If not bypassing, mark all levels from current to new as PAID
+                long bits = ext.addon$getPaidLevels(skillId);
+                for (int lvl = currentBaseLevel + 1; lvl <= level; lvl++) {
+                    bits |= (1L << lvl);
+                }
+                ext.addon$setPaidLevels(skillId, bits);
+            }
+
             ext.addon$setSkillLevel(skillId, level);
         }
 
@@ -1324,6 +1340,11 @@ public class SkillLevelingManager {
         if (ext != null) {
             ext.addon$setOwner(player);
             ext.addon$setCategoryId(categoryId);
+
+            // Clear the bit for the level being removed
+            long bits = ext.addon$getPaidLevels(skillId);
+            ext.addon$setPaidLevels(skillId, bits & ~(1L << currentBaseLevel));
+
             ext.addon$setSkillLevel(skillId, newLevel);
         }
 

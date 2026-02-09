@@ -1,0 +1,10 @@
+{
+    "title": "Ancient Mastery",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:netherite_ingot"
+        }
+    },
+    "background": "textures/gui/advancements/backgrounds/stone.png"
+}

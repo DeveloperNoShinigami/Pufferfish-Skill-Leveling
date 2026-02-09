@@ -177,8 +177,9 @@ Controls how skills can be acquired:
 
 ## Next Steps
 
-- [Features Reference](./FEATURES.md) — Complete list of all addon features
-- [Datapack Guide](./DATAPACK_GUIDE.md) — Detailed guide for creating custom datapacks
+- **[Point B: Features Reference](./FEATURES.md)** — Complete list of all addon features and mechanics.
+- **[Point C: Datapack Guide](./DATAPACK_GUIDE.md)** — Detailed journey from your first skill to advanced mastery logic.
+- **[Point Z: Feature Roadmap](./ROADMAP.md)** — Experimental features and future development plans.
 
 ---
 

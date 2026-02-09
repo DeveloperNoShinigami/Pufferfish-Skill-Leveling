@@ -29,7 +29,21 @@ docs/video_guide/
 Pufferfish-Skill-Leveling-working version_f21508f/
 Pufferfish-Skill-Leveling-working version_f21508f_reference__features_only/
 puffish_skills-*_source_do_not_edit/
+
+# Addon Local Exclusions
+docs/AGENTS.md
+docs/video_guide/
 video_guide/
 crash_reports/
+docs/crash_reports/
+
+# Minecraft Run directory
+**/run/
+run/
+
 # Local build failure logs
 build_errors.txt
+
+# System Clutter
+.DS_Store
+Thumbs.db

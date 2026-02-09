@@ -11,15 +11,49 @@ Skills can have any number of levels (1 to N), each granting cumulative or disti
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `max_skill_level` | integer | 1 | Maximum levels for this skill |
-| `points_per_level` | integer | 1 | Skill points required per level |
-| `category_id` | string | — | Category this skill belongs to |
-| `loot_mode` | string | — | `"tome_only"`, `"imbue_only"`, or `"both"` |
-| `merge_description` | boolean | false | Accumulate descriptions across levels |
-| `hidden` | boolean | false | Completely hide skill from UI until prerequisites met |
-| `required_skill` | array | — | Cross-category requirements (object with `skill_id`, `level`, `category_id`) |
-| `descriptions` | object | — | Level-specific descriptions |
-| `extra_descriptions` | object | — | Preview text for next level |
+| `max_skill_level` | integer | 1 | Maximum levels for this skill. Alias: `max_levels`. |
+| `points_per_level`| integer | 1 | Skill points required per level. |
+| `category_id` | string | — | Category string (**Mandatory** for Creative Tab items). |
+| `loot_mode` | string | — | `"tome_only"`, `"imbue_only"`, or `"both"`. |
+| `hidden` | boolean | false | Completely hide skill icon until prerequisites met. |
+| `merge_description`| boolean | false | Accumulate tooltips across all attained levels. |
+| `descriptions` | object | — | Keyed list of descriptions (e.g., `"1": "Level 1 info"`). |
+| `extra_descriptions`| object | — | Keyed list of level-up previews (Use `"0"` for unlock). |
+
+### Technical Cost Mechanics
+All XP costs (`enchantment_cost`, `imbuement_cost`, `slot_opening_cost`, `cleansing_cost`) support four high-flexibility formats:
+
+| Format | Example | Behavior |
+|--------|---------|----------|
+| **Scalar** | `5` | Multiplied by target level (e.g., Level 2 costs 10 XP). |
+| **Array** | `[5, 10, 20]` | Index-based lookup (Index = Level - 1). |
+| **Expression**| `"level * 2 + 5"`| Evaluates math string with `level` variable. |
+| **Object** | `{"type": "expression", "data": {"expression": "..."}}` | Explicitly defined for complex data. |
+
+> [!NOTE]
+> **Legacy Support**: `enchantment_levels` and `imbuement_levels` are compatible aliases for `enchantment_cost` and `imbuement_cost`.
+
+---
+
+### Tiered Prerequisite System
+The addon uses a multi-layered requirement system to control progression flow.
+
+#### 1. Initial Unlock (`prerequisite_skills`)
+- **Field**: `prerequisite_skills` (or legacy `required_skill`).
+- **Function**: Controls the first-time appearance and purchase availability.
+- **Scope**: Skill-wide. Once unlocked, it stays unlocked.
+
+#### 2. Tiered Level Gating (`required_skill_for_level`)
+- **Field**: `required_skill_for_level`.
+- **Function**: Blocks specific level increments (e.g., Level 5 requires Sword Mastery 3).
+- **Format**: `{"level_number": [{"skill": "id", "min_level": N, "category": "cat"}]}`.
+- **Modern Standard**: This field replaces the "old" flat `required_skill` logic for depth-based gating.
+
+### Point Bypass Mechanic (Paid Level Tracker)
+The addon tracks which levels were actually purchased with points vs. which were granted by external items.
+- **Skill Tomes / Imbuing**: Automatically bypasses point costs. These levels are marked as "Granted".
+- **Refunds**: Refunding a "Granted" level returns 0 points. Refunding a "Paid" level returns the full cost.
+- **Goal**: Ensures discovery-based progression doesn't interfere with the player's intentional point allocation.
 
 ### Visual Discovery (Hidden Skills)
 
@@ -102,13 +136,19 @@ The Skill Master follows standard villager leveling (Novice to Master):
 
 ---
 
-## Equipment Imbuing
-
-- **Application**: Combine a Skill Tome and gear in an anvil.
-- **Requirement**: Skill must be defined in the datapack with appropriate `imbue_only` or `both` loot mode.
-- **Slots**: Most gear supports up to 3 slots (via Sigils). Skill Charms provide dedicated slots for charms.
-- **Stacking**: Multiple imbued skills on one item stack their attribute bonuses.
 - **Dynamic Sync**: Attribute changes (Health, Damage, MS) apply immediately when equipped.
+
+---
+
+## Technical Costs (XP Expressions)
+The addon supports dynamic XP cost calculation using common math expressions (e.g., `level * 5 + 10`).
+
+| Field | Location | Description |
+|-------|----------|-------------|
+| `enchantment_cost` | Skill | XP cost to combine Tome + Item in Anvil |
+| `imbuement_cost` | Skill | XP cost for specialized manual imbuing |
+| `slot_opening_cost`| Skill | XP cost to use a Sigil of Imbuement on the item |
+| `cleansing_cost` | Skill | XP cost to extract a skill using a Tome of Cleansing |
 
 ---
 

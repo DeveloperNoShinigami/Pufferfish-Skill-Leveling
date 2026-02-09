@@ -11,10 +11,10 @@
 
 | Document | Description |
 |----------|-------------|
-| [Getting Started](./docs/GETTING_STARTED.md) | Installation and quick-start tutorial |
-| [Features](./docs/FEATURES.md) | Complete list of all addon features |
-| [Datapack Guide](./docs/DATAPACK_GUIDE.md) | How to create custom skill datapacks |
-| [Roadmap](./docs/ROADMAP.md) | Planned features and project progress |
+| [1. Getting Started](./docs/GETTING_STARTED.md) | **Point A**: Installation & First Level |
+| [2. Features Reference](./docs/FEATURES.md) | **Point B**: Complete List of Mechanics |
+| [3. Datapack Guide](./docs/DATAPACK_GUIDE.md) | **Point C**: Beginner to Advanced Tutorial |
+| [4. Feature Roadmap](./docs/ROADMAP.md) | **Point Z**: Experimental & Future Work |
 
 ---
 

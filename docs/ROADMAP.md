@@ -82,6 +82,17 @@
 - [ ] **Timed Toggles**: Duration-based activation (`timed_toggle`) with `on_expiry` reward support.
 - [ ] **Re-implement Targeted Tome Selection Mode**: Restore functionality for Tomes that require selecting a specific skill (removed due to mixin crash).
 
+### 📚 Documentation & Technical 
+- [ ] **Comprehensive Developer Guide**: In-depth technical manual for modders and developers. Covers Java API, internal mixins, and deep-level JSON schema customization for advanced modding.
+
 ---
 
-*Last Updated: 2026-02-08*
+## 🐛 Current Bugs & Known Issues
+*These are identified issues scheduled for resolution in the next minor update.*
+
+- [ ] **Loot Randomization failure**: The `puffish_skill_leveling:randomize_skill_tome` function and global loot config are currently non-functional and require a logic overhaul.
+- [ ] **Hidden Skill Category Warning**: "Could not determine category for skill..." warnings appear during prerequisite checking for hidden skills (Rewards mapping timing issue).
+
+---
+
+*Last Updated: 2026-02-09*

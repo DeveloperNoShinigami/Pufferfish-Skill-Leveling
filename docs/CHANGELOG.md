@@ -7,6 +7,23 @@ All notable changes to the **Pufferfish Skill Leveling** mod will be documented 
 - **Level 1 Reward Fix**: Resolved a critical regression where Level 1 rewards were skipped. Implemented manual reward triggering for the 0->1 transition in `CategoryDataMixin` to bypass Pufferfish's premature firing order.
 - **Recursive Refund Fix**: Finalized the Tome of Greater Clear Mind logic to correctly refund all levels down to 0 while maintaining prerequisite integrity.
 
+## [2026-02-09] - Documentation "High-Fidelity" Restoration & Repo Cleanup
+
+- **Point A-Z Documentation Flow**: Reorganized the entire repository documentation into a professional, sequential journey (**Getting Started** -> **Features** -> **Datapack Guide** -> **Roadmap**).
+- **Exhaustive Datapack Guide (v2)**: Performed a total restoration and expansion of `DATAPACK_GUIDE.md`, moving from foundational structure to "Grandmaster" authorship.
+    - **Technical Mechanics**: Restored exhaustive field references for all cost types (`cleansing_cost`, `slot_opening_cost`, etc).
+    - **Tome Combining**: Documented the Anvil-based Rank Up logic (Rank X + Rank X = Rank X+1).
+    - **Point Bypass System**: Defined the technical "Paid" vs "Granted" level tracking logic.
+    - **Specialized Progression Items**: Comprehensive documentation for Blank Tomes, Refund/Reset artifacts, and Skill Charms.
+- **Skill Master House & Reputation**: Corrected terminology to "Skill Master House" and added deep-dives into his professional reputation system, tier-gated (T4/T5) special trades, and price scaling.
+- **Repository Cleanup**:
+    - **Updated `.gitignore`**: Successfully untracked local-only files (`AGENTS.md`, `video_guide/`) while keeping them in the filesystem.
+    - **Obsolete Removal**: Deleted `WIKI_TUTORIAL.md`, `STANDARDIZED_DATAPACK_REFERENCE.md`, and `EXAMPLE_SKILLS_README.md` to streamline the repository.
+- **Visual & Technical Polish**:
+    - **JSON Formatting**: Beautified all guide examples with proper multi-line, indented JSON structures for maximum clarity.
+    - **Point Consumption Fix**: Finalized the paid-level tracker bitset integration for Skill Tomes.
+- **Roadmap Update**: Added the "Comprehensive Developer Guide" project for future high-level technical/Java API documentation.
+
 ## [2026-02-07] - Modpack Integration & Cleanups
 
 - **Fixed**: `InvalidMixinException` in `ServerChatMixin` (Remapped Issue).

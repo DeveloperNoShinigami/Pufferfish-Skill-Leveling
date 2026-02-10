@@ -53,6 +53,7 @@ The addon uses a multi-layered requirement system to control progression flow.
 The addon tracks which levels were actually purchased with points vs. which were granted by external items.
 - **Skill Tomes / Imbuing**: Automatically bypasses point costs. These levels are marked as "Granted".
 - **Refunds**: Refunding a "Granted" level returns 0 points. Refunding a "Paid" level returns the full cost.
+- **Flexible Matching**: Imbuing and bonus calculation use **Namespace Agnostic Pathing**. This allows "normally generated" tomes with short IDs (e.g., `vitality`) to correctly match gear and tree skills with namespaced IDs (e.g., `template:vitality`).
 - **Goal**: Ensures discovery-based progression doesn't interfere with the player's intentional point allocation.
 
 ### Visual Discovery (Hidden Skills)
@@ -158,6 +159,7 @@ The addon supports dynamic XP cost calculation using common math expressions (e.
 |---------|-------------|
 | `/skillleveling get <player> <cat> <skill>` | View current base skill level |
 | `/skillleveling set <player> <cat> <skill> <level>` | Admin override (sets level directly) |
+| `/skillleveling give tome <player> <cat> <skill> [mode] [lvl]` | Generate custom Skill Tomes for testing |
 | `/skillleveling advance <player> <cat> <skill>` | Advance skill by 1 level (costs points) |
 | `/skillleveling refund <player> <cat> <skill> [amount]` | Refund levels and return spent points |
 | `/skillleveling refund <player> <cat> <skill> all` | Fully reset a skill to level 0 |

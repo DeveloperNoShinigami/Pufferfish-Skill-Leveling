@@ -230,23 +230,35 @@ public abstract class AnvilScreenHandlerMixin extends ScreenHandler {
                         }
                     } else if (existingLevel == 0 && ImbuedSkillHelper.hasEmptySlot(result)) {
                         // === Imbue scenario: new skill into empty slot ===
-                        ImbuedSkillHelper.addSkill(result, categoryId, skillId, tomeLevel);
+                        var manager = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance()
+                                .getSkillLevelingManager();
+                        if (manager != null) {
+                            net.minecraft.util.Identifier catId = manager
+                                    .normalizeCategoryId(new net.minecraft.util.Identifier(categoryId));
 
-                        this.slots.get(2).setStack(result);
+                            // Resolved canonical ID (ensures namespaced IDs like 'template:vitality' are
+                            // used
+                            // even if tome only specifies 'vitality')
+                            String canonicalSkillId = manager.getCanonicalSkillId(catId, skillId);
 
-                        int imbuementCost = 0;
-                        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
-                        if (config == null || config.lootMode == null)
+                            ImbuedSkillHelper.addSkill(result, categoryId, canonicalSkillId, tomeLevel);
+
+                            this.slots.get(2).setStack(result);
+
+                            int imbuementCost = 0;
+                            var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+                            if (config == null || config.lootMode == null)
+                                return;
+                            if (config != null && config.imbuementCost != null) {
+                                imbuementCost = config.imbuementCost.getCost(tomeLevel);
+                            }
+
+                            this.levelCost.set(imbuementCost);
+                            this.repairItemUsage = 1;
+                            skillLeveling$isSkillImbue = true;
+                            this.sendContentUpdates();
                             return;
-                        if (config != null && config.imbuementCost != null) {
-                            imbuementCost = config.imbuementCost.getCost(tomeLevel);
                         }
-
-                        this.levelCost.set(imbuementCost);
-                        this.repairItemUsage = 1;
-                        skillLeveling$isSkillImbue = true;
-                        this.sendContentUpdates();
-                        return;
                     }
                     // If no empty slots or skill already at different level, don't do imbuing
                 }

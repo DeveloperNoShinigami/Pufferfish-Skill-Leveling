@@ -7,8 +7,16 @@ All notable changes to the **Pufferfish Skill Leveling** mod will be documented 
 - **Level 1 Reward Fix**: Resolved a critical regression where Level 1 rewards were skipped. Implemented manual reward triggering for the 0->1 transition in `CategoryDataMixin` to bypass Pufferfish's premature firing order.
 - **Recursive Refund Fix**: Finalized the Tome of Greater Clear Mind logic to correctly refund all levels down to 0 while maintaining prerequisite integrity.
 
-## [2026-02-09] - Documentation "High-Fidelity" Restoration & Repo Cleanup
+## [2026-02-10] - Tome Imbuing & Admin Tools
 
+- **Simplified Tome Imbuing (Pathing Checks)**: Implemented flexible ID matching using "pathing checks" (Identifier paths). This ensures that "normally generated" tomes with short IDs (e.g., `vitality`) correctly match namespaced tree skills and gear (e.g., `template:vitality`).
+- **Improved Anvil Logic**: Updated the Anvil screen handler to use fuzzy matching for skill upgrades and to consistently resolve short IDs to canonical (namespaced) registry IDs when imbuing new skills onto gear. 
+- **New Command: `/skillleveling give tome`**: Added a comprehensive give command with full auto-suggestions for players, categories, skills, loot modes, and levels.
+- **ImbuedSkillHelper Refinement**: Added fuzzy matching helpers to `ImbuedSkillHelper` to unify ID handling across Gear and Curios.
+
+## [2026-02-09] - UI Sync & Documentation Restoration
+
+- **UI Sync & Prerequisite Fix**: Resolved a critical issue where using a Skill Tome didn't immediately update the UI state or reveal hidden successor skills until a manual screen refresh.
 - **Point A-Z Documentation Flow**: Reorganized the entire repository documentation into a professional, sequential journey (**Getting Started** -> **Features** -> **Datapack Guide** -> **Roadmap**).
 - **Exhaustive Datapack Guide (v2)**: Performed a total restoration and expansion of `DATAPACK_GUIDE.md`, moving from foundational structure to "Grandmaster" authorship.
     - **Technical Mechanics**: Restored exhaustive field references for all cost types (`cleansing_cost`, `slot_opening_cost`, etc).

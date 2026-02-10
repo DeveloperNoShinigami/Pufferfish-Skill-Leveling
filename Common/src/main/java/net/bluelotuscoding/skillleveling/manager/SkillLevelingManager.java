@@ -559,9 +559,9 @@ public class SkillLevelingManager {
         // Gating for regular Equipment (Gear)
         if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.requireUnlockForImbuing && baseLevel == 0
                 && gearBonus > 0) {
-            // Check if skill is imbue_only
+            // Check if skill is allowed via loot (both or imbue_only)
             var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
-            if (config == null || !"imbue_only".equals(config.lootMode)) {
+            if (config == null || (!"imbue_only".equals(config.lootMode) && !"both".equals(config.lootMode))) {
                 SkillLevelingMod.getInstance().getLogger()
                         .debug("[SkillLeveling] Gear bonus skipped for " + skillId
                                 + ": base level 0 and unlock required");
@@ -587,6 +587,9 @@ public class SkillLevelingManager {
      * Get only the base (purchased/persisted) skill level.
      */
     public int getBaseSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        // NORMALIZE: Ensure we use the canonical namespaced ID from the tree
+        skillId = getCanonicalSkillId(categoryId, skillId);
+
         // Try to get from Mixin first as it's the most "live" during a session
         var ext = getCategoryDataExtension(player, categoryId);
         if (ext != null) {
@@ -660,7 +663,7 @@ public class SkillLevelingManager {
         int bonus = 0;
         List<ImbuedSkillHelper.ImbuedSkill> imbuedSkills = ImbuedSkillHelper.getSkills(stack);
         for (ImbuedSkillHelper.ImbuedSkill imbued : imbuedSkills) {
-            if (imbued.skillId.equals(skillId)) {
+            if (isFuzzySkillMatch(imbued.skillId, skillId)) {
                 // Check if category matches (flexible)
                 if (categoryId == null || categoryId.getPath().equals(imbued.categoryId)
                         || categoryId.toString().equals(imbued.categoryId)) {
@@ -671,6 +674,66 @@ public class SkillLevelingManager {
             }
         }
         return bonus;
+    }
+
+    /**
+     * FUZZY MATCHING: Compares two skill IDs for equality, ignoring namespaces if
+     * necessary.
+     * 
+     * RATIONALE: Tree skills are often registered with namespaces (e.g.,
+     * 'template:vitality'),
+     * while Skills Tomes may only store the path ('vitality'). This helper ensures
+     * consistency.
+     */
+    private boolean isFuzzySkillMatch(String id1, String id2) {
+        if (id1 == null || id2 == null)
+            return false;
+        if (id1.equals(id2))
+            return true;
+
+        // Path-only match for namespace flexibility
+        net.minecraft.util.Identifier ident1 = net.minecraft.util.Identifier.tryParse(id1);
+        net.minecraft.util.Identifier ident2 = net.minecraft.util.Identifier.tryParse(id2);
+
+        if (ident1 != null && ident2 != null) {
+            return ident1.getPath().equals(ident2.getPath());
+        }
+
+        // Fallback for non-identifier strings
+        String path1 = id1.contains(":") ? id1.substring(id1.indexOf(":") + 1) : id1;
+        String path2 = id2.contains(":") ? id2.substring(id2.indexOf(":") + 1) : id2;
+
+        return path1.equals(path2);
+    }
+
+    /**
+     * CANONICAL ID RESOLUTION: Finds the full namespaced skill ID for a given path
+     * within a category.
+     * 
+     * RATIONALE: Tomes and external triggers often use short names (e.g.,
+     * 'vitality'),
+     * but the skill tree registers them as 'namespace:vitality'. This method
+     * ensures
+     * we always map back to the 'canonical' ID defined in the datapack.
+     */
+    public String getCanonicalSkillId(Identifier categoryId, String skillId) {
+        if (skillId == null || skillId.contains(":")) {
+            return skillId;
+        }
+
+        var categoryRewards = perLevelRewardsRewards.get(categoryId);
+        if (categoryRewards != null) {
+            // Check for namespaced matches (path match)
+            for (String registeredId : categoryRewards.keySet()) {
+                if (registeredId.contains(":")) {
+                    String path = registeredId.substring(registeredId.indexOf(":") + 1);
+                    if (path.equals(skillId)) {
+                        return registeredId;
+                    }
+                }
+            }
+        }
+        return skillId; // Return as-is if no canonical match found
     }
 
     /**
@@ -925,6 +988,7 @@ public class SkillLevelingManager {
 
         // NORMALIZE: Ensure IDs from NBT/Command match registered registry IDs
         categoryId = normalizeCategoryId(categoryId);
+        skillId = getCanonicalSkillId(categoryId, skillId);
 
         var category = SkillsAPI.getCategory(categoryId);
         if (category.isEmpty()) {
@@ -1023,6 +1087,7 @@ public class SkillLevelingManager {
             boolean bypassPoints) {
         // NORMALIZE: Ensure IDs from NBT/Command match registered registry IDs
         categoryId = normalizeCategoryId(categoryId);
+        skillId = getCanonicalSkillId(categoryId, skillId);
 
         var category = SkillsAPI.getCategory(categoryId);
         if (category.isEmpty()) {
@@ -1090,11 +1155,11 @@ public class SkillLevelingManager {
             }
         }
 
-        // REAL-TIME SYNC: Immediately notify client of level change
-        // Sync TOTAL level to client for UI
-        int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
-        int totalLevel = getSkillLevel(player, categoryId, skillId);
-        syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel);
+        // REAL-TIME SYNC: Immediately notify client of level change.
+        // SYNC FIX: Perform a full sync instead of single skill sync.
+        // This ensures that prerequisites for OTHER skills are refreshed immediately,
+        // correctly updating successor states in the UI when a requirement is met.
+        syncAllSkillsToPlayer(player);
 
         // Ensure the core Skills mod updates its UI/state (points/spent calculation)
         try {
@@ -1288,6 +1353,10 @@ public class SkillLevelingManager {
      * Refund one level of a skill for a player
      */
     public boolean refundSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        // NORMALIZE: Ensure IDs from NBT/Command match registered registry IDs
+        categoryId = normalizeCategoryId(categoryId);
+        skillId = getCanonicalSkillId(categoryId, skillId);
+
         var category = SkillsAPI.getCategory(categoryId);
         if (category.isEmpty()) {
             return false;

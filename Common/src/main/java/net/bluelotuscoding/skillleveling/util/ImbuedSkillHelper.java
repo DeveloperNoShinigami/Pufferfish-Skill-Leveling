@@ -59,6 +59,21 @@ public class ImbuedSkillHelper {
                     nbt.getString(NBT_SKILL_ID),
                     nbt.getInt(NBT_LEVEL));
         }
+
+        public boolean isFuzzyMatch(String otherSkillId) {
+            if (this.skillId == null || otherSkillId == null)
+                return false;
+            if (this.skillId.equals(otherSkillId))
+                return true;
+
+            // Path-only match for namespace flexibility
+            String path1 = this.skillId.contains(":") ? this.skillId.substring(this.skillId.indexOf(":") + 1)
+                    : this.skillId;
+            String path2 = otherSkillId.contains(":") ? otherSkillId.substring(otherSkillId.indexOf(":") + 1)
+                    : otherSkillId;
+
+            return path1.equals(path2);
+        }
     }
 
     /**
@@ -193,7 +208,7 @@ public class ImbuedSkillHelper {
 
         for (int i = 0; i < skills.size(); i++) {
             ImbuedSkill skill = skills.get(i);
-            if (skill.skillId.equals(skillId)) {
+            if (skill.isFuzzyMatch(skillId)) {
                 skills.set(i, new ImbuedSkill(skill.categoryId, skill.skillId, skill.level + 1));
                 upgraded = true;
                 break;
@@ -210,7 +225,7 @@ public class ImbuedSkillHelper {
      * Checks if an item has a specific skill.
      */
     public static boolean hasSkill(ItemStack stack, String skillId) {
-        return getSkills(stack).stream().anyMatch(s -> s.skillId.equals(skillId));
+        return getSkills(stack).stream().anyMatch(s -> s.isFuzzyMatch(skillId));
     }
 
     /**
@@ -219,7 +234,7 @@ public class ImbuedSkillHelper {
      */
     public static int getSkillLevel(ItemStack stack, String skillId) {
         return getSkills(stack).stream()
-                .filter(s -> s.skillId.equals(skillId))
+                .filter(s -> s.isFuzzyMatch(skillId))
                 .findFirst()
                 .map(s -> s.level)
                 .orElse(0);

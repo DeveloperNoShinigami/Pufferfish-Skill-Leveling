@@ -4,7 +4,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -184,13 +186,11 @@ public class SkillLevelingCommand {
                                                 // CATEGORYLEVEL: Set player's category level (calculates XP needed)
                                                 .then(CommandManager.literal("categorylevel")
                                                                 .then(CommandManager.literal("sync")
-                                                                                .then(CommandManager
-                                                                                                .argument("player",
-                                                                                                                EntityArgumentType
-                                                                                                                                .player())
+                                                                                .then(CommandManager.argument("player",
+                                                                                                EntityArgumentType
+                                                                                                                .player())
                                                                                                 .then(CommandManager
-                                                                                                                .argument(
-                                                                                                                                "category",
+                                                                                                                .argument("category",
                                                                                                                                 net.puffish.skillsmod.commands.arguments.CategoryArgumentType
                                                                                                                                                 .category())
                                                                                                                 .then(CommandManager
@@ -210,7 +210,40 @@ public class SkillLevelingCommand {
                                                                                                                 .argument("level",
                                                                                                                                 IntegerArgumentType
                                                                                                                                                 .integer(0))
-                                                                                                                .executes(SkillLevelingCommand::setCategoryLevel))))));
+                                                                                                                .executes(SkillLevelingCommand::setCategoryLevel)))))
+                                                // GIVE: Give a Skill Tome
+                                                .then(CommandManager.literal("give")
+                                                                .then(CommandManager.literal("tome")
+                                                                                .then(CommandManager.argument("player",
+                                                                                                EntityArgumentType
+                                                                                                                .player())
+                                                                                                .then(CommandManager
+                                                                                                                .argument("category",
+                                                                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
+                                                                                                                                                .category())
+                                                                                                                .then(CommandManager
+                                                                                                                                .argument("skill",
+                                                                                                                                                net.puffish.skillsmod.commands.arguments.SkillArgumentType
+                                                                                                                                                                .skillFromCategory(
+                                                                                                                                                                                "category"))
+                                                                                                                                .then(CommandManager
+                                                                                                                                                .argument("loot_mode",
+                                                                                                                                                                StringArgumentType
+                                                                                                                                                                                .word())
+                                                                                                                                                .suggests((ctx, builder) -> {
+                                                                                                                                                        builder.suggest("both");
+                                                                                                                                                        builder.suggest("tome_only");
+                                                                                                                                                        builder.suggest("imbue_only");
+                                                                                                                                                        return builder.buildFuture();
+                                                                                                                                                })
+                                                                                                                                                .then(CommandManager
+                                                                                                                                                                .argument("level",
+                                                                                                                                                                                IntegerArgumentType
+                                                                                                                                                                                                .integer(1))
+                                                                                                                                                                .executes(SkillLevelingCommand::giveSkillTome))
+                                                                                                                                                .executes(ctx -> giveSkillTome(
+                                                                                                                                                                ctx,
+                                                                                                                                                                1)))))))));
         }
 
         /**
@@ -812,6 +845,46 @@ public class SkillLevelingCommand {
                 } else {
                         source.sendError(Text
                                         .literal("§cYou must be looking at a Skill Master villager within 10 blocks!"));
+                        return 0;
+                }
+        }
+
+        /**
+         * Give a Skill Tome to a player
+         */
+        private static int giveSkillTome(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+                int level = IntegerArgumentType.getInteger(context, "level");
+                return giveSkillTome(context, level);
+        }
+
+        private static int giveSkillTome(CommandContext<ServerCommandSource> context, int level)
+                        throws CommandSyntaxException {
+                var source = context.getSource();
+                var player = EntityArgumentType.getPlayer(context, "player");
+                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
+                                "category");
+                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
+                                "skill", category);
+
+                String lootMode = "both";
+                try {
+                        lootMode = StringArgumentType.getString(context, "loot_mode");
+                } catch (Exception ignored) {
+                }
+
+                ItemStack tome = net.bluelotuscoding.skillleveling.item.SkillTomeItem.createSkillTome(
+                                net.bluelotuscoding.skillleveling.registry.ModItems.SKILL_TOME,
+                                category.getId().toString(),
+                                skill.getId(),
+                                lootMode,
+                                level);
+
+                if (player.getInventory().insertStack(tome)) {
+                        source.sendMessage(Text.literal("§aGiven §e" + skill.getId() + " §aSkill Tome to §6"
+                                        + player.getName().getString()));
+                        return 1;
+                } else {
+                        source.sendError(Text.literal("§cInventory full for " + player.getName().getString()));
                         return 0;
                 }
         }

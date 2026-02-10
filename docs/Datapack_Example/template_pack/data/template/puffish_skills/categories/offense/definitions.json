@@ -12,7 +12,6 @@
         },
         "loot_mode": "tome_only",
         "max_skill_level": 5,
-        "points_per_level": 2,
         "merge_description": false,
         "descriptions": {
             "1": "Rank 1: +1 Damage",
@@ -106,7 +105,6 @@
         },
         "loot_mode": "tome_only",
         "max_skill_level": 5,
-        "points_per_level": 3,
         "merge_description": false,
         "descriptions": {
             "1": "Swiftness: +10% Speed",

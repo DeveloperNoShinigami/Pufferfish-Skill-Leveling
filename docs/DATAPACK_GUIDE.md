@@ -349,6 +349,7 @@ Specialized advice for creating high-quality, production-ready packs.
 
 ### Developer Commands
 - `/reload`: The most important tool. Flushes cache and re-parses all JSON.
+- `/skillleveling give tome <player> <category> <skill> [loot_mode] [level]`: Generate custom tomes for testing.
 - `/skillleveling get <p> <cat> <skill>`: View exact data values.
 - `/skillleveling set <p> <cat> <skill> <lvl>`: Manually force a rank.
 - `/skillleveling villager setTier <1-5>`: Force a Skill Master to rank up.

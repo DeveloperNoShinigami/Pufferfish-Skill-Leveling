@@ -25,10 +25,9 @@ public abstract class SkillDefinitionConfigMixin {
     private static void onParseHead(String id, JsonObject rootObject, ConfigContext context,
             CallbackInfoReturnable<Result<Optional<SkillDefinitionConfig>, Problem>> cir) {
 
-        var typeResult = rootObject.get("type").getSuccess();
-        if (typeResult.isEmpty()) {
-            return;
-        }
+        // We don't strictly enforce "type" presence here.
+        // If type is missing, Pufferfish might use a default, or it might be implicit.
+        // We still need to consume our custom fields to avoid "unused field" errors.
 
         // Consume our custom fields and standard prerequisite fields to prevent
         // "unused field" errors from Pufferfish for ALL skills.
@@ -50,6 +49,9 @@ public abstract class SkillDefinitionConfigMixin {
         rootObject.get("prerequisite_skills");
         rootObject.get("required_skill");
         rootObject.get("required_skill_for_level");
+        rootObject.get("toggle");
+        rootObject.get("keybind_slot");
+        rootObject.get("cooldown");
 
         // Use the raw GSON object for injection
         var rawRoot = rootObject.getJson().getAsJsonObject();
@@ -330,6 +332,9 @@ public abstract class SkillDefinitionConfigMixin {
                         rootObject.get("slot_opening_cost").getSuccess().isPresent() ||
                         rootObject.get("cleansing_cost").getSuccess().isPresent() ||
                         rootObject.get("required_skill_for_level").getSuccess().isPresent() ||
+                        rootObject.get("toggle").getSuccess().isPresent() ||
+                        rootObject.get("keybind_slot").getSuccess().isPresent() ||
+                        rootObject.get("cooldown").getSuccess().isPresent() ||
                         !requiredSkillsList.isEmpty();
 
                 if (hasAddonFeatures) {
@@ -338,11 +343,21 @@ public abstract class SkillDefinitionConfigMixin {
                             .flatMap(e -> e.getAsInt().getSuccess())
                             .orElse(1); // Default to 1 for standard skills
 
+                    boolean toggle = rootObject.get("toggle").getSuccess()
+                            .flatMap(e -> e.getAsBoolean().getSuccess())
+                            .orElse(false);
+                    int keybindSlot = rootObject.get("keybind_slot").getSuccess()
+                            .flatMap(e -> e.getAsInt().getSuccess())
+                            .orElse(0);
+                    int cooldown = rootObject.get("cooldown").getSuccess()
+                            .flatMap(e -> e.getAsInt().getSuccess())
+                            .orElse(0);
+
                     LeveledConfigStorage.put(id,
                             new LeveledConfigStorage.LeveledConfig(finalMaxLevels, points, merge,
                                     requiredSkillsList, levelPrereqs, lootMode, categoryId, enchantmentCost,
                                     imbuementCost,
-                                    slotOpeningCost, cleansingCost, isLootable, hidden));
+                                    slotOpeningCost, cleansingCost, isLootable, hidden, toggle, keybindSlot, cooldown));
                 }
             });
         });

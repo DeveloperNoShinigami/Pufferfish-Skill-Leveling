@@ -14,6 +14,9 @@ public class ClientSkillLevelStorage {
     private static final Map<String, Integer> skillMaxLevels = new ConcurrentHashMap<>();
     private static final Map<String, Integer> skillPointsPerLevel = new ConcurrentHashMap<>();
     private static final Map<String, Boolean> hiddenSkillFlags = new ConcurrentHashMap<>();
+    private static final Map<String, Long> skillCooldownExpiries = new ConcurrentHashMap<>();
+    private static final Map<String, Boolean> toggleSkills = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> keybindSlots = new ConcurrentHashMap<>();
 
     // Mapping from category path to the last seen full category ID (for shorthand
     // resolution)
@@ -50,7 +53,7 @@ public class ClientSkillLevelStorage {
     }
 
     public static void setLevel(String categoryId, String skillId, int baseLevel, int totalLevel, int maxLevel,
-            int pointsPerLevel, boolean hidden) {
+            int pointsPerLevel, boolean hidden, boolean toggle, int keybindSlot) {
         // "Learn" the full category ID from current packet
         if (categoryId != null && categoryId.contains(":")) {
             try {
@@ -79,6 +82,8 @@ public class ClientSkillLevelStorage {
         }
         // Always store hidden status if provided
         hiddenSkillFlags.put(key, hidden);
+        toggleSkills.put(key, toggle);
+        keybindSlots.put(key, keybindSlot);
     }
 
     /**
@@ -158,8 +163,50 @@ public class ClientSkillLevelStorage {
         return hiddenSkillFlags.getOrDefault(getKey(categoryId, skillId), false);
     }
 
+    public static boolean isToggle(String categoryId, String skillId) {
+        return toggleSkills.getOrDefault(getKey(categoryId, skillId), false);
+    }
+
+    public static void setCooldown(String categoryId, String skillId, int cooldownTicks) {
+        String key = getKey(categoryId, skillId);
+        if (cooldownTicks <= 0) {
+            skillCooldownExpiries.remove(key);
+        } else {
+            // Convert ticks to ms (1 tick = 50ms)
+            long expiry = System.currentTimeMillis() + (cooldownTicks * 50L);
+            skillCooldownExpiries.put(key, expiry);
+        }
+    }
+
+    public static int getRemainingCooldownSecondsByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        if (key == null)
+            return 0;
+
+        Long expiry = skillCooldownExpiries.get(key);
+        if (expiry == null)
+            return 0;
+
+        long remainingMs = expiry - System.currentTimeMillis();
+        if (remainingMs <= 0) {
+            skillCooldownExpiries.remove(key);
+            return 0;
+        }
+
+        return (int) Math.ceil(remainingMs / 1000.0);
+    }
+
     public static boolean hasLevelInfo(String categoryId, String skillId) {
         return totalSkillLevels.containsKey(getKey(categoryId, skillId));
+    }
+
+    public static String getSkillKeyByKeybindSlot(int slot) {
+        for (var entry : keybindSlots.entrySet()) {
+            if (entry.getValue() == slot) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     /**
@@ -267,6 +314,9 @@ public class ClientSkillLevelStorage {
         skillMaxLevels.clear();
         skillPointsPerLevel.clear();
         hiddenSkillFlags.clear();
+        skillCooldownExpiries.clear();
+        toggleSkills.clear();
+        keybindSlots.clear();
         definitionToKey.clear();
     }
 }

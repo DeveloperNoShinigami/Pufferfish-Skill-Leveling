@@ -34,6 +34,8 @@ public class SkillLevelingNetwork {
     public static final Identifier SKILL_PROGRESSION_UPDATE = SkillLevelingMod
             .createIdentifier("skill_progression_update");
     public static final Identifier FULL_SKILL_SYNC = SkillLevelingMod.createIdentifier("full_skill_sync");
+    public static final Identifier TOGGLE_COOLDOWN = SkillLevelingMod.createIdentifier("toggle_cooldown");
+    public static final Identifier REQUEST_TOGGLE_SKILL = SkillLevelingMod.createIdentifier("request_toggle_skill");
 
     // ================================================
     // SERVER-TO-CLIENT SYNCHRONIZATION
@@ -251,7 +253,8 @@ public class SkillLevelingNetwork {
         // system
         // For now, we'll implement the packet structure for future integration
 
-        var packet = new SkillLevelUpdatePacket(categoryId, skillId, currentLevel, maxLevel);
+        // var packet = new SkillLevelUpdatePacket(categoryId, skillId, currentLevel,
+        // maxLevel);
 
         // FUTURE IMPLEMENTATION: Send packet via Fabric/Forge networking
         // FabricNetworking.send(player, SKILL_LEVEL_UPDATE, packet);
@@ -282,13 +285,33 @@ public class SkillLevelingNetwork {
         var packet = new SkillDescriptionUpdatePacket(categoryId, skillId, descriptions, extraDescriptions,
                 mergeDescription);
 
-        // FUTURE IMPLEMENTATION: Send packet via mod loader networking
-        // NetworkingAPI.send(player, SKILL_DESCRIPTION_UPDATE, packet);
-
         // LOGGING: Track description updates for debugging
         var logger = SkillLevelingMod.getInstance().getLogger();
         logger.debug("Sending skill description update to " + player.getName().getString()
                 + ": " + categoryId + ":" + skillId + " (merge=" + mergeDescription + ")");
+    }
+
+    /**
+     * COOLDOWN TRANSMISSION: Sends skill cooldown data
+     */
+    public static void sendToggleCooldown(ServerPlayerEntity player, Identifier categoryId, String skillId,
+            int cooldownTicks) {
+        var addon = SkillLevelingMod.getInstance();
+        var handler = addon.getNetworkHandler();
+        if (handler != null) {
+            handler.sendToPlayer(new SyncToggleCooldownPacket(categoryId, skillId, cooldownTicks), player);
+        }
+    }
+
+    /**
+     * REQUEST TOGGLE TRANSMISSION: Sends toggle request to server
+     */
+    public static void sendRequestToggleSkill(Identifier categoryId, String skillId) {
+        var addon = SkillLevelingMod.getInstance();
+        var handler = addon.getNetworkHandler();
+        if (handler != null) {
+            handler.sendToServer(new RequestToggleSkillPacket(categoryId, skillId));
+        }
     }
 
     /**

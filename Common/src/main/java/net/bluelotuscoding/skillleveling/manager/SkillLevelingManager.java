@@ -45,6 +45,7 @@ public class SkillLevelingManager {
     private MinecraftServer server;
     private boolean configurationsLoaded = false;
     private boolean networkHandlerNullWarned = false;
+    private final Map<UUID, Map<String, Integer>> playerCooldowns = new ConcurrentHashMap<>();
     // Track which definitionIds have been sent to which players to avoid redundant
     // sends
 
@@ -116,15 +117,21 @@ public class SkillLevelingManager {
             var networkHandler = SkillLevelingMod.getInstance().getNetworkHandler();
             if (networkHandler != null) {
                 boolean hidden = false;
+                boolean toggle = false;
+                int keybindSlot = 0;
+
                 var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage
                         .get(definitionId != null ? definitionId : skillId);
                 if (config != null) {
                     hidden = config.hidden;
+                    toggle = config.toggle;
+                    keybindSlot = config.keybindSlot;
                 }
 
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillLevelPacket(categoryId, skillId,
-                                baseLevel, totalLevel, maxLevel, pointsPerLevel, definitionId, hidden),
+                                baseLevel, totalLevel, maxLevel, pointsPerLevel, definitionId, hidden, toggle,
+                                keybindSlot),
                         player);
 
             } else {
@@ -1469,6 +1476,94 @@ public class SkillLevelingManager {
         }
 
         return refunded;
+    }
+
+    /**
+     * TOGGLE SKILL: Logic for enabling/disabling skills
+     */
+    public boolean toggleSkill(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        ensureConfigurationsLoaded();
+        categoryId = normalizeCategoryId(categoryId);
+        skillId = getCanonicalSkillId(categoryId, skillId);
+
+        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+        if (config == null || !config.toggle) {
+            return false;
+        }
+
+        int currentLevel = getBaseSkillLevel(player, categoryId, skillId);
+        boolean enabling = currentLevel <= 0;
+
+        if (enabling) {
+            // Prerequisites check
+            if (!checkSkillPrerequisites(player, categoryId, skillId)) {
+                return false;
+            }
+            // Cooldown check
+            if (getRemainingCooldown(player, skillId) > 0) {
+                return false;
+            }
+
+            // Enable (Level 1)
+            setSkillLevel(player, categoryId, skillId, 1, true);
+        } else {
+            // Disable (Level 0)
+            setSkillLevel(player, categoryId, skillId, 0, true);
+
+            // Trigger cooldown
+            if (config.cooldown > 0) {
+                setCooldown(player, skillId, config.cooldown);
+            }
+        }
+
+        return true;
+    }
+
+    public int getRemainingCooldown(ServerPlayerEntity player, String skillId) {
+        var cooldowns = playerCooldowns.get(player.getUuid());
+        if (cooldowns == null)
+            return 0;
+        return cooldowns.getOrDefault(skillId, 0);
+    }
+
+    private void setCooldown(ServerPlayerEntity player, String skillId, int ticks) {
+        playerCooldowns.computeIfAbsent(player.getUuid(), k -> new ConcurrentHashMap<>()).put(skillId, ticks);
+        // Sync to client
+        var category = findCategoryBySkillId(skillId);
+        if (category != null) {
+            net.bluelotuscoding.skillleveling.network.SkillLevelingNetwork.sendToggleCooldown(player, category, skillId,
+                    ticks);
+        }
+    }
+
+    private Identifier findCategoryBySkillId(String skillId) {
+        for (var entry : perLevelRewardsRewards.entrySet()) {
+            if (entry.getValue().containsKey(skillId)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    public void tick(MinecraftServer server) {
+        for (var playerEntry : playerCooldowns.entrySet()) {
+            // UUID playerId = playerEntry.getKey(); // Unused here, but useful for
+            // reference
+            var cooldowns = playerEntry.getValue();
+
+            if (cooldowns.isEmpty())
+                continue;
+
+            // Safely update cooldowns
+            for (String skillId : cooldowns.keySet()) {
+                cooldowns.compute(skillId, (k, v) -> {
+                    if (v == null)
+                        return null;
+                    int remaining = v - 1;
+                    return remaining > 0 ? remaining : null; // Remove if <= 0
+                });
+            }
+        }
     }
 
     private void deactivateLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {

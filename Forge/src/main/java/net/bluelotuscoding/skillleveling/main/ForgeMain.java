@@ -75,6 +75,13 @@ public class ForgeMain {
                 SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStopping(event.getServer());
         }
 
+        @SubscribeEvent
+        public void onServerTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
+                if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
+                        SkillLevelingMod.getInstance().getSkillLevelingManager().tick(event.getServer());
+                }
+        }
+
         @Mod.EventBusSubscriber(modid = SkillLevelingMod.MOD_ID)
         public static class ForgeEvents {
 

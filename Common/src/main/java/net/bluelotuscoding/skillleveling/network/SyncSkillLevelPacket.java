@@ -12,9 +12,11 @@ public class SyncSkillLevelPacket {
     private final int pointsPerLevel;
     private final String definitionId;
     private final boolean hidden;
+    private final boolean toggle;
+    private final int keybindSlot;
 
     public SyncSkillLevelPacket(Identifier categoryId, String skillId, int baseLevel, int totalLevel, int maxLevel,
-            int pointsPerLevel, String definitionId, boolean hidden) {
+            int pointsPerLevel, String definitionId, boolean hidden, boolean toggle, int keybindSlot) {
         this.categoryId = categoryId;
         this.skillId = skillId;
         this.baseLevel = baseLevel;
@@ -23,6 +25,8 @@ public class SyncSkillLevelPacket {
         this.pointsPerLevel = pointsPerLevel;
         this.definitionId = definitionId;
         this.hidden = hidden;
+        this.toggle = toggle;
+        this.keybindSlot = keybindSlot;
     }
 
     public void encode(PacketByteBuf buf) {
@@ -40,6 +44,8 @@ public class SyncSkillLevelPacket {
             buf.writeString(definitionId);
         }
         buf.writeBoolean(hidden);
+        buf.writeBoolean(toggle);
+        buf.writeInt(keybindSlot);
     }
 
     public static SyncSkillLevelPacket decode(PacketByteBuf buf) {
@@ -57,13 +63,15 @@ public class SyncSkillLevelPacket {
             defId = buf.readString();
         }
         boolean hidden = buf.readBoolean();
+        boolean toggle = buf.readBoolean();
+        int keybindSlot = buf.readInt();
         return new SyncSkillLevelPacket(catId, sId, baseLevel, totalLevel, maxLevel, pPerLevel, defId,
-                hidden);
+                hidden, toggle, keybindSlot);
     }
 
     public void handleClient() {
         net.bluelotuscoding.skillleveling.client.ClientPacketHandler.handleSyncSkillLevel(categoryId, skillId,
                 baseLevel,
-                totalLevel, maxLevel, pointsPerLevel, definitionId, hidden);
+                totalLevel, maxLevel, pointsPerLevel, definitionId, hidden, toggle, keybindSlot);
     }
 }

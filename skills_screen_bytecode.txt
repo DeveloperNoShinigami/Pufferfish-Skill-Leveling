@@ -1,0 +1,3331 @@
+Compiled from "SkillsScreen.java"
+public class net.puffish.skillsmod.client.gui.SkillsScreen extends net.minecraft.client.gui.screens.Screen {
+  private static final net.minecraft.resources.ResourceLocation TABS_TEXTURE;
+
+  private static final net.minecraft.resources.ResourceLocation WINDOW_TEXTURE;
+
+  private static final net.minecraft.resources.ResourceLocation WIDGETS_TEXTURE;
+
+  private static final net.minecraft.resources.ResourceLocation ICONS_TEXTURE;
+
+  private static final net.minecraft.resources.ResourceLocation RECIPE_BOOK_TEXTURE;
+
+  private static final net.minecraft.resources.ResourceLocation TRIAL_ICON_TEXTURE;
+
+  private static final int TEXTURE_WIDTH;
+
+  private static final int TEXTURE_HEIGHT;
+
+  private static final int FRAME_WIDTH;
+
+  private static final int FRAME_HEIGHT;
+
+  private static final int FRAME_PADDING;
+
+  private static final int FRAME_CUT;
+
+  private static final int FRAME_EXPAND;
+
+  private static final int CONTENT_GROW;
+
+  private static final int TABS_HEIGHT;
+
+  private static final int HALF_FRAME_WIDTH;
+
+  private static final int HALF_FRAME_HEIGHT;
+
+  private static final org.joml.Vector4fc COLOR_WHITE;
+
+  private static final org.joml.Vector4fc COLOR_GRAY;
+
+  private final net.puffish.skillsmod.client.data.ClientSkillScreenData data;
+
+  private java.util.Optional<net.puffish.skillsmod.client.data.ClientCategoryData> optActiveCategoryData;
+
+  private java.util.Optional<net.minecraft.resources.ResourceLocation> optActiveCategoryId;
+
+  private net.minecraft.client.gui.components.StateSwitchingButton nextButton;
+
+  private net.minecraft.client.gui.components.StateSwitchingButton prevButton;
+
+  private float minScale;
+
+  private float maxScale;
+
+  private double dragStartX;
+
+  private double dragStartY;
+
+  private double dragTotal;
+
+  private boolean canDrag;
+
+  private net.puffish.skillsmod.util.Bounds2i bounds;
+
+  private boolean small;
+
+  private int contentPaddingTop;
+
+  private int contentPaddingLeft;
+
+  private int contentPaddingRight;
+
+  private int contentPaddingBottom;
+
+  public net.puffish.skillsmod.client.gui.SkillsScreen(net.puffish.skillsmod.client.data.ClientSkillScreenData, java.util.Optional<net.minecraft.resources.ResourceLocation>);
+    Code:
+       0: aload_0
+       1: getstatic     #116                // Field net/minecraft/network/chat/CommonComponents.f_237098_:Lnet/minecraft/network/chat/Component;
+       4: invokespecial #119                // Method net/minecraft/client/gui/screens/Screen."<init>":(Lnet/minecraft/network/chat/Component;)V
+       7: aload_0
+       8: invokestatic  #125                // Method java/util/Optional.empty:()Ljava/util/Optional;
+      11: putfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+      14: aload_0
+      15: fconst_1
+      16: putfield      #129                // Field minScale:F
+      19: aload_0
+      20: fconst_1
+      21: putfield      #131                // Field maxScale:F
+      24: aload_0
+      25: dconst_0
+      26: putfield      #133                // Field dragStartX:D
+      29: aload_0
+      30: dconst_0
+      31: putfield      #135                // Field dragStartY:D
+      34: aload_0
+      35: dconst_0
+      36: putfield      #137                // Field dragTotal:D
+      39: aload_0
+      40: iconst_0
+      41: putfield      #139                // Field canDrag:Z
+      44: aload_0
+      45: invokestatic  #145                // Method net/puffish/skillsmod/util/Bounds2i.zero:()Lnet/puffish/skillsmod/util/Bounds2i;
+      48: putfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+      51: aload_0
+      52: iconst_0
+      53: putfield      #149                // Field small:Z
+      56: aload_0
+      57: iconst_0
+      58: putfield      #151                // Field contentPaddingTop:I
+      61: aload_0
+      62: iconst_0
+      63: putfield      #153                // Field contentPaddingLeft:I
+      66: aload_0
+      67: iconst_0
+      68: putfield      #155                // Field contentPaddingRight:I
+      71: aload_0
+      72: iconst_0
+      73: putfield      #157                // Field contentPaddingBottom:I
+      76: aload_0
+      77: aload_1
+      78: putfield      #159                // Field data:Lnet/puffish/skillsmod/client/data/ClientSkillScreenData;
+      81: aload_0
+      82: aload_2
+      83: putfield      #161                // Field optActiveCategoryId:Ljava/util/Optional;
+      86: return
+
+  protected void m_7856_();
+    Code:
+       0: aload_0
+       1: invokespecial #167                // Method net/minecraft/client/gui/screens/Screen.m_7856_:()V
+       4: aload_0
+       5: invokevirtual #170                // Method resize:()V
+       8: return
+
+  public void m_6574_(net.minecraft.client.Minecraft, int, int);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: iload_2
+       3: iload_3
+       4: invokespecial #177                // Method net/minecraft/client/gui/screens/Screen.m_6574_:(Lnet/minecraft/client/Minecraft;II)V
+       7: aload_0
+       8: invokevirtual #170                // Method resize:()V
+      11: return
+
+  private void resize();
+    Code:
+       0: aload_0
+       1: aload_0
+       2: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+       5: aload_0
+       6: invokedynamic #197,  0            // InvokeDynamic #0:apply:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;)Ljava/util/function/Function;
+      11: invokevirtual #201                // Method java/util/Optional.map:(Ljava/util/function/Function;)Ljava/util/Optional;
+      14: iconst_0
+      15: invokestatic  #207                // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      18: invokevirtual #210                // Method java/util/Optional.orElse:(Ljava/lang/Object;)Ljava/lang/Object;
+      21: checkcast     #203                // class java/lang/Boolean
+      24: invokevirtual #214                // Method java/lang/Boolean.booleanValue:()Z
+      27: putfield      #149                // Field small:Z
+      30: aload_0
+      31: getfield      #149                // Field small:Z
+      34: ifeq          64
+      37: aload_0
+      38: bipush        62
+      40: putfield      #151                // Field contentPaddingTop:I
+      43: aload_0
+      44: bipush        17
+      46: putfield      #153                // Field contentPaddingLeft:I
+      49: aload_0
+      50: bipush        17
+      52: putfield      #155                // Field contentPaddingRight:I
+      55: aload_0
+      56: bipush        17
+      58: putfield      #157                // Field contentPaddingBottom:I
+      61: goto          88
+      64: aload_0
+      65: bipush        54
+      67: putfield      #151                // Field contentPaddingTop:I
+      70: aload_0
+      71: bipush        17
+      73: putfield      #153                // Field contentPaddingLeft:I
+      76: aload_0
+      77: bipush        17
+      79: putfield      #155                // Field contentPaddingRight:I
+      82: aload_0
+      83: bipush        17
+      85: putfield      #157                // Field contentPaddingBottom:I
+      88: aload_0
+      89: getfield      #217                // Field f_96543_:I
+      92: iconst_2
+      93: idiv
+      94: istore_1
+      95: aload_0
+      96: getfield      #220                // Field f_96544_:I
+      99: iconst_2
+     100: idiv
+     101: istore_2
+     102: aload_0
+     103: aload_0
+     104: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+     107: invokedynamic #229,  0            // InvokeDynamic #1:apply:()Ljava/util/function/Function;
+     112: invokevirtual #201                // Method java/util/Optional.map:(Ljava/util/function/Function;)Ljava/util/Optional;
+     115: invokedynamic #237,  0            // InvokeDynamic #2:get:()Ljava/util/function/Supplier;
+     120: invokevirtual #241                // Method java/util/Optional.orElseGet:(Ljava/util/function/Supplier;)Ljava/lang/Object;
+     123: checkcast     #141                // class net/puffish/skillsmod/util/Bounds2i
+     126: putfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     129: aload_0
+     130: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     133: bipush        32
+     135: invokevirtual #245                // Method net/puffish/skillsmod/util/Bounds2i.grow:(I)V
+     138: aload_0
+     139: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     142: new           #247                // class org/joml/Vector2i
+     145: dup
+     146: aload_0
+     147: getfield      #153                // Field contentPaddingLeft:I
+     150: iload_1
+     151: isub
+     152: aload_0
+     153: getfield      #151                // Field contentPaddingTop:I
+     156: iload_2
+     157: isub
+     158: invokespecial #250                // Method org/joml/Vector2i."<init>":(II)V
+     161: invokevirtual #254                // Method net/puffish/skillsmod/util/Bounds2i.extend:(Lorg/joml/Vector2i;)V
+     164: aload_0
+     165: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     168: new           #247                // class org/joml/Vector2i
+     171: dup
+     172: aload_0
+     173: getfield      #217                // Field f_96543_:I
+     176: iload_1
+     177: isub
+     178: aload_0
+     179: getfield      #155                // Field contentPaddingRight:I
+     182: isub
+     183: aload_0
+     184: getfield      #220                // Field f_96544_:I
+     187: iload_2
+     188: isub
+     189: aload_0
+     190: getfield      #157                // Field contentPaddingBottom:I
+     193: isub
+     194: invokespecial #250                // Method org/joml/Vector2i."<init>":(II)V
+     197: invokevirtual #254                // Method net/puffish/skillsmod/util/Bounds2i.extend:(Lorg/joml/Vector2i;)V
+     200: aload_0
+     201: getfield      #217                // Field f_96543_:I
+     204: aload_0
+     205: getfield      #153                // Field contentPaddingLeft:I
+     208: isub
+     209: aload_0
+     210: getfield      #155                // Field contentPaddingRight:I
+     213: isub
+     214: istore_3
+     215: aload_0
+     216: getfield      #220                // Field f_96544_:I
+     219: aload_0
+     220: getfield      #151                // Field contentPaddingTop:I
+     223: isub
+     224: aload_0
+     225: getfield      #157                // Field contentPaddingBottom:I
+     228: isub
+     229: istore        4
+     231: aload_0
+     232: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     235: invokevirtual #257                // Method net/puffish/skillsmod/util/Bounds2i.width:()I
+     238: iload         4
+     240: imul
+     241: iload_3
+     242: aload_0
+     243: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     246: invokevirtual #259                // Method net/puffish/skillsmod/util/Bounds2i.height:()I
+     249: imul
+     250: if_icmple     293
+     253: aload_0
+     254: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     257: invokevirtual #257                // Method net/puffish/skillsmod/util/Bounds2i.width:()I
+     260: iload         4
+     262: imul
+     263: iload_3
+     264: iconst_2
+     265: imul
+     266: invokestatic  #265                // Method net/minecraft/util/Mth.m_184652_:(II)I
+     269: istore        5
+     271: aload_0
+     272: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     275: iload         5
+     277: ineg
+     278: invokevirtual #268                // Method net/puffish/skillsmod/util/Bounds2i.extendY:(I)V
+     281: aload_0
+     282: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     285: iload         5
+     287: invokevirtual #268                // Method net/puffish/skillsmod/util/Bounds2i.extendY:(I)V
+     290: goto          330
+     293: aload_0
+     294: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     297: invokevirtual #259                // Method net/puffish/skillsmod/util/Bounds2i.height:()I
+     300: iload_3
+     301: imul
+     302: iload         4
+     304: iconst_2
+     305: imul
+     306: invokestatic  #265                // Method net/minecraft/util/Mth.m_184652_:(II)I
+     309: istore        5
+     311: aload_0
+     312: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     315: iload         5
+     317: ineg
+     318: invokevirtual #271                // Method net/puffish/skillsmod/util/Bounds2i.extendX:(I)V
+     321: aload_0
+     322: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     325: iload         5
+     327: invokevirtual #271                // Method net/puffish/skillsmod/util/Bounds2i.extendX:(I)V
+     330: aload_0
+     331: iload_3
+     332: i2f
+     333: aload_0
+     334: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     337: invokevirtual #257                // Method net/puffish/skillsmod/util/Bounds2i.width:()I
+     340: i2f
+     341: fdiv
+     342: iload         4
+     344: i2f
+     345: aload_0
+     346: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     349: invokevirtual #259                // Method net/puffish/skillsmod/util/Bounds2i.height:()I
+     352: i2f
+     353: fdiv
+     354: invokestatic  #277                // Method java/lang/Math.max:(FF)F
+     357: putfield      #129                // Field minScale:F
+     360: aload_0
+     361: fconst_1
+     362: putfield      #131                // Field maxScale:F
+     365: aload_0
+     366: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+     369: aload_0
+     370: invokedynamic #289,  0            // InvokeDynamic #3:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;)Ljava/util/function/Consumer;
+     375: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+     378: aload_0
+     379: new           #11                 // class net/puffish/skillsmod/client/gui/SkillsScreen$1
+     382: dup
+     383: aload_0
+     384: aload_0
+     385: getfield      #217                // Field f_96543_:I
+     388: bipush        8
+     390: isub
+     391: bipush        12
+     393: isub
+     394: bipush        16
+     396: bipush        12
+     398: bipush        17
+     400: iconst_0
+     401: invokespecial #296                // Method net/puffish/skillsmod/client/gui/SkillsScreen$1."<init>":(Lnet/puffish/skillsmod/client/gui/SkillsScreen;IIIIZ)V
+     404: putfield      #298                // Field nextButton:Lnet/minecraft/client/gui/components/StateSwitchingButton;
+     407: aload_0
+     408: getfield      #298                // Field nextButton:Lnet/minecraft/client/gui/components/StateSwitchingButton;
+     411: iconst_1
+     412: sipush        208
+     415: bipush        13
+     417: bipush        18
+     419: getstatic     #300                // Field RECIPE_BOOK_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     422: invokevirtual #306                // Method net/minecraft/client/gui/components/StateSwitchingButton.m_94624_:(IIIILnet/minecraft/resources/ResourceLocation;)V
+     425: aload_0
+     426: new           #9                  // class net/puffish/skillsmod/client/gui/SkillsScreen$2
+     429: dup
+     430: aload_0
+     431: bipush        8
+     433: bipush        16
+     435: bipush        12
+     437: bipush        17
+     439: iconst_1
+     440: invokespecial #307                // Method net/puffish/skillsmod/client/gui/SkillsScreen$2."<init>":(Lnet/puffish/skillsmod/client/gui/SkillsScreen;IIIIZ)V
+     443: putfield      #309                // Field prevButton:Lnet/minecraft/client/gui/components/StateSwitchingButton;
+     446: aload_0
+     447: getfield      #309                // Field prevButton:Lnet/minecraft/client/gui/components/StateSwitchingButton;
+     450: iconst_1
+     451: sipush        208
+     454: bipush        13
+     456: bipush        18
+     458: getstatic     #300                // Field RECIPE_BOOK_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     461: invokevirtual #306                // Method net/minecraft/client/gui/components/StateSwitchingButton.m_94624_:(IIIILnet/minecraft/resources/ResourceLocation;)V
+     464: return
+
+  private org.joml.Vector2i getMousePos(double, double);
+    Code:
+       0: new           #247                // class org/joml/Vector2i
+       3: dup
+       4: dload_1
+       5: d2i
+       6: dload_3
+       7: d2i
+       8: invokespecial #250                // Method org/joml/Vector2i."<init>":(II)V
+      11: areturn
+
+  private org.joml.Vector2i getTransformedMousePos(double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: new           #247                // class org/joml/Vector2i
+       3: dup
+       4: dload_1
+       5: aload         5
+       7: invokevirtual #326                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getX:()I
+      10: i2d
+      11: dsub
+      12: aload_0
+      13: getfield      #217                // Field f_96543_:I
+      16: i2d
+      17: ldc2_w        #327                // double 2.0d
+      20: ddiv
+      21: dsub
+      22: aload         5
+      24: invokevirtual #332                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getScale:()F
+      27: f2d
+      28: ddiv
+      29: invokestatic  #336                // Method java/lang/Math.round:(D)J
+      32: l2i
+      33: dload_3
+      34: aload         5
+      36: invokevirtual #339                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getY:()I
+      39: i2d
+      40: dsub
+      41: aload_0
+      42: getfield      #220                // Field f_96544_:I
+      45: i2d
+      46: ldc2_w        #327                // double 2.0d
+      49: ddiv
+      50: dsub
+      51: aload         5
+      53: invokevirtual #332                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getScale:()F
+      56: f2d
+      57: ddiv
+      58: invokestatic  #336                // Method java/lang/Math.round:(D)J
+      61: l2i
+      62: invokespecial #250                // Method org/joml/Vector2i."<init>":(II)V
+      65: areturn
+
+  private boolean isInsideTab(org.joml.Vector2i, int);
+    Code:
+       0: aload_1
+       1: getfield      #346                // Field org/joml/Vector2i.x:I
+       4: iload_2
+       5: if_icmplt     41
+       8: aload_1
+       9: getfield      #349                // Field org/joml/Vector2i.y:I
+      12: bipush        8
+      14: if_icmplt     41
+      17: aload_1
+      18: getfield      #346                // Field org/joml/Vector2i.x:I
+      21: iload_2
+      22: bipush        28
+      24: iadd
+      25: if_icmpge     41
+      28: aload_1
+      29: getfield      #349                // Field org/joml/Vector2i.y:I
+      32: bipush        40
+      34: if_icmpge     41
+      37: iconst_1
+      38: goto          42
+      41: iconst_0
+      42: ireturn
+
+  private boolean isInsideSkill(org.joml.Vector2i, net.puffish.skillsmod.client.config.skill.ClientSkillConfig, net.puffish.skillsmod.client.config.skill.ClientSkillDefinitionConfig);
+    Code:
+       0: ldc_w         #356                // float 13.0f
+       3: aload_3
+       4: invokevirtual #361                // Method net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.size:()F
+       7: fmul
+       8: invokestatic  #364                // Method java/lang/Math.round:(F)I
+      11: istore        4
+      13: aload_1
+      14: getfield      #346                // Field org/joml/Vector2i.x:I
+      17: aload_2
+      18: invokevirtual #368                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.x:()I
+      21: iload         4
+      23: isub
+      24: if_icmplt     73
+      27: aload_1
+      28: getfield      #349                // Field org/joml/Vector2i.y:I
+      31: aload_2
+      32: invokevirtual #370                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.y:()I
+      35: iload         4
+      37: isub
+      38: if_icmplt     73
+      41: aload_1
+      42: getfield      #346                // Field org/joml/Vector2i.x:I
+      45: aload_2
+      46: invokevirtual #368                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.x:()I
+      49: iload         4
+      51: iadd
+      52: if_icmpge     73
+      55: aload_1
+      56: getfield      #349                // Field org/joml/Vector2i.y:I
+      59: aload_2
+      60: invokevirtual #370                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.y:()I
+      63: iload         4
+      65: iadd
+      66: if_icmpge     73
+      69: iconst_1
+      70: goto          74
+      73: iconst_0
+      74: ireturn
+
+  private boolean isInsideContent(org.joml.Vector2i);
+    Code:
+       0: aload_1
+       1: getfield      #346                // Field org/joml/Vector2i.x:I
+       4: aload_0
+       5: getfield      #153                // Field contentPaddingLeft:I
+       8: if_icmplt     58
+      11: aload_1
+      12: getfield      #349                // Field org/joml/Vector2i.y:I
+      15: aload_0
+      16: getfield      #151                // Field contentPaddingTop:I
+      19: if_icmplt     58
+      22: aload_1
+      23: getfield      #346                // Field org/joml/Vector2i.x:I
+      26: aload_0
+      27: getfield      #217                // Field f_96543_:I
+      30: aload_0
+      31: getfield      #155                // Field contentPaddingRight:I
+      34: isub
+      35: if_icmpge     58
+      38: aload_1
+      39: getfield      #349                // Field org/joml/Vector2i.y:I
+      42: aload_0
+      43: getfield      #220                // Field f_96544_:I
+      46: aload_0
+      47: getfield      #157                // Field contentPaddingBottom:I
+      50: isub
+      51: if_icmpge     58
+      54: iconst_1
+      55: goto          59
+      58: iconst_0
+      59: ireturn
+
+  private boolean isInsideExperience(org.joml.Vector2i, int, int);
+    Code:
+       0: aload_1
+       1: getfield      #346                // Field org/joml/Vector2i.x:I
+       4: iload_2
+       5: if_icmplt     42
+       8: aload_1
+       9: getfield      #349                // Field org/joml/Vector2i.y:I
+      12: iload_3
+      13: if_icmplt     42
+      16: aload_1
+      17: getfield      #346                // Field org/joml/Vector2i.x:I
+      20: iload_2
+      21: sipush        182
+      24: iadd
+      25: if_icmpge     42
+      28: aload_1
+      29: getfield      #349                // Field org/joml/Vector2i.y:I
+      32: iload_3
+      33: iconst_5
+      34: iadd
+      35: if_icmpge     42
+      38: iconst_1
+      39: goto          43
+      42: iconst_0
+      43: ireturn
+
+  private boolean isInsideArea(org.joml.Vector2i, int, int, int, int);
+    Code:
+       0: aload_1
+       1: getfield      #346                // Field org/joml/Vector2i.x:I
+       4: iload_2
+       5: if_icmplt     38
+       8: aload_1
+       9: getfield      #349                // Field org/joml/Vector2i.y:I
+      12: iload_3
+      13: if_icmplt     38
+      16: aload_1
+      17: getfield      #346                // Field org/joml/Vector2i.x:I
+      20: iload         4
+      22: if_icmpge     38
+      25: aload_1
+      26: getfield      #349                // Field org/joml/Vector2i.y:I
+      29: iload         5
+      31: if_icmpge     38
+      34: iconst_1
+      35: goto          39
+      38: iconst_0
+      39: ireturn
+
+  private void syncCategory();
+    Code:
+       0: aload_0
+       1: getfield      #161                // Field optActiveCategoryId:Ljava/util/Optional;
+       4: aload_0
+       5: getfield      #159                // Field data:Lnet/puffish/skillsmod/client/data/ClientSkillScreenData;
+       8: dup
+       9: invokestatic  #388                // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+      12: pop
+      13: invokedynamic #399,  0            // InvokeDynamic #4:apply:(Lnet/puffish/skillsmod/client/data/ClientSkillScreenData;)Ljava/util/function/Function;
+      18: invokevirtual #402                // Method java/util/Optional.flatMap:(Ljava/util/function/Function;)Ljava/util/Optional;
+      21: astore_1
+      22: aload_1
+      23: invokedynamic #409,  0            // InvokeDynamic #5:accept:()Ljava/util/function/Consumer;
+      28: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+      31: aload_0
+      32: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+      35: invokevirtual #412                // Method java/util/Optional.isEmpty:()Z
+      38: ifne          56
+      41: aload_0
+      42: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+      45: invokevirtual #415                // Method java/util/Optional.orElseThrow:()Ljava/lang/Object;
+      48: aload_1
+      49: aconst_null
+      50: invokevirtual #210                // Method java/util/Optional.orElse:(Ljava/lang/Object;)Ljava/lang/Object;
+      53: if_acmpeq     105
+      56: aload_0
+      57: aload_0
+      58: getfield      #159                // Field data:Lnet/puffish/skillsmod/client/data/ClientSkillScreenData;
+      61: invokevirtual #419                // Method net/puffish/skillsmod/client/data/ClientSkillScreenData.getCategories:()Ljava/util/Collection;
+      64: invokeinterface #425,  1          // InterfaceMethod java/util/Collection.stream:()Ljava/util/stream/Stream;
+      69: invokedynamic #433,  0            // InvokeDynamic #6:apply:()Ljava/util/function/Function;
+      74: invokestatic  #439                // InterfaceMethod java/util/Comparator.comparing:(Ljava/util/function/Function;)Ljava/util/Comparator;
+      77: invokeinterface #444,  2          // InterfaceMethod java/util/stream/Stream.max:(Ljava/util/Comparator;)Ljava/util/Optional;
+      82: putfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+      85: aload_0
+      86: aload_0
+      87: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+      90: invokedynamic #451,  0            // InvokeDynamic #7:apply:()Ljava/util/function/Function;
+      95: invokevirtual #201                // Method java/util/Optional.map:(Ljava/util/function/Function;)Ljava/util/Optional;
+      98: putfield      #161                // Field optActiveCategoryId:Ljava/util/Optional;
+     101: aload_0
+     102: invokevirtual #170                // Method resize:()V
+     105: aload_0
+     106: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+     109: invokedynamic #456,  0            // InvokeDynamic #8:accept:()Ljava/util/function/Consumer;
+     114: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+     117: return
+
+  private int getTabX(int);
+    Code:
+       0: bipush        8
+       2: iload_1
+       3: aload_0
+       4: getfield      #159                // Field data:Lnet/puffish/skillsmod/client/data/ClientSkillScreenData;
+       7: invokevirtual #463                // Method net/puffish/skillsmod/client/data/ClientSkillScreenData.getOffset:()I
+      10: isub
+      11: bipush        32
+      13: imul
+      14: iadd
+      15: aload_0
+      16: getfield      #159                // Field data:Lnet/puffish/skillsmod/client/data/ClientSkillScreenData;
+      19: invokevirtual #463                // Method net/puffish/skillsmod/client/data/ClientSkillScreenData.getOffset:()I
+      22: ifle          30
+      25: bipush        15
+      27: goto          31
+      30: iconst_0
+      31: iadd
+      32: ireturn
+
+  private void forEachVisibleTab(java.util.function.BiConsumer<java.lang.Integer, net.puffish.skillsmod.client.data.ClientCategoryData>);
+    Code:
+       0: aload_0
+       1: getfield      #159                // Field data:Lnet/puffish/skillsmod/client/data/ClientSkillScreenData;
+       4: invokevirtual #419                // Method net/puffish/skillsmod/client/data/ClientSkillScreenData.getCategories:()Ljava/util/Collection;
+       7: invokeinterface #471,  1          // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
+      12: astore_2
+      13: iconst_0
+      14: istore_3
+      15: aload_2
+      16: invokeinterface #476,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      21: ifeq          88
+      24: aload_2
+      25: invokeinterface #479,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      30: checkcast     #323                // class net/puffish/skillsmod/client/data/ClientCategoryData
+      33: astore        4
+      35: aload_0
+      36: iload_3
+      37: invokevirtual #481                // Method getTabX:(I)I
+      40: istore        5
+      42: iload         5
+      44: bipush        8
+      46: if_icmplt     82
+      49: iload         5
+      51: bipush        28
+      53: iadd
+      54: aload_0
+      55: getfield      #217                // Field f_96543_:I
+      58: bipush        8
+      60: isub
+      61: bipush        12
+      63: isub
+      64: iconst_3
+      65: isub
+      66: if_icmpgt     82
+      69: aload_1
+      70: iload         5
+      72: invokestatic  #486                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+      75: aload         4
+      77: invokeinterface #491,  3          // InterfaceMethod java/util/function/BiConsumer.accept:(Ljava/lang/Object;Ljava/lang/Object;)V
+      82: iinc          3, 1
+      85: goto          15
+      88: return
+
+  private boolean hasNextButton();
+    Code:
+       0: aload_0
+       1: aload_0
+       2: getfield      #159                // Field data:Lnet/puffish/skillsmod/client/data/ClientSkillScreenData;
+       5: invokevirtual #419                // Method net/puffish/skillsmod/client/data/ClientSkillScreenData.getCategories:()Ljava/util/Collection;
+       8: invokeinterface #500,  1          // InterfaceMethod java/util/Collection.size:()I
+      13: iconst_1
+      14: isub
+      15: invokevirtual #481                // Method getTabX:(I)I
+      18: istore_1
+      19: iload_1
+      20: bipush        28
+      22: iadd
+      23: aload_0
+      24: getfield      #217                // Field f_96543_:I
+      27: bipush        8
+      29: isub
+      30: bipush        12
+      32: isub
+      33: iconst_3
+      34: isub
+      35: if_icmple     42
+      38: iconst_1
+      39: goto          43
+      42: iconst_0
+      43: ireturn
+
+  private boolean hasPrevButton();
+    Code:
+       0: aload_0
+       1: getfield      #159                // Field data:Lnet/puffish/skillsmod/client/data/ClientSkillScreenData;
+       4: invokevirtual #463                // Method net/puffish/skillsmod/client/data/ClientSkillScreenData.getOffset:()I
+       7: ifle          14
+      10: iconst_1
+      11: goto          15
+      14: iconst_0
+      15: ireturn
+
+  public boolean m_6375_(double, double, int);
+    Code:
+       0: iload         5
+       2: ifne          20
+       5: aload_0
+       6: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+       9: aload_0
+      10: dload_1
+      11: dload_3
+      12: invokedynamic #512,  0            // InvokeDynamic #9:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;DD)Ljava/util/function/Consumer;
+      17: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+      20: aload_0
+      21: invokevirtual #514                // Method hasNextButton:()Z
+      24: ifeq          39
+      27: aload_0
+      28: getfield      #298                // Field nextButton:Lnet/minecraft/client/gui/components/StateSwitchingButton;
+      31: dload_1
+      32: dload_3
+      33: iload         5
+      35: invokevirtual #516                // Method net/minecraft/client/gui/components/StateSwitchingButton.m_6375_:(DDI)Z
+      38: pop
+      39: aload_0
+      40: invokevirtual #518                // Method hasPrevButton:()Z
+      43: ifeq          58
+      46: aload_0
+      47: getfield      #309                // Field prevButton:Lnet/minecraft/client/gui/components/StateSwitchingButton;
+      50: dload_1
+      51: dload_3
+      52: iload         5
+      54: invokevirtual #516                // Method net/minecraft/client/gui/components/StateSwitchingButton.m_6375_:(DDI)Z
+      57: pop
+      58: iconst_1
+      59: ireturn
+
+  private void mouseClickedWithCategory(double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: dload_1
+       2: dload_3
+       3: invokevirtual #521                // Method getMousePos:(DD)Lorg/joml/Vector2i;
+       6: astore        6
+       8: aload_0
+       9: aload         6
+      11: invokevirtual #523                // Method isInsideContent:(Lorg/joml/Vector2i;)Z
+      14: ifeq          54
+      17: aload_0
+      18: dload_1
+      19: aload         5
+      21: invokevirtual #326                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getX:()I
+      24: i2d
+      25: dsub
+      26: putfield      #133                // Field dragStartX:D
+      29: aload_0
+      30: dload_3
+      31: aload         5
+      33: invokevirtual #339                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getY:()I
+      36: i2d
+      37: dsub
+      38: putfield      #135                // Field dragStartY:D
+      41: aload_0
+      42: dconst_0
+      43: putfield      #137                // Field dragTotal:D
+      46: aload_0
+      47: iconst_1
+      48: putfield      #139                // Field canDrag:Z
+      51: goto          59
+      54: aload_0
+      55: iconst_0
+      56: putfield      #139                // Field canDrag:Z
+      59: aload_0
+      60: aload_0
+      61: aload         6
+      63: invokedynamic #534,  0            // InvokeDynamic #10:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lorg/joml/Vector2i;)Ljava/util/function/BiConsumer;
+      68: invokevirtual #536                // Method forEachVisibleTab:(Ljava/util/function/BiConsumer;)V
+      71: return
+
+  public boolean m_6348_(double, double, int);
+    Code:
+       0: iload         5
+       2: ifne          33
+       5: aload_0
+       6: getfield      #137                // Field dragTotal:D
+       9: ldc2_w        #327                // double 2.0d
+      12: dcmpl
+      13: ifle          18
+      16: iconst_1
+      17: ireturn
+      18: aload_0
+      19: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+      22: aload_0
+      23: dload_1
+      24: dload_3
+      25: invokedynamic #542,  0            // InvokeDynamic #11:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;DD)Ljava/util/function/Consumer;
+      30: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+      33: iconst_1
+      34: ireturn
+
+  private void mouseReleasedWithCategory(double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: dload_1
+       2: dload_3
+       3: invokevirtual #521                // Method getMousePos:(DD)Lorg/joml/Vector2i;
+       6: astore        6
+       8: aload_0
+       9: dload_1
+      10: dload_3
+      11: aload         5
+      13: invokevirtual #545                // Method getTransformedMousePos:(DDLnet/puffish/skillsmod/client/data/ClientCategoryData;)Lorg/joml/Vector2i;
+      16: astore        7
+      18: aload         5
+      20: invokevirtual #549                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getConfig:()Lnet/puffish/skillsmod/client/config/ClientCategoryConfig;
+      23: astore        8
+      25: aload_0
+      26: aload         6
+      28: invokevirtual #523                // Method isInsideContent:(Lorg/joml/Vector2i;)Z
+      31: ifeq          145
+      34: aload         8
+      36: invokevirtual #555                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.skills:()Ljava/util/Map;
+      39: invokeinterface #560,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+      44: invokeinterface #471,  1          // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
+      49: astore        9
+      51: aload         9
+      53: invokeinterface #476,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      58: ifeq          145
+      61: aload         9
+      63: invokeinterface #479,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      68: checkcast     #366                // class net/puffish/skillsmod/client/config/skill/ClientSkillConfig
+      71: astore        10
+      73: aload         8
+      75: invokevirtual #563                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.definitions:()Ljava/util/Map;
+      78: aload         10
+      80: invokevirtual #567                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.definitionId:()Ljava/lang/String;
+      83: invokeinterface #569,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      88: checkcast     #358                // class net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig
+      91: astore        11
+      93: aload         11
+      95: ifnonnull     101
+      98: goto          51
+     101: aload_0
+     102: aload         7
+     104: aload         10
+     106: aload         11
+     108: invokevirtual #571                // Method isInsideSkill:(Lorg/joml/Vector2i;Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;Lnet/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig;)Z
+     111: ifeq          142
+     114: invokestatic  #577                // Method net/puffish/skillsmod/client/SkillsClientMod.getInstance:()Lnet/puffish/skillsmod/client/SkillsClientMod;
+     117: invokevirtual #581                // Method net/puffish/skillsmod/client/SkillsClientMod.getPacketSender:()Lnet/puffish/skillsmod/client/network/ClientPacketSender;
+     120: new           #583                // class net/puffish/skillsmod/client/network/packets/out/SkillClickOutPacket
+     123: dup
+     124: aload         8
+     126: invokevirtual #587                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.id:()Lnet/minecraft/resources/ResourceLocation;
+     129: aload         10
+     131: invokevirtual #589                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.id:()Ljava/lang/String;
+     134: invokespecial #592                // Method net/puffish/skillsmod/client/network/packets/out/SkillClickOutPacket."<init>":(Lnet/minecraft/resources/ResourceLocation;Ljava/lang/String;)V
+     137: invokeinterface #598,  2          // InterfaceMethod net/puffish/skillsmod/client/network/ClientPacketSender.send:(Lnet/puffish/skillsmod/network/OutPacket;)V
+     142: goto          51
+     145: return
+
+  public boolean m_7933_(int, int, int);
+    Code:
+       0: getstatic     #609                // Field net/puffish/skillsmod/client/SkillsClientMod.OPEN_KEY_BINDING:Lnet/minecraft/client/KeyMapping;
+       3: iload_1
+       4: iload_2
+       5: invokevirtual #615                // Method net/minecraft/client/KeyMapping.m_90832_:(II)Z
+       8: ifeq          17
+      11: aload_0
+      12: invokevirtual #618                // Method m_7379_:()V
+      15: iconst_1
+      16: ireturn
+      17: aload_0
+      18: iload_1
+      19: iload_2
+      20: iload_3
+      21: invokespecial #620                // Method net/minecraft/client/gui/screens/Screen.m_7933_:(III)Z
+      24: ireturn
+
+  public void m_88315_(net.minecraft.client.gui.GuiGraphics, int, int, float);
+    Code:
+       0: aload_0
+       1: invokevirtual #626                // Method syncCategory:()V
+       4: aload_0
+       5: aload_1
+       6: invokevirtual #630                // Method m_280273_:(Lnet/minecraft/client/gui/GuiGraphics;)V
+       9: aload_0
+      10: aload_1
+      11: iload_2
+      12: i2d
+      13: iload_3
+      14: i2d
+      15: invokevirtual #634                // Method drawContent:(Lnet/minecraft/client/gui/GuiGraphics;DD)V
+      18: aload_0
+      19: aload_1
+      20: iload_2
+      21: i2d
+      22: iload_3
+      23: i2d
+      24: invokevirtual #637                // Method drawWindow:(Lnet/minecraft/client/gui/GuiGraphics;DD)V
+      27: aload_0
+      28: aload_1
+      29: iload_2
+      30: iload_3
+      31: fload         4
+      33: invokevirtual #640                // Method drawTabs:(Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+      36: return
+
+  public boolean m_7979_(double, double, int, double, double);
+    Code:
+       0: aload_0
+       1: getfield      #139                // Field canDrag:Z
+       4: ifne          9
+       7: iconst_1
+       8: ireturn
+       9: iload         5
+      11: ifne          68
+      14: aload_0
+      15: dup
+      16: getfield      #137                // Field dragTotal:D
+      19: dload         6
+      21: invokestatic  #649                // Method java/lang/Math.abs:(D)D
+      24: dadd
+      25: putfield      #137                // Field dragTotal:D
+      28: aload_0
+      29: dup
+      30: getfield      #137                // Field dragTotal:D
+      33: dload         8
+      35: invokestatic  #649                // Method java/lang/Math.abs:(D)D
+      38: dadd
+      39: putfield      #137                // Field dragTotal:D
+      42: aload_0
+      43: getfield      #137                // Field dragTotal:D
+      46: ldc2_w        #327                // double 2.0d
+      49: dcmpl
+      50: ifle          68
+      53: aload_0
+      54: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+      57: aload_0
+      58: dload_1
+      59: dload_3
+      60: invokedynamic #654,  0            // InvokeDynamic #12:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;DD)Ljava/util/function/Consumer;
+      65: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+      68: iconst_1
+      69: ireturn
+
+  public boolean m_6050_(double, double, double);
+    Code:
+       0: aload_0
+       1: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+       4: aload_0
+       5: dload         5
+       7: dload_1
+       8: dload_3
+       9: invokedynamic #665,  0            // InvokeDynamic #13:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;DDD)Ljava/util/function/Consumer;
+      14: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+      17: aload_0
+      18: dload_1
+      19: dload_3
+      20: dload         5
+      22: invokespecial #667                // Method net/minecraft/client/gui/screens/Screen.m_6050_:(DDD)Z
+      25: ireturn
+
+  private void applyChangesWithLimits(int, int, float, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: getfield      #217                // Field f_96543_:I
+       4: iconst_2
+       5: idiv
+       6: istore        5
+       8: aload_0
+       9: getfield      #220                // Field f_96544_:I
+      12: iconst_2
+      13: idiv
+      14: istore        6
+      16: fload_3
+      17: aload_0
+      18: getfield      #129                // Field minScale:F
+      21: aload_0
+      22: getfield      #131                // Field maxScale:F
+      25: invokestatic  #674                // Method net/minecraft/util/Mth.m_14036_:(FFF)F
+      28: fstore_3
+      29: aload         4
+      31: iload_1
+      32: iload         5
+      34: aload_0
+      35: getfield      #155                // Field contentPaddingRight:I
+      38: isub
+      39: i2f
+      40: aload_0
+      41: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+      44: invokevirtual #677                // Method net/puffish/skillsmod/util/Bounds2i.max:()Lorg/joml/Vector2i;
+      47: invokevirtual #678                // Method org/joml/Vector2i.x:()I
+      50: i2f
+      51: fload_3
+      52: fmul
+      53: fsub
+      54: f2d
+      55: invokestatic  #681                // Method java/lang/Math.ceil:(D)D
+      58: d2i
+      59: aload_0
+      60: getfield      #153                // Field contentPaddingLeft:I
+      63: iload         5
+      65: isub
+      66: i2f
+      67: aload_0
+      68: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+      71: invokevirtual #684                // Method net/puffish/skillsmod/util/Bounds2i.min:()Lorg/joml/Vector2i;
+      74: invokevirtual #678                // Method org/joml/Vector2i.x:()I
+      77: i2f
+      78: fload_3
+      79: fmul
+      80: fsub
+      81: f2d
+      82: invokestatic  #687                // Method java/lang/Math.floor:(D)D
+      85: d2i
+      86: invokestatic  #691                // Method net/minecraft/util/Mth.m_14045_:(III)I
+      89: invokevirtual #694                // Method net/puffish/skillsmod/client/data/ClientCategoryData.setX:(I)V
+      92: aload         4
+      94: iload_2
+      95: iload         6
+      97: aload_0
+      98: getfield      #157                // Field contentPaddingBottom:I
+     101: isub
+     102: i2f
+     103: aload_0
+     104: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     107: invokevirtual #677                // Method net/puffish/skillsmod/util/Bounds2i.max:()Lorg/joml/Vector2i;
+     110: invokevirtual #695                // Method org/joml/Vector2i.y:()I
+     113: i2f
+     114: fload_3
+     115: fmul
+     116: fsub
+     117: f2d
+     118: invokestatic  #681                // Method java/lang/Math.ceil:(D)D
+     121: d2i
+     122: aload_0
+     123: getfield      #151                // Field contentPaddingTop:I
+     126: iload         6
+     128: isub
+     129: i2f
+     130: aload_0
+     131: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     134: invokevirtual #684                // Method net/puffish/skillsmod/util/Bounds2i.min:()Lorg/joml/Vector2i;
+     137: invokevirtual #695                // Method org/joml/Vector2i.y:()I
+     140: i2f
+     141: fload_3
+     142: fmul
+     143: fsub
+     144: f2d
+     145: invokestatic  #687                // Method java/lang/Math.floor:(D)D
+     148: d2i
+     149: invokestatic  #691                // Method net/minecraft/util/Mth.m_14045_:(III)I
+     152: invokevirtual #698                // Method net/puffish/skillsmod/client/data/ClientCategoryData.setY:(I)V
+     155: aload         4
+     157: fload_3
+     158: invokevirtual #702                // Method net/puffish/skillsmod/client/data/ClientCategoryData.setScale:(F)V
+     161: return
+
+  private void drawIcon(net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.puffish.skillsmod.client.rendering.ItemBatchedRenderer, net.puffish.skillsmod.client.config.ClientIconConfig, float, int, int);
+    Code:
+       0: aload_0
+       1: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+       4: ifnonnull     8
+       7: return
+       8: aload_1
+       9: invokevirtual #717                // Method net/minecraft/client/gui/GuiGraphics.m_280168_:()Lcom/mojang/blaze3d/vertex/PoseStack;
+      12: astore        8
+      14: aload         8
+      16: invokevirtual #722                // Method com/mojang/blaze3d/vertex/PoseStack.m_85836_:()V
+      19: aload         4
+      21: instanceof    #13                 // class net/puffish/skillsmod/client/config/ClientIconConfig$ItemIconConfig
+      24: ifeq          83
+      27: aload         4
+      29: checkcast     #13                 // class net/puffish/skillsmod/client/config/ClientIconConfig$ItemIconConfig
+      32: astore        9
+      34: aload         8
+      36: iload         6
+      38: i2f
+      39: fconst_1
+      40: fload         5
+      42: fsub
+      43: fmul
+      44: iload         7
+      46: i2f
+      47: fconst_1
+      48: fload         5
+      50: fsub
+      51: fmul
+      52: fconst_1
+      53: invokevirtual #726                // Method com/mojang/blaze3d/vertex/PoseStack.m_252880_:(FFF)V
+      56: aload         8
+      58: fload         5
+      60: fload         5
+      62: fconst_1
+      63: invokevirtual #729                // Method com/mojang/blaze3d/vertex/PoseStack.m_85841_:(FFF)V
+      66: aload_3
+      67: aload_1
+      68: aload         9
+      70: invokevirtual #733                // Method net/puffish/skillsmod/client/config/ClientIconConfig$ItemIconConfig.item:()Lnet/minecraft/world/item/ItemStack;
+      73: iload         6
+      75: iload         7
+      77: invokevirtual #739                // Method net/puffish/skillsmod/client/rendering/ItemBatchedRenderer.emitItem:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/item/ItemStack;II)V
+      80: goto          234
+      83: aload         4
+      85: instanceof    #18                 // class net/puffish/skillsmod/client/config/ClientIconConfig$EffectIconConfig
+      88: ifeq          167
+      91: aload         4
+      93: checkcast     #18                 // class net/puffish/skillsmod/client/config/ClientIconConfig$EffectIconConfig
+      96: astore        10
+      98: aload         8
+     100: fconst_0
+     101: fconst_0
+     102: fconst_1
+     103: invokevirtual #726                // Method com/mojang/blaze3d/vertex/PoseStack.m_252880_:(FFF)V
+     106: aload_0
+     107: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+     110: invokevirtual #745                // Method net/minecraft/client/Minecraft.m_91306_:()Lnet/minecraft/client/resources/MobEffectTextureManager;
+     113: aload         10
+     115: invokevirtual #749                // Method net/puffish/skillsmod/client/config/ClientIconConfig$EffectIconConfig.effect:()Lnet/minecraft/world/effect/MobEffect;
+     118: invokevirtual #755                // Method net/minecraft/client/resources/MobEffectTextureManager.m_118732_:(Lnet/minecraft/world/effect/MobEffect;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
+     121: astore        12
+     123: ldc_w         #756                // float 9.0f
+     126: fload         5
+     128: fmul
+     129: invokestatic  #364                // Method java/lang/Math.round:(F)I
+     132: istore        13
+     134: iload         13
+     136: iconst_2
+     137: imul
+     138: istore        14
+     140: aload_2
+     141: aload_1
+     142: aload         12
+     144: iload         6
+     146: iload         13
+     148: isub
+     149: iload         7
+     151: iload         13
+     153: isub
+     154: iload         14
+     156: iload         14
+     158: getstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+     161: invokevirtual #764                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitSpriteStretch:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;IIIILorg/joml/Vector4fc;)V
+     164: goto          234
+     167: aload         4
+     169: instanceof    #21                 // class net/puffish/skillsmod/client/config/ClientIconConfig$TextureIconConfig
+     172: ifeq          234
+     175: aload         4
+     177: checkcast     #21                 // class net/puffish/skillsmod/client/config/ClientIconConfig$TextureIconConfig
+     180: astore        11
+     182: aload         8
+     184: fconst_0
+     185: fconst_0
+     186: fconst_1
+     187: invokevirtual #726                // Method com/mojang/blaze3d/vertex/PoseStack.m_252880_:(FFF)V
+     190: ldc_w         #765                // float 8.0f
+     193: fload         5
+     195: fmul
+     196: invokestatic  #364                // Method java/lang/Math.round:(F)I
+     199: istore        12
+     201: iload         12
+     203: iconst_2
+     204: imul
+     205: istore        13
+     207: aload_2
+     208: aload_1
+     209: aload         11
+     211: invokevirtual #768                // Method net/puffish/skillsmod/client/config/ClientIconConfig$TextureIconConfig.texture:()Lnet/minecraft/resources/ResourceLocation;
+     214: iload         6
+     216: iload         12
+     218: isub
+     219: iload         7
+     221: iload         12
+     223: isub
+     224: iload         13
+     226: iload         13
+     228: getstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+     231: invokevirtual #772                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIILorg/joml/Vector4fc;)V
+     234: aload         8
+     236: invokevirtual #775                // Method com/mojang/blaze3d/vertex/PoseStack.m_85849_:()V
+     239: return
+
+  private void drawFrame(net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.puffish.skillsmod.client.config.ClientFrameConfig, float, int, int, net.puffish.skillsmod.api.Skill$State);
+    Code:
+       0: aload_0
+       1: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+       4: ifnonnull     8
+       7: return
+       8: ldc_w         #356                // float 13.0f
+      11: fload         4
+      13: fmul
+      14: invokestatic  #364                // Method java/lang/Math.round:(F)I
+      17: istore        8
+      19: iload         8
+      21: iconst_2
+      22: imul
+      23: istore        9
+      25: aload_3
+      26: instanceof    #24                 // class net/puffish/skillsmod/client/config/ClientFrameConfig$AdvancementFrameConfig
+      29: ifeq          212
+      32: aload_3
+      33: checkcast     #24                 // class net/puffish/skillsmod/client/config/ClientFrameConfig$AdvancementFrameConfig
+      36: astore        10
+      38: aload         7
+      40: getstatic     #796                // Field net/puffish/skillsmod/api/Skill$State.UNLOCKED:Lnet/puffish/skillsmod/api/Skill$State;
+      43: if_acmpne     52
+      46: getstatic     #802                // Field net/minecraft/client/gui/screens/advancements/AdvancementWidgetType.OBTAINED:Lnet/minecraft/client/gui/screens/advancements/AdvancementWidgetType;
+      49: goto          55
+      52: getstatic     #805                // Field net/minecraft/client/gui/screens/advancements/AdvancementWidgetType.UNOBTAINED:Lnet/minecraft/client/gui/screens/advancements/AdvancementWidgetType;
+      55: astore        12
+      57: getstatic     #809                // Field net/puffish/skillsmod/client/gui/SkillsScreen$3.$SwitchMap$net$puffish$skillsmod$api$Skill$State:[I
+      60: aload         7
+      62: invokevirtual #812                // Method net/puffish/skillsmod/api/Skill$State.ordinal:()I
+      65: iaload
+      66: tableswitch   { // 1 to 5
+                     1: 108
+                     2: 108
+                     3: 114
+                     4: 114
+                     5: 114
+               default: 100
+          }
+     100: new           #814                // class java/lang/IncompatibleClassChangeError
+     103: dup
+     104: invokespecial #816                // Method java/lang/IncompatibleClassChangeError."<init>":()V
+     107: athrow
+     108: getstatic     #818                // Field COLOR_GRAY:Lorg/joml/Vector4fc;
+     111: goto          117
+     114: getstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+     117: astore        13
+     119: aload_2
+     120: aload_1
+     121: getstatic     #822                // Field WIDGETS_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     124: iload         5
+     126: iload         8
+     128: isub
+     129: iload         6
+     131: iload         8
+     133: isub
+     134: iload         9
+     136: iload         9
+     138: aload         10
+     140: invokevirtual #825                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$AdvancementFrameConfig.frame:()Lnet/minecraft/advancements/FrameType;
+     143: invokevirtual #830                // Method net/minecraft/advancements/FrameType.m_15551_:()I
+     146: i2f
+     147: ldc_w         #831                // float 256.0f
+     150: fdiv
+     151: sipush        128
+     154: aload         12
+     156: invokevirtual #834                // Method net/minecraft/client/gui/screens/advancements/AdvancementWidgetType.m_97325_:()I
+     159: bipush        26
+     161: imul
+     162: iadd
+     163: i2f
+     164: ldc_w         #831                // float 256.0f
+     167: fdiv
+     168: aload         10
+     170: invokevirtual #825                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$AdvancementFrameConfig.frame:()Lnet/minecraft/advancements/FrameType;
+     173: invokevirtual #830                // Method net/minecraft/advancements/FrameType.m_15551_:()I
+     176: bipush        26
+     178: iadd
+     179: i2f
+     180: ldc_w         #831                // float 256.0f
+     183: fdiv
+     184: sipush        128
+     187: aload         12
+     189: invokevirtual #834                // Method net/minecraft/client/gui/screens/advancements/AdvancementWidgetType.m_97325_:()I
+     192: bipush        26
+     194: imul
+     195: iadd
+     196: bipush        26
+     198: iadd
+     199: i2f
+     200: ldc_w         #831                // float 256.0f
+     203: fdiv
+     204: aload         13
+     206: invokevirtual #837                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIIFFFFLorg/joml/Vector4fc;)V
+     209: goto          465
+     212: aload_3
+     213: instanceof    #34                 // class net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig
+     216: ifeq          465
+     219: aload_3
+     220: checkcast     #34                 // class net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig
+     223: astore        11
+     225: getstatic     #809                // Field net/puffish/skillsmod/client/gui/SkillsScreen$3.$SwitchMap$net$puffish$skillsmod$api$Skill$State:[I
+     228: aload         7
+     230: invokevirtual #812                // Method net/puffish/skillsmod/api/Skill$State.ordinal:()I
+     233: iaload
+     234: tableswitch   { // 1 to 5
+                     1: 268
+                     2: 414
+                     3: 311
+                     4: 341
+                     5: 384
+               default: 457
+          }
+     268: aload         11
+     270: invokevirtual #840                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig.lockedTexture:()Ljava/util/Optional;
+     273: aload_2
+     274: aload_1
+     275: iload         5
+     277: iload         8
+     279: iload         6
+     281: iload         9
+     283: invokedynamic #850,  0            // InvokeDynamic #14:accept:(Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/minecraft/client/gui/GuiGraphics;IIII)Ljava/util/function/Consumer;
+     288: aload_2
+     289: aload_1
+     290: aload         11
+     292: iload         5
+     294: iload         8
+     296: iload         6
+     298: iload         9
+     300: invokedynamic #860,  0            // InvokeDynamic #15:run:(Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig;IIII)Ljava/lang/Runnable;
+     305: invokevirtual #864                // Method java/util/Optional.ifPresentOrElse:(Ljava/util/function/Consumer;Ljava/lang/Runnable;)V
+     308: goto          465
+     311: aload_2
+     312: aload_1
+     313: aload         11
+     315: invokevirtual #867                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig.availableTexture:()Lnet/minecraft/resources/ResourceLocation;
+     318: iload         5
+     320: iload         8
+     322: isub
+     323: iload         6
+     325: iload         8
+     327: isub
+     328: iload         9
+     330: iload         9
+     332: getstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+     335: invokevirtual #772                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIILorg/joml/Vector4fc;)V
+     338: goto          465
+     341: aload         11
+     343: invokevirtual #870                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig.affordableTexture:()Ljava/util/Optional;
+     346: aload_2
+     347: aload_1
+     348: iload         5
+     350: iload         8
+     352: iload         6
+     354: iload         9
+     356: invokedynamic #875,  0            // InvokeDynamic #16:accept:(Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/minecraft/client/gui/GuiGraphics;IIII)Ljava/util/function/Consumer;
+     361: aload_2
+     362: aload_1
+     363: aload         11
+     365: iload         5
+     367: iload         8
+     369: iload         6
+     371: iload         9
+     373: invokedynamic #880,  0            // InvokeDynamic #17:run:(Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig;IIII)Ljava/lang/Runnable;
+     378: invokevirtual #864                // Method java/util/Optional.ifPresentOrElse:(Ljava/util/function/Consumer;Ljava/lang/Runnable;)V
+     381: goto          465
+     384: aload_2
+     385: aload_1
+     386: aload         11
+     388: invokevirtual #883                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig.unlockedTexture:()Lnet/minecraft/resources/ResourceLocation;
+     391: iload         5
+     393: iload         8
+     395: isub
+     396: iload         6
+     398: iload         8
+     400: isub
+     401: iload         9
+     403: iload         9
+     405: getstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+     408: invokevirtual #772                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIILorg/joml/Vector4fc;)V
+     411: goto          465
+     414: aload         11
+     416: invokevirtual #886                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig.excludedTexture:()Ljava/util/Optional;
+     419: aload_2
+     420: aload_1
+     421: iload         5
+     423: iload         8
+     425: iload         6
+     427: iload         9
+     429: invokedynamic #891,  0            // InvokeDynamic #18:accept:(Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/minecraft/client/gui/GuiGraphics;IIII)Ljava/util/function/Consumer;
+     434: aload_2
+     435: aload_1
+     436: aload         11
+     438: iload         5
+     440: iload         8
+     442: iload         6
+     444: iload         9
+     446: invokedynamic #896,  0            // InvokeDynamic #19:run:(Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig;IIII)Ljava/lang/Runnable;
+     451: invokevirtual #864                // Method java/util/Optional.ifPresentOrElse:(Ljava/util/function/Consumer;Ljava/lang/Runnable;)V
+     454: goto          465
+     457: new           #898                // class java/lang/UnsupportedOperationException
+     460: dup
+     461: invokespecial #899                // Method java/lang/UnsupportedOperationException."<init>":()V
+     464: athrow
+     465: return
+
+  private void drawBackground(net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.config.ClientBackgroundConfig);
+    Code:
+       0: aload_2
+       1: invokevirtual #915                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.position:()Lnet/puffish/skillsmod/common/BackgroundPosition;
+       4: astore_3
+       5: getstatic     #918                // Field net/puffish/skillsmod/client/gui/SkillsScreen$3.$SwitchMap$net$puffish$skillsmod$common$BackgroundPosition:[I
+       8: aload_3
+       9: invokevirtual #921                // Method net/puffish/skillsmod/common/BackgroundPosition.ordinal:()I
+      12: iaload
+      13: lookupswitch  { // 2
+                     1: 40
+                     2: 93
+               default: 134
+          }
+      40: aload_1
+      41: aload_2
+      42: invokevirtual #922                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.texture:()Lnet/minecraft/resources/ResourceLocation;
+      45: aload_0
+      46: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+      49: invokevirtual #684                // Method net/puffish/skillsmod/util/Bounds2i.min:()Lorg/joml/Vector2i;
+      52: invokevirtual #678                // Method org/joml/Vector2i.x:()I
+      55: aload_0
+      56: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+      59: invokevirtual #684                // Method net/puffish/skillsmod/util/Bounds2i.min:()Lorg/joml/Vector2i;
+      62: invokevirtual #695                // Method org/joml/Vector2i.y:()I
+      65: fconst_0
+      66: fconst_0
+      67: aload_0
+      68: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+      71: invokevirtual #257                // Method net/puffish/skillsmod/util/Bounds2i.width:()I
+      74: aload_0
+      75: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+      78: invokevirtual #259                // Method net/puffish/skillsmod/util/Bounds2i.height:()I
+      81: aload_2
+      82: invokevirtual #923                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.width:()I
+      85: aload_2
+      86: invokevirtual #924                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.height:()I
+      89: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+      92: return
+      93: aload_0
+      94: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+      97: invokevirtual #257                // Method net/puffish/skillsmod/util/Bounds2i.width:()I
+     100: aload_2
+     101: invokevirtual #924                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.height:()I
+     104: imul
+     105: aload_2
+     106: invokevirtual #923                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.width:()I
+     109: aload_0
+     110: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     113: invokevirtual #259                // Method net/puffish/skillsmod/util/Bounds2i.height:()I
+     116: imul
+     117: if_icmple     127
+     120: getstatic     #932                // Field net/puffish/skillsmod/common/BackgroundPosition.FILL_WIDTH:Lnet/puffish/skillsmod/common/BackgroundPosition;
+     123: astore_3
+     124: goto          134
+     127: getstatic     #935                // Field net/puffish/skillsmod/common/BackgroundPosition.FILL_HEIGHT:Lnet/puffish/skillsmod/common/BackgroundPosition;
+     130: astore_3
+     131: goto          134
+     134: getstatic     #918                // Field net/puffish/skillsmod/client/gui/SkillsScreen$3.$SwitchMap$net$puffish$skillsmod$common$BackgroundPosition:[I
+     137: aload_3
+     138: invokevirtual #921                // Method net/puffish/skillsmod/common/BackgroundPosition.ordinal:()I
+     141: iaload
+     142: tableswitch   { // 3 to 5
+                     3: 168
+                     4: 197
+                     5: 276
+               default: 355
+          }
+     168: aload_2
+     169: invokevirtual #923                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.width:()I
+     172: istore        6
+     174: aload_2
+     175: invokevirtual #924                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.height:()I
+     178: istore        7
+     180: iload         6
+     182: bipush        -2
+     184: idiv
+     185: istore        4
+     187: iload         7
+     189: bipush        -2
+     191: idiv
+     192: istore        5
+     194: goto          363
+     197: aload_0
+     198: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     201: invokevirtual #684                // Method net/puffish/skillsmod/util/Bounds2i.min:()Lorg/joml/Vector2i;
+     204: invokevirtual #678                // Method org/joml/Vector2i.x:()I
+     207: istore        4
+     209: aload_0
+     210: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     213: invokevirtual #257                // Method net/puffish/skillsmod/util/Bounds2i.width:()I
+     216: istore        6
+     218: aload_0
+     219: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     222: invokevirtual #684                // Method net/puffish/skillsmod/util/Bounds2i.min:()Lorg/joml/Vector2i;
+     225: invokevirtual #695                // Method org/joml/Vector2i.y:()I
+     228: aload_0
+     229: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     232: invokevirtual #259                // Method net/puffish/skillsmod/util/Bounds2i.height:()I
+     235: iconst_2
+     236: idiv
+     237: iadd
+     238: aload_2
+     239: invokevirtual #924                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.height:()I
+     242: iload         6
+     244: imul
+     245: iconst_2
+     246: aload_2
+     247: invokevirtual #923                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.width:()I
+     250: imul
+     251: invokestatic  #265                // Method net/minecraft/util/Mth.m_184652_:(II)I
+     254: isub
+     255: istore        5
+     257: aload_2
+     258: invokevirtual #924                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.height:()I
+     261: iload         6
+     263: imul
+     264: aload_2
+     265: invokevirtual #923                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.width:()I
+     268: invokestatic  #265                // Method net/minecraft/util/Mth.m_184652_:(II)I
+     271: istore        7
+     273: goto          363
+     276: aload_0
+     277: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     280: invokevirtual #684                // Method net/puffish/skillsmod/util/Bounds2i.min:()Lorg/joml/Vector2i;
+     283: invokevirtual #695                // Method org/joml/Vector2i.y:()I
+     286: istore        5
+     288: aload_0
+     289: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     292: invokevirtual #259                // Method net/puffish/skillsmod/util/Bounds2i.height:()I
+     295: istore        7
+     297: aload_0
+     298: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     301: invokevirtual #684                // Method net/puffish/skillsmod/util/Bounds2i.min:()Lorg/joml/Vector2i;
+     304: invokevirtual #678                // Method org/joml/Vector2i.x:()I
+     307: aload_0
+     308: getfield      #147                // Field bounds:Lnet/puffish/skillsmod/util/Bounds2i;
+     311: invokevirtual #257                // Method net/puffish/skillsmod/util/Bounds2i.width:()I
+     314: iconst_2
+     315: idiv
+     316: iadd
+     317: aload_2
+     318: invokevirtual #923                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.width:()I
+     321: iload         7
+     323: imul
+     324: iconst_2
+     325: aload_2
+     326: invokevirtual #924                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.height:()I
+     329: imul
+     330: invokestatic  #265                // Method net/minecraft/util/Mth.m_184652_:(II)I
+     333: isub
+     334: istore        4
+     336: aload_2
+     337: invokevirtual #923                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.width:()I
+     340: iload         7
+     342: imul
+     343: aload_2
+     344: invokevirtual #924                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.height:()I
+     347: invokestatic  #265                // Method net/minecraft/util/Mth.m_184652_:(II)I
+     350: istore        6
+     352: goto          363
+     355: new           #937                // class java/lang/IllegalStateException
+     358: dup
+     359: invokespecial #938                // Method java/lang/IllegalStateException."<init>":()V
+     362: athrow
+     363: aload_1
+     364: aload_2
+     365: invokevirtual #922                // Method net/puffish/skillsmod/client/config/ClientBackgroundConfig.texture:()Lnet/minecraft/resources/ResourceLocation;
+     368: iload         4
+     370: iload         5
+     372: fconst_0
+     373: fconst_0
+     374: iload         6
+     376: iload         7
+     378: iload         6
+     380: iload         7
+     382: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+     385: return
+
+  private void drawContent(net.minecraft.client.gui.GuiGraphics, double, double);
+    Code:
+       0: fconst_1
+       1: fconst_1
+       2: fconst_1
+       3: fconst_1
+       4: invokestatic  #945                // Method com/mojang/blaze3d/systems/RenderSystem.setShaderColor:(FFFF)V
+       7: iconst_1
+       8: iconst_1
+       9: iconst_1
+      10: iconst_1
+      11: invokestatic  #949                // Method com/mojang/blaze3d/systems/RenderSystem.colorMask:(ZZZZ)V
+      14: invokestatic  #952                // Method com/mojang/blaze3d/systems/RenderSystem.disableBlend:()V
+      17: invokestatic  #955                // Method com/mojang/blaze3d/systems/RenderSystem.enableDepthTest:()V
+      20: aload_1
+      21: aload_0
+      22: getfield      #153                // Field contentPaddingLeft:I
+      25: iconst_4
+      26: isub
+      27: aload_0
+      28: getfield      #151                // Field contentPaddingTop:I
+      31: iconst_4
+      32: isub
+      33: aload_0
+      34: getfield      #217                // Field f_96543_:I
+      37: aload_0
+      38: getfield      #155                // Field contentPaddingRight:I
+      41: isub
+      42: iconst_4
+      43: iadd
+      44: aload_0
+      45: getfield      #220                // Field f_96544_:I
+      48: aload_0
+      49: getfield      #157                // Field contentPaddingBottom:I
+      52: isub
+      53: iconst_4
+      54: iadd
+      55: invokevirtual #959                // Method net/minecraft/client/gui/GuiGraphics.m_280588_:(IIII)V
+      58: aload_1
+      59: iconst_0
+      60: iconst_0
+      61: aload_0
+      62: getfield      #217                // Field f_96543_:I
+      65: aload_0
+      66: getfield      #220                // Field f_96544_:I
+      69: ldc_w         #960                // int -16777216
+      72: invokevirtual #964                // Method net/minecraft/client/gui/GuiGraphics.m_280509_:(IIIII)V
+      75: aload_0
+      76: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+      79: aload_0
+      80: aload_1
+      81: dload_2
+      82: dload         4
+      84: invokedynamic #972,  0            // InvokeDynamic #20:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lnet/minecraft/client/gui/GuiGraphics;DD)Ljava/util/function/Consumer;
+      89: aload_0
+      90: aload_1
+      91: invokedynamic #979,  0            // InvokeDynamic #21:run:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lnet/minecraft/client/gui/GuiGraphics;)Ljava/lang/Runnable;
+      96: invokevirtual #864                // Method java/util/Optional.ifPresentOrElse:(Ljava/util/function/Consumer;Ljava/lang/Runnable;)V
+      99: aload_1
+     100: invokevirtual #982                // Method net/minecraft/client/gui/GuiGraphics.m_280618_:()V
+     103: return
+
+  private void drawContentWithCategory(net.minecraft.client.gui.GuiGraphics, double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+       4: ifnonnull     8
+       7: return
+       8: aload_0
+       9: dload_2
+      10: dload         4
+      12: invokevirtual #521                // Method getMousePos:(DD)Lorg/joml/Vector2i;
+      15: astore        7
+      17: aload_0
+      18: dload_2
+      19: dload         4
+      21: aload         6
+      23: invokevirtual #545                // Method getTransformedMousePos:(DDLnet/puffish/skillsmod/client/data/ClientCategoryData;)Lorg/joml/Vector2i;
+      26: astore        8
+      28: aload         6
+      30: invokevirtual #549                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getConfig:()Lnet/puffish/skillsmod/client/config/ClientCategoryConfig;
+      33: astore        9
+      35: aload_1
+      36: invokevirtual #717                // Method net/minecraft/client/gui/GuiGraphics.m_280168_:()Lcom/mojang/blaze3d/vertex/PoseStack;
+      39: astore        10
+      41: aload         10
+      43: invokevirtual #722                // Method com/mojang/blaze3d/vertex/PoseStack.m_85836_:()V
+      46: aload         10
+      48: aload         6
+      50: invokevirtual #326                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getX:()I
+      53: i2f
+      54: aload_0
+      55: getfield      #217                // Field f_96543_:I
+      58: i2f
+      59: fconst_2
+      60: fdiv
+      61: fadd
+      62: aload         6
+      64: invokevirtual #339                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getY:()I
+      67: i2f
+      68: aload_0
+      69: getfield      #220                // Field f_96544_:I
+      72: i2f
+      73: fconst_2
+      74: fdiv
+      75: fadd
+      76: fconst_0
+      77: invokevirtual #726                // Method com/mojang/blaze3d/vertex/PoseStack.m_252880_:(FFF)V
+      80: aload         10
+      82: aload         6
+      84: invokevirtual #332                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getScale:()F
+      87: aload         6
+      89: invokevirtual #332                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getScale:()F
+      92: fconst_1
+      93: invokevirtual #729                // Method com/mojang/blaze3d/vertex/PoseStack.m_85841_:(FFF)V
+      96: aload_0
+      97: aload_1
+      98: aload         9
+     100: invokevirtual #986                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.background:()Lnet/puffish/skillsmod/client/config/ClientBackgroundConfig;
+     103: invokevirtual #988                // Method drawBackground:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/config/ClientBackgroundConfig;)V
+     106: new           #990                // class net/puffish/skillsmod/client/rendering/ConnectionBatchedRenderer
+     109: dup
+     110: invokespecial #991                // Method net/puffish/skillsmod/client/rendering/ConnectionBatchedRenderer."<init>":()V
+     113: astore        11
+     115: aload         9
+     117: invokevirtual #994                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.normalConnections:()Ljava/util/Collection;
+     120: invokeinterface #471,  1          // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
+     125: astore        12
+     127: aload         12
+     129: invokeinterface #476,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     134: ifeq          172
+     137: aload         12
+     139: invokeinterface #479,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     144: checkcast     #996                // class net/puffish/skillsmod/client/config/skill/ClientSkillConnectionConfig
+     147: astore        13
+     149: aload         6
+     151: aload         13
+     153: invokevirtual #1000               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getConnection:(Lnet/puffish/skillsmod/client/config/skill/ClientSkillConnectionConfig;)Ljava/util/Optional;
+     156: aload         11
+     158: aload_1
+     159: aload         13
+     161: invokedynamic #1010,  0           // InvokeDynamic #22:accept:(Lnet/puffish/skillsmod/client/rendering/ConnectionBatchedRenderer;Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/config/skill/ClientSkillConnectionConfig;)Ljava/util/function/Consumer;
+     166: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+     169: goto          127
+     172: aload_0
+     173: aload         7
+     175: invokevirtual #523                // Method isInsideContent:(Lorg/joml/Vector2i;)Z
+     178: ifeq          236
+     181: aload         9
+     183: invokevirtual #555                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.skills:()Ljava/util/Map;
+     186: invokeinterface #560,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+     191: invokeinterface #425,  1          // InterfaceMethod java/util/Collection.stream:()Ljava/util/stream/Stream;
+     196: aload_0
+     197: aload         9
+     199: aload         8
+     201: invokedynamic #1023,  0           // InvokeDynamic #23:test:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lnet/puffish/skillsmod/client/config/ClientCategoryConfig;Lorg/joml/Vector2i;)Ljava/util/function/Predicate;
+     206: invokeinterface #1027,  2         // InterfaceMethod java/util/stream/Stream.filter:(Ljava/util/function/Predicate;)Ljava/util/stream/Stream;
+     211: invokeinterface #1030,  1         // InterfaceMethod java/util/stream/Stream.findFirst:()Ljava/util/Optional;
+     216: astore        12
+     218: aload         12
+     220: aload_0
+     221: aload         9
+     223: aload         6
+     225: aload         11
+     227: aload_1
+     228: invokedynamic #1040,  0           // InvokeDynamic #24:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lnet/puffish/skillsmod/client/config/ClientCategoryConfig;Lnet/puffish/skillsmod/client/data/ClientCategoryData;Lnet/puffish/skillsmod/client/rendering/ConnectionBatchedRenderer;Lnet/minecraft/client/gui/GuiGraphics;)Ljava/util/function/Consumer;
+     233: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+     236: aload_1
+     237: invokevirtual #1043               // Method net/minecraft/client/gui/GuiGraphics.m_280262_:()V
+     240: invokestatic  #1046               // Method com/mojang/blaze3d/systems/RenderSystem.enableBlend:()V
+     243: getstatic     #1050               // Field com/mojang/blaze3d/platform/GlStateManager$SourceFactor.SRC_ALPHA:Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;
+     246: getstatic     #1054               // Field com/mojang/blaze3d/platform/GlStateManager$DestFactor.ONE_MINUS_SRC_ALPHA:Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;
+     249: invokestatic  #1058               // Method com/mojang/blaze3d/systems/RenderSystem.blendFunc:(Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;)V
+     252: aload         11
+     254: invokevirtual #1061               // Method net/puffish/skillsmod/client/rendering/ConnectionBatchedRenderer.draw:()V
+     257: new           #760                // class net/puffish/skillsmod/client/rendering/TextureBatchedRenderer
+     260: dup
+     261: invokespecial #1062               // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer."<init>":()V
+     264: astore        12
+     266: new           #735                // class net/puffish/skillsmod/client/rendering/ItemBatchedRenderer
+     269: dup
+     270: invokespecial #1063               // Method net/puffish/skillsmod/client/rendering/ItemBatchedRenderer."<init>":()V
+     273: astore        13
+     275: aload         9
+     277: invokevirtual #555                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.skills:()Ljava/util/Map;
+     280: invokeinterface #560,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+     285: invokeinterface #471,  1          // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
+     290: astore        14
+     292: aload         14
+     294: invokeinterface #476,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     299: ifeq          345
+     302: aload         14
+     304: invokeinterface #479,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     309: checkcast     #366                // class net/puffish/skillsmod/client/config/skill/ClientSkillConfig
+     312: astore        15
+     314: aload         9
+     316: aload         15
+     318: invokevirtual #567                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.definitionId:()Ljava/lang/String;
+     321: invokevirtual #1067               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.getDefinitionById:(Ljava/lang/String;)Ljava/util/Optional;
+     324: aload_0
+     325: aload_1
+     326: aload         12
+     328: aload         15
+     330: aload         6
+     332: aload         13
+     334: invokedynamic #1077,  0           // InvokeDynamic #25:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;Lnet/puffish/skillsmod/client/data/ClientCategoryData;Lnet/puffish/skillsmod/client/rendering/ItemBatchedRenderer;)Ljava/util/function/Consumer;
+     339: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+     342: goto          292
+     345: aload         12
+     347: invokevirtual #1078               // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.draw:()V
+     350: aload         13
+     352: invokevirtual #1079               // Method net/puffish/skillsmod/client/rendering/ItemBatchedRenderer.draw:()V
+     355: aload         10
+     357: invokevirtual #775                // Method com/mojang/blaze3d/vertex/PoseStack.m_85849_:()V
+     360: return
+
+  private void drawContentWithoutCategory(net.minecraft.client.gui.GuiGraphics);
+    Code:
+       0: aload_0
+       1: getfield      #153                // Field contentPaddingLeft:I
+       4: aload_0
+       5: getfield      #217                // Field f_96543_:I
+       8: aload_0
+       9: getfield      #153                // Field contentPaddingLeft:I
+      12: isub
+      13: aload_0
+      14: getfield      #155                // Field contentPaddingRight:I
+      17: isub
+      18: iconst_2
+      19: idiv
+      20: iadd
+      21: istore_2
+      22: aload_1
+      23: aload_0
+      24: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+      27: ldc_w         #1092               // String advancements.sad_label
+      30: invokestatic  #1098               // InterfaceMethod net/minecraft/network/chat/Component.m_237115_:(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;
+      33: iload_2
+      34: aload_0
+      35: getfield      #220                // Field f_96544_:I
+      38: aload_0
+      39: getfield      #157                // Field contentPaddingBottom:I
+      42: isub
+      43: aload_0
+      44: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+      47: invokestatic  #388                // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+      50: pop
+      51: bipush        9
+      53: isub
+      54: iconst_m1
+      55: invokevirtual #1102               // Method net/minecraft/client/gui/GuiGraphics.m_280653_:(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;III)V
+      58: aload_1
+      59: aload_0
+      60: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+      63: ldc_w         #1104               // String advancements.empty
+      66: invokestatic  #1098               // InterfaceMethod net/minecraft/network/chat/Component.m_237115_:(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;
+      69: iload_2
+      70: aload_0
+      71: getfield      #151                // Field contentPaddingTop:I
+      74: aload_0
+      75: getfield      #220                // Field f_96544_:I
+      78: aload_0
+      79: getfield      #151                // Field contentPaddingTop:I
+      82: isub
+      83: aload_0
+      84: getfield      #157                // Field contentPaddingBottom:I
+      87: isub
+      88: aload_0
+      89: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+      92: invokestatic  #388                // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+      95: pop
+      96: bipush        9
+      98: isub
+      99: iconst_2
+     100: idiv
+     101: iadd
+     102: iconst_m1
+     103: invokevirtual #1102               // Method net/minecraft/client/gui/GuiGraphics.m_280653_:(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;III)V
+     106: return
+
+  private void drawTabs(net.minecraft.client.gui.GuiGraphics, int, int, float);
+    Code:
+       0: aload_0
+       1: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+       4: ifnonnull     8
+       7: return
+       8: aload_0
+       9: invokevirtual #514                // Method hasNextButton:()Z
+      12: ifeq          27
+      15: aload_0
+      16: getfield      #298                // Field nextButton:Lnet/minecraft/client/gui/components/StateSwitchingButton;
+      19: aload_1
+      20: iload_2
+      21: iload_3
+      22: fload         4
+      24: invokevirtual #1107               // Method net/minecraft/client/gui/components/StateSwitchingButton.m_88315_:(Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+      27: aload_0
+      28: invokevirtual #518                // Method hasPrevButton:()Z
+      31: ifeq          46
+      34: aload_0
+      35: getfield      #309                // Field prevButton:Lnet/minecraft/client/gui/components/StateSwitchingButton;
+      38: aload_1
+      39: iload_2
+      40: iload_3
+      41: fload         4
+      43: invokevirtual #1107               // Method net/minecraft/client/gui/components/StateSwitchingButton.m_88315_:(Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+      46: fconst_1
+      47: fconst_1
+      48: fconst_1
+      49: fconst_1
+      50: invokestatic  #945                // Method com/mojang/blaze3d/systems/RenderSystem.setShaderColor:(FFFF)V
+      53: iconst_1
+      54: iconst_1
+      55: iconst_1
+      56: iconst_1
+      57: invokestatic  #949                // Method com/mojang/blaze3d/systems/RenderSystem.colorMask:(ZZZZ)V
+      60: invokedynamic #1116,  0           // InvokeDynamic #26:get:()Ljava/util/function/Supplier;
+      65: invokestatic  #1120               // Method com/mojang/blaze3d/systems/RenderSystem.setShader:(Ljava/util/function/Supplier;)V
+      68: invokestatic  #1046               // Method com/mojang/blaze3d/systems/RenderSystem.enableBlend:()V
+      71: getstatic     #1050               // Field com/mojang/blaze3d/platform/GlStateManager$SourceFactor.SRC_ALPHA:Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;
+      74: getstatic     #1054               // Field com/mojang/blaze3d/platform/GlStateManager$DestFactor.ONE_MINUS_SRC_ALPHA:Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;
+      77: invokestatic  #1058               // Method com/mojang/blaze3d/systems/RenderSystem.blendFunc:(Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;)V
+      80: invokestatic  #1123               // Method com/mojang/blaze3d/systems/RenderSystem.disableDepthTest:()V
+      83: aload_0
+      84: aload_0
+      85: aload_1
+      86: invokedynamic #1131,  0           // InvokeDynamic #27:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lnet/minecraft/client/gui/GuiGraphics;)Ljava/util/function/BiConsumer;
+      91: invokevirtual #536                // Method forEachVisibleTab:(Ljava/util/function/BiConsumer;)V
+      94: aload_0
+      95: iload_2
+      96: i2d
+      97: iload_3
+      98: i2d
+      99: invokevirtual #521                // Method getMousePos:(DD)Lorg/joml/Vector2i;
+     102: astore        5
+     104: new           #760                // class net/puffish/skillsmod/client/rendering/TextureBatchedRenderer
+     107: dup
+     108: invokespecial #1062               // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer."<init>":()V
+     111: astore        6
+     113: new           #735                // class net/puffish/skillsmod/client/rendering/ItemBatchedRenderer
+     116: dup
+     117: invokespecial #1063               // Method net/puffish/skillsmod/client/rendering/ItemBatchedRenderer."<init>":()V
+     120: astore        7
+     122: aload_0
+     123: aload_0
+     124: aload_1
+     125: aload         6
+     127: aload         7
+     129: aload         5
+     131: invokedynamic #1139,  0           // InvokeDynamic #28:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/puffish/skillsmod/client/rendering/ItemBatchedRenderer;Lorg/joml/Vector2i;)Ljava/util/function/BiConsumer;
+     136: invokevirtual #536                // Method forEachVisibleTab:(Ljava/util/function/BiConsumer;)V
+     139: aload         6
+     141: invokevirtual #1078               // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.draw:()V
+     144: aload         7
+     146: invokevirtual #1079               // Method net/puffish/skillsmod/client/rendering/ItemBatchedRenderer.draw:()V
+     149: aload_0
+     150: aload_1
+     151: invokedynamic #1146,  0           // InvokeDynamic #29:accept:(Lnet/minecraft/client/gui/GuiGraphics;)Ljava/util/function/BiConsumer;
+     156: invokevirtual #536                // Method forEachVisibleTab:(Ljava/util/function/BiConsumer;)V
+     159: return
+
+  private void drawWindow(net.minecraft.client.gui.GuiGraphics, double, double);
+    Code:
+       0: aload_0
+       1: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+       4: ifnonnull     8
+       7: return
+       8: fconst_1
+       9: fconst_1
+      10: fconst_1
+      11: fconst_1
+      12: invokestatic  #945                // Method com/mojang/blaze3d/systems/RenderSystem.setShaderColor:(FFFF)V
+      15: iconst_1
+      16: iconst_1
+      17: iconst_1
+      18: iconst_1
+      19: invokestatic  #949                // Method com/mojang/blaze3d/systems/RenderSystem.colorMask:(ZZZZ)V
+      22: invokedynamic #1116,  0           // InvokeDynamic #26:get:()Ljava/util/function/Supplier;
+      27: invokestatic  #1120               // Method com/mojang/blaze3d/systems/RenderSystem.setShader:(Ljava/util/function/Supplier;)V
+      30: invokestatic  #1046               // Method com/mojang/blaze3d/systems/RenderSystem.enableBlend:()V
+      33: getstatic     #1050               // Field com/mojang/blaze3d/platform/GlStateManager$SourceFactor.SRC_ALPHA:Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;
+      36: getstatic     #1054               // Field com/mojang/blaze3d/platform/GlStateManager$DestFactor.ONE_MINUS_SRC_ALPHA:Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;
+      39: invokestatic  #1058               // Method com/mojang/blaze3d/systems/RenderSystem.blendFunc:(Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;)V
+      42: invokestatic  #1123               // Method com/mojang/blaze3d/systems/RenderSystem.disableDepthTest:()V
+      45: aload_1
+      46: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+      49: bipush        8
+      51: aload_0
+      52: getfield      #220                // Field f_96544_:I
+      55: bipush        8
+      57: isub
+      58: bipush        70
+      60: isub
+      61: fconst_0
+      62: ldc_w         #1150               // float 70.0f
+      65: bipush        126
+      67: bipush        70
+      69: sipush        256
+      72: sipush        256
+      75: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+      78: aload_1
+      79: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+      82: aload_0
+      83: getfield      #217                // Field f_96543_:I
+      86: bipush        8
+      88: isub
+      89: bipush        126
+      91: isub
+      92: aload_0
+      93: getfield      #220                // Field f_96544_:I
+      96: bipush        8
+      98: isub
+      99: bipush        70
+     101: isub
+     102: ldc_w         #1151               // float 126.0f
+     105: ldc_w         #1150               // float 70.0f
+     108: bipush        126
+     110: bipush        70
+     112: sipush        256
+     115: sipush        256
+     118: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+     121: aload_1
+     122: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     125: bipush        8
+     127: bipush        78
+     129: bipush        126
+     131: aload_0
+     132: getfield      #220                // Field f_96544_:I
+     135: bipush        16
+     137: isub
+     138: sipush        140
+     141: isub
+     142: fconst_0
+     143: ldc_w         #1152               // float 69.0f
+     146: bipush        126
+     148: iconst_2
+     149: sipush        256
+     152: sipush        256
+     155: invokevirtual #1156               // Method net/minecraft/client/gui/GuiGraphics.m_280411_:(Lnet/minecraft/resources/ResourceLocation;IIIIFFIIII)V
+     158: aload_1
+     159: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     162: sipush        134
+     165: aload_0
+     166: getfield      #220                // Field f_96544_:I
+     169: bipush        8
+     171: isub
+     172: bipush        70
+     174: isub
+     175: aload_0
+     176: getfield      #217                // Field f_96543_:I
+     179: bipush        16
+     181: isub
+     182: sipush        252
+     185: isub
+     186: bipush        70
+     188: ldc_w         #1157               // float 125.0f
+     191: ldc_w         #1150               // float 70.0f
+     194: iconst_2
+     195: bipush        70
+     197: sipush        256
+     200: sipush        256
+     203: invokevirtual #1156               // Method net/minecraft/client/gui/GuiGraphics.m_280411_:(Lnet/minecraft/resources/ResourceLocation;IIIIFFIIII)V
+     206: aload_1
+     207: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     210: aload_0
+     211: getfield      #217                // Field f_96543_:I
+     214: bipush        8
+     216: isub
+     217: bipush        126
+     219: isub
+     220: bipush        78
+     222: bipush        126
+     224: aload_0
+     225: getfield      #220                // Field f_96544_:I
+     228: bipush        16
+     230: isub
+     231: sipush        140
+     234: isub
+     235: ldc_w         #1151               // float 126.0f
+     238: ldc_w         #1152               // float 69.0f
+     241: bipush        126
+     243: iconst_2
+     244: sipush        256
+     247: sipush        256
+     250: invokevirtual #1156               // Method net/minecraft/client/gui/GuiGraphics.m_280411_:(Lnet/minecraft/resources/ResourceLocation;IIIIFFIIII)V
+     253: aload_0
+     254: getfield      #149                // Field small:Z
+     257: ifeq          457
+     260: aload_1
+     261: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     264: bipush        8
+     266: bipush        36
+     268: fconst_0
+     269: fconst_0
+     270: bipush        126
+     272: bipush        16
+     274: sipush        256
+     277: sipush        256
+     280: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+     283: aload_1
+     284: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     287: bipush        8
+     289: bipush        52
+     291: fconst_0
+     292: ldc_w         #765                // float 8.0f
+     295: bipush        126
+     297: bipush        26
+     299: sipush        256
+     302: sipush        256
+     305: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+     308: aload_1
+     309: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     312: aload_0
+     313: getfield      #217                // Field f_96543_:I
+     316: bipush        8
+     318: isub
+     319: bipush        126
+     321: isub
+     322: bipush        36
+     324: ldc_w         #1151               // float 126.0f
+     327: fconst_0
+     328: bipush        126
+     330: bipush        16
+     332: sipush        256
+     335: sipush        256
+     338: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+     341: aload_1
+     342: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     345: aload_0
+     346: getfield      #217                // Field f_96543_:I
+     349: bipush        8
+     351: isub
+     352: bipush        126
+     354: isub
+     355: bipush        52
+     357: ldc_w         #1151               // float 126.0f
+     360: ldc_w         #765                // float 8.0f
+     363: bipush        126
+     365: bipush        26
+     367: sipush        256
+     370: sipush        256
+     373: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+     376: aload_1
+     377: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     380: sipush        134
+     383: bipush        36
+     385: aload_0
+     386: getfield      #217                // Field f_96543_:I
+     389: bipush        16
+     391: isub
+     392: sipush        252
+     395: isub
+     396: bipush        16
+     398: ldc_w         #1157               // float 125.0f
+     401: fconst_0
+     402: iconst_2
+     403: bipush        16
+     405: sipush        256
+     408: sipush        256
+     411: invokevirtual #1156               // Method net/minecraft/client/gui/GuiGraphics.m_280411_:(Lnet/minecraft/resources/ResourceLocation;IIIIFFIIII)V
+     414: aload_1
+     415: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     418: sipush        134
+     421: bipush        52
+     423: aload_0
+     424: getfield      #217                // Field f_96543_:I
+     427: bipush        16
+     429: isub
+     430: sipush        252
+     433: isub
+     434: bipush        54
+     436: ldc_w         #1157               // float 125.0f
+     439: ldc_w         #765                // float 8.0f
+     442: iconst_2
+     443: bipush        54
+     445: sipush        256
+     448: sipush        256
+     451: invokevirtual #1156               // Method net/minecraft/client/gui/GuiGraphics.m_280411_:(Lnet/minecraft/resources/ResourceLocation;IIIIFFIIII)V
+     454: goto          551
+     457: aload_1
+     458: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     461: bipush        8
+     463: bipush        36
+     465: fconst_0
+     466: fconst_0
+     467: bipush        126
+     469: bipush        42
+     471: sipush        256
+     474: sipush        256
+     477: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+     480: aload_1
+     481: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     484: aload_0
+     485: getfield      #217                // Field f_96543_:I
+     488: bipush        8
+     490: isub
+     491: bipush        126
+     493: isub
+     494: bipush        36
+     496: ldc_w         #1151               // float 126.0f
+     499: fconst_0
+     500: bipush        126
+     502: bipush        42
+     504: sipush        256
+     507: sipush        256
+     510: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+     513: aload_1
+     514: getstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     517: sipush        134
+     520: bipush        36
+     522: aload_0
+     523: getfield      #217                // Field f_96543_:I
+     526: bipush        16
+     528: isub
+     529: sipush        252
+     532: isub
+     533: bipush        70
+     535: ldc_w         #1157               // float 125.0f
+     538: fconst_0
+     539: iconst_2
+     540: bipush        70
+     542: sipush        256
+     545: sipush        256
+     548: invokevirtual #1156               // Method net/minecraft/client/gui/GuiGraphics.m_280411_:(Lnet/minecraft/resources/ResourceLocation;IIIIFFIIII)V
+     551: ldc_w         #1159               // String text
+     554: ldc_w         #1160               // String skills
+     557: iconst_0
+     558: anewarray     #1162               // class java/lang/Object
+     561: invokestatic  #1168               // Method net/puffish/skillsmod/SkillsMod.createTranslatable:(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+     564: astore        6
+     566: bipush        16
+     568: istore        7
+     570: bipush        42
+     572: istore        8
+     574: aload_1
+     575: aload_0
+     576: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+     579: aload         6
+     581: iload         7
+     583: iload         8
+     585: ldc_w         #1169               // int -12566464
+     588: iconst_0
+     589: invokevirtual #1173               // Method net/minecraft/client/gui/GuiGraphics.m_280614_:(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)I
+     592: pop
+     593: aload_0
+     594: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+     597: aload_0
+     598: aload_1
+     599: dload_2
+     600: dload         4
+     602: invokedynamic #1178,  0           // InvokeDynamic #30:accept:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lnet/minecraft/client/gui/GuiGraphics;DD)Ljava/util/function/Consumer;
+     607: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+     610: return
+
+  private void drawWindowWithCategory(net.minecraft.client.gui.GuiGraphics, double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: dload_2
+       2: dload         4
+       4: invokevirtual #521                // Method getMousePos:(DD)Lorg/joml/Vector2i;
+       7: astore        7
+       9: aload         6
+      11: invokevirtual #549                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getConfig:()Lnet/puffish/skillsmod/client/config/ClientCategoryConfig;
+      14: astore        8
+      16: aload_0
+      17: getfield      #217                // Field f_96543_:I
+      20: bipush        8
+      22: isub
+      23: bipush        7
+      25: isub
+      26: istore        9
+      28: bipush        42
+      30: istore        10
+      32: iload         9
+      34: istore        11
+      36: aload         6
+      38: invokevirtual #1185               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getPointsLeft:()I
+      41: aload         8
+      43: invokevirtual #1188               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.spentPointsLimit:()I
+      46: ldc_w         #1189               // int 2147483647
+      49: if_icmpne     58
+      52: ldc_w         #1191               // String
+      55: goto          68
+      58: aload         6
+      60: invokevirtual #1194               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getSpentPointsLeft:()I
+      63: invokedynamic #1206,  0           // InvokeDynamic #31:makeConcatWithConstants:(I)Ljava/lang/String;
+      68: invokedynamic #1213,  0           // InvokeDynamic #32:makeConcatWithConstants:(ILjava/lang/String;)Ljava/lang/String;
+      73: invokestatic  #1216               // InterfaceMethod net/minecraft/network/chat/Component.m_237113_:(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;
+      76: astore        12
+      78: iload         9
+      80: aload_0
+      81: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+      84: aload         12
+      86: invokevirtual #1222               // Method net/minecraft/client/gui/Font.m_92852_:(Lnet/minecraft/network/chat/FormattedText;)I
+      89: isub
+      90: istore        9
+      92: iinc          9, -1
+      95: aload         8
+      97: invokevirtual #1226               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.colors:()Lnet/puffish/skillsmod/client/config/colors/ClientColorsConfig;
+     100: invokevirtual #1232               // Method net/puffish/skillsmod/client/config/colors/ClientColorsConfig.points:()Lnet/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig;
+     103: astore        13
+     105: aload         13
+     107: invokevirtual #1238               // Method net/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig.stroke:()Lnet/puffish/skillsmod/client/config/colors/ClientColorConfig;
+     110: invokevirtual #1243               // Method net/puffish/skillsmod/client/config/colors/ClientColorConfig.argb:()I
+     113: istore        14
+     115: aload         13
+     117: invokevirtual #1246               // Method net/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig.fill:()Lnet/puffish/skillsmod/client/config/colors/ClientColorConfig;
+     120: invokevirtual #1243               // Method net/puffish/skillsmod/client/config/colors/ClientColorConfig.argb:()I
+     123: istore        15
+     125: aload_1
+     126: aload_0
+     127: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+     130: aload         12
+     132: iload         9
+     134: iconst_1
+     135: isub
+     136: iload         10
+     138: iload         14
+     140: iconst_0
+     141: invokevirtual #1173               // Method net/minecraft/client/gui/GuiGraphics.m_280614_:(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)I
+     144: pop
+     145: aload_1
+     146: aload_0
+     147: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+     150: aload         12
+     152: iload         9
+     154: iload         10
+     156: iconst_1
+     157: isub
+     158: iload         14
+     160: iconst_0
+     161: invokevirtual #1173               // Method net/minecraft/client/gui/GuiGraphics.m_280614_:(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)I
+     164: pop
+     165: aload_1
+     166: aload_0
+     167: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+     170: aload         12
+     172: iload         9
+     174: iconst_1
+     175: iadd
+     176: iload         10
+     178: iload         14
+     180: iconst_0
+     181: invokevirtual #1173               // Method net/minecraft/client/gui/GuiGraphics.m_280614_:(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)I
+     184: pop
+     185: aload_1
+     186: aload_0
+     187: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+     190: aload         12
+     192: iload         9
+     194: iload         10
+     196: iconst_1
+     197: iadd
+     198: iload         14
+     200: iconst_0
+     201: invokevirtual #1173               // Method net/minecraft/client/gui/GuiGraphics.m_280614_:(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)I
+     204: pop
+     205: aload_1
+     206: aload_0
+     207: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+     210: aload         12
+     212: iload         9
+     214: iload         10
+     216: iload         15
+     218: iconst_0
+     219: invokevirtual #1173               // Method net/minecraft/client/gui/GuiGraphics.m_280614_:(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)I
+     222: pop
+     223: iinc          9, -1
+     226: ldc_w         #1159               // String text
+     229: ldc_w         #1248               // String points_left
+     232: iconst_0
+     233: anewarray     #1162               // class java/lang/Object
+     236: invokestatic  #1168               // Method net/puffish/skillsmod/SkillsMod.createTranslatable:(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+     239: astore        12
+     241: iload         9
+     243: aload_0
+     244: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+     247: aload         12
+     249: invokevirtual #1222               // Method net/minecraft/client/gui/Font.m_92852_:(Lnet/minecraft/network/chat/FormattedText;)I
+     252: isub
+     253: istore        9
+     255: aload_1
+     256: aload_0
+     257: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+     260: aload         12
+     262: iload         9
+     264: iload         10
+     266: ldc_w         #1169               // int -12566464
+     269: iconst_0
+     270: invokevirtual #1173               // Method net/minecraft/client/gui/GuiGraphics.m_280614_:(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)I
+     273: pop
+     274: aload_0
+     275: aload         7
+     277: iload         9
+     279: iload         10
+     281: iload         11
+     283: iload         10
+     285: aload_0
+     286: getfield      #1090               // Field f_96547_:Lnet/minecraft/client/gui/Font;
+     289: invokestatic  #388                // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+     292: pop
+     293: bipush        9
+     295: iadd
+     296: invokevirtual #1250               // Method isInsideArea:(Lorg/joml/Vector2i;IIII)Z
+     299: ifeq          412
+     302: new           #1252               // class java/util/ArrayList
+     305: dup
+     306: invokespecial #1253               // Method java/util/ArrayList."<init>":()V
+     309: astore        16
+     311: aload         16
+     313: ldc_w         #1255               // String tooltip
+     316: ldc_w         #1257               // String earned_points
+     319: iconst_1
+     320: anewarray     #1162               // class java/lang/Object
+     323: dup
+     324: iconst_0
+     325: aload         6
+     327: invokevirtual #1260               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getEarnedPoints:()I
+     330: invokestatic  #486                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     333: aastore
+     334: invokestatic  #1168               // Method net/puffish/skillsmod/SkillsMod.createTranslatable:(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+     337: invokevirtual #1266               // Method net/minecraft/network/chat/MutableComponent.m_7532_:()Lnet/minecraft/util/FormattedCharSequence;
+     340: invokevirtual #1269               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     343: pop
+     344: aload         16
+     346: ldc_w         #1255               // String tooltip
+     349: ldc_w         #1271               // String spent_points
+     352: iconst_1
+     353: anewarray     #1162               // class java/lang/Object
+     356: dup
+     357: iconst_0
+     358: aload         6
+     360: invokevirtual #1274               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getSpentPoints:()I
+     363: aload         8
+     365: invokevirtual #1188               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.spentPointsLimit:()I
+     368: ldc_w         #1189               // int 2147483647
+     371: if_icmpne     380
+     374: ldc_w         #1191               // String
+     377: goto          390
+     380: aload         8
+     382: invokevirtual #1188               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.spentPointsLimit:()I
+     385: invokedynamic #1206,  0           // InvokeDynamic #31:makeConcatWithConstants:(I)Ljava/lang/String;
+     390: invokedynamic #1213,  0           // InvokeDynamic #32:makeConcatWithConstants:(ILjava/lang/String;)Ljava/lang/String;
+     395: aastore
+     396: invokestatic  #1168               // Method net/puffish/skillsmod/SkillsMod.createTranslatable:(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+     399: invokevirtual #1266               // Method net/minecraft/network/chat/MutableComponent.m_7532_:()Lnet/minecraft/util/FormattedCharSequence;
+     402: invokevirtual #1269               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     405: pop
+     406: aload_0
+     407: aload         16
+     409: invokevirtual #1280               // Method m_257959_:(Ljava/util/List;)V
+     412: aload         6
+     414: invokevirtual #1283               // Method net/puffish/skillsmod/client/data/ClientCategoryData.hasExperience:()Z
+     417: ifeq          709
+     420: aload_0
+     421: getfield      #149                // Field small:Z
+     424: ifeq          450
+     427: aload_0
+     428: getfield      #217                // Field f_96543_:I
+     431: bipush        8
+     433: isub
+     434: bipush        8
+     436: isub
+     437: sipush        182
+     440: isub
+     441: istore        9
+     443: bipush        53
+     445: istore        10
+     447: goto          466
+     450: aload_0
+     451: getfield      #217                // Field f_96543_:I
+     454: sipush        182
+     457: isub
+     458: iconst_2
+     459: idiv
+     460: istore        9
+     462: bipush        43
+     464: istore        10
+     466: aload_1
+     467: getstatic     #1285               // Field ICONS_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     470: iload         9
+     472: iload         10
+     474: iconst_0
+     475: bipush        64
+     477: sipush        182
+     480: iconst_5
+     481: invokevirtual #1289               // Method net/minecraft/client/gui/GuiGraphics.m_280218_:(Lnet/minecraft/resources/ResourceLocation;IIIIII)V
+     484: sipush        182
+     487: aload         6
+     489: invokevirtual #1292               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getExperienceProgress:()F
+     492: ldc_w         #1293               // float 183.0f
+     495: fmul
+     496: f2i
+     497: invokestatic  #1295               // Method java/lang/Math.min:(II)I
+     500: istore        16
+     502: iload         16
+     504: ifle          524
+     507: aload_1
+     508: getstatic     #1285               // Field ICONS_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+     511: iload         9
+     513: iload         10
+     515: iconst_0
+     516: bipush        69
+     518: iload         16
+     520: iconst_5
+     521: invokevirtual #1289               // Method net/minecraft/client/gui/GuiGraphics.m_280218_:(Lnet/minecraft/resources/ResourceLocation;IIIIII)V
+     524: aload_0
+     525: aload         7
+     527: iload         9
+     529: iload         10
+     531: invokevirtual #1297               // Method isInsideExperience:(Lorg/joml/Vector2i;II)Z
+     534: ifeq          709
+     537: new           #1252               // class java/util/ArrayList
+     540: dup
+     541: invokespecial #1253               // Method java/util/ArrayList."<init>":()V
+     544: astore        17
+     546: aload         17
+     548: ldc_w         #1255               // String tooltip
+     551: ldc_w         #1299               // String current_level
+     554: iconst_1
+     555: anewarray     #1162               // class java/lang/Object
+     558: dup
+     559: iconst_0
+     560: aload         6
+     562: invokevirtual #1302               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getCurrentLevel:()I
+     565: aload         8
+     567: invokevirtual #1305               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.levelLimit:()I
+     570: ldc_w         #1189               // int 2147483647
+     573: if_icmpne     582
+     576: ldc_w         #1191               // String
+     579: goto          592
+     582: aload         8
+     584: invokevirtual #1305               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.levelLimit:()I
+     587: invokedynamic #1206,  0           // InvokeDynamic #31:makeConcatWithConstants:(I)Ljava/lang/String;
+     592: invokedynamic #1213,  0           // InvokeDynamic #32:makeConcatWithConstants:(ILjava/lang/String;)Ljava/lang/String;
+     597: aastore
+     598: invokestatic  #1168               // Method net/puffish/skillsmod/SkillsMod.createTranslatable:(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+     601: invokevirtual #1266               // Method net/minecraft/network/chat/MutableComponent.m_7532_:()Lnet/minecraft/util/FormattedCharSequence;
+     604: invokevirtual #1269               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     607: pop
+     608: aload         17
+     610: ldc_w         #1255               // String tooltip
+     613: ldc_w         #1307               // String experience_progress
+     616: iconst_3
+     617: anewarray     #1162               // class java/lang/Object
+     620: dup
+     621: iconst_0
+     622: aload         6
+     624: invokevirtual #1310               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getCurrentExperience:()I
+     627: invokestatic  #486                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     630: aastore
+     631: dup
+     632: iconst_1
+     633: aload         6
+     635: invokevirtual #1313               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getRequiredExperience:()I
+     638: invokestatic  #486                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     641: aastore
+     642: dup
+     643: iconst_2
+     644: aload         6
+     646: invokevirtual #1292               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getExperienceProgress:()F
+     649: ldc_w         #1314               // float 100.0f
+     652: fmul
+     653: invokestatic  #1317               // Method net/minecraft/util/Mth.m_14143_:(F)I
+     656: invokestatic  #486                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     659: aastore
+     660: invokestatic  #1168               // Method net/puffish/skillsmod/SkillsMod.createTranslatable:(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+     663: invokevirtual #1266               // Method net/minecraft/network/chat/MutableComponent.m_7532_:()Lnet/minecraft/util/FormattedCharSequence;
+     666: invokevirtual #1269               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     669: pop
+     670: aload         17
+     672: ldc_w         #1255               // String tooltip
+     675: ldc_w         #1319               // String to_next_level
+     678: iconst_1
+     679: anewarray     #1162               // class java/lang/Object
+     682: dup
+     683: iconst_0
+     684: aload         6
+     686: invokevirtual #1322               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getExperienceToNextLevel:()I
+     689: invokestatic  #486                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     692: aastore
+     693: invokestatic  #1168               // Method net/puffish/skillsmod/SkillsMod.createTranslatable:(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+     696: invokevirtual #1266               // Method net/minecraft/network/chat/MutableComponent.m_7532_:()Lnet/minecraft/util/FormattedCharSequence;
+     699: invokevirtual #1269               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     702: pop
+     703: aload_0
+     704: aload         17
+     706: invokevirtual #1280               // Method m_257959_:(Ljava/util/List;)V
+     709: return
+
+  private void lambda$drawWindow$26(net.minecraft.client.gui.GuiGraphics, double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: dload_2
+       3: dload         4
+       5: aload         6
+       7: invokevirtual #1332               // Method drawWindowWithCategory:(Lnet/minecraft/client/gui/GuiGraphics;DDLnet/puffish/skillsmod/client/data/ClientCategoryData;)V
+      10: return
+
+  private static void lambda$drawTabs$25(net.minecraft.client.gui.GuiGraphics, java.lang.Integer, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_2
+       1: invokevirtual #1335               // Method net/puffish/skillsmod/client/data/ClientCategoryData.hasUnseenPoints:()Z
+       4: ifeq          45
+       7: aload_0
+       8: getstatic     #1337               // Field TRIAL_ICON_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+      11: aload_1
+      12: invokevirtual #1340               // Method java/lang/Integer.intValue:()I
+      15: bipush        10
+      17: iadd
+      18: iconst_3
+      19: fconst_0
+      20: invokestatic  #1345               // Method net/minecraft/Util.m_137550_:()J
+      23: ldc2_w        #1346               // long 800l
+      26: ldiv
+      27: lconst_1
+      28: land
+      29: l2f
+      30: ldc_w         #765                // float 8.0f
+      33: fmul
+      34: bipush        8
+      36: bipush        8
+      38: bipush        8
+      40: bipush        16
+      42: invokevirtual #928                // Method net/minecraft/client/gui/GuiGraphics.m_280163_:(Lnet/minecraft/resources/ResourceLocation;IIFFIIII)V
+      45: return
+
+  private void lambda$drawTabs$24(net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.puffish.skillsmod.client.rendering.ItemBatchedRenderer, org.joml.Vector2i, java.lang.Integer, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload         6
+       2: invokevirtual #549                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getConfig:()Lnet/puffish/skillsmod/client/config/ClientCategoryConfig;
+       5: astore        7
+       7: aload_0
+       8: aload_1
+       9: aload_2
+      10: aload_3
+      11: aload         7
+      13: invokevirtual #1351               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.icon:()Lnet/puffish/skillsmod/client/config/ClientIconConfig;
+      16: fconst_1
+      17: aload         5
+      19: invokevirtual #1340               // Method java/lang/Integer.intValue:()I
+      22: bipush        6
+      24: iadd
+      25: bipush        8
+      27: iadd
+      28: bipush        25
+      30: invokevirtual #1353               // Method drawIcon:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/puffish/skillsmod/client/rendering/ItemBatchedRenderer;Lnet/puffish/skillsmod/client/config/ClientIconConfig;FII)V
+      33: aload_0
+      34: aload         4
+      36: aload         5
+      38: invokevirtual #1340               // Method java/lang/Integer.intValue:()I
+      41: invokevirtual #1355               // Method isInsideTab:(Lorg/joml/Vector2i;I)Z
+      44: ifeq          193
+      47: new           #1252               // class java/util/ArrayList
+      50: dup
+      51: invokespecial #1253               // Method java/util/ArrayList."<init>":()V
+      54: astore        8
+      56: aload         8
+      58: aload         7
+      60: invokevirtual #1359               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.title:()Lnet/minecraft/network/chat/Component;
+      63: invokeinterface #1360,  1         // InterfaceMethod net/minecraft/network/chat/Component.m_7532_:()Lnet/minecraft/util/FormattedCharSequence;
+      68: invokevirtual #1269               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+      71: pop
+      72: aload         8
+      74: aload_0
+      75: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+      78: aload         7
+      80: invokevirtual #1363               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.description:()Lnet/minecraft/network/chat/Component;
+      83: invokeinterface #1367,  1         // InterfaceMethod net/minecraft/network/chat/Component.m_6881_:()Lnet/minecraft/network/chat/MutableComponent;
+      88: getstatic     #1373               // Field net/minecraft/network/chat/Style.f_131099_:Lnet/minecraft/network/chat/Style;
+      91: getstatic     #1379               // Field net/minecraft/ChatFormatting.GRAY:Lnet/minecraft/ChatFormatting;
+      94: invokevirtual #1383               // Method net/minecraft/network/chat/Style.m_131157_:(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/Style;
+      97: invokestatic  #1389               // Method net/minecraft/network/chat/ComponentUtils.m_130750_:(Lnet/minecraft/network/chat/MutableComponent;Lnet/minecraft/network/chat/Style;)Lnet/minecraft/network/chat/MutableComponent;
+     100: invokestatic  #1395               // Method net/minecraft/client/gui/components/Tooltip.m_257868_:(Lnet/minecraft/client/Minecraft;Lnet/minecraft/network/chat/Component;)Ljava/util/List;
+     103: invokevirtual #1399               // Method java/util/ArrayList.addAll:(Ljava/util/Collection;)Z
+     106: pop
+     107: invokestatic  #1402               // Method net/minecraft/client/gui/screens/Screen.m_96638_:()Z
+     110: ifeq          148
+     113: aload         8
+     115: aload_0
+     116: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+     119: aload         7
+     121: invokevirtual #1405               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.extraDescription:()Lnet/minecraft/network/chat/Component;
+     124: invokeinterface #1367,  1         // InterfaceMethod net/minecraft/network/chat/Component.m_6881_:()Lnet/minecraft/network/chat/MutableComponent;
+     129: getstatic     #1373               // Field net/minecraft/network/chat/Style.f_131099_:Lnet/minecraft/network/chat/Style;
+     132: getstatic     #1379               // Field net/minecraft/ChatFormatting.GRAY:Lnet/minecraft/ChatFormatting;
+     135: invokevirtual #1383               // Method net/minecraft/network/chat/Style.m_131157_:(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/Style;
+     138: invokestatic  #1389               // Method net/minecraft/network/chat/ComponentUtils.m_130750_:(Lnet/minecraft/network/chat/MutableComponent;Lnet/minecraft/network/chat/Style;)Lnet/minecraft/network/chat/MutableComponent;
+     141: invokestatic  #1395               // Method net/minecraft/client/gui/components/Tooltip.m_257868_:(Lnet/minecraft/client/Minecraft;Lnet/minecraft/network/chat/Component;)Ljava/util/List;
+     144: invokevirtual #1399               // Method java/util/ArrayList.addAll:(Ljava/util/Collection;)Z
+     147: pop
+     148: aload_0
+     149: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+     152: getfield      #1409               // Field net/minecraft/client/Minecraft.f_91066_:Lnet/minecraft/client/Options;
+     155: getfield      #1414               // Field net/minecraft/client/Options.f_92125_:Z
+     158: ifeq          187
+     161: aload         8
+     163: aload         7
+     165: invokevirtual #587                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.id:()Lnet/minecraft/resources/ResourceLocation;
+     168: invokevirtual #1419               // Method net/minecraft/resources/ResourceLocation.toString:()Ljava/lang/String;
+     171: invokestatic  #1216               // InterfaceMethod net/minecraft/network/chat/Component.m_237113_:(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;
+     174: getstatic     #1422               // Field net/minecraft/ChatFormatting.DARK_GRAY:Lnet/minecraft/ChatFormatting;
+     177: invokevirtual #1426               // Method net/minecraft/network/chat/MutableComponent.m_130940_:(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/MutableComponent;
+     180: invokevirtual #1266               // Method net/minecraft/network/chat/MutableComponent.m_7532_:()Lnet/minecraft/util/FormattedCharSequence;
+     183: invokevirtual #1269               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     186: pop
+     187: aload_0
+     188: aload         8
+     190: invokevirtual #1280               // Method m_257959_:(Ljava/util/List;)V
+     193: return
+
+  private void lambda$drawTabs$23(net.minecraft.client.gui.GuiGraphics, java.lang.Integer, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_1
+       1: getstatic     #1429               // Field TABS_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+       4: aload_2
+       5: invokevirtual #1340               // Method java/lang/Integer.intValue:()I
+       8: bipush        8
+      10: aload_2
+      11: invokevirtual #1340               // Method java/lang/Integer.intValue:()I
+      14: bipush        8
+      16: if_icmpne     23
+      19: iconst_0
+      20: goto          25
+      23: bipush        28
+      25: aload_0
+      26: getfield      #127                // Field optActiveCategoryData:Ljava/util/Optional;
+      29: aconst_null
+      30: invokevirtual #210                // Method java/util/Optional.orElse:(Ljava/lang/Object;)Ljava/lang/Object;
+      33: aload_3
+      34: if_acmpne     42
+      37: bipush        32
+      39: goto          43
+      42: iconst_0
+      43: bipush        28
+      45: bipush        32
+      47: invokevirtual #1289               // Method net/minecraft/client/gui/GuiGraphics.m_280218_:(Lnet/minecraft/resources/ResourceLocation;IIIIII)V
+      50: return
+
+  private void lambda$drawContentWithCategory$22(net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.puffish.skillsmod.client.config.skill.ClientSkillConfig, net.puffish.skillsmod.client.data.ClientCategoryData, net.puffish.skillsmod.client.rendering.ItemBatchedRenderer, net.puffish.skillsmod.client.config.skill.ClientSkillDefinitionConfig);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aload         6
+       5: invokevirtual #1432               // Method net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.frame:()Lnet/puffish/skillsmod/client/config/ClientFrameConfig;
+       8: aload         6
+      10: invokevirtual #361                // Method net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.size:()F
+      13: aload_3
+      14: invokevirtual #368                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.x:()I
+      17: aload_3
+      18: invokevirtual #370                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.y:()I
+      21: aload         4
+      23: aload_3
+      24: invokevirtual #1436               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getSkillState:(Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;)Lnet/puffish/skillsmod/api/Skill$State;
+      27: invokevirtual #1438               // Method drawFrame:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/puffish/skillsmod/client/config/ClientFrameConfig;FIILnet/puffish/skillsmod/api/Skill$State;)V
+      30: aload_0
+      31: aload_1
+      32: aload_2
+      33: aload         5
+      35: aload         6
+      37: invokevirtual #1439               // Method net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.icon:()Lnet/puffish/skillsmod/client/config/ClientIconConfig;
+      40: aload         6
+      42: invokevirtual #361                // Method net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.size:()F
+      45: aload_3
+      46: invokevirtual #368                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.x:()I
+      49: aload_3
+      50: invokevirtual #370                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.y:()I
+      53: invokevirtual #1353               // Method drawIcon:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/rendering/TextureBatchedRenderer;Lnet/puffish/skillsmod/client/rendering/ItemBatchedRenderer;Lnet/puffish/skillsmod/client/config/ClientIconConfig;FII)V
+      56: return
+
+  private void lambda$drawContentWithCategory$21(net.puffish.skillsmod.client.config.ClientCategoryConfig, net.puffish.skillsmod.client.data.ClientCategoryData, net.puffish.skillsmod.client.rendering.ConnectionBatchedRenderer, net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.config.skill.ClientSkillConfig);
+    Code:
+       0: aload_1
+       1: invokevirtual #563                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.definitions:()Ljava/util/Map;
+       4: aload         5
+       6: invokevirtual #567                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.definitionId:()Ljava/lang/String;
+       9: invokeinterface #569,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      14: checkcast     #358                // class net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig
+      17: astore        6
+      19: aload         6
+      21: ifnonnull     25
+      24: return
+      25: new           #1252               // class java/util/ArrayList
+      28: dup
+      29: invokespecial #1253               // Method java/util/ArrayList."<init>":()V
+      32: astore        7
+      34: aload         7
+      36: aload         6
+      38: invokevirtual #1441               // Method net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.title:()Lnet/minecraft/network/chat/Component;
+      41: invokeinterface #1360,  1         // InterfaceMethod net/minecraft/network/chat/Component.m_7532_:()Lnet/minecraft/util/FormattedCharSequence;
+      46: invokevirtual #1269               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+      49: pop
+      50: aload         7
+      52: aload_0
+      53: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+      56: aload         6
+      58: invokevirtual #1442               // Method net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.description:()Lnet/minecraft/network/chat/Component;
+      61: invokeinterface #1367,  1         // InterfaceMethod net/minecraft/network/chat/Component.m_6881_:()Lnet/minecraft/network/chat/MutableComponent;
+      66: getstatic     #1373               // Field net/minecraft/network/chat/Style.f_131099_:Lnet/minecraft/network/chat/Style;
+      69: getstatic     #1379               // Field net/minecraft/ChatFormatting.GRAY:Lnet/minecraft/ChatFormatting;
+      72: invokevirtual #1383               // Method net/minecraft/network/chat/Style.m_131157_:(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/Style;
+      75: invokestatic  #1389               // Method net/minecraft/network/chat/ComponentUtils.m_130750_:(Lnet/minecraft/network/chat/MutableComponent;Lnet/minecraft/network/chat/Style;)Lnet/minecraft/network/chat/MutableComponent;
+      78: invokestatic  #1395               // Method net/minecraft/client/gui/components/Tooltip.m_257868_:(Lnet/minecraft/client/Minecraft;Lnet/minecraft/network/chat/Component;)Ljava/util/List;
+      81: invokevirtual #1399               // Method java/util/ArrayList.addAll:(Ljava/util/Collection;)Z
+      84: pop
+      85: invokestatic  #1402               // Method net/minecraft/client/gui/screens/Screen.m_96638_:()Z
+      88: ifeq          126
+      91: aload         7
+      93: aload_0
+      94: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+      97: aload         6
+      99: invokevirtual #1443               // Method net/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig.extraDescription:()Lnet/minecraft/network/chat/Component;
+     102: invokeinterface #1367,  1         // InterfaceMethod net/minecraft/network/chat/Component.m_6881_:()Lnet/minecraft/network/chat/MutableComponent;
+     107: getstatic     #1373               // Field net/minecraft/network/chat/Style.f_131099_:Lnet/minecraft/network/chat/Style;
+     110: getstatic     #1379               // Field net/minecraft/ChatFormatting.GRAY:Lnet/minecraft/ChatFormatting;
+     113: invokevirtual #1383               // Method net/minecraft/network/chat/Style.m_131157_:(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/Style;
+     116: invokestatic  #1389               // Method net/minecraft/network/chat/ComponentUtils.m_130750_:(Lnet/minecraft/network/chat/MutableComponent;Lnet/minecraft/network/chat/Style;)Lnet/minecraft/network/chat/MutableComponent;
+     119: invokestatic  #1395               // Method net/minecraft/client/gui/components/Tooltip.m_257868_:(Lnet/minecraft/client/Minecraft;Lnet/minecraft/network/chat/Component;)Ljava/util/List;
+     122: invokevirtual #1399               // Method java/util/ArrayList.addAll:(Ljava/util/Collection;)Z
+     125: pop
+     126: aload_0
+     127: getfield      #711                // Field f_96541_:Lnet/minecraft/client/Minecraft;
+     130: getfield      #1409               // Field net/minecraft/client/Minecraft.f_91066_:Lnet/minecraft/client/Options;
+     133: getfield      #1414               // Field net/minecraft/client/Options.f_92125_:Z
+     136: ifeq          162
+     139: aload         7
+     141: aload         5
+     143: invokevirtual #589                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.id:()Ljava/lang/String;
+     146: invokestatic  #1216               // InterfaceMethod net/minecraft/network/chat/Component.m_237113_:(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;
+     149: getstatic     #1422               // Field net/minecraft/ChatFormatting.DARK_GRAY:Lnet/minecraft/ChatFormatting;
+     152: invokevirtual #1426               // Method net/minecraft/network/chat/MutableComponent.m_130940_:(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/MutableComponent;
+     155: invokevirtual #1266               // Method net/minecraft/network/chat/MutableComponent.m_7532_:()Lnet/minecraft/util/FormattedCharSequence;
+     158: invokevirtual #1269               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     161: pop
+     162: aload_0
+     163: aload         7
+     165: invokevirtual #1280               // Method m_257959_:(Ljava/util/List;)V
+     168: aload_1
+     169: invokevirtual #1446               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.skillExclusiveConnections:()Ljava/util/Map;
+     172: aload         5
+     174: invokevirtual #589                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.id:()Ljava/lang/String;
+     177: invokeinterface #569,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     182: checkcast     #421                // class java/util/Collection
+     185: astore        8
+     187: aload         8
+     189: ifnull        245
+     192: aload         8
+     194: invokeinterface #471,  1          // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
+     199: astore        9
+     201: aload         9
+     203: invokeinterface #476,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     208: ifeq          245
+     211: aload         9
+     213: invokeinterface #479,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     218: checkcast     #996                // class net/puffish/skillsmod/client/config/skill/ClientSkillConnectionConfig
+     221: astore        10
+     223: aload_2
+     224: aload         10
+     226: invokevirtual #1000               // Method net/puffish/skillsmod/client/data/ClientCategoryData.getConnection:(Lnet/puffish/skillsmod/client/config/skill/ClientSkillConnectionConfig;)Ljava/util/Optional;
+     229: aload_3
+     230: aload         4
+     232: aload         10
+     234: invokedynamic #1451,  0           // InvokeDynamic #33:accept:(Lnet/puffish/skillsmod/client/rendering/ConnectionBatchedRenderer;Lnet/minecraft/client/gui/GuiGraphics;Lnet/puffish/skillsmod/client/config/skill/ClientSkillConnectionConfig;)Ljava/util/function/Consumer;
+     239: invokevirtual #293                // Method java/util/Optional.ifPresent:(Ljava/util/function/Consumer;)V
+     242: goto          201
+     245: return
+
+  private static void lambda$drawContentWithCategory$20(net.puffish.skillsmod.client.rendering.ConnectionBatchedRenderer, net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.config.skill.ClientSkillConnectionConfig, net.puffish.skillsmod.client.data.ClientSkillConnectionData);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_3
+       3: invokevirtual #1461               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getSkillA:()Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;
+       6: invokevirtual #368                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.x:()I
+       9: i2f
+      10: aload_3
+      11: invokevirtual #1461               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getSkillA:()Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;
+      14: invokevirtual #370                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.y:()I
+      17: i2f
+      18: aload_3
+      19: invokevirtual #1464               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getSkillB:()Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;
+      22: invokevirtual #368                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.x:()I
+      25: i2f
+      26: aload_3
+      27: invokevirtual #1464               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getSkillB:()Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;
+      30: invokevirtual #370                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.y:()I
+      33: i2f
+      34: aload_2
+      35: invokevirtual #1467               // Method net/puffish/skillsmod/client/config/skill/ClientSkillConnectionConfig.bidirectional:()Z
+      38: aload_3
+      39: invokevirtual #1470               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getColor:()Lnet/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig;
+      42: invokevirtual #1246               // Method net/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig.fill:()Lnet/puffish/skillsmod/client/config/colors/ClientColorConfig;
+      45: invokevirtual #1243               // Method net/puffish/skillsmod/client/config/colors/ClientColorConfig.argb:()I
+      48: aload_3
+      49: invokevirtual #1470               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getColor:()Lnet/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig;
+      52: invokevirtual #1238               // Method net/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig.stroke:()Lnet/puffish/skillsmod/client/config/colors/ClientColorConfig;
+      55: invokevirtual #1243               // Method net/puffish/skillsmod/client/config/colors/ClientColorConfig.argb:()I
+      58: invokevirtual #1474               // Method net/puffish/skillsmod/client/rendering/ConnectionBatchedRenderer.emitConnection:(Lnet/minecraft/client/gui/GuiGraphics;FFFFZII)V
+      61: return
+
+  private boolean lambda$drawContentWithCategory$19(net.puffish.skillsmod.client.config.ClientCategoryConfig, org.joml.Vector2i, net.puffish.skillsmod.client.config.skill.ClientSkillConfig);
+    Code:
+       0: aload_1
+       1: aload_3
+       2: invokevirtual #567                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.definitionId:()Ljava/lang/String;
+       5: invokevirtual #1067               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.getDefinitionById:(Ljava/lang/String;)Ljava/util/Optional;
+       8: aload_0
+       9: aload_2
+      10: aload_3
+      11: invokedynamic #1485,  0           // InvokeDynamic #34:apply:(Lnet/puffish/skillsmod/client/gui/SkillsScreen;Lorg/joml/Vector2i;Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;)Ljava/util/function/Function;
+      16: invokevirtual #201                // Method java/util/Optional.map:(Ljava/util/function/Function;)Ljava/util/Optional;
+      19: iconst_0
+      20: invokestatic  #207                // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      23: invokevirtual #210                // Method java/util/Optional.orElse:(Ljava/lang/Object;)Ljava/lang/Object;
+      26: checkcast     #203                // class java/lang/Boolean
+      29: invokevirtual #214                // Method java/lang/Boolean.booleanValue:()Z
+      32: ireturn
+
+  private java.lang.Boolean lambda$drawContentWithCategory$18(org.joml.Vector2i, net.puffish.skillsmod.client.config.skill.ClientSkillConfig, net.puffish.skillsmod.client.config.skill.ClientSkillDefinitionConfig);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aload_3
+       4: invokevirtual #571                // Method isInsideSkill:(Lorg/joml/Vector2i;Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;Lnet/puffish/skillsmod/client/config/skill/ClientSkillDefinitionConfig;)Z
+       7: invokestatic  #207                // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      10: areturn
+
+  private static void lambda$drawContentWithCategory$17(net.puffish.skillsmod.client.rendering.ConnectionBatchedRenderer, net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.config.skill.ClientSkillConnectionConfig, net.puffish.skillsmod.client.data.ClientSkillConnectionData);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_3
+       3: invokevirtual #1461               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getSkillA:()Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;
+       6: invokevirtual #368                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.x:()I
+       9: i2f
+      10: aload_3
+      11: invokevirtual #1461               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getSkillA:()Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;
+      14: invokevirtual #370                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.y:()I
+      17: i2f
+      18: aload_3
+      19: invokevirtual #1464               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getSkillB:()Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;
+      22: invokevirtual #368                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.x:()I
+      25: i2f
+      26: aload_3
+      27: invokevirtual #1464               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getSkillB:()Lnet/puffish/skillsmod/client/config/skill/ClientSkillConfig;
+      30: invokevirtual #370                // Method net/puffish/skillsmod/client/config/skill/ClientSkillConfig.y:()I
+      33: i2f
+      34: aload_2
+      35: invokevirtual #1467               // Method net/puffish/skillsmod/client/config/skill/ClientSkillConnectionConfig.bidirectional:()Z
+      38: aload_3
+      39: invokevirtual #1470               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getColor:()Lnet/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig;
+      42: invokevirtual #1246               // Method net/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig.fill:()Lnet/puffish/skillsmod/client/config/colors/ClientColorConfig;
+      45: invokevirtual #1243               // Method net/puffish/skillsmod/client/config/colors/ClientColorConfig.argb:()I
+      48: aload_3
+      49: invokevirtual #1470               // Method net/puffish/skillsmod/client/data/ClientSkillConnectionData.getColor:()Lnet/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig;
+      52: invokevirtual #1238               // Method net/puffish/skillsmod/client/config/colors/ClientFillStrokeColorsConfig.stroke:()Lnet/puffish/skillsmod/client/config/colors/ClientColorConfig;
+      55: invokevirtual #1243               // Method net/puffish/skillsmod/client/config/colors/ClientColorConfig.argb:()I
+      58: invokevirtual #1474               // Method net/puffish/skillsmod/client/rendering/ConnectionBatchedRenderer.emitConnection:(Lnet/minecraft/client/gui/GuiGraphics;FFFFZII)V
+      61: return
+
+  private void lambda$drawContent$16(net.minecraft.client.gui.GuiGraphics);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #1487               // Method drawContentWithoutCategory:(Lnet/minecraft/client/gui/GuiGraphics;)V
+       5: return
+
+  private void lambda$drawContent$15(net.minecraft.client.gui.GuiGraphics, double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: dload_2
+       3: dload         4
+       5: aload         6
+       7: invokevirtual #1489               // Method drawContentWithCategory:(Lnet/minecraft/client/gui/GuiGraphics;DDLnet/puffish/skillsmod/client/data/ClientCategoryData;)V
+      10: return
+
+  private static void lambda$drawFrame$14(net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.config.ClientFrameConfig$TextureFrameConfig, int, int, int, int);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: invokevirtual #867                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig.availableTexture:()Lnet/minecraft/resources/ResourceLocation;
+       6: iload_3
+       7: iload         4
+       9: isub
+      10: iload         5
+      12: iload         4
+      14: isub
+      15: iload         6
+      17: iload         6
+      19: getstatic     #818                // Field COLOR_GRAY:Lorg/joml/Vector4fc;
+      22: invokevirtual #772                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIILorg/joml/Vector4fc;)V
+      25: return
+
+  private static void lambda$drawFrame$13(net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.minecraft.client.gui.GuiGraphics, int, int, int, int, net.minecraft.resources.ResourceLocation);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload         6
+       4: iload_2
+       5: iload_3
+       6: isub
+       7: iload         4
+       9: iload_3
+      10: isub
+      11: iload         5
+      13: iload         5
+      15: getstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+      18: invokevirtual #772                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIILorg/joml/Vector4fc;)V
+      21: return
+
+  private static void lambda$drawFrame$12(net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.config.ClientFrameConfig$TextureFrameConfig, int, int, int, int);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: invokevirtual #867                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig.availableTexture:()Lnet/minecraft/resources/ResourceLocation;
+       6: iload_3
+       7: iload         4
+       9: isub
+      10: iload         5
+      12: iload         4
+      14: isub
+      15: iload         6
+      17: iload         6
+      19: getstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+      22: invokevirtual #772                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIILorg/joml/Vector4fc;)V
+      25: return
+
+  private static void lambda$drawFrame$11(net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.minecraft.client.gui.GuiGraphics, int, int, int, int, net.minecraft.resources.ResourceLocation);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload         6
+       4: iload_2
+       5: iload_3
+       6: isub
+       7: iload         4
+       9: iload_3
+      10: isub
+      11: iload         5
+      13: iload         5
+      15: getstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+      18: invokevirtual #772                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIILorg/joml/Vector4fc;)V
+      21: return
+
+  private static void lambda$drawFrame$10(net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.minecraft.client.gui.GuiGraphics, net.puffish.skillsmod.client.config.ClientFrameConfig$TextureFrameConfig, int, int, int, int);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: invokevirtual #867                // Method net/puffish/skillsmod/client/config/ClientFrameConfig$TextureFrameConfig.availableTexture:()Lnet/minecraft/resources/ResourceLocation;
+       6: iload_3
+       7: iload         4
+       9: isub
+      10: iload         5
+      12: iload         4
+      14: isub
+      15: iload         6
+      17: iload         6
+      19: getstatic     #818                // Field COLOR_GRAY:Lorg/joml/Vector4fc;
+      22: invokevirtual #772                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIILorg/joml/Vector4fc;)V
+      25: return
+
+  private static void lambda$drawFrame$9(net.puffish.skillsmod.client.rendering.TextureBatchedRenderer, net.minecraft.client.gui.GuiGraphics, int, int, int, int, net.minecraft.resources.ResourceLocation);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload         6
+       4: iload_2
+       5: iload_3
+       6: isub
+       7: iload         4
+       9: iload_3
+      10: isub
+      11: iload         5
+      13: iload         5
+      15: getstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+      18: invokevirtual #772                // Method net/puffish/skillsmod/client/rendering/TextureBatchedRenderer.emitTexture:(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/resources/ResourceLocation;IIIILorg/joml/Vector4fc;)V
+      21: return
+
+  private void lambda$mouseScrolled$8(double, double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: ldc2_w        #327                // double 2.0d
+       3: dload_1
+       4: ldc2_w        #1490               // double 0.25d
+       7: dmul
+       8: invokestatic  #1495               // Method java/lang/Math.pow:(DD)D
+      11: d2f
+      12: fstore        8
+      14: aload         7
+      16: invokevirtual #326                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getX:()I
+      19: istore        9
+      21: aload         7
+      23: invokevirtual #339                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getY:()I
+      26: istore        10
+      28: aload         7
+      30: invokevirtual #332                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getScale:()F
+      33: fstore        11
+      35: fload         11
+      37: fload         8
+      39: fmul
+      40: fstore        11
+      42: fload         11
+      44: aload_0
+      45: getfield      #129                // Field minScale:F
+      48: fcmpg
+      49: ifge          67
+      52: aload_0
+      53: getfield      #129                // Field minScale:F
+      56: fstore        11
+      58: aload_0
+      59: getfield      #129                // Field minScale:F
+      62: fload         11
+      64: fdiv
+      65: fstore        8
+      67: fload         11
+      69: aload_0
+      70: getfield      #131                // Field maxScale:F
+      73: fcmpl
+      74: ifle          92
+      77: aload_0
+      78: getfield      #131                // Field maxScale:F
+      81: fstore        11
+      83: aload_0
+      84: getfield      #131                // Field maxScale:F
+      87: fload         11
+      89: fdiv
+      90: fstore        8
+      92: aload_0
+      93: iload         9
+      95: fload         8
+      97: fconst_1
+      98: fsub
+      99: f2d
+     100: dload_3
+     101: iload         9
+     103: i2d
+     104: dsub
+     105: aload_0
+     106: getfield      #217                // Field f_96543_:I
+     109: i2f
+     110: fconst_2
+     111: fdiv
+     112: f2d
+     113: dsub
+     114: dmul
+     115: invokestatic  #336                // Method java/lang/Math.round:(D)J
+     118: l2i
+     119: isub
+     120: iload         10
+     122: fload         8
+     124: fconst_1
+     125: fsub
+     126: f2d
+     127: dload         5
+     129: iload         10
+     131: i2d
+     132: dsub
+     133: aload_0
+     134: getfield      #220                // Field f_96544_:I
+     137: i2f
+     138: fconst_2
+     139: fdiv
+     140: f2d
+     141: dsub
+     142: dmul
+     143: invokestatic  #336                // Method java/lang/Math.round:(D)J
+     146: l2i
+     147: isub
+     148: fload         11
+     150: aload         7
+     152: invokevirtual #1497               // Method applyChangesWithLimits:(IIFLnet/puffish/skillsmod/client/data/ClientCategoryData;)V
+     155: return
+
+  private void lambda$mouseDragged$7(double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: dload_1
+       2: aload_0
+       3: getfield      #133                // Field dragStartX:D
+       6: dsub
+       7: invokestatic  #336                // Method java/lang/Math.round:(D)J
+      10: l2i
+      11: dload_3
+      12: aload_0
+      13: getfield      #135                // Field dragStartY:D
+      16: dsub
+      17: invokestatic  #336                // Method java/lang/Math.round:(D)J
+      20: l2i
+      21: aload         5
+      23: invokevirtual #332                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getScale:()F
+      26: aload         5
+      28: invokevirtual #1497               // Method applyChangesWithLimits:(IIFLnet/puffish/skillsmod/client/data/ClientCategoryData;)V
+      31: return
+
+  private void lambda$mouseReleased$6(double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: dload_1
+       2: dload_3
+       3: aload         5
+       5: invokevirtual #1500               // Method mouseReleasedWithCategory:(DDLnet/puffish/skillsmod/client/data/ClientCategoryData;)V
+       8: return
+
+  private void lambda$mouseClickedWithCategory$5(org.joml.Vector2i, java.lang.Integer, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: invokevirtual #1340               // Method java/lang/Integer.intValue:()I
+       6: invokevirtual #1355               // Method isInsideTab:(Lorg/joml/Vector2i;I)Z
+       9: ifeq          30
+      12: aload_0
+      13: aload_3
+      14: invokevirtual #549                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getConfig:()Lnet/puffish/skillsmod/client/config/ClientCategoryConfig;
+      17: invokevirtual #587                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.id:()Lnet/minecraft/resources/ResourceLocation;
+      20: invokestatic  #1504               // Method java/util/Optional.ofNullable:(Ljava/lang/Object;)Ljava/util/Optional;
+      23: putfield      #161                // Field optActiveCategoryId:Ljava/util/Optional;
+      26: aload_0
+      27: invokevirtual #626                // Method syncCategory:()V
+      30: return
+
+  private void lambda$mouseClicked$4(double, double, net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: dload_1
+       2: dload_3
+       3: aload         5
+       5: invokevirtual #1506               // Method mouseClickedWithCategory:(DDLnet/puffish/skillsmod/client/data/ClientCategoryData;)V
+       8: return
+
+  private static net.minecraft.resources.ResourceLocation lambda$syncCategory$3(net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: invokevirtual #549                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getConfig:()Lnet/puffish/skillsmod/client/config/ClientCategoryConfig;
+       4: invokevirtual #587                // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.id:()Lnet/minecraft/resources/ResourceLocation;
+       7: areturn
+
+  private void lambda$resize$2(net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #326                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getX:()I
+       5: aload_1
+       6: invokevirtual #339                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getY:()I
+       9: aload_1
+      10: invokevirtual #332                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getScale:()F
+      13: aload_1
+      14: invokevirtual #1497               // Method applyChangesWithLimits:(IIFLnet/puffish/skillsmod/client/data/ClientCategoryData;)V
+      17: return
+
+  private static net.puffish.skillsmod.util.Bounds2i lambda$resize$1(net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_0
+       1: invokevirtual #549                // Method net/puffish/skillsmod/client/data/ClientCategoryData.getConfig:()Lnet/puffish/skillsmod/client/config/ClientCategoryConfig;
+       4: invokevirtual #1509               // Method net/puffish/skillsmod/client/config/ClientCategoryConfig.getBounds:()Lnet/puffish/skillsmod/util/Bounds2i;
+       7: areturn
+
+  private java.lang.Boolean lambda$resize$0(net.puffish.skillsmod.client.data.ClientCategoryData);
+    Code:
+       0: aload_1
+       1: invokevirtual #1283               // Method net/puffish/skillsmod/client/data/ClientCategoryData.hasExperience:()Z
+       4: ifeq          21
+       7: aload_0
+       8: getfield      #217                // Field f_96543_:I
+      11: sipush        450
+      14: if_icmpge     21
+      17: iconst_1
+      18: goto          22
+      21: iconst_0
+      22: invokestatic  #207                // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      25: areturn
+
+  static {};
+    Code:
+       0: new           #1416               // class net/minecraft/resources/ResourceLocation
+       3: dup
+       4: ldc_w         #1512               // String textures/gui/advancements/tabs.png
+       7: invokespecial #1515               // Method net/minecraft/resources/ResourceLocation."<init>":(Ljava/lang/String;)V
+      10: putstatic     #1429               // Field TABS_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+      13: new           #1416               // class net/minecraft/resources/ResourceLocation
+      16: dup
+      17: ldc_w         #1517               // String textures/gui/advancements/window.png
+      20: invokespecial #1515               // Method net/minecraft/resources/ResourceLocation."<init>":(Ljava/lang/String;)V
+      23: putstatic     #1149               // Field WINDOW_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+      26: new           #1416               // class net/minecraft/resources/ResourceLocation
+      29: dup
+      30: ldc_w         #1519               // String textures/gui/advancements/widgets.png
+      33: invokespecial #1515               // Method net/minecraft/resources/ResourceLocation."<init>":(Ljava/lang/String;)V
+      36: putstatic     #822                // Field WIDGETS_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+      39: new           #1416               // class net/minecraft/resources/ResourceLocation
+      42: dup
+      43: ldc_w         #1521               // String textures/gui/icons.png
+      46: invokespecial #1515               // Method net/minecraft/resources/ResourceLocation."<init>":(Ljava/lang/String;)V
+      49: putstatic     #1285               // Field ICONS_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+      52: new           #1416               // class net/minecraft/resources/ResourceLocation
+      55: dup
+      56: ldc_w         #1523               // String textures/gui/recipe_book.png
+      59: invokespecial #1515               // Method net/minecraft/resources/ResourceLocation."<init>":(Ljava/lang/String;)V
+      62: putstatic     #300                // Field RECIPE_BOOK_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+      65: new           #1416               // class net/minecraft/resources/ResourceLocation
+      68: dup
+      69: ldc_w         #1525               // String realms
+      72: ldc_w         #1527               // String textures/gui/realms/trial_icon.png
+      75: invokespecial #1530               // Method net/minecraft/resources/ResourceLocation."<init>":(Ljava/lang/String;Ljava/lang/String;)V
+      78: putstatic     #1337               // Field TRIAL_ICON_TEXTURE:Lnet/minecraft/resources/ResourceLocation;
+      81: new           #1532               // class org/joml/Vector4f
+      84: dup
+      85: fconst_1
+      86: fconst_1
+      87: fconst_1
+      88: fconst_1
+      89: invokespecial #1534               // Method org/joml/Vector4f."<init>":(FFFF)V
+      92: putstatic     #758                // Field COLOR_WHITE:Lorg/joml/Vector4fc;
+      95: new           #1532               // class org/joml/Vector4f
+      98: dup
+      99: ldc_w         #1535               // float 0.25f
+     102: ldc_w         #1535               // float 0.25f
+     105: ldc_w         #1535               // float 0.25f
+     108: fconst_1
+     109: invokespecial #1534               // Method org/joml/Vector4f."<init>":(FFFF)V
+     112: putstatic     #818                // Field COLOR_GRAY:Lorg/joml/Vector4fc;
+     115: return
+}

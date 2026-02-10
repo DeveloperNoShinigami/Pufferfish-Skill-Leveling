@@ -60,6 +60,29 @@ public class ForgeNetworkHandler implements NetworkHandler {
                     });
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+
+        CHANNEL.registerMessage(id++, SyncToggleCooldownPacket.class, SyncToggleCooldownPacket::encode,
+                SyncToggleCooldownPacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(packet::handleClient);
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, RequestToggleSkillPacket.class, RequestToggleSkillPacket::encode,
+                RequestToggleSkillPacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isServer()) {
+                        context.enqueueWork(() -> {
+                            var sender = context.getSender();
+                            if (sender != null) {
+                                packet.handleServer(sender);
+                            }
+                        });
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_SERVER));
     }
 
     @Override
@@ -88,5 +111,15 @@ public class ForgeNetworkHandler implements NetworkHandler {
     @Override
     public void sendToPlayer(CloseSkillScreenPacket packet, ServerPlayerEntity player) {
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    @Override
+    public void sendToPlayer(SyncToggleCooldownPacket packet, ServerPlayerEntity player) {
+        CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    @Override
+    public void sendToServer(RequestToggleSkillPacket packet) {
+        CHANNEL.sendToServer(packet);
     }
 }

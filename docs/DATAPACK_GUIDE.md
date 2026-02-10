@@ -46,7 +46,7 @@ Every skill in `definitions.json` is an object keyed by its **Unique ID**.
 
 | Field | Type | Required? | Description |
 | :--- | :--- | :--- | :--- |
-| `type` | string | **YES** | Use `puffish_skills:default` or `puffish_skill_leveling:stackable`. |
+| `type` | string | [Opt] | Defaults to `puffish_skills:default`. Can be omitted for standard/toggle skills. Can be omitted for standard/toggle skills. |
 | `category_id` | string | **YES** | Must match the folder name. Required for Creative Tab Items. |
 | `title` | string | **YES** | **MUST match the ID key** for clear command/data tracking. |
 | `points_per_level`| int | **YES** | Point cost per level (Set to `0` for loot-only skills). |
@@ -160,73 +160,65 @@ Players have a "Level 0" state when they can see a skill but haven't bought any 
 
 This is the core power of the addon. Use it to specify exactly what happens at every single level increment. **Do not skip levels**; if your `max_skill_level` is 5, you must define rewards for levels 1, 2, 3, 4, and 5 in the map for consistent behavior.
 
-#### Example: Continuous Progression (Lvl 1-5)
+#### Example: Continuous Progression (Stackable)
+The `puffish_skill_leveling:stackable` type is a **hybrid**. It supports both standard rewards (applied once when the skill is first unlocked) and per-level rewards (applied/incremented at every level).
+
 ```json
 "champion_seal": {
     "type": "puffish_skill_leveling:stackable",
     "max_skill_level": 5,
     "rewards": [
         {
+            "type": "puffish_skills:attribute",
+            "data": {
+                "attribute": "generic.max_health",
+                "value": 2,
+                "operation": "addition"
+            }
+        },
+        {
             "type": "puffish_skill_leveling:per_level_rewards",
             "data": {
                 "skill_id": "champion_seal",
                 "levels": {
                     "1": [
-                        { 
-                            "type": "puffish_skills:attribute", 
-                            "data": { 
-                                "attribute": "generic.attack_damage", 
-                                "value": 1, 
-                                "operation": "addition" 
-                            } 
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "say Rank 1!"
+                            }
                         }
                     ],
                     "2": [
-                        { 
-                            "type": "puffish_skills:attribute", 
-                            "data": { 
-                                "attribute": "generic.attack_damage", 
-                                "value": 2, 
-                                "operation": "addition" 
-                            } 
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "say Rank 2!"
+                            }
                         }
                     ],
                     "3": [
-                        { 
-                            "type": "puffish_skills:attribute", 
-                            "data": { 
-                                "attribute": "generic.attack_damage", 
-                                "value": 3, 
-                                "operation": "addition" 
-                            } 
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "say Rank 3!"
+                            }
                         }
                     ],
                     "4": [
-                        { 
-                            "type": "puffish_skills:attribute", 
-                            "data": { 
-                                "attribute": "generic.attack_damage", 
-                                "value": 4, 
-                                "operation": "addition" 
-                            } 
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "say Rank 4!"
+                            }
                         }
                     ],
                     "5": [
-                        { 
-                            "type": "puffish_skills:attribute", 
-                            "data": { 
-                                "attribute": "generic.attack_damage", 
-                                "value": 5, 
-                                "operation": "addition" 
-                            } 
-                        },
-                        { 
-                            "type": "puffish_skills:effect", 
-                            "data": { 
-                                "effect": "minecraft:strength", 
-                                "amplifier": 0, 
-                                "ambient": true 
-                            } 
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "say Rank 5!"
+                            }
                         }
                     ]
                 }
@@ -239,6 +231,67 @@ This is the core power of the addon. Use it to specify exactly what happens at e
 
 ---
 
+## 🔘 Point F.1: Toggle Skills
+
+Any skill can be made into a "Toggle Skill" by adding the `toggle` field. These skills are binary (Enabled/Disabled) and can be toggled for free once unlocked.
+
+- **`toggle`**: (Boolean) Set to `true` to enable toggle behavior.
+- **`keybind_slot`**: (Integer, 1-9) Assigns the skill to one of the 9 "Mastery Key" slots in the Controls menu.
+- **`cooldown`**: (Integer, Ticks) Specifies the cooldown period after a skill is **disabled**. Players cannot enable the skill again until this time has passed.
+- **`puffish_skill_leveling:toggle`**: A special reward type that defines what happens when the skill is enabled or disabled. It wraps arrays of other reward types in `enable_rewards` and `disable_rewards`.
+- **`puffish_skills:effect`**: A special reward type that applies potion effects to the player.
+    - **`effect`**: (String) The identifier of the effect (e.g., `"minecraft:haste"`, `"alexsmobs:speedy_momentum"`). Supports all modded effects.
+    - **`amplifier`**: (Integer) The level of the effect (0 = Level I).
+    - **`duration`**: (Integer, Ticks) How long the effect lasts. Use `-1` for infinite (ideal for toggles).
+
+#### Example: Comprehensive Toggle Mastery
+This example shows a toggle skill with standard Pufferfish fields (`title`, `description`, `icon`) and multiple toggle rewards.
+
+```json
+"berserker_rage": {
+    "title": "Berserker Rage",
+    "description": "Enter a state of reckless fury.",
+    "icon": {
+        "type": "item",
+        "data": { "item": "minecraft:netherite_axe" }
+    },
+    "toggle": true,
+    "keybind_slot": 2,
+    "cooldown": 600,
+    "rewards": [
+        {
+            "type": "puffish_skill_leveling:toggle",
+            "data": {
+                "enable_rewards": [
+                    {
+                        "type": "puffish_skills:effect",
+                        "data": {
+                            "effect": "minecraft:strength",
+                            "amplifier": 1,
+                            "duration": -1
+                        }
+                    },
+                    {
+                        "type": "puffish_skills:attribute",
+                        "data": {
+                            "attribute": "generic.attack_speed",
+                            "value": 0.2,
+                            "operation": "multiply_base"
+                        }
+                    }
+                ],
+                "disable_rewards": [
+            }
+        }
+    ],
+    "metadata": {
+        "icon": "berserker_rage_icon_id"
+    }
+}
+```
+
+---
+
 ## 💎 Point G: Technical Economies (Costs)
 
 All cost fields (`enchantment_cost`, `imbuement_cost`, `slot_opening_cost`, `cleansing_cost`) support three formats:
@@ -246,6 +299,57 @@ All cost fields (`enchantment_cost`, `imbuement_cost`, `slot_opening_cost`, `cle
 1.  **Integer (Scalar)**: `5` -> (Target Level * 5 XP Levels).
 2.  **Array**: `[5, 10, 15, 20, 30]` -> Specific hardcoded cost per rank.
 3.  **Expression**: `"level * 2 + (level^2)"` -> Evaluated math using the `level` variable.
+
+### 4. Comprehensive Example: Arcane Striker
+This example combines everything: 5 Levels, Mixed Rewards (Attributes + Effects + Commands), and a Mathematical Enchantment Cost.
+
+```json
+"arcane_striker": {
+    "title": "Arcane Striker",
+    "description": "Infuse your strikes with magic.",
+    "icon": {
+        "type": "item",
+        "data": { "item": "minecraft:amethyst_shard" }
+    },
+    "max_skill_level": 5,
+    "loot_mode": "both",
+    "enchantment_cost": {
+        "type": "expression",
+        "data": { "expression": "level * 5 + 10" }
+    },
+    "imbuement_cost": 5,
+    "rewards": [
+        {
+            "type": "puffish_skill_leveling:per_level_rewards",
+            "data": {
+                "skill_id": "arcane_striker",
+                "levels": {
+                    "1": [
+                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 1, "operation": "addition" } }
+                    ],
+                    "2": [
+                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 2, "operation": "addition" } }
+                    ],
+                    "3": [
+                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 3, "operation": "addition" } },
+                        { "type": "puffish_skills:effect", "data": { "effect": "minecraft:glowing", "duration": 100, "amplifier": 0 } }
+                    ],
+                    "4": [
+                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 4, "operation": "addition" } },
+                        { "type": "puffish_skills:effect", "data": { "effect": "minecraft:glowing", "duration": 120, "amplifier": 0 } }
+                    ],
+                    "5": [
+                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 5, "operation": "addition" } },
+                        { "type": "puffish_skills:effect", "data": { "effect": "minecraft:glowing", "duration": 140, "amplifier": 0 } },
+                        { "type": "puffish_skills:command", "data": { "command": "particle minecraft:witch %player_x% %player_y% %player_z% 0 0 0 1 10" } }
+                    ]
+                }
+            }
+        }
+    ],
+    "metadata": { "icon": "arcane_striker_icon" }
+}
+```
 
 ---
 

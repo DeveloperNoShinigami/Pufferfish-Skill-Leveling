@@ -196,5 +196,170 @@
         "metadata": {
             "icon": "armor_plating_icon_id"
         }
+    },
+    "berserker_rage": {
+        "type": "puffish_skills:default",
+        "category_id": "combat",
+        "title": "Berserker Rage",
+        "description": "Enter a state of reckless fury.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:netherite_axe"
+            }
+        },
+        "toggle": true,
+        "keybind_slot": 2,
+        "cooldown": 600,
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:toggle",
+                "data": {
+                    "enable_rewards": [
+                        {
+                            "type": "puffish_skills:effect",
+                            "data": {
+                                "effect": "minecraft:strength",
+                                "amplifier": 1,
+                                "duration": -1
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:attribute",
+                            "data": {
+                                "attribute": "generic.attack_speed",
+                                "value": 0.2,
+                                "operation": "multiply_base"
+                            }
+                        }
+                    ],
+                    "disable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "say Rage fades..."
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "berserker_rage_icon_id"
+        }
+    },
+    "arcane_striker": {
+        "type": "puffish_skills:default",
+        "category_id": "combat",
+        "title": "Arcane Striker",
+        "description": "Infuse your strikes with magic.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:amethyst_shard"
+            }
+        },
+        "max_skill_level": 5,
+        "loot_mode": "both",
+        "enchantment_cost": {
+            "type": "expression",
+            "data": {
+                "expression": "level * 5 + 10"
+            }
+        },
+        "imbuement_cost": 5,
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "arcane_striker",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "value": 1,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "value": 2,
+                                    "operation": "addition"
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "value": 3,
+                                    "operation": "addition"
+                                }
+                            },
+                            {
+                                "type": "puffish_skills:effect",
+                                "data": {
+                                    "effect": "minecraft:glowing",
+                                    "duration": 100,
+                                    "amplifier": 0
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "value": 4,
+                                    "operation": "addition"
+                                }
+                            },
+                            {
+                                "type": "puffish_skills:effect",
+                                "data": {
+                                    "effect": "minecraft:glowing",
+                                    "duration": 120,
+                                    "amplifier": 0
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "value": 5,
+                                    "operation": "addition"
+                                }
+                            },
+                            {
+                                "type": "puffish_skills:effect",
+                                "data": {
+                                    "effect": "minecraft:glowing",
+                                    "duration": 140,
+                                    "amplifier": 0
+                                }
+                            },
+                            {
+                                "type": "puffish_skills:command",
+                                "data": {
+                                    "command": "particle minecraft:witch %player_x% %player_y% %player_z% 0 0 0 1 10"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "arcane_striker_icon"
+        }
     }
 }

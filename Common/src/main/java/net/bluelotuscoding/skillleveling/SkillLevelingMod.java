@@ -3,6 +3,8 @@ package net.bluelotuscoding.skillleveling;
 import net.bluelotuscoding.skillleveling.manager.SkillLevelingManager;
 import net.bluelotuscoding.skillleveling.integration.SkillsModEventHandler;
 import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
+import net.bluelotuscoding.skillleveling.rewards.EffectReward;
+import net.bluelotuscoding.skillleveling.rewards.ToggleReward;
 import net.bluelotuscoding.skillleveling.util.AddonLogger;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -84,7 +86,9 @@ public class SkillLevelingMod {
 
         // REGISTER REWARD TYPE: Add our per-level rewards to Skills mod's reward system
         PerLevelRewardsReward.register();
-        instance.logger.info("Registered per-level rewards reward type");
+        EffectReward.register();
+        ToggleReward.register();
+        instance.logger.info("Registered custom reward types (Per-Level, Effect, Toggle)");
 
         // SKILLS MOD EVENT INTEGRATION: Hook into unlock/lock events
         instance.eventHandler.registerEventHandlers();

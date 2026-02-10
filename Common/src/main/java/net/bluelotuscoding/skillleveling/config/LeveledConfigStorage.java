@@ -85,12 +85,15 @@ public class LeveledConfigStorage {
         public final EnchantmentCostConfig cleansingCost;
         public final boolean isLootable;
         public final boolean hidden;
+        public final boolean toggle;
+        public final int keybindSlot;
+        public final int cooldown;
 
         public LeveledConfig(int maxLevels, int pointsPerLevel, boolean mergeDescription, String lootMode,
                 String categoryId, boolean isLootable, boolean hidden) {
             this(maxLevels, pointsPerLevel, mergeDescription, new ArrayList<>(), new HashMap<>(), lootMode, categoryId,
                     EnchantmentCostConfig.FREE, EnchantmentCostConfig.FREE, EnchantmentCostConfig.FREE,
-                    EnchantmentCostConfig.FREE, isLootable, hidden);
+                    EnchantmentCostConfig.FREE, isLootable, hidden, false, 0, 0);
         }
 
         public LeveledConfig(int maxLevels, int pointsPerLevel, boolean mergeDescription, String lootMode,
@@ -99,7 +102,7 @@ public class LeveledConfigStorage {
             this(maxLevels, pointsPerLevel, mergeDescription, new ArrayList<>(), new HashMap<>(), lootMode, categoryId,
                     enchantmentCost,
                     imbuementCost, EnchantmentCostConfig.FREE, EnchantmentCostConfig.FREE, isLootable,
-                    hidden);
+                    hidden, false, 0, 0);
         }
 
         public LeveledConfig(int maxLevels, int pointsPerLevel, boolean mergeDescription,
@@ -107,7 +110,7 @@ public class LeveledConfigStorage {
                 String lootMode, String categoryId,
                 EnchantmentCostConfig enchantmentCost, EnchantmentCostConfig imbuementCost,
                 EnchantmentCostConfig slotOpeningCost, EnchantmentCostConfig cleansingCost, boolean isLootable,
-                boolean hidden) {
+                boolean hidden, boolean toggle, int keybindSlot, int cooldown) {
             this.maxLevels = maxLevels;
             this.pointsPerLevel = pointsPerLevel;
             this.mergeDescription = mergeDescription;
@@ -121,6 +124,9 @@ public class LeveledConfigStorage {
             this.cleansingCost = cleansingCost != null ? cleansingCost : EnchantmentCostConfig.FREE;
             this.isLootable = isLootable;
             this.hidden = hidden;
+            this.toggle = toggle;
+            this.keybindSlot = keybindSlot;
+            this.cooldown = cooldown;
         }
     }
 

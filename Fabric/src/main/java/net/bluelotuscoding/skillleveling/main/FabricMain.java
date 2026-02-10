@@ -39,6 +39,11 @@ public class FabricMain implements ModInitializer {
                 // Initialize common addon logic
                 SkillLevelingMod.init();
 
+                // Initialize networking
+                net.bluelotuscoding.skillleveling.network.FabricNetworkHandler.init();
+                SkillLevelingMod.getInstance().setNetworkHandler(
+                                new net.bluelotuscoding.skillleveling.network.FabricNetworkHandler());
+
                 // Register Loot Functions
                 ModLootFunctions.register();
 
@@ -218,5 +223,9 @@ public class FabricMain implements ModInitializer {
                                                                                 applyExecutor);
                                         }
                                 });
+
+                net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+                        SkillLevelingMod.getInstance().getSkillLevelingManager().tick(server);
+                });
         }
 }

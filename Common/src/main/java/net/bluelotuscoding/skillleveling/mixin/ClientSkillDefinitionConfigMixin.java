@@ -1,5 +1,6 @@
 package net.bluelotuscoding.skillleveling.mixin;
 
+import net.bluelotuscoding.skillleveling.config.LeveledConfigStorage;
 import net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage;
 import net.bluelotuscoding.skillleveling.client.ClientSkillLevelStorage;
 import net.minecraft.text.MutableText;
@@ -57,7 +58,17 @@ public class ClientSkillDefinitionConfigMixin {
                 result.append(Text.literal("\n"));
             }
 
-            // 2. Add level indicator (Base + Bonus)
+            // 2. Add toggle status if applicable
+            LeveledConfigStorage.LeveledConfig config = LeveledConfigStorage.get(defId);
+            if (config != null && config.toggle) {
+                if (currentLevel > 0) {
+                    result.append(Text.literal("§a§lENABLED\n"));
+                } else {
+                    result.append(Text.literal("§c§lDISABLED\n"));
+                }
+            }
+
+            // 3. Add level indicator (Base + Bonus)
             // ONLY show if maxLevel > 1 (leveled skill)
             if (maxLevel > 1) {
                 if (currentLevel <= 0) {

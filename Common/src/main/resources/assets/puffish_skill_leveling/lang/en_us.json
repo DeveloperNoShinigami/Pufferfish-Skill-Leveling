@@ -68,5 +68,15 @@
   "item.puffish_skill_leveling.skill_charm.bonus": "%s",
   "item.puffish_skill_leveling.skill_charm.hint": "Equip in a charm slot to gain this bonus",
   "item.puffish_skill_leveling.skill_charm.unconfigured": "No Skill Applied",
-  "curios.identifier.skill_charm": "Skill Charm"
+  "curios.identifier.skill_charm": "Skill Charm",
+  "category.skillleveling.mastery": "Skill Mastery",
+  "key.skillleveling.mastery_1": "Mastery Slot 1",
+  "key.skillleveling.mastery_2": "Mastery Slot 2",
+  "key.skillleveling.mastery_3": "Mastery Slot 3",
+  "key.skillleveling.mastery_4": "Mastery Slot 4",
+  "key.skillleveling.mastery_5": "Mastery Slot 5",
+  "key.skillleveling.mastery_6": "Mastery Slot 6",
+  "key.skillleveling.mastery_7": "Mastery Slot 7",
+  "key.skillleveling.mastery_8": "Mastery Slot 8",
+  "key.skillleveling.mastery_9": "Mastery Slot 9"
 }

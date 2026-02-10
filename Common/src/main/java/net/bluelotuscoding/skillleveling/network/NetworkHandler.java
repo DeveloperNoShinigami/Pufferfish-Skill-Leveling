@@ -8,4 +8,8 @@ public interface NetworkHandler {
     void sendToPlayer(SyncSkillDescriptionsPacket packet, ServerPlayerEntity player);
 
     void sendToPlayer(CloseSkillScreenPacket packet, ServerPlayerEntity player);
+
+    void sendToPlayer(SyncToggleCooldownPacket packet, ServerPlayerEntity player);
+
+    void sendToServer(RequestToggleSkillPacket packet);
 }

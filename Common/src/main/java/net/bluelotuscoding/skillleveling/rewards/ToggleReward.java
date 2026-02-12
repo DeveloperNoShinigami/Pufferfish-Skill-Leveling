@@ -25,32 +25,72 @@ public class ToggleReward implements Reward {
     private final List<SkillRewardConfig> enableRewards;
     private final List<SkillRewardConfig> disableRewards;
 
+    private final java.util.Map<java.util.UUID, Boolean> lastActiveState = new java.util.HashMap<>();
+
+    public void initializeState(java.util.UUID uuid, boolean active) {
+        lastActiveState.put(uuid, active);
+    }
+
     public ToggleReward(List<SkillRewardConfig> enableRewards, List<SkillRewardConfig> disableRewards) {
         this.enableRewards = enableRewards;
         this.disableRewards = disableRewards;
     }
 
+    private Identifier cachedCategoryId;
+    private String cachedSkillId;
+
+    public void setCachedCategoryId(Identifier categoryId) {
+        this.cachedCategoryId = categoryId;
+    }
+
+    public void setCachedSkillId(String skillId) {
+        this.cachedSkillId = skillId;
+    }
+
     @Override
     public void update(RewardUpdateContext context) {
         var player = context.getPlayer();
-        int count = context.getCount();
-        boolean action = context.isAction();
+        var uuid = player.getUuid();
 
-        if (count > 0) {
-            // Skill is enabled
-            for (var reward : enableRewards) {
-                reward.instance().update(new RewardUpdateContextImpl(player, 1, action));
-            }
-            for (var reward : disableRewards) {
-                reward.instance().update(new RewardUpdateContextImpl(player, 0, false));
-            }
+        // STRICT LOOKUP: Ignore context.getCount() (which is 1 if skill is unlocked).
+        // Instead, query the authoritative DataManager state.
+        boolean isActive = false;
+        if (cachedCategoryId != null && cachedSkillId != null) {
+            isActive = SkillLevelingMod.getInstance().getSkillLevelingManager().getDataManager().isToggleActive(player,
+                    cachedCategoryId, cachedSkillId);
+        }
+
+        boolean wasActive = lastActiveState.getOrDefault(uuid, false);
+        boolean transition = isActive != wasActive;
+
+        if (transition) {
+            lastActiveState.put(uuid, isActive);
+        }
+
+        // 1. Update Enable Rewards (Handles Attributes/Effects ON and OFF)
+        // If Active: count=1 (Apply modifiers)
+        // If Inactive: count=0 (Remove modifiers)
+        int enableCount = isActive ? 1 : 0;
+
+        boolean enableAction;
+        if (transition) {
+            // FIX: Only set action=true if we are effectively ENABLING.
+            // When disabling, we want count=0 (to clear effects) but action=false
+            // (to prevent commands from firing).
+            enableAction = isActive;
         } else {
-            // Skill is disabled
-            for (var reward : enableRewards) {
-                reward.instance().update(new RewardUpdateContextImpl(player, 0, action));
-            }
+            enableAction = context.isAction();
+        }
+
+        for (var reward : enableRewards) {
+            reward.instance().update(new RewardUpdateContextImpl(player, enableCount, enableAction));
+        }
+
+        // 2. Update Disable Rewards (One-shot triggers on disable)
+        if (transition && !isActive) {
             for (var reward : disableRewards) {
-                reward.instance().update(new RewardUpdateContextImpl(player, 1, action));
+                // Force action=true when state changes to disabled
+                reward.instance().update(new RewardUpdateContextImpl(player, 1, true));
             }
         }
     }
@@ -60,6 +100,7 @@ public class ToggleReward implements Reward {
         var disposeContext = new net.puffish.skillsmod.util.DisposeContext(context.getServer());
         enableRewards.forEach(r -> r.dispose(disposeContext));
         disableRewards.forEach(r -> r.dispose(disposeContext));
+        lastActiveState.clear();
     }
 
     public static void register() {
@@ -81,7 +122,7 @@ public class ToggleReward implements Reward {
                         .mapFailure(Problem::combine)
                         .ifSuccess(enableRewards::addAll)
                         .ifFailure(problems::add);
-            }).ifFailure(problems::add);
+            });
         });
 
         List<SkillRewardConfig> disableRewards = new ArrayList<>();
@@ -91,13 +132,13 @@ public class ToggleReward implements Reward {
                         .mapFailure(Problem::combine)
                         .ifSuccess(disableRewards::addAll)
                         .ifFailure(problems::add);
-            }).ifFailure(problems::add);
+            });
         });
 
-        if (problems.isEmpty()) {
-            return Result.success(new ToggleReward(enableRewards, disableRewards));
-        } else {
+        if (!problems.isEmpty()) {
             return Result.failure(Problem.combine(problems));
         }
+
+        return Result.success(new ToggleReward(enableRewards, disableRewards));
     }
 }

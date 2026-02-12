@@ -7,6 +7,37 @@ All notable changes to the **Pufferfish Skill Leveling** mod will be documented 
 - **Level 1 Reward Fix**: Resolved a critical regression where Level 1 rewards were skipped. Implemented manual reward triggering for the 0->1 transition in `CategoryDataMixin` to bypass Pufferfish's premature firing order.
 - **Recursive Refund Fix**: Finalized the Tome of Greater Clear Mind logic to correctly refund all levels down to 0 while maintaining prerequisite integrity.
 
+- **Trigger Skill Stability Finalized**: Resolved a series of critical regressions with Trigger (Toggle) skills. 
+    - Fixed "First Click Delay" by unifying `DataManager` caches into an atomic `PlayerCache` object.
+    - Resolved "Double Execution" of commands by conditionally silencing `enable_rewards` during disable transitions.
+    - Fixed "Persistent Effects/Attributes" by ensuring zero-count updates on all state transitions.
+    - Fully restored "World Join Persistence" while maintaining silent login (no activation spam on join).
+- **Linter Cleanup**: Resolved all unused imports and defunct methods in `SkillLevelingDataManager` and `ToggleReward`.
+
+## [2026-02-11] - Toggle Skill Refinement & Stability
+
+### New Features
+- **Effect Reward (`puffish_skills:effect`)**: Added a native Potion Effect reward type. Supports `amplifier`, `duration`, `ambient`, `show_particles`, and `show_icon`. Ideal for Toggle Skills (use `duration: -1` for infinite effects).
+
+### Toggle Skills
+- **Functional Restoration**: Fixed a critical issue where `ToggleReward` instances were not being registered or updated, causing toggle skills to have no effect.
+- **Join Event Stability**: Implemented pre-seeding of toggle states on player join. This prevents toggle commands (e.g., chat messages, potion effects) from incorrectly re-triggering every time a player logs in.
+- **Command Spams Resolved**: Fixed a logic error in `refreshAllRewards()` that caused toggle skill commands to re-trigger on every sync or equipment change. Toggle rewards now only fire on genuine state changes.
+- **Visual State Polish**: Implemented specific visual states for disabled toggle skills based on their `loot_mode`:
+    - **Imbue Only**: "DISABLED (Equip item to use)"
+    - **Tome Only**: "DISABLED (Read tome to learn)"
+    - **Both**: "DISABLED (Equip or Learn to use)"
+- **Sync Optimization**: Added `loot_mode` to the `SyncSkillLevelPacket` to ensure client-side tooltips always have the correct context for displaying disabled states.
+
+### General Stability
+- **Client Crash Fix**: Resolved a critical `InvalidInjectionException` in `SkillsScreenMixin` by enabling remapping for the `mouseClicked` injection. This crash occurred in non-dev environments where method names are obfuscated.
+- **Log Cleanup**: Removed excessive debug logging from `PerLevelRewardsReward`, `ClientSkillLevelStorage`, and `SkillLevelingManager` to reduce console spam.
+- **Toggle Skill Default State**: Fixed an issue where toggle skills would automatically activate upon unlocking. Added lazy configuration loading to ensure state checks are always performed, even during the initial learning transaction.
+- **Trigger Skill Reload Fix**: Resolved an issue where learned trigger/toggle skills would auto-fire their rewards upon joining the world due to execution order. Moved reward state pre-seeding to occur *before* the initial skill synchronization to prevent race conditions during player join.
+- **PerLevelReward State Tracking**: Improved internal state tracking in `PerLevelRewardsReward` to prevent reward re-execution during non-state-changing updates.
+- **Null Safety**: Added robust null checks in `SkillLevelingManager` when iterating reward maps to prevent potential crashes.
+- **Packet Safety**: Resolved a duplicate field definition in `SyncSkillLevelPacket` that could cause packet decoding errors on some clients.
+
 ## [2026-02-10] - Tome Imbuing & Admin Tools
 
 - **Simplified Tome Imbuing (Pathing Checks)**: Implemented flexible ID matching using "pathing checks" (Identifier paths). This ensures that "normally generated" tomes with short IDs (e.g., `vitality`) correctly match namespaced tree skills and gear (e.g., `template:vitality`).

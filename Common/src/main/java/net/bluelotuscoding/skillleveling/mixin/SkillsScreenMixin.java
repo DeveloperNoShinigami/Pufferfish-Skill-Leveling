@@ -5,7 +5,6 @@ import net.puffish.skillsmod.client.data.ClientCategoryData;
 import net.puffish.skillsmod.client.config.ClientCategoryConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillConnectionConfig;
-import org.joml.Vector2i;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -91,7 +90,7 @@ public abstract class SkillsScreenMixin {
         this.addon$hoveredSkillConfig = null;
     }
 
-    @org.spongepowered.asm.mixin.injection.Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true, remap = false)
+    @org.spongepowered.asm.mixin.injection.Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true, remap = true)
     private void addon$onMouseClicked(double mouseX, double mouseY, int button,
             org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
         if (button == 0 && optActiveCategoryData.isPresent() && addon$hoveredSkillConfig != null) {
@@ -102,14 +101,12 @@ public abstract class SkillsScreenMixin {
             // Check if it's a toggle skill
             if (net.bluelotuscoding.skillleveling.client.ClientSkillLevelStorage.isToggle(categoryId.toString(),
                     skill.id())) {
-                // Check if it's already unlocked (level > 0)
-                int level = net.bluelotuscoding.skillleveling.client.ClientSkillLevelStorage.getLevel(
-                        categoryId.toString(),
+                // ALWAYS intercept toggle skills - even at level 0 (Enable)
+                net.bluelotuscoding.skillleveling.network.SkillLevelingNetwork.sendRequestToggleSkill(categoryId,
                         skill.id());
-                if (level > 0) {
-                    net.bluelotuscoding.skillleveling.network.SkillLevelingNetwork.sendRequestToggleSkill(categoryId,
-                            skill.id());
-                }
+
+                // Consume the click to prevent standard Pufferfish unlock logic
+                cir.setReturnValue(true);
             }
         }
     }
@@ -156,22 +153,9 @@ public abstract class SkillsScreenMixin {
             if (definition == null)
                 continue;
 
-            // Check hover (logic uses transformed position)
+            // Hover check (logic uses transformed position)
             if (isInsideSkill(transformedMousePos, skill, definition)) {
                 this.addon$hoveredSkillConfig = skill;
-            }
-
-            // Draw Cooldown Overlay
-            int seconds = net.bluelotuscoding.skillleveling.client.ClientSkillLevelStorage
-                    .getRemainingCooldownSecondsByDefinitionId(skill.id());
-            if (seconds > 0) {
-                String text = String.valueOf(seconds);
-                var textRenderer = net.minecraft.client.MinecraftClient.getInstance().textRenderer;
-                int textWidth = textRenderer.getWidth(text);
-
-                // Draw in skill coordinates
-                context.drawText(textRenderer, text, skill.x() + 13 - textWidth / 2, skill.y() + 13 - 4, 0xFFFF55,
-                        true);
             }
         }
 

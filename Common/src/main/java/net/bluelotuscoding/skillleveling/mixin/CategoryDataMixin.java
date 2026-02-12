@@ -282,7 +282,7 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         if (leveledConfig != null && !force) {
             // 1. Check loot_mode
             if (leveledConfig.lootMode != null && (leveledConfig.lootMode.equals("tome_only")
-                    || leveledConfig.lootMode.equals("imbue_only"))) {
+                    || leveledConfig.lootMode.equals("imbue_only") || leveledConfig.lootMode.equals("both"))) {
 
                 if (owner != null) {
                     owner.sendMessage(
@@ -403,10 +403,11 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
         if (totalLevel > 0 || level > 0) {
             var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
 
-            // For loot-only skills (imbue_only, tome_only):
+            // For loot-only skills (imbue_only, tome_only, both):
             // Show as UNLOCKED if they are Level 1+ but not maxed (no border, active icon)
             if (leveledConfig != null && leveledConfig.lootMode != null
-                    && (leveledConfig.lootMode.equals("tome_only") || leveledConfig.lootMode.equals("imbue_only"))) {
+                    && (leveledConfig.lootMode.equals("tome_only") || leveledConfig.lootMode.equals("imbue_only")
+                            || leveledConfig.lootMode.equals("both"))) {
                 cir.setReturnValue(Skill.State.UNLOCKED);
                 return;
             }

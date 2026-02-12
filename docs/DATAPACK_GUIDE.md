@@ -243,6 +243,9 @@ Any skill can be made into a "Toggle Skill" by adding the `toggle` field. These 
     - **`effect`**: (String) The identifier of the effect (e.g., `"minecraft:haste"`, `"alexsmobs:speedy_momentum"`). Supports all modded effects.
     - **`amplifier`**: (Integer) The level of the effect (0 = Level I).
     - **`duration`**: (Integer, Ticks) How long the effect lasts. Use `-1` for infinite (ideal for toggles).
+    
+> [!NOTE]
+> **Loot Modes & Visuals**: Toggle skills respect `loot_mode`. If a skill is `"imbue_only"` and the player unequips the item, the skill will **Auto-Disable** and the tooltip will change to "DISABLED (Equip item to use)". Ensure your toggle logic supports this flow.
 
 #### Example: Comprehensive Toggle Mastery
 This example shows a toggle skill with standard Pufferfish fields (`title`, `description`, `icon`) and multiple toggle rewards.

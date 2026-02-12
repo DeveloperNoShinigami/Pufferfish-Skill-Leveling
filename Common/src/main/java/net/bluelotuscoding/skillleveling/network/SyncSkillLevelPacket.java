@@ -14,9 +14,12 @@ public class SyncSkillLevelPacket {
     private final boolean hidden;
     private final boolean toggle;
     private final int keybindSlot;
+    private final boolean active;
+    private final String lootMode;
 
     public SyncSkillLevelPacket(Identifier categoryId, String skillId, int baseLevel, int totalLevel, int maxLevel,
-            int pointsPerLevel, String definitionId, boolean hidden, boolean toggle, int keybindSlot) {
+            int pointsPerLevel, String definitionId, boolean hidden, boolean toggle, int keybindSlot, boolean active,
+            String lootMode) {
         this.categoryId = categoryId;
         this.skillId = skillId;
         this.baseLevel = baseLevel;
@@ -27,6 +30,8 @@ public class SyncSkillLevelPacket {
         this.hidden = hidden;
         this.toggle = toggle;
         this.keybindSlot = keybindSlot;
+        this.active = active;
+        this.lootMode = lootMode;
     }
 
     public void encode(PacketByteBuf buf) {
@@ -46,6 +51,11 @@ public class SyncSkillLevelPacket {
         buf.writeBoolean(hidden);
         buf.writeBoolean(toggle);
         buf.writeInt(keybindSlot);
+        buf.writeBoolean(active);
+        buf.writeBoolean(lootMode != null);
+        if (lootMode != null) {
+            buf.writeString(lootMode);
+        }
     }
 
     public static SyncSkillLevelPacket decode(PacketByteBuf buf) {
@@ -65,13 +75,18 @@ public class SyncSkillLevelPacket {
         boolean hidden = buf.readBoolean();
         boolean toggle = buf.readBoolean();
         int keybindSlot = buf.readInt();
+        boolean active = buf.readBoolean();
+        String lMode = null;
+        if (buf.readBoolean()) {
+            lMode = buf.readString();
+        }
         return new SyncSkillLevelPacket(catId, sId, baseLevel, totalLevel, maxLevel, pPerLevel, defId,
-                hidden, toggle, keybindSlot);
+                hidden, toggle, keybindSlot, active, lMode);
     }
 
     public void handleClient() {
         net.bluelotuscoding.skillleveling.client.ClientPacketHandler.handleSyncSkillLevel(categoryId, skillId,
                 baseLevel,
-                totalLevel, maxLevel, pointsPerLevel, definitionId, hidden, toggle, keybindSlot);
+                totalLevel, maxLevel, pointsPerLevel, definitionId, hidden, toggle, keybindSlot, active, lootMode);
     }
 }

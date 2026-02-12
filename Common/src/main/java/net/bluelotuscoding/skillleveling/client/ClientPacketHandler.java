@@ -12,9 +12,10 @@ import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrer
 public class ClientPacketHandler {
 
     public static void handleSyncSkillLevel(Identifier categoryId, String skillId, int baseLevel, int totalLevel,
-            int maxLevel, int pointsPerLevel, String definitionId, boolean hidden, boolean toggle, int keybindSlot) {
+            int maxLevel, int pointsPerLevel, String definitionId, boolean hidden, boolean toggle, int keybindSlot,
+            boolean active, String lootMode) {
         ClientSkillLevelStorage.setLevel(categoryId.toString(), skillId, baseLevel, totalLevel, maxLevel,
-                pointsPerLevel, hidden, toggle, keybindSlot);
+                pointsPerLevel, hidden, toggle, keybindSlot, active, lootMode);
         if (definitionId != null) {
             ClientSkillLevelStorage.registerDefinitionMapping(definitionId, categoryId.toString(), skillId);
         }

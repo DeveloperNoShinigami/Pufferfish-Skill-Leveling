@@ -23,136 +23,105 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SkillLevelingDataManager {
 
-    // In-memory cache of skill level data
-    private final Map<UUID, Map<Identifier, Map<String, Integer>>> playerSkillLevels;
+    // Unified in-memory cache of player data (Levels + Toggles)
+    private final Map<UUID, PlayerCache> playerCaches;
 
-    public SkillLevelingDataManager() {
-        this.playerSkillLevels = new ConcurrentHashMap<>();
+    private static class PlayerCache {
+        final Map<Identifier, Map<String, Integer>> levels = new ConcurrentHashMap<>();
+        final Map<Identifier, Map<String, Boolean>> toggles = new ConcurrentHashMap<>();
     }
 
-    /**
-     * ADDON INITIALIZATION: Called when the server starts.
-     */
+    public SkillLevelingDataManager() {
+        this.playerCaches = new ConcurrentHashMap<>();
+    }
+
     public void initialize(MinecraftServer server) {
         // No file system initialization needed - data is stored in player NBT
     }
 
     /**
-     * PLAYER JOIN: Loads skill data from player NBT into memory cache.
+     * Atomic retrieval of player cache. Loads from NBT if missing.
      */
-    public void loadPlayerData(ServerPlayerEntity player) {
-        playerSkillLevels.computeIfAbsent(player.getUuid(), uuid -> {
-            var nbtData = loadFromNbt(player);
-            if (nbtData != null && !nbtData.isEmpty()) {
-                return nbtData;
-            }
-            return new ConcurrentHashMap<>();
+    private PlayerCache getPlayerCache(ServerPlayerEntity player) {
+        return playerCaches.computeIfAbsent(player.getUuid(), uuid -> {
+            PlayerCache cache = new PlayerCache();
+            loadFromNbt(player, cache);
+            return cache;
         });
     }
 
-    /**
-     * PLAYER LEAVE: Saves skill data from memory cache to player NBT.
-     */
+    public void loadPlayerData(ServerPlayerEntity player) {
+        getPlayerCache(player); // Triggers loading
+    }
+
     public void savePlayerData(ServerPlayerEntity player) {
-        var data = playerSkillLevels.get(player.getUuid());
-        saveToNbt(player, data);
+        var cache = playerCaches.get(player.getUuid());
+        if (cache != null) {
+            saveToNbt(player, cache);
+        }
     }
 
-    /**
-     * SERVER SHUTDOWN: Clears the in-memory cache (data is already in NBT).
-     */
     public void saveAll() {
-        playerSkillLevels.clear();
+        playerCaches.clear();
     }
 
-    /**
-     * CORE LEVEL RETRIEVAL: Gets the current level of a skill for a player.
-     */
     public int getSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
-        var playerData = getPlayerData(player);
-        var categoryData = getCategoryData(playerData, categoryId);
+        var cache = getPlayerCache(player);
+        var categoryData = getCategoryData(cache.levels, categoryId);
         return categoryData != null ? categoryData.getOrDefault(skillId, 0) : 0;
     }
 
-    /**
-     * LEVEL ADVANCEMENT: Sets a new level for a skill.
-     */
     public void setSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        var playerData = getPlayerData(player);
-        var categoryData = getCategoryData(playerData, categoryId);
+        var cache = getPlayerCache(player);
+        var categoryData = getCategoryData(cache.levels, categoryId);
 
         if (categoryData == null) {
             categoryData = new ConcurrentHashMap<>();
-            playerData.put(categoryId, categoryData);
+            cache.levels.put(categoryId, categoryData);
         }
 
         categoryData.put(skillId, level);
-
-        // Immediate NBT update for persistence
-        saveToNbt(player, playerData);
+        saveToNbt(player, cache);
     }
 
-    /**
-     * Robust category data retrieval with namespace fallback.
-     */
-    private Map<String, Integer> getCategoryData(Map<Identifier, Map<String, Integer>> playerData,
-            Identifier categoryId) {
-        if (playerData.containsKey(categoryId)) {
-            return playerData.get(categoryId);
-        }
-
-        for (var entry : playerData.entrySet()) {
-            if (entry.getKey().getPath().equals(categoryId.getPath())) {
-                var data = entry.getValue();
-                playerData.remove(entry.getKey());
-                playerData.put(categoryId, data);
-                return data;
-            }
-        }
-        return null;
-    }
-
-    private Map<Identifier, Map<String, Integer>> getPlayerData(ServerPlayerEntity player) {
-        return playerSkillLevels.computeIfAbsent(player.getUuid(), uuid -> {
-            var nbtData = loadFromNbt(player);
-            return nbtData != null ? nbtData : new ConcurrentHashMap<>();
-        });
-    }
-
-    /**
-     * NBT PERSISTENCE: Saves data to player NBT.
-     */
-    public void saveToNbt(ServerPlayerEntity player, Map<Identifier, Map<String, Integer>> data) {
-        if (data == null || data.isEmpty())
-            return;
-
+    public void saveToNbt(ServerPlayerEntity player, PlayerCache cache) {
         net.minecraft.nbt.NbtCompound skillTag = new net.minecraft.nbt.NbtCompound();
-        net.minecraft.nbt.NbtCompound levelsTag = new net.minecraft.nbt.NbtCompound();
 
-        for (var entry : data.entrySet()) {
-            net.minecraft.nbt.NbtCompound catTag = new net.minecraft.nbt.NbtCompound();
-            entry.getValue().forEach(catTag::putInt);
-            levelsTag.put(entry.getKey().toString(), catTag);
+        // Save Levels
+        if (!cache.levels.isEmpty()) {
+            net.minecraft.nbt.NbtCompound levelsTag = new net.minecraft.nbt.NbtCompound();
+            for (var entry : cache.levels.entrySet()) {
+                net.minecraft.nbt.NbtCompound catTag = new net.minecraft.nbt.NbtCompound();
+                entry.getValue().forEach(catTag::putInt);
+                levelsTag.put(entry.getKey().toString(), catTag);
+            }
+            skillTag.put("Levels", levelsTag);
         }
 
-        skillTag.put("Levels", levelsTag);
+        // Save Toggle States
+        if (!cache.toggles.isEmpty()) {
+            net.minecraft.nbt.NbtCompound togglesTag = new net.minecraft.nbt.NbtCompound();
+            for (var entry : cache.toggles.entrySet()) {
+                net.minecraft.nbt.NbtCompound catTag = new net.minecraft.nbt.NbtCompound();
+                entry.getValue().forEach(catTag::putBoolean);
+                togglesTag.put(entry.getKey().toString(), catTag);
+            }
+            skillTag.put("ToggleStates", togglesTag);
+        }
 
         if (player instanceof SkillLevelHolder holder) {
             holder.addon$setSkillLevelingData(skillTag);
         }
     }
 
-    /**
-     * NBT LOADING: Loads data from player NBT.
-     */
-    private Map<Identifier, Map<String, Integer>> loadFromNbt(ServerPlayerEntity player) {
+    private void loadFromNbt(ServerPlayerEntity player, PlayerCache cache) {
         if (player instanceof SkillLevelHolder holder) {
             try {
                 net.minecraft.nbt.NbtCompound skillTag = holder.addon$getSkillLevelingData();
                 if (skillTag == null || skillTag.isEmpty())
-                    return null;
+                    return;
 
-                Map<Identifier, Map<String, Integer>> data = new ConcurrentHashMap<>();
+                // Load Levels
                 net.minecraft.nbt.NbtCompound levelsTag = skillTag.contains("Levels", 10)
                         ? skillTag.getCompound("Levels")
                         : skillTag;
@@ -163,73 +132,132 @@ public class SkillLevelingDataManager {
                         net.minecraft.nbt.NbtCompound catTag = levelsTag.getCompound(key);
                         Map<String, Integer> skills = new ConcurrentHashMap<>();
                         for (String skillId : catTag.getKeys()) {
-                            skills.put(skillId, catTag.getInt(skillId));
+                            if (catTag.contains(skillId, 3) || catTag.contains(skillId, 1)
+                                    || catTag.contains(skillId, 2)) {
+                                skills.put(skillId, catTag.getInt(skillId));
+                            }
                         }
-                        data.put(catId, skills);
+                        if (!skills.isEmpty())
+                            cache.levels.put(catId, skills);
                     }
                 }
-                return data;
+
+                // Load Toggle States
+                if (skillTag.contains("ToggleStates", 10)) {
+                    net.minecraft.nbt.NbtCompound togglesTag = skillTag.getCompound("ToggleStates");
+                    for (String key : togglesTag.getKeys()) {
+                        Identifier catId = Identifier.tryParse(key);
+                        if (catId != null) {
+                            net.minecraft.nbt.NbtCompound catTag = togglesTag.getCompound(key);
+                            Map<String, Boolean> toggles = new ConcurrentHashMap<>();
+                            for (String skillId : catTag.getKeys()) {
+                                toggles.put(skillId, catTag.getBoolean(skillId));
+                            }
+                            cache.toggles.put(catId, toggles);
+                        }
+                    }
+                }
             } catch (Exception e) {
-                return null;
+                // Silently fail and use empty maps
             }
         }
-        return null;
     }
 
-    /**
-     * BULK OPERATIONS: Category-level data access for admin commands and UI.
-     */
     public Map<String, Integer> getCategorySkillLevels(ServerPlayerEntity player, Identifier categoryId) {
-        var playerData = getPlayerData(player);
-        return getCategoryData(playerData, categoryId);
+        var cache = getPlayerCache(player);
+        return getCategoryData(cache.levels, categoryId);
     }
 
-    /**
-     * RESET FUNCTIONALITY: Clears all skill levels in a category.
-     */
     public void resetCategorySkillLevels(ServerPlayerEntity player, Identifier categoryId) {
-        var playerData = getPlayerData(player);
-        Identifier toRemove = null;
-        for (Identifier id : playerData.keySet()) {
+        var cache = getPlayerCache(player);
+
+        Identifier toRemoveLevel = null;
+        for (Identifier id : cache.levels.keySet()) {
             if (id.getPath().equals(categoryId.getPath())) {
-                toRemove = id;
+                toRemoveLevel = id;
                 break;
             }
         }
 
-        if (toRemove != null) {
-            playerData.remove(toRemove);
-            saveToNbt(player, playerData);
-            if (playerData.isEmpty()) {
-                playerSkillLevels.remove(player.getUuid());
+        Identifier toRemoveToggle = null;
+        for (Identifier id : cache.toggles.keySet()) {
+            if (id.getPath().equals(categoryId.getPath())) {
+                toRemoveToggle = id;
+                break;
             }
         }
+
+        if (toRemoveLevel != null)
+            cache.levels.remove(toRemoveLevel);
+        if (toRemoveToggle != null)
+            cache.toggles.remove(toRemoveToggle);
+
+        saveToNbt(player, cache);
     }
 
-    /**
-     * DATA EXISTENCE CHECK: Determines if we have level data for a skill.
-     */
     public boolean hasSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
-        var playerData = getPlayerData(player);
-        var categoryData = getCategoryData(playerData, categoryId);
+        var cache = getPlayerCache(player);
+        var categoryData = getCategoryData(cache.levels, categoryId);
         return categoryData != null && categoryData.containsKey(skillId);
     }
 
-    /**
-     * INDIVIDUAL SKILL CLEANUP: Removes level data for a specific skill.
-     */
     public void clearSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
-        var playerData = getPlayerData(player);
-        var categoryData = getCategoryData(playerData, categoryId);
-        if (categoryData != null) {
-            categoryData.remove(skillId);
-            if (categoryData.isEmpty()) {
-                playerData.remove(categoryId);
-                if (playerData.isEmpty()) {
-                    playerSkillLevels.remove(player.getUuid());
-                }
+        var cache = getPlayerCache(player);
+        var catLevelData = getCategoryData(cache.levels, categoryId);
+        if (catLevelData != null) {
+            catLevelData.remove(skillId);
+            if (catLevelData.isEmpty()) {
+                // Find and remove by exact key
+                cache.levels.keySet().removeIf(id -> id.getPath().equals(categoryId.getPath()));
             }
-            saveToNbt(player, playerData);
         }
+
+        var catToggleData = getCategoryData(cache.toggles, categoryId);
+        if (catToggleData != null) {
+            catToggleData.remove(skillId);
+            if (catToggleData.isEmpty()) {
+                cache.toggles.keySet().removeIf(id -> id.getPath().equals(categoryId.getPath()));
+            }
+        }
+
+        saveToNbt(player, cache);
+    }
+
+    public boolean isToggleActive(ServerPlayerEntity player, Identifier categoryId, String skillId) {
+        var cache = getPlayerCache(player);
+        var catToggleData = getCategoryData(cache.toggles, categoryId);
+        return catToggleData != null && catToggleData.getOrDefault(skillId, false);
+    }
+
+    public void setToggleActive(ServerPlayerEntity player, Identifier categoryId, String skillId, boolean active) {
+        var cache = getPlayerCache(player);
+        var catToggleData = getCategoryData(cache.toggles, categoryId);
+
+        if (catToggleData == null) {
+            catToggleData = new ConcurrentHashMap<>();
+            cache.toggles.put(categoryId, catToggleData);
+        }
+
+        catToggleData.put(skillId, active);
+        saveToNbt(player, cache);
+    }
+
+    private <T> Map<String, T> getCategoryData(Map<Identifier, Map<String, T>> playerData,
+            Identifier categoryId) {
+        if (playerData.containsKey(categoryId)) {
+            return playerData.get(categoryId);
+        }
+
+        for (var entry : playerData.entrySet()) {
+            if (entry.getKey().getPath().equals(categoryId.getPath())) {
+                var data = entry.getValue();
+                if (!entry.getKey().equals(categoryId)) {
+                    playerData.remove(entry.getKey());
+                    playerData.put(categoryId, data);
+                }
+                return data;
+            }
+        }
+        return null;
     }
 }

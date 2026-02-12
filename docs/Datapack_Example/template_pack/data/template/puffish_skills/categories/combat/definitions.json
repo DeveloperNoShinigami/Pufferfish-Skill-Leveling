@@ -198,7 +198,6 @@
         }
     },
     "berserker_rage": {
-        "type": "puffish_skills:default",
         "category_id": "combat",
         "title": "Berserker Rage",
         "description": "Enter a state of reckless fury.",
@@ -231,6 +230,12 @@
                                 "value": 0.2,
                                 "operation": "multiply_base"
                             }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "say Rage unleashed!"
+                            }
                         }
                     ],
                     "disable_rewards": [
@@ -249,7 +254,6 @@
         }
     },
     "arcane_striker": {
-        "type": "puffish_skills:default",
         "category_id": "combat",
         "title": "Arcane Striker",
         "description": "Infuse your strikes with magic.",

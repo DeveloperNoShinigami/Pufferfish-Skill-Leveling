@@ -1,6 +1,5 @@
 package net.bluelotuscoding.skillleveling.mixin;
 
-import net.bluelotuscoding.skillleveling.config.LeveledConfigStorage;
 import net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage;
 import net.bluelotuscoding.skillleveling.client.ClientSkillLevelStorage;
 import net.minecraft.text.MutableText;
@@ -45,9 +44,19 @@ public class ClientSkillDefinitionConfigMixin {
             int maxLevel = Math.max(ClientDescriptionStorage.getMaxLevel(defId),
                     ClientSkillLevelStorage.getMaxLevelByDefinitionId(defId));
 
+            boolean isToggle = ClientSkillLevelStorage.isToggleByDefinitionId(defId);
+
             // If we have no level info and no descriptions, keep original
-            if (currentLevel <= 0 && !ClientDescriptionStorage.hasDescriptions(defId) && maxLevel <= 1) {
+            // FIX: Allow toggle skills to show "READY" status even at level 0.
+            if (currentLevel <= 0 && !ClientDescriptionStorage.hasDescriptions(defId) && maxLevel <= 1
+                    && !isToggle) {
                 return;
+            }
+
+            // DEBUG: Log if we are in a toggle skill
+            if (isToggle) {
+                // net.minecraft.client.MinecraftClient.getInstance().player.sendMessage(Text.literal("§d[Tooltip]
+                // defId: " + defId + " Found Config: " + (config != null)), false);
             }
 
             MutableText result = Text.empty();
@@ -59,12 +68,40 @@ public class ClientSkillDefinitionConfigMixin {
             }
 
             // 2. Add toggle status if applicable
-            LeveledConfigStorage.LeveledConfig config = LeveledConfigStorage.get(defId);
-            if (config != null && config.toggle) {
-                if (currentLevel > 0) {
-                    result.append(Text.literal("§a§lENABLED\n"));
+            if (isToggle) {
+                int cooldown = ClientSkillLevelStorage.getRemainingCooldownSecondsByDefinitionId(defId);
+                boolean isToggledOn = ClientSkillLevelStorage.isToggledOnByDefinitionId(defId);
+
+                if (isToggledOn) {
+                    result.append(Text.literal("§a§lENABLED"));
+                    result.append(Text.literal(" §7(Click to Disable)\n"));
                 } else {
-                    result.append(Text.literal("§c§lDISABLED\n"));
+                    // Check if toggle is disabled due to missing requirements (level <= 0 for
+                    // loot/learned)
+                    String lootMode = ClientDescriptionStorage.getLootMode(defId);
+                    if (lootMode.isEmpty()) {
+                        lootMode = ClientSkillLevelStorage.getLootModeByDefinitionId(defId);
+                    }
+                    boolean isLootLearned = lootMode != null && !lootMode.isEmpty();
+
+                    if (isLootLearned && currentLevel <= 0) {
+                        result.append(Text.literal("§c§lDISABLED"));
+                        if ("imbue_only".equals(lootMode)) {
+                            result.append(Text.literal(" §7(Equip item to use)\n"));
+                        } else if ("tome_only".equals(lootMode)) {
+                            result.append(Text.literal(" §7(Read tome to learn)\n"));
+                        } else if ("both".equals(lootMode)) {
+                            result.append(Text.literal(" §7(Equip or Learn to use)\n"));
+                        } else {
+                            result.append(Text.literal(" §7(Locked)\n"));
+                        }
+                    } else if (cooldown > 0) {
+                        result.append(Text.literal("§c§lON COOLDOWN"));
+                        result.append(Text.literal(" §7(" + cooldown + "s remaining)\n"));
+                    } else {
+                        result.append(Text.literal("§7§lREADY"));
+                        result.append(Text.literal(" §7(Click to Enable)\n"));
+                    }
                 }
             }
 

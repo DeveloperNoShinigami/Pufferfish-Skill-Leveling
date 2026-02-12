@@ -3,6 +3,7 @@ package net.bluelotuscoding.skillleveling.client;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
+import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +34,20 @@ public class MasteryKeybinds {
     public static void handleMasteryKey(int slot) {
         String skillKey = ClientSkillLevelStorage.getSkillKeyByKeybindSlot(slot);
         if (skillKey != null) {
-            String[] parts = skillKey.split(":", 2);
-            if (parts.length == 2) {
-                net.minecraft.util.Identifier categoryId = net.minecraft.util.Identifier.tryParse(parts[0]);
-                String skillId = parts[1];
+            // FIX: Split by LAST colon to separate Category (which may contain colons) from
+            // SkillID
+            int lastColon = skillKey.lastIndexOf(':');
+            if (lastColon > 0) {
+                String categoryStr = skillKey.substring(0, lastColon);
+                String skillId = skillKey.substring(lastColon + 1);
+
+                net.minecraft.util.Identifier categoryId = net.minecraft.util.Identifier.tryParse(categoryStr);
+
+                SkillLevelingMod.getInstance().getLogger().info("[MasteryKeybinds] Key press slot " + slot +
+                        " -> Raw: " + skillKey +
+                        " -> Parsed Cat: " + categoryId +
+                        ", Skill: " + skillId);
+
                 if (categoryId != null) {
                     net.bluelotuscoding.skillleveling.network.SkillLevelingNetwork.sendRequestToggleSkill(categoryId,
                             skillId);

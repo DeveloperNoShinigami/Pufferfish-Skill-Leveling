@@ -51,6 +51,9 @@
 - [x] **Hidden Skills**: Visual discovery mode (invisible icons/tooltips until requirements met).
 - [x] **Enhanced Prerequisites**: Cross-category locking and specialized bypasses.
 - [x] **External Configuration**: Full datapack support for Trading, Reputation, and Loot.
+- [x] **Toggle Skills**: Support for 9 custom keybinds to manually activate/deactivate skills.
+- [x] **Toggle Stability**: Full state persistence across joins, silent login, and fixed first-click desync.
+- [x] **Effect Rewards**: Native Potion Effect support (`puffish_skills:effect`) with infinite duration handling.
 
 ---
 
@@ -69,6 +72,7 @@
 - [ ] Tooltip preview for slot opening costs
 - [ ] Better visual feedback in anvil when imbuing/extracting
 - [ ] **Deactivation Rewards (`locked`)**: Support for rewards that trigger when a skill hits Level 0 (deactivation hook).
+- [ ] **Stackable Skill Type**: Restore `puffish_skill_leveling:stackable` to allow base Pufferfish rewards and per-level rewards to scale together.
 
 ### Advanced Imbuing
 - [ ] Skill compatibility restrictions (e.g., some skills can't coexist)
@@ -78,7 +82,6 @@
 - [ ] **Apotheosis-style Skill Loot**: Automatically injecting randomized skills/imbuements into standard loot tables.
 
 ### User Interface & Controls
-- [ ] **Toggle Skills**: Support for 4 custom keybinds to manually activate/deactivate skills.
 - [ ] **Timed Toggles**: Duration-based activation (`timed_toggle`) with `on_expiry` reward support.
 - [ ] **Re-implement Targeted Tome Selection Mode**: Restore functionality for Tomes that require selecting a specific skill (removed due to mixin crash).
 
@@ -88,11 +91,10 @@
 ---
 
 ## 🐛 Current Bugs & Known Issues
-*These are identified issues scheduled for resolution in the next minor update.*
+*All major critical bugs from the v2.5.0 cycle have been resolved.*
 
-- [ ] **Loot Randomization failure**: The `puffish_skill_leveling:randomize_skill_tome` function and global loot config are currently non-functional and require a logic overhaul.
-- [ ] **Hidden Skill Category Warning**: "Could not determine category for skill..." warnings appear during prerequisite checking for hidden skills (Rewards mapping timing issue).
+- [ ] **Hidden Skill Category Warning**: "Could not determine category for skill..." warnings sometimes appear during initial registry mapping for hidden skills.
 
 ---
 
-*Last Updated: 2026-02-09*
+*Last Updated: 2026-02-11*

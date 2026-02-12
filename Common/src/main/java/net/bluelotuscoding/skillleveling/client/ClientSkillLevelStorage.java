@@ -17,6 +17,8 @@ public class ClientSkillLevelStorage {
     private static final Map<String, Long> skillCooldownExpiries = new ConcurrentHashMap<>();
     private static final Map<String, Boolean> toggleSkills = new ConcurrentHashMap<>();
     private static final Map<String, Integer> keybindSlots = new ConcurrentHashMap<>();
+    private static final Map<String, Boolean> activeToggleStates = new ConcurrentHashMap<>();
+    private static final Map<String, String> skillLootModes = new ConcurrentHashMap<>();
 
     // Mapping from category path to the last seen full category ID (for shorthand
     // resolution)
@@ -53,7 +55,7 @@ public class ClientSkillLevelStorage {
     }
 
     public static void setLevel(String categoryId, String skillId, int baseLevel, int totalLevel, int maxLevel,
-            int pointsPerLevel, boolean hidden, boolean toggle, int keybindSlot) {
+            int pointsPerLevel, boolean hidden, boolean toggle, int keybindSlot, boolean active, String lootMode) {
         // "Learn" the full category ID from current packet
         if (categoryId != null && categoryId.contains(":")) {
             try {
@@ -65,6 +67,12 @@ public class ClientSkillLevelStorage {
             }
         }
 
+        // SkillLevelingMod.getInstance().getLogger()
+        // .info("[ClientSkillLevelStorage] setLevel: " + categoryId + " / " + skillId +
+        // " -> Base: " + baseLevel + ", Total: " + totalLevel + ", Toggle: " + toggle +
+        // ", Active: "
+        // + active + ", LootMode: " + lootMode);
+
         String key = getKey(categoryId, skillId);
         if (baseLevel <= 0 && totalLevel <= 0) {
             // Level 0 means skill is locked/reset - remove most info, but KEEP hidden
@@ -73,7 +81,9 @@ public class ClientSkillLevelStorage {
             baseSkillLevels.remove(key);
             totalSkillLevels.remove(key);
             skillMaxLevels.remove(key);
+            skillMaxLevels.remove(key);
             skillPointsPerLevel.remove(key);
+            // Don't remove lootMode here as it's static config data, not dynamic level data
         } else {
             baseSkillLevels.put(key, baseLevel);
             totalSkillLevels.put(key, totalLevel);
@@ -84,6 +94,20 @@ public class ClientSkillLevelStorage {
         hiddenSkillFlags.put(key, hidden);
         toggleSkills.put(key, toggle);
         keybindSlots.put(key, keybindSlot);
+        keybindSlots.put(key, keybindSlot);
+        activeToggleStates.put(key, active);
+        if (lootMode != null) {
+            skillLootModes.put(key, lootMode);
+        }
+    }
+
+    public static boolean isToggledOn(String categoryId, String skillId) {
+        return activeToggleStates.getOrDefault(getKey(categoryId, skillId), false);
+    }
+
+    public static boolean isToggledOnByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        return key != null && activeToggleStates.getOrDefault(key, false);
     }
 
     /**
@@ -129,6 +153,17 @@ public class ClientSkillLevelStorage {
     }
 
     /**
+     * Get loot mode by definition ID.
+     */
+    public static String getLootModeByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        if (key == null) {
+            return "";
+        }
+        return skillLootModes.getOrDefault(key, "");
+    }
+
+    /**
      * Check if a skill definition is a leveled skill (max level > 1)
      */
     public static boolean isLeveledByDefinitionId(String definitionId) {
@@ -159,12 +194,27 @@ public class ClientSkillLevelStorage {
         return skillMaxLevels.getOrDefault(getKey(categoryId, skillId), 1);
     }
 
+    public static boolean isToggle(String categoryId, String skillId) {
+        return toggleSkills.getOrDefault(getKey(categoryId, skillId), false);
+    }
+
+    public static boolean isToggleByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        return key != null && toggleSkills.getOrDefault(key, false);
+    }
+
     public static boolean isHidden(String categoryId, String skillId) {
         return hiddenSkillFlags.getOrDefault(getKey(categoryId, skillId), false);
     }
 
-    public static boolean isToggle(String categoryId, String skillId) {
-        return toggleSkills.getOrDefault(getKey(categoryId, skillId), false);
+    public static boolean isHiddenByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        return key != null && hiddenSkillFlags.getOrDefault(key, false);
+    }
+
+    public static int getKeybindSlotByDefinitionId(String definitionId) {
+        String key = definitionToKey.get(definitionId);
+        return key != null ? keybindSlots.getOrDefault(key, 0) : 0;
     }
 
     public static void setCooldown(String categoryId, String skillId, int cooldownTicks) {
@@ -217,6 +267,7 @@ public class ClientSkillLevelStorage {
         baseSkillLevels.remove(key);
         totalSkillLevels.remove(key);
         skillMaxLevels.remove(key);
+        activeToggleStates.remove(key);
     }
 
     /**
@@ -228,6 +279,7 @@ public class ClientSkillLevelStorage {
         totalSkillLevels.keySet().removeIf(k -> k.startsWith(prefix));
         skillMaxLevels.keySet().removeIf(k -> k.startsWith(prefix));
         hiddenSkillFlags.keySet().removeIf(k -> k.startsWith(prefix));
+        activeToggleStates.keySet().removeIf(k -> k.startsWith(prefix));
     }
 
     /**
@@ -318,5 +370,8 @@ public class ClientSkillLevelStorage {
         toggleSkills.clear();
         keybindSlots.clear();
         definitionToKey.clear();
+        definitionToKey.clear();
+        activeToggleStates.clear();
+        skillLootModes.clear();
     }
 }

@@ -227,12 +227,25 @@ public class SkillLevelingNetwork {
         // SKILL ITERATION: Send data for all skills with level progression
         net.puffish.skillsmod.api.SkillsAPI.streamCategories().forEach(category -> {
             category.streamSkills().forEach(skill -> {
-                // LEVEL DATA SYNC: Send current level information
-                if (manager.hasSkillData(player, category.getId(), skill.getId())) {
-                    int currentLevel = manager.getTotalSkillLevel(player, category.getId(), skill.getId());
+                // SYNC REGULAR SKILLS (only if they have data)
+                boolean hasData = manager.hasSkillData(player, category.getId(), skill.getId());
+
+                // CRITICAL: Also sync skills that are TOGGLES, even if they have no data (level
+                // 0)
+                // This ensures the client knows they are toggleable and registers keybinds.
+                // LeveledConfigStorage handles fuzzy matching for the skill ID.
+                var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage
+                        .get(skill.getId().toString());
+
+                if (hasData || (leveledConfig != null && (leveledConfig.toggle || leveledConfig.lootMode != null))) {
+                    int baseLevel = manager.getBaseSkillLevel(player, category.getId(), skill.getId());
+                    int totalLevel = manager.getTotalSkillLevel(player, category.getId(), skill.getId());
                     int maxLevel = manager.getMaxLevel(category.getId(), skill.getId());
 
-                    sendSkillLevelUpdate(player, category.getId(), skill.getId(), currentLevel, maxLevel);
+                    // REAL SYNC: Use the manager's sync method which sends the SyncSkillLevelPacket
+                    String definitionId = manager.getDefinitionId(category.getId(), skill.getId());
+                    manager.syncSkillLevelToClient(player, category.getId(), skill.getId(), baseLevel, totalLevel,
+                            maxLevel, definitionId);
 
                     // DESCRIPTION DATA SYNC: Send description information
                     sendSkillDescriptionUpdate(player, category.getId(), skill.getId());
@@ -243,52 +256,48 @@ public class SkillLevelingNetwork {
 
     /**
      * LEVEL UPDATE TRANSMISSION: Sends single skill level update
-     * 
-     * TRANSMISSION MECHANICS: Packages and sends skill level change to client
-     * for immediate UI update without full resynchronization.
+     * NOTE: This is now mostly for logging; real sync happens via
+     * SkillLevelingManager.syncSkillLevelToClient
      */
     public static void sendSkillLevelUpdate(ServerPlayerEntity player, Identifier categoryId, String skillId,
             int currentLevel, int maxLevel) {
-        // Note: In a real implementation, this would use the mod loader's networking
-        // system
-        // For now, we'll implement the packet structure for future integration
-
-        // var packet = new SkillLevelUpdatePacket(categoryId, skillId, currentLevel,
-        // maxLevel);
-
-        // FUTURE IMPLEMENTATION: Send packet via Fabric/Forge networking
-        // FabricNetworking.send(player, SKILL_LEVEL_UPDATE, packet);
-        // or
-        // ForgeNetworking.send(player, SKILL_LEVEL_UPDATE, packet);
-
-        // LOGGING: Track network updates for debugging
         var logger = SkillLevelingMod.getInstance().getLogger();
-        logger.debug("Sending skill level update to " + player.getName().getString()
+        logger.debug("Syncing skill level to " + player.getName().getString()
                 + ": " + categoryId + ":" + skillId + " = " + currentLevel + "/" + maxLevel);
     }
 
     /**
      * DESCRIPTION UPDATE TRANSMISSION: Sends skill description data
-     * 
-     * DESCRIPTION TRANSMISSION: Packages and sends skill description and merge
-     * configuration to client for tooltip and UI enhancement.
      */
     public static void sendSkillDescriptionUpdate(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         var addon = SkillLevelingMod.getInstance();
         var manager = addon.getSkillLevelingManager();
+        var networkHandler = addon.getNetworkHandler();
+
+        if (networkHandler == null)
+            return;
+
+        // Find definitionId
+        String definitionId = manager.getDefinitionId(categoryId, skillId);
 
         // DESCRIPTION COLLECTION: Gather all description data for skill
         var descriptions = manager.getDescriptions(categoryId, skillId);
         var extraDescriptions = manager.getExtraDescriptions(categoryId, skillId);
         boolean mergeDescription = manager.shouldMergeDescriptions(categoryId, skillId);
+        int maxLevel = manager.getMaxLevel(categoryId, skillId);
+        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(definitionId);
+        String lootMode = config != null ? config.lootMode : null;
 
-        var packet = new SkillDescriptionUpdatePacket(categoryId, skillId, descriptions, extraDescriptions,
-                mergeDescription);
+        // Use correct packet class name: SyncSkillDescriptionsPacket
+        var packet = new SyncSkillDescriptionsPacket(definitionId, descriptions, extraDescriptions,
+                mergeDescription, maxLevel, lootMode, new java.util.ArrayList<>());
+
+        networkHandler.sendToPlayer(packet, player);
 
         // LOGGING: Track description updates for debugging
-        var logger = SkillLevelingMod.getInstance().getLogger();
-        logger.debug("Sending skill description update to " + player.getName().getString()
-                + ": " + categoryId + ":" + skillId + " (merge=" + mergeDescription + ")");
+        var logger = addon.getLogger();
+        logger.debug("Sent skill description update to " + player.getName().getString()
+                + ": " + definitionId + " (merge=" + mergeDescription + ")");
     }
 
     /**

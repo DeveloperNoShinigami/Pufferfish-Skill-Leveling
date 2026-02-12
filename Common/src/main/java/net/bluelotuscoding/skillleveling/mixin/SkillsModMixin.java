@@ -86,8 +86,18 @@ public abstract class SkillsModMixin {
                     }
                 }
 
-                if (leveledConfig != null && !force && leveledConfig.lootMode != null) {
-                    if (leveledConfig.lootMode.equals("tome_only") || leveledConfig.lootMode.equals("imbue_only")) {
+                if (leveledConfig != null && !force) {
+                    // 1. LOOT MODE BLOCKING
+                    if (leveledConfig.lootMode != null &&
+                            (leveledConfig.lootMode.equals("tome_only") || leveledConfig.lootMode.equals("imbue_only")
+                                    || leveledConfig.lootMode.equals("both"))) {
+                        ci.cancel();
+                        return;
+                    }
+
+                    // 2. TOGGLE SKILL BLOCKING: Block standard unlock from the skill tree
+                    // Toggle skills are handled EXCLUSIVELY via SkillLevelingManager.toggleSkill
+                    if (leveledConfig.toggle) {
                         ci.cancel();
                         return;
                     }

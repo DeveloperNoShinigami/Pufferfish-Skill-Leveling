@@ -184,5 +184,55 @@
         "metadata": {
             "icon": "luck_icon_id"
         }
+    },
+    "night_vision": {
+        "category_id": "utility",
+        "title": "Night Vision",
+        "description": "Toggle Night Vision (Keybind 1)",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:ender_eye"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 1,
+        "toggle": true,
+        "keybind_slot": 1,
+        "imbuement_cost": 5,
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:toggle",
+                "data": {
+                    "enable_rewards": [
+                        {
+                            "type": "puffish_skills:effect",
+                            "data": {
+                                "effect": "minecraft:night_vision",
+                                "duration": -1,
+                                "amplifier": 0
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "say Night Vision Enabled"
+                            }
+                        }
+                    ],
+                    "disable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "say Night Vision Disabled"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "night_vision_icon_id"
+        }
     }
 }

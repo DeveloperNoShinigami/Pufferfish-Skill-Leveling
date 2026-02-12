@@ -104,6 +104,33 @@ public abstract class ClientCategoryDataMixin {
         // State will be determined below
         Skill.State determinedState = null;
 
+        // TOGGLE SKILL UI RULES:
+        // 1. Never show UNLOCKED (Golden) for toggle skills.
+        // 2. Imbue/Loot: LOCKED if level 0, AVAILABLE if level > 0.
+        // 3. Standard: Always AVAILABLE.
+        if (ClientSkillLevelStorage.isToggle(categoryId, skillId)) {
+            String lootMode = ClientDescriptionStorage.getLootMode(defId);
+            if (lootMode.isEmpty()) {
+                // Fallback to SyncPacket data for toggles not in description sync
+                lootMode = ClientSkillLevelStorage.getLootModeByDefinitionId(defId);
+            }
+            boolean isLootLearned = lootMode != null && !lootMode.isEmpty();
+
+            if (isLootLearned) {
+                if (totalLevel > 0) {
+                    determinedState = Skill.State.AVAILABLE;
+                } else {
+                    determinedState = Skill.State.LOCKED;
+                }
+            } else {
+                // Standard toggle: Always AVAILABLE
+                determinedState = Skill.State.AVAILABLE;
+            }
+
+            cir.setReturnValue(determinedState);
+            return;
+        }
+
         // DYNAMIC PREREQUISITE CHECK: Skills deactivate and lock/hide when
         // prerequisites are lost
         if (defId != null) {

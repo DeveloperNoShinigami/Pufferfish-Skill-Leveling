@@ -324,16 +324,21 @@ public class PerLevelRewardsReward implements Reward {
             for (var reward : entry.getValue()) {
                 try {
                     // Attributes re-apply whenever they are active OR if they changed state.
-                    String type = reward.type().toString();
-                    boolean isAttribute = type.equals("puffish_skills:attribute");
-
+                    boolean isAttribute = reward.type().toString().equals("puffish_skills:attribute");
                     int count = isNowActive ? 1 : 0;
                     boolean effectiveAction;
+
+                    // SkillLevelingMod.getInstance().getLogger()
+                    // .info("[PerLevelRewards] Processing reward type: " + reward.type() +
+                    // ", Level: " + level +
+                    // ", isNowActive: " + isNowActive +
+                    // ", stateChanged: " + stateChanged +
+                    // ", action: " + action);
 
                     if (isAttribute) {
                         effectiveAction = (isNowActive && (stateChanged || context.isAction()));
                     } else {
-                        // Commands/effects trigger ONLY on state change to active
+                        // STANDARD LOGIC
                         if (isNowActive && stateChanged && action) {
                             var activated = activatedLevels.computeIfAbsent(uuid, k -> new java.util.HashSet<>());
                             if (!activated.contains(level)) {
@@ -343,8 +348,21 @@ public class PerLevelRewardsReward implements Reward {
                                 effectiveAction = false;
                             }
                         } else {
+                            if (!isNowActive && stateChanged) {
+                                var activated = activatedLevels.get(uuid);
+                                if (activated != null) {
+                                    activated.remove(level);
+                                }
+                            }
                             effectiveAction = false;
                         }
+                    }
+
+                    if (effectiveAction) {
+                        // SkillLevelingMod.getInstance().getLogger()
+                        // .info("[PerLevelRewards] Sending update to reward instance with count=" +
+                        // count
+                        // + ", action=true");
                     }
 
                     reward.instance().update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player,
@@ -357,6 +375,7 @@ public class PerLevelRewardsReward implements Reward {
         }
 
         lastActiveLevels.put(uuid, currentlyActive);
+
     }
 
     @Override

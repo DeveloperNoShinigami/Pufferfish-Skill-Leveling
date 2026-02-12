@@ -29,29 +29,30 @@ public abstract class SkillDefinitionConfigMixin {
         // If type is missing, Pufferfish might use a default, or it might be implicit.
         // We still need to consume our custom fields to avoid "unused field" errors.
 
-        // Consume our custom fields and standard prerequisite fields to prevent
-        // "unused field" errors from Pufferfish for ALL skills.
-        rootObject.get("max_skill_level");
-        rootObject.get("max_levels");
-        rootObject.get("points_per_level");
-        rootObject.get("merge_description");
-        rootObject.get("descriptions");
-        rootObject.get("extra_descriptions");
-        rootObject.get("loot_mode");
-        rootObject.get("category_id");
-        rootObject.get("enchantment_levels");
-        rootObject.get("enchantment_cost");
-        rootObject.get("imbuement_levels");
-        rootObject.get("imbuement_cost");
-        rootObject.get("slot_opening_cost");
-        rootObject.get("cleansing_cost");
-        rootObject.get("hidden");
-        rootObject.get("prerequisite_skills");
-        rootObject.get("required_skill");
-        rootObject.get("required_skill_for_level");
-        rootObject.get("toggle");
-        rootObject.get("keybind_slot");
-        rootObject.get("cooldown");
+        // Consumed fields must be accessed to avoid "Unused field" errors in
+        // Pufferfish.
+        rootObject.get("type").getSuccess();
+        rootObject.get("max_skill_level").getSuccess();
+        rootObject.get("max_levels").getSuccess();
+        rootObject.get("points_per_level").getSuccess();
+        rootObject.get("merge_description").getSuccess();
+        rootObject.get("descriptions").getSuccess();
+        rootObject.get("extra_descriptions").getSuccess();
+        rootObject.get("loot_mode").getSuccess();
+        rootObject.get("category_id").getSuccess();
+        rootObject.get("enchantment_levels").getSuccess();
+        rootObject.get("enchantment_cost").getSuccess();
+        rootObject.get("imbuement_levels").getSuccess();
+        rootObject.get("imbuement_cost").getSuccess();
+        rootObject.get("slot_opening_cost").getSuccess();
+        rootObject.get("cleansing_cost").getSuccess();
+        rootObject.get("hidden").getSuccess();
+        rootObject.get("prerequisite_skills").getSuccess();
+        rootObject.get("required_skill").getSuccess();
+        rootObject.get("required_skill_for_level").getSuccess();
+        rootObject.get("toggle").getSuccess();
+        rootObject.get("keybind_slot").getSuccess();
+        rootObject.get("cooldown").getSuccess();
 
         // Use the raw GSON object for injection
         var rawRoot = rootObject.getJson().getAsJsonObject();
@@ -118,11 +119,6 @@ public abstract class SkillDefinitionConfigMixin {
     private static void onParseReturn(String id, JsonObject rootObject, ConfigContext context,
             CallbackInfoReturnable<Result<Optional<SkillDefinitionConfig>, Problem>> cir) {
 
-        var typeResult = rootObject.get("type").getSuccess();
-        if (typeResult.isEmpty()) {
-            return;
-        }
-
         // Always parse "hidden" and "loot_mode" for all skills (including standard
         // Pufferfish skills)
         final boolean isLootable = rootObject.get("loot_mode").getSuccess().isPresent();
@@ -130,11 +126,11 @@ public abstract class SkillDefinitionConfigMixin {
                 .flatMap(e -> e.getAsBoolean().getSuccess())
                 .orElse(false);
 
-        // For standard skills, we still want to put them in storage if they have
-        // addon-specific features.
-        // We will continue below to parse more fields if available.
-
         Result<Optional<SkillDefinitionConfig>, Problem> result = cir.getReturnValue();
+        if (result == null || result.getSuccess().isEmpty()) {
+            return;
+        }
+
         result.getSuccess().ifPresent(optConfig -> {
             optConfig.ifPresent(config -> {
                 int points = rootObject.get("points_per_level").getSuccess()
@@ -353,11 +349,14 @@ public abstract class SkillDefinitionConfigMixin {
                             .flatMap(e -> e.getAsInt().getSuccess())
                             .orElse(0);
 
-                    LeveledConfigStorage.put(id,
+                    LeveledConfigStorage.put(id.toString(),
                             new LeveledConfigStorage.LeveledConfig(finalMaxLevels, points, merge,
                                     requiredSkillsList, levelPrereqs, lootMode, categoryId, enchantmentCost,
                                     imbuementCost,
                                     slotOpeningCost, cleansingCost, isLootable, hidden, toggle, keybindSlot, cooldown));
+
+                    System.out.println("[SkillDefinitionConfigMixin] Registered Addon Features for: " + id
+                            + " (Toggle: " + toggle + ")");
                 }
             });
         });

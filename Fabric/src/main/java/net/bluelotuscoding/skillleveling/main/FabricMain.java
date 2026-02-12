@@ -27,6 +27,7 @@ import net.minecraft.resource.ResourceReloader;
 import net.minecraft.resource.ResourceType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.loot.LootPool;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -43,6 +44,8 @@ public class FabricMain implements ModInitializer {
                 net.bluelotuscoding.skillleveling.network.FabricNetworkHandler.init();
                 SkillLevelingMod.getInstance().setNetworkHandler(
                                 new net.bluelotuscoding.skillleveling.network.FabricNetworkHandler());
+                SkillLevelingMod.getInstance()
+                                .setPlatform(new net.bluelotuscoding.skillleveling.fabric.util.FabricPlatform());
 
                 // Register Loot Functions
                 ModLootFunctions.register();
@@ -226,6 +229,11 @@ public class FabricMain implements ModInitializer {
 
                 net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
                         SkillLevelingMod.getInstance().getSkillLevelingManager().tick(server);
+                });
+
+                ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+                        SkillLevelingMod.getInstance().getSkillLevelingManager()
+                                        .refreshAllRewards(newPlayer);
                 });
         }
 }

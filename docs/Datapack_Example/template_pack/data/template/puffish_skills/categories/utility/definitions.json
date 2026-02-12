@@ -210,7 +210,9 @@
                             "data": {
                                 "effect": "minecraft:night_vision",
                                 "duration": -1,
-                                "amplifier": 0
+                                "amplifier": 0,
+                                "persistent": true,
+                                "is_protected": true
                             }
                         },
                         {

@@ -14,6 +14,25 @@ All notable changes to the **Pufferfish Skill Leveling** mod will be documented 
     - Fully restored "World Join Persistence" while maintaining silent login (no activation spam on join).
 - **Linter Cleanup**: Resolved all unused imports and defunct methods in `SkillLevelingDataManager` and `ToggleReward`.
 
+## [2026-02-12] - Event-Based Refined Effect Rewards
+
+### Performance & Efficiency
+- **Event-Driven Protection**: Migrated the `is_protected` logic from a per-second tick check to a highly efficient event-based system.
+    - **Common Mixins**: Hooked into `LivingEntity.onStatusEffectRemoved` and `clearStatusEffects` to trigger instant re-application.
+    - **Smart Logic**: Maintained "Smart Overwrite" behavior that respects stronger active potion effects (e.g., waiting for Haste II potion to expire before returning Haste I skill reward).
+- **Zero-Tick Overhead**: Removed background ticking checks for protected effects, reducing server load.
+
+### New Features
+- **Refined Effect Rewards (`puffish_skills:effect`)**: Significant enhancements to the base effect reward type.
+    - **`persistent`**: Boolean flag to make effects immune to milk and curative items (supported natively on Forge).
+    - **`is_protected`**: Boolean flag to ensure effects are re-applied if cleared by commands, mods, or death.
+- **Cross-Platform Respawn Support**: Added specialized hooks for Forge (`PlayerRespawnEvent`) and Fabric (`AFTER_RESPAWN`) to ensure skill rewards are restored immediately upon death.
+- **Platform Abstraction Layer**: Implemented a `Platform` interface and loader-specific implementations (`ForgePlatform`, `FabricPlatform`) to handle technical differences safely.
+
+### Bug Fixes
+- **Sticky Effect Removal**: Resolved a race condition where toggling off a skill would trigger its own "protection" and re-apply the effect. Corrected the order of operations to unregister protected effects *before* removal.
+- **Night Vision Test Case**: Applied and verified the new fields in the `night_vision` skill template.
+
 ## [2026-02-11] - Toggle Skill Refinement & Stability
 
 ### New Features

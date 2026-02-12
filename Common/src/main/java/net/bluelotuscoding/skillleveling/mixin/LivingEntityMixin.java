@@ -8,6 +8,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
@@ -56,6 +58,28 @@ public abstract class LivingEntityMixin {
                     mod.getSkillLevelingManager().refreshAllRewards(player);
                     mod.getSkillLevelingManager().syncAllSkillsToPlayer(player);
                 });
+            }
+        }
+    }
+
+    @Inject(method = "onStatusEffectRemoved", at = @At("TAIL"))
+    protected void onStatusEffectRemoved(StatusEffectInstance effect, CallbackInfo ci) {
+        LivingEntity entity = (LivingEntity) (Object) this;
+        if (entity instanceof ServerPlayerEntity player && !player.getWorld().isClient()) {
+            var mod = SkillLevelingMod.getInstance();
+            if (mod != null && mod.getSkillLevelingManager() != null) {
+                mod.getSkillLevelingManager().checkProtectedEffects(player, effect.getEffectType());
+            }
+        }
+    }
+
+    @Inject(method = "clearStatusEffects", at = @At("TAIL"))
+    protected void onClearStatusEffects(CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity entity = (LivingEntity) (Object) this;
+        if (entity instanceof ServerPlayerEntity player && !player.getWorld().isClient()) {
+            var mod = SkillLevelingMod.getInstance();
+            if (mod != null && mod.getSkillLevelingManager() != null) {
+                mod.getSkillLevelingManager().checkProtectedEffects(player, null);
             }
         }
     }

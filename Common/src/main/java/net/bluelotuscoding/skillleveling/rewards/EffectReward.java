@@ -27,15 +27,19 @@ public class EffectReward implements Reward {
     private final boolean ambient;
     private final boolean showParticles;
     private final boolean showIcon;
+    private final boolean persistent;
+    private final boolean isProtected;
 
     public EffectReward(Identifier effectId, int amplifier, int duration, boolean ambient, boolean showParticles,
-            boolean showIcon) {
+            boolean showIcon, boolean persistent, boolean isProtected) {
         this.effectId = effectId;
         this.amplifier = amplifier;
         this.duration = duration;
         this.ambient = ambient;
         this.showParticles = showParticles;
         this.showIcon = showIcon;
+        this.persistent = persistent;
+        this.isProtected = isProtected;
     }
 
     @Override
@@ -53,8 +57,30 @@ public class EffectReward implements Reward {
             int effectiveDuration = duration == -1 ? Integer.MAX_VALUE : duration;
             StatusEffectInstance instance = new StatusEffectInstance(effect, effectiveDuration, amplifier, ambient,
                     showParticles, showIcon);
+
+            if (persistent) {
+                // Remove curative items (like milk) to make the effect persistent
+                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getPlatform().makePersistent(instance);
+            }
+
             player.addStatusEffect(instance);
+
+            if (isProtected) {
+                // Register for tick-based re-application
+                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getSkillLevelingManager()
+                        .registerProtectedEffect(player.getUuid(),
+                                new net.bluelotuscoding.skillleveling.manager.SkillLevelingManager.ProtectedEffect(
+                                        effectId, amplifier, duration, ambient, showParticles, showIcon, persistent));
+            }
         } else {
+            if (isProtected) {
+                // Unregister from tick-based re-application BEFORE removal
+                // This prevents the event hook (LivingEntityMixin) from re-applying it
+                // immediately
+                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getSkillLevelingManager()
+                        .unregisterProtectedEffect(player.getUuid(), effectId);
+            }
+
             // Remove effect
             player.removeStatusEffect(effect);
         }
@@ -87,10 +113,15 @@ public class EffectReward implements Reward {
                 .flatMap(e -> e.getAsBoolean().ifFailure(problems::add).getSuccess()).orElse(true);
         var showIcon = rootObject.get("show_icon").getSuccess()
                 .flatMap(e -> e.getAsBoolean().ifFailure(problems::add).getSuccess()).orElse(true);
+        var persistent = rootObject.get("persistent").getSuccess()
+                .flatMap(e -> e.getAsBoolean().ifFailure(problems::add).getSuccess()).orElse(false);
+        var isProtected = rootObject.get("is_protected").getSuccess()
+                .flatMap(e -> e.getAsBoolean().ifFailure(problems::add).getSuccess()).orElse(false);
 
         if (problems.isEmpty()) {
             Identifier effectId = new Identifier(effectIdStr.orElse("minecraft:haste"));
-            return Result.success(new EffectReward(effectId, amplifier, duration, ambient, showParticles, showIcon));
+            return Result.success(new EffectReward(effectId, amplifier, duration, ambient, showParticles, showIcon,
+                    persistent, isProtected));
         } else {
             return Result.failure(Problem.combine(problems));
         }

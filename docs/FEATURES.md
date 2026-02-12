@@ -54,7 +54,7 @@ The addon introduces specialized rewards to support advanced progression.
 
 | ID | Description | Parameters |
 |----|-------------|------------|
-| `puffish_skills:effect` | Grants potion effects. | `effect`, `amplifier`, `duration` (-1 for infinite), `show_particles`, `show_icon`. |
+| `puffish_skills:effect` | Grants potion effects. | `effect`, `amplifier`, `duration`, `show_particles`, `show_icon`, `persistent`, `is_protected`. |
 | `puffish_skill_leveling:command` | Executes server-side commands. | `command` (supports placeholder `<player>`). |
 | `puffish_skill_leveling:experience` | Grants category-specific XP. | `category`, `amount`. |
 

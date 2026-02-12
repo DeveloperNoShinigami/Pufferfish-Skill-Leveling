@@ -45,6 +45,8 @@ public class ForgeMain {
                 net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler.init();
                 SkillLevelingMod.getInstance()
                                 .setNetworkHandler(new net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler());
+                SkillLevelingMod.getInstance()
+                                .setPlatform(new net.bluelotuscoding.skillleveling.forge.util.ForgePlatform());
 
                 MinecraftForge.EVENT_BUS.register(this);
                 MinecraftForge.EVENT_BUS.register(new ForgeVillagerTrades());
@@ -98,6 +100,14 @@ public class ForgeMain {
                 @SubscribeEvent
                 public static void onEquipmentChange(
                                 net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent event) {
+                        if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
+                                SkillLevelingMod.getInstance().getSkillLevelingManager()
+                                                .refreshAllRewards(serverPlayer);
+                        }
+                }
+
+                @SubscribeEvent
+                public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
                         if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
                                 SkillLevelingMod.getInstance().getSkillLevelingManager()
                                                 .refreshAllRewards(serverPlayer);

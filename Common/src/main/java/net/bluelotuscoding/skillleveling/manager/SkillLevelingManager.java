@@ -48,6 +48,7 @@ public class SkillLevelingManager {
     private boolean configurationsLoaded = false;
     private boolean networkHandlerNullWarned = false;
     private final Map<UUID, Map<String, Long>> playerCooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, List<ProtectedEffect>> protectedEffects = new ConcurrentHashMap<>();
     // Track which definitionIds have been sent to which players to avoid redundant
     // sends
 
@@ -395,6 +396,52 @@ public class SkillLevelingManager {
         dataManager.saveAll();
     }
 
+    public void checkProtectedEffects(ServerPlayerEntity player, net.minecraft.entity.effect.StatusEffect type) {
+        var effects = protectedEffects.get(player.getUuid());
+        if (effects == null || effects.isEmpty())
+            return;
+
+        for (ProtectedEffect pe : effects) {
+            net.minecraft.entity.effect.StatusEffect effect = net.minecraft.registry.Registries.STATUS_EFFECT
+                    .get(pe.effectId);
+            if (effect == null)
+                continue;
+
+            // If we are checking a specific type, skip others
+            if (type != null && effect != type) {
+                continue;
+            }
+
+            var current = player.getStatusEffect(effect);
+            boolean shouldReapply = false;
+
+            if (current == null) {
+                shouldReapply = true;
+            } else {
+                // SMART OVERWRITE LOGIC:
+                // 1. If existing effect is weaker, overwrite it.
+                // 2. If existing effect is same strength but about to expire, refresh it.
+                // 3. If existing effect is stronger, do nothing (respect potions).
+                if (current.getAmplifier() < pe.amplifier) {
+                    shouldReapply = true;
+                } else if (current.getAmplifier() == pe.amplifier && current.getDuration() < 100) {
+                    shouldReapply = true;
+                }
+            }
+
+            if (shouldReapply) {
+                int effectiveDuration = pe.duration == -1 ? Integer.MAX_VALUE : pe.duration;
+                var instance = new net.minecraft.entity.effect.StatusEffectInstance(effect, effectiveDuration,
+                        pe.amplifier, pe.ambient, pe.showParticles, pe.showIcon);
+                if (pe.persistent) {
+                    net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getPlatform()
+                            .makePersistent(instance);
+                }
+                player.addStatusEffect(instance);
+            }
+        }
+    }
+
     public void onPlayerJoin(ServerPlayerEntity player) {
         // Ensure configurations are loaded before any skill lookups
         ensureConfigurationsLoaded();
@@ -470,6 +517,7 @@ public class SkillLevelingManager {
     public void onPlayerLeave(ServerPlayerEntity player) {
         // Save player skill level data
         dataManager.savePlayerData(player);
+        protectedEffects.remove(player.getUuid());
     }
 
     public Optional<MinecraftServer> getServer() {
@@ -581,6 +629,23 @@ public class SkillLevelingManager {
             }
         }
         return null;
+    }
+
+    public void registerProtectedEffect(UUID playerId, ProtectedEffect effect) {
+        protectedEffects.computeIfAbsent(playerId, k -> new ArrayList<>())
+                .removeIf(e -> e.effectId.equals(effect.effectId));
+        protectedEffects.get(playerId).add(effect);
+    }
+
+    public void unregisterProtectedEffect(UUID playerId, Identifier effectId) {
+        var effects = protectedEffects.get(playerId);
+        if (effects != null) {
+            effects.removeIf(e -> e.effectId.equals(effectId));
+        }
+    }
+
+    public static record ProtectedEffect(Identifier effectId, int amplifier, int duration, boolean ambient,
+            boolean showParticles, boolean showIcon, boolean persistent) {
     }
 
     /**

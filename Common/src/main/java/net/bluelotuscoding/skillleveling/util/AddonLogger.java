@@ -51,7 +51,8 @@ public class AddonLogger {
      * SILENCED by default to prevent log clogging.
      */
     public void debug(String message) {
-        // Disabled by default to prevent log clogging
-        // logger.info("[ADDON] [DEBUG] " + message);
+        if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.debugLogging) {
+            logger.info("[DEBUG] " + message);
+        }
     }
 }

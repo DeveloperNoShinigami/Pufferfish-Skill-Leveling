@@ -14,6 +14,7 @@ public class ClientDescriptionStorage {
     private static final Map<String, Map<Integer, String>> levelExtraDescriptions = new HashMap<>();
     private static final Map<String, Boolean> mergeDescriptionFlags = new HashMap<>();
     private static final Map<String, Integer> maxLevels = new HashMap<>();
+    private static final Map<String, Integer> toggleLevels = new HashMap<>();
     private static final Map<String, String> lootModes = new HashMap<>();
     private static final Map<String, java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite>> skillPrerequisites = new HashMap<>();
 
@@ -26,7 +27,8 @@ public class ClientDescriptionStorage {
             boolean mergeDescription,
             int maxLevel,
             String lootMode,
-            java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prerequisites) {
+            java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prerequisites,
+            int toggleLevel) {
         if (descriptions != null && !descriptions.isEmpty()) {
             levelDescriptions.put(definitionId, new HashMap<>(descriptions));
         }
@@ -35,6 +37,7 @@ public class ClientDescriptionStorage {
         }
         mergeDescriptionFlags.put(definitionId, mergeDescription);
         maxLevels.put(definitionId, maxLevel);
+        toggleLevels.put(definitionId, toggleLevel);
         lootModes.put(definitionId, lootMode != null ? lootMode : "");
         if (prerequisites != null && !prerequisites.isEmpty()) {
             skillPrerequisites.put(definitionId, new java.util.ArrayList<>(prerequisites));
@@ -131,6 +134,10 @@ public class ClientDescriptionStorage {
         return maxLevels.getOrDefault(definitionId, 1);
     }
 
+    public static int getToggleLevel(String definitionId) {
+        return toggleLevels.getOrDefault(definitionId, 0);
+    }
+
     public static String getLootMode(String definitionId) {
         return lootModes.getOrDefault(definitionId, "");
     }
@@ -199,6 +206,7 @@ public class ClientDescriptionStorage {
         levelExtraDescriptions.remove(definitionId);
         mergeDescriptionFlags.remove(definitionId);
         maxLevels.remove(definitionId);
+        toggleLevels.remove(definitionId);
         lootModes.remove(definitionId);
         skillPrerequisites.remove(definitionId);
     }
@@ -211,6 +219,7 @@ public class ClientDescriptionStorage {
         levelExtraDescriptions.clear();
         mergeDescriptionFlags.clear();
         maxLevels.clear();
+        toggleLevels.clear();
         lootModes.clear();
         skillPrerequisites.clear();
     }

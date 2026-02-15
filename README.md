@@ -25,6 +25,18 @@
 - Each level grants rewards and contributes to "Mastery".
 - Dynamic tooltips show current total level (Base + Bonuses).
 
+### Toggle Skills
+- Primary active abilities (e.g., Rage, Night Vision).
+- **Keybind Support**: Assign skills to 9 dedicated mastery slots.
+- **State Persistence**: Toggle states are saved across sessions.
+- **Smart Logic**: Supports cooldowns and auto-disabling on gear removal.
+
+### Refined Effect Rewards
+- Native `puffish_skills:effect` reward type with advanced controls.
+- **Persistence**: Effects can be made immune to milk and curative items.
+- **Protection**: High-performance, event-based re-application system ensures effects remain active even after death or clearing.
+- **Smart Overwrite**: Intelligently respects stronger active potion effects.
+
 ### Skill Master Villager
 - Dedicated profession for trading skill-related items.
 - **Dynamic Trading Pool**: Offers change based on your progression and "Mastery".

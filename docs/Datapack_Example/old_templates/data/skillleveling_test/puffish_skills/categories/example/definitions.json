@@ -121,7 +121,7 @@
       {
         "type": "puffish_skills:command",
         "data": {
-          "command": "say Player unlocked the Mage skill tree!"
+          "command": "tellraw @a {\"text\":\"A player has unlocked the Mage skill tree!\",\"color\":\"gold\"}"
         }
       },
       {
@@ -133,7 +133,7 @@
               {
                 "type": "puffish_skills:command",
                 "data": {
-                  "command": "say Learned Fire Magic! (Level 1)"
+                  "command": "tellraw @s {\"text\":\"Learned Fire Magic! (Level 1)\",\"color\":\"red\"}"
                 }
               }
             ],
@@ -141,7 +141,7 @@
               {
                 "type": "puffish_skills:command",
                 "data": {
-                  "command": "say Learned Lightning Magic! (Level 2)"
+                  "command": "tellraw @s {\"text\":\"Learned Lightning Magic! (Level 2)\",\"color\":\"aqua\"}"
                 }
               }
             ],
@@ -149,7 +149,7 @@
               {
                 "type": "puffish_skills:command",
                 "data": {
-                  "command": "say Mastered Arcane Magic! (Level 3)"
+                  "command": "tellraw @s {\"text\":\"Mastered Arcane Magic! (Level 3)\",\"color\":\"light_purple\"}"
                 }
               }
             ]
@@ -208,7 +208,7 @@
               {
                 "type": "puffish_skills:command",
                 "data": {
-                  "command": "say Unlocked Blade Enchantment! (Level 1)"
+                  "command": "tellraw @s {\"text\":\"Unlocked Blade Enchantment! (Level 1)\",\"color\":\"blue\"}"
                 }
               }
             ],
@@ -216,7 +216,7 @@
               {
                 "type": "puffish_skills:command",
                 "data": {
-                  "command": "say Learned Arcane Strikes! (Level 2)"
+                  "command": "tellraw @s {\"text\":\"Learned Arcane Strikes! (Level 2)\",\"color\":\"light_purple\"}"
                 }
               }
             ],
@@ -224,7 +224,7 @@
               {
                 "type": "puffish_skills:command",
                 "data": {
-                  "command": "say Mastered Elemental Mastery! (Level 3)"
+                  "command": "tellraw @s {\"text\":\"Mastered Elemental Mastery! (Level 3)\",\"color\":\"green\"}"
                 }
               }
             ]

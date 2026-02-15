@@ -16,14 +16,20 @@ Before you write a single line of logic, your folder hierarchy must be perfect. 
 your_datapack/
 ├── pack.mcmeta
 └── data/
-    └── <your_namespace>/
-        └── puffish_skills/
-            └── categories/
-                └── <category_id>/  <-- e.g., 'combat'
-                    ├── category.json
-                    ├── definitions.json <-- Technical Logic
-                    ├── skills.json      <-- Visual Layout
-                    └── connections.json
+    ├── <your_namespace>/
+    │   └── puffish_skills/
+    │       ├── config.json      <-- (Essential) Registry of your categories
+    │       └── categories/      <-- Folder for category logic
+    │           └── <category_id>/
+    │               ├── category.json
+    │               ├── definitions.json
+    │               ├── skills.json
+    │               └── connections.json
+    └── puffish_skill_leveling/  <-- (Namespace) Addon Configuration
+        ├── loot_modifiers/      <-- Universal Loot Injection
+        ├── skill_imbue_loot/    <-- Item Imbuing / Tooltip Scaling
+        ├── skill_master_reputation/ <-- Trading & Reputation Economy 
+        └── skill_master_trades/ <-- Custom Villager Trade Pools
 ```
 
 ### 2. pack.mcmeta
@@ -51,13 +57,13 @@ Every skill in `definitions.json` is an object keyed by its **Unique ID**.
 | `title` | string | **YES** | **MUST match the ID key** for clear command/data tracking. |
 | `points_per_level`| int | **YES** | Point cost per level (Set to `0` for loot-only skills). |
 | `metadata` | object | **YES** | Required by parser. Use `{}` if no extra data is needed. |
-| `max_skill_level` | int | [Opt] | The level ceiling (Default: 1). Alias: `max_levels`. |
+| `max_skill_level` | int | [Opt] | The level ceiling (Default: 1). |
 | `loot_mode` | string | [Opt] | Path: `"both"`, `"tome_only"`, or `"imbue_only"`. |
 | `hidden` | boolean | [Opt] | If true, icon is invisible until prerequisites are met. |
 | `merge_description`| boolean | [Opt] | If true, current-level tooltips list all previous rank bonuses. |
 | `descriptions` | map | [Opt] | Map of level-based tooltips (Keyed `"1"`, `"2"`, etc). |
 | `extra_descriptions`| map | [Opt] | Map of "Next Rank" previews (Key `"0"` is for first unlock). |
-| `prerequisite_skills`| array | [Opt] | **Initial Reveal/Buy** requirements. Alias: `required_skill`.|
+| `prerequisite_skills`| array | [Opt] | **Initial Reveal/Buy** requirements. |
 | `required_skill_for_level` | object | [Opt] | Gates **specific levels** (e.g., Lvl 5 requires mastery). |
 | `enchantment_cost` | mixed | [Opt] | XP cost for Anvil combining. Supports Scalar/Array/Math. |
 | `imbuement_cost` | mixed | [Opt] | XP cost for Sigil imbuing. Supports Scalar/Array/Math. |
@@ -185,7 +191,7 @@ The `puffish_skill_leveling:stackable` type is a **hybrid**. It supports both st
                         {
                             "type": "puffish_skills:command",
                             "data": {
-                                "command": "say Rank 1!"
+                                "command": "tellraw @s {\"text\":\"Rank 1!\",\"color\":\"gray\"}"
                             }
                         }
                     ],
@@ -193,7 +199,7 @@ The `puffish_skill_leveling:stackable` type is a **hybrid**. It supports both st
                         {
                             "type": "puffish_skills:command",
                             "data": {
-                                "command": "say Rank 2!"
+                                "command": "tellraw @s {\"text\":\"Rank 2!\",\"color\":\"gray\"}"
                             }
                         }
                     ],
@@ -201,7 +207,7 @@ The `puffish_skill_leveling:stackable` type is a **hybrid**. It supports both st
                         {
                             "type": "puffish_skills:command",
                             "data": {
-                                "command": "say Rank 3!"
+                                "command": "tellraw @s {\"text\":\"Rank 3!\",\"color\":\"gray\"}"
                             }
                         }
                     ],
@@ -209,7 +215,7 @@ The `puffish_skill_leveling:stackable` type is a **hybrid**. It supports both st
                         {
                             "type": "puffish_skills:command",
                             "data": {
-                                "command": "say Rank 4!"
+                                "command": "tellraw @s {\"text\":\"Rank 4!\",\"color\":\"gray\"}"
                             }
                         }
                     ],
@@ -217,7 +223,7 @@ The `puffish_skill_leveling:stackable` type is a **hybrid**. It supports both st
                         {
                             "type": "puffish_skills:command",
                             "data": {
-                                "command": "say Rank 5!"
+                                "command": "tellraw @s {\"text\":\"Rank 5!\",\"color\":\"gray\"}"
                             }
                         }
                     ]
@@ -232,68 +238,10 @@ The `puffish_skill_leveling:stackable` type is a **hybrid**. It supports both st
 ---
 
 ## 🔘 Point F.1: Toggle Skills
+Any skill can be made into a "Toggle Skill" by adding the `toggle` field. These skills are active abilities assigned to Mastery Keybinds.
 
-Any skill can be made into a "Toggle Skill" by adding the `toggle` field. These skills are binary (Enabled/Disabled) and can be toggled for free once unlocked.
-
-- **`toggle`**: (Boolean) Set to `true` to enable toggle behavior.
-- **`keybind_slot`**: (Integer, 1-9) Assigns the skill to one of the 9 "Mastery Key" slots in the Controls menu.
-- **`cooldown`**: (Integer, Ticks) Specifies the cooldown period after a skill is **disabled**. Players cannot enable the skill again until this time has passed.
-- **`puffish_skill_leveling:toggle`**: A special reward type that defines what happens when the skill is enabled or disabled. It wraps arrays of other reward types in `enable_rewards` and `disable_rewards`.
-- **`puffish_skills:effect`**: A special reward type that applies potion effects to the player.
-    - **`effect`**: (String) The identifier of the effect (e.g., `"minecraft:haste"`, `"alexsmobs:speedy_momentum"`). Supports all modded effects.
-    - **`amplifier`**: (Integer) The level of the effect (0 = Level I).
-    - **`duration`**: (Integer, Ticks) How long the effect lasts. Use `-1` for infinite (ideal for toggles).
-    - **`persistent`**: (Boolean) [Optional] If true, the effect is immune to milk/curative items (Forge only).
-    - **`is_protected`**: (Boolean) [Optional] If true, the effect is re-applied instantly if removed or expired while the skill is active (Zero-tick overhead).
-    
-> [!NOTE]
-> **Loot Modes & Visuals**: Toggle skills respect `loot_mode`. If a skill is `"imbue_only"` and the player unequips the item, the skill will **Auto-Disable** and the tooltip will change to "DISABLED (Equip item to use)". Ensure your toggle logic supports this flow.
-
-#### Example: Comprehensive Toggle Mastery
-This example shows a toggle skill with standard Pufferfish fields (`title`, `description`, `icon`) and multiple toggle rewards.
-
-```json
-"berserker_rage": {
-    "title": "Berserker Rage",
-    "description": "Enter a state of reckless fury.",
-    "icon": {
-        "type": "item",
-        "data": { "item": "minecraft:netherite_axe" }
-    },
-    "toggle": true,
-    "keybind_slot": 2,
-    "cooldown": 600,
-    "rewards": [
-        {
-            "type": "puffish_skill_leveling:toggle",
-            "data": {
-                "enable_rewards": [
-                    {
-                        "type": "puffish_skills:effect",
-                        "data": {
-                            "effect": "minecraft:strength",
-                            "amplifier": 1,
-                            "duration": -1
-                        }
-                    },
-                    {
-                        "type": "puffish_skills:attribute",
-                        "data": {
-                            "attribute": "generic.attack_speed",
-                            "value": 0.2,
-                            "operation": "multiply_base"
-                        }
-                    }
-                ],
-                "disable_rewards": [
-            }
-        }
-    ],
-    "metadata": {
-        "icon": "berserker_rage_icon_id"
-    }
-}
-```
+- **Hybrid Rewards**: Toggle skills can wrap `per_level_rewards` to create powerful leveling abilities.
+- **Detailed Guide**: See [Toggle System](./Toggle_System.md) for a full breakdown of keybinds, cooldowns, and hybrid interactions.
 
 ---
 
@@ -337,16 +285,16 @@ This example combines everything: 5 Levels, Mixed Rewards (Attributes + Effects 
                     ],
                     "3": [
                         { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 3, "operation": "addition" } },
-                        { "type": "puffish_skills:effect", "data": { "effect": "minecraft:glowing", "duration": 100, "amplifier": 0 } }
+                        { "type": "puffish_skill_leveling:effect", "data": { "effect": "minecraft:glowing", "duration": 100, "amplifier": 0, "is_protected": true } }
                     ],
                     "4": [
                         { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 4, "operation": "addition" } },
-                        { "type": "puffish_skills:effect", "data": { "effect": "minecraft:glowing", "duration": 120, "amplifier": 0 } }
+                        { "type": "puffish_skill_leveling:effect", "data": { "effect": "minecraft:glowing", "duration": 120, "amplifier": 0, "is_protected": true } }
                     ],
                     "5": [
                         { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 5, "operation": "addition" } },
-                        { "type": "puffish_skills:effect", "data": { "effect": "minecraft:glowing", "duration": 140, "amplifier": 0 } },
-                        { "type": "puffish_skills:command", "data": { "command": "particle minecraft:witch %player_x% %player_y% %player_z% 0 0 0 1 10" } }
+                        { "type": "puffish_skill_leveling:effect", "data": { "effect": "minecraft:glowing", "duration": 140, "amplifier": 0, "is_protected": true } },
+                        { "type": "puffish_skills:command", "data": { "command": "particle minecraft:witch ~ ~ ~ 0 0 0 1 10" } }
                     ]
                 }
             }
@@ -435,7 +383,23 @@ Technical authors must understand how the addon tracks progression to balance th
 
 ---
 
-## 💎 Point L: Grandmaster Author Tips
+## 🎲 Point L: Dynamic Loot & Imbuement
+
+The addon allows you to inject custom loot (like Skill Charms) and dynamically imbue skills onto equipment found in the world.
+
+### 1. Universal Loot Injection
+Define custom drops for mobs and chests in a single, persistent configuration.
+- **Path**: `data/puffish_skill_leveling/loot_modifiers/universal_loot.json`
+- **Detailed Guide**: [Universal Loot System](Universal_Loot_System.md)
+
+### 2. Skill Imbuement Logic
+Control how skills are applied to drops based on dimensions, distance, and item categories.
+- **Path**: `data/puffish_skill_leveling/skill_imbue_loot/config.json`
+- **Detailed Guide**: [Skill Imbuement System](Skill_Imbuement_System.md)
+
+---
+
+## 💎 Point M: Grandmaster Author Tips
 
 Specialized advice for creating high-quality, production-ready packs.
 

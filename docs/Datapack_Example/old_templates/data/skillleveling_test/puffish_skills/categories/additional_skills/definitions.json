@@ -13,7 +13,7 @@
         },
         "max_skill_level": 3,
         "points_per_level": 0,
-        "enchantment_levels": 10,
+        "enchantment_cost": 10,
         "descriptions": {
             "1": "Level 1: +10% Damage",
             "2": "Level 2: +20% Damage",
@@ -77,8 +77,8 @@
         },
         "max_skill_level": 5,
         "points_per_level": 0,
-        "enchantment_levels": "level ^ 2 * 5",
-        "imbuement_levels": "level ^ 2 * 2.5",
+        "enchantment_cost": "level ^ 2 * 5",
+        "imbuement_cost": "level ^ 2 * 2.5",
         "slot_opening_cost": 0,
         "cleansing_cost": 0,
         "descriptions": {
@@ -166,7 +166,7 @@
         },
         "max_skill_level": 3,
         "points_per_level": 0,
-        "enchantment_levels": "level * 10",
+        "enchantment_cost": "level * 10",
         "descriptions": {
             "1": "+5% Attack Speed",
             "2": "+10% Attack Speed",
@@ -228,7 +228,7 @@
         },
         "max_skill_level": 5,
         "points_per_level": 0,
-        "enchantment_levels": "level * 8",
+        "enchantment_cost": "level * 8",
         "descriptions": {
             "1": "+1 Armor",
             "2": "+2 Armor",
@@ -312,7 +312,7 @@
         },
         "max_skill_level": 5,
         "points_per_level": 0,
-        "enchantment_levels": "level * 12",
+        "enchantment_cost": "level * 12",
         "descriptions": {
             "1": "+0.5 Toughness",
             "2": "+1.0 Toughness",
@@ -396,7 +396,7 @@
         },
         "max_skill_level": 3,
         "points_per_level": 0,
-        "enchantment_levels": "level * 15",
+        "enchantment_cost": "level * 15",
         "descriptions": {
             "1": "+5% Speed",
             "2": "+10% Speed",
@@ -458,7 +458,7 @@
         },
         "max_skill_level": 3,
         "points_per_level": 1,
-        "enchantment_levels": "level * 15",
+        "enchantment_cost": "level * 15",
         "descriptions": {
             "1": "Level 1: +1 Luck",
             "2": "Level 2: +2 Luck",

@@ -51,7 +51,9 @@ public class SkillLevelingMod {
     private final AddonLogger logger;
     private final net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader tradeLoader;
     private final net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader reputationLoader;
-    private final net.bluelotuscoding.skillleveling.data.GlobalLootConfigLoader globalLootConfigLoader;
+
+    private final net.bluelotuscoding.skillleveling.loot.LootImbueManager lootImbueManager;
+    private final net.bluelotuscoding.skillleveling.loot.UniversalLootHandler universalLootHandler;
     private net.bluelotuscoding.skillleveling.network.NetworkHandler networkHandler;
     private net.bluelotuscoding.skillleveling.integration.EquipmentScanner equipmentScanner = entity -> java.util.Collections
             .emptyList();
@@ -64,7 +66,9 @@ public class SkillLevelingMod {
         this.logger = new AddonLogger();
         this.tradeLoader = new net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader();
         this.reputationLoader = new net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader();
-        this.globalLootConfigLoader = new net.bluelotuscoding.skillleveling.data.GlobalLootConfigLoader();
+
+        this.lootImbueManager = new net.bluelotuscoding.skillleveling.loot.LootImbueManager();
+        this.universalLootHandler = new net.bluelotuscoding.skillleveling.loot.UniversalLootHandler();
     }
 
     /**
@@ -80,10 +84,16 @@ public class SkillLevelingMod {
      * 3. Hook into Skills mod events for skill unlock/lock detection
      * 4. Set up server lifecycle listeners for data management
      */
-    public static void init() {
+    public static void init(java.io.File configDir) {
         instance = new SkillLevelingMod();
 
-        instance.logger.info("Initializing Pufferfish Skill Leveling addon...");
+        // INITIALIZE CONFIGURATION: Load before anything else to set logging states
+        net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.load(configDir);
+
+        instance.logger.info("Initializing Pufferfish Skill Leveling addon v2 (Logging Balanced)...");
+        if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.debugLogging) {
+            instance.logger.info("Debug logging is now ACTIVE via configuration.");
+        }
 
         // REGISTER REWARD TYPE: Add our per-level rewards to Skills mod's reward system
         PerLevelRewardsReward.register();
@@ -145,8 +155,12 @@ public class SkillLevelingMod {
         return reputationLoader;
     }
 
-    public net.bluelotuscoding.skillleveling.data.GlobalLootConfigLoader getGlobalLootConfigLoader() {
-        return globalLootConfigLoader;
+    public net.bluelotuscoding.skillleveling.loot.LootImbueManager getLootImbueManager() {
+        return lootImbueManager;
+    }
+
+    public net.bluelotuscoding.skillleveling.loot.UniversalLootHandler getUniversalLootHandler() {
+        return universalLootHandler;
     }
 
     public void setEquipmentScanner(net.bluelotuscoding.skillleveling.integration.EquipmentScanner equipmentScanner) {

@@ -206,7 +206,7 @@
                 "data": {
                     "enable_rewards": [
                         {
-                            "type": "puffish_skills:effect",
+                            "type": "puffish_skill_leveling:effect",
                             "data": {
                                 "effect": "minecraft:night_vision",
                                 "duration": -1,
@@ -218,7 +218,7 @@
                         {
                             "type": "puffish_skills:command",
                             "data": {
-                                "command": "say Night Vision Enabled"
+                                "command": "tellraw @s {\"text\":\"Night Vision Enabled\",\"color\":\"green\"}"
                             }
                         }
                     ],
@@ -226,7 +226,7 @@
                         {
                             "type": "puffish_skills:command",
                             "data": {
-                                "command": "say Night Vision Disabled"
+                                "command": "tellraw @s {\"text\":\"Night Vision Disabled\",\"color\":\"gray\"}"
                             }
                         }
                     ]
@@ -235,6 +235,94 @@
         ],
         "metadata": {
             "icon": "night_vision_icon_id"
+        }
+    },
+    "focus": {
+        "type": "puffish_skills:default",
+        "category_id": "utility",
+        "title": "Focus",
+        "description": "Inner peace provides passive clarity, while deep focus unleashes mining speed.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:diamond_pickaxe"
+            }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 1,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Level 1: +5% Movement Speed (Passive)",
+            "2": "Level 2: +10% Movement Speed (Passive)",
+            "3": "Level 3: UNLOCKS DEEP FOCUS (Toggleable Haste)"
+        },
+        "toggle": true,
+        "keybind_slot": 4,
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "focus",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.movement_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.05
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.movement_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.1
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skill_leveling:toggle",
+                                "data": {
+                                    "enable_rewards": [
+                                        {
+                                            "type": "puffish_skill_leveling:effect",
+                                            "data": {
+                                                "effect": "minecraft:haste",
+                                                "duration": -1,
+                                                "amplifier": 0,
+                                                "persistent": true,
+                                                "is_protected": true
+                                            }
+                                        },
+                                        {
+                                            "type": "puffish_skills:command",
+                                            "data": {
+                                                "command": "title @s actionbar {\"text\":\"Deep Focus Active\",\"color\":\"aqua\"}"
+                                            }
+                                        }
+                                    ],
+                                    "disable_rewards": [
+                                        {
+                                            "type": "puffish_skills:command",
+                                            "data": {
+                                                "command": "title @s actionbar {\"text\":\"Focus Lost\",\"color\":\"gray\"}"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "minecraft:diamond_pickaxe"
         }
     }
 }

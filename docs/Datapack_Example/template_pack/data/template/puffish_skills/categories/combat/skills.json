@@ -18,5 +18,10 @@
         "x": 100,
         "y": 50,
         "definition": "arcane_striker"
+    },
+    "berserker_stance": {
+        "x": 50,
+        "y": 100,
+        "definition": "berserker_stance"
     }
 }

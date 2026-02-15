@@ -125,7 +125,7 @@
             {
                 "type": "puffish_skills:command",
                 "data": {
-                    "command": "say %player% is moving faster!"
+                    "command": "tellraw @s {\"text\":\"Moving faster!\",\"color\":\"gray\"}"
                 }
             },
             {
@@ -185,7 +185,7 @@
                             {
                                 "type": "puffish_skills:command",
                                 "data": {
-                                    "command": "say %player% has reached peak haste!"
+                                    "command": "tellraw @s {\"text\":\"Peak haste reached!\",\"color\":\"gold\"}"
                                 }
                             }
                         ]
@@ -206,13 +206,11 @@
         "prerequisite_skills": [
             {
                 "skill": "strength",
-                "level": 5,
-                "category": "offense"
+                "level": 5
             },
             {
                 "skill": "haste",
-                "level": 5,
-                "category": "offense"
+                "level": 5
             }
         ],
         "icon": {

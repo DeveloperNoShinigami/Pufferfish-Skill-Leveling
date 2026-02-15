@@ -1,0 +1,57 @@
+{
+    "item_whitelist": [],
+    "loot_table_whitelist": [],
+    "category_settings": {},
+    "distance_scaling": {
+        "enabled": true,
+        "origin": [
+            0,
+            0
+        ],
+        "brackets": [
+            {
+                "distance": 5000,
+                "max_level": 1,
+                "chance_mult": 1.0
+            },
+            {
+                "distance": 25000,
+                "max_level": 3,
+                "chance_mult": 1.0
+            },
+            {
+                "distance": 50000,
+                "max_level": 5,
+                "chance_mult": 1.0
+            }
+        ]
+    },
+    "dimension_overrides": {
+        "minecraft:overworld": {
+            "imbue_chance": 0.25,
+            "max_skills": 1,
+            "min_level": 1,
+            "max_level": 2
+        },
+        "minecraft:the_nether": {
+            "imbue_chance": 0.5,
+            "max_skills": 2,
+            "min_level": 2,
+            "max_level": 5
+        },
+        "minecraft:the_end": {
+            "imbue_chance": 0.75,
+            "max_skills": 3,
+            "min_level": 999,
+            "max_level": 999
+        }
+    },
+    "item_blacklist": [],
+    "exclusion_groups": [],
+    "global": [
+        {
+            "skill": "any",
+            "weight": 20
+        }
+    ]
+}

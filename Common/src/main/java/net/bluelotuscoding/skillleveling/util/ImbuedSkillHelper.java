@@ -229,6 +229,13 @@ public class ImbuedSkillHelper {
     }
 
     /**
+     * Checks if an item has ANY imbued skills.
+     */
+    public static boolean isImbued(ItemStack stack) {
+        return !getSkills(stack).isEmpty();
+    }
+
+    /**
      * Gets the level of a specific skill on an item.
      * Returns 0 if skill not found.
      */

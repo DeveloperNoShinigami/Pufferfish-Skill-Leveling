@@ -125,7 +125,7 @@
             {
                 "type": "puffish_skills:command",
                 "data": {
-                    "command": "say %player% is reinforcing their armor!"
+                    "command": "tellraw @s {\"text\":\"Reinforcing armor!\",\"color\":\"gray\"}"
                 }
             },
             {
@@ -185,7 +185,7 @@
                             {
                                 "type": "puffish_skills:command",
                                 "data": {
-                                    "command": "effect give %player% minecraft:resistance 99999 0 true"
+                                    "command": "effect give @s minecraft:resistance 99999 0 true"
                                 }
                             }
                         ]
@@ -216,11 +216,13 @@
                 "data": {
                     "enable_rewards": [
                         {
-                            "type": "puffish_skills:effect",
+                            "type": "puffish_skill_leveling:effect",
                             "data": {
                                 "effect": "minecraft:strength",
                                 "amplifier": 1,
-                                "duration": -1
+                                "duration": -1,
+                                "persistent": true,
+                                "is_protected": true
                             }
                         },
                         {
@@ -234,7 +236,7 @@
                         {
                             "type": "puffish_skills:command",
                             "data": {
-                                "command": "say Rage unleashed!"
+                                "command": "tellraw @s {\"text\":\"Rage unleashed!\",\"color\":\"red\"}"
                             }
                         }
                     ],
@@ -242,7 +244,7 @@
                         {
                             "type": "puffish_skills:command",
                             "data": {
-                                "command": "say Rage fades..."
+                                "command": "tellraw @s {\"text\":\"Rage fades...\",\"color\":\"gray\"}"
                             }
                         }
                     ]
@@ -308,7 +310,7 @@
                                 }
                             },
                             {
-                                "type": "puffish_skills:effect",
+                                "type": "puffish_skill_leveling:effect",
                                 "data": {
                                     "effect": "minecraft:glowing",
                                     "duration": 100,
@@ -326,7 +328,7 @@
                                 }
                             },
                             {
-                                "type": "puffish_skills:effect",
+                                "type": "puffish_skill_leveling:effect",
                                 "data": {
                                     "effect": "minecraft:glowing",
                                     "duration": 120,
@@ -344,7 +346,7 @@
                                 }
                             },
                             {
-                                "type": "puffish_skills:effect",
+                                "type": "puffish_skill_leveling:effect",
                                 "data": {
                                     "effect": "minecraft:glowing",
                                     "duration": 140,
@@ -354,7 +356,7 @@
                             {
                                 "type": "puffish_skills:command",
                                 "data": {
-                                    "command": "particle minecraft:witch %player_x% %player_y% %player_z% 0 0 0 1 10"
+                                    "command": "particle minecraft:witch ~ ~ ~ 0 0 0 1 10"
                                 }
                             }
                         ]
@@ -364,6 +366,119 @@
         ],
         "metadata": {
             "icon": "arcane_striker_icon"
+        }
+    },
+    "berserker_stance": {
+        "type": "puffish_skills:default",
+        "category_id": "combat",
+        "title": "Berserker Stance",
+        "description": "Enter a state of bloodlust. Power increases with rank.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:iron_sword"
+            }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 1,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +1 Attack Damage when active.",
+            "2": "Rank 2: +2 Attack Damage when active.",
+            "3": "Rank 3: +3 Attack Damage when active.",
+            "4": "Rank 4: +4 Attack Damage when active.",
+            "5": "Rank 5: +5 Attack Damage and Berserk Focus."
+        },
+        "toggle": true,
+        "keybind_slot": 3,
+        "cooldown": 200,
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:toggle",
+                "data": {
+                    "enable_rewards": [
+                        {
+                            "type": "puffish_skill_leveling:per_level_rewards",
+                            "data": {
+                                "skill_id": "berserker_stance",
+                                "levels": {
+                                    "1": [
+                                        {
+                                            "type": "puffish_skills:attribute",
+                                            "data": {
+                                                "attribute": "minecraft:generic.attack_damage",
+                                                "operation": "addition",
+                                                "value": 1.0
+                                            }
+                                        }
+                                    ],
+                                    "2": [
+                                        {
+                                            "type": "puffish_skills:attribute",
+                                            "data": {
+                                                "attribute": "minecraft:generic.attack_damage",
+                                                "operation": "addition",
+                                                "value": 2.0
+                                            }
+                                        }
+                                    ],
+                                    "3": [
+                                        {
+                                            "type": "puffish_skills:attribute",
+                                            "data": {
+                                                "attribute": "minecraft:generic.attack_damage",
+                                                "operation": "addition",
+                                                "value": 3.0
+                                            }
+                                        }
+                                    ],
+                                    "4": [
+                                        {
+                                            "type": "puffish_skills:attribute",
+                                            "data": {
+                                                "attribute": "minecraft:generic.attack_damage",
+                                                "operation": "addition",
+                                                "value": 4.0
+                                            }
+                                        }
+                                    ],
+                                    "5": [
+                                        {
+                                            "type": "puffish_skills:attribute",
+                                            "data": {
+                                                "attribute": "minecraft:generic.attack_damage",
+                                                "operation": "addition",
+                                                "value": 5.0
+                                            }
+                                        }
+                                    ]
+                                },
+                                "on_disable_levels": {
+                                    "1": [
+                                        {
+                                            "type": "puffish_skills:command",
+                                            "data": {
+                                                "command": "title @s actionbar {\"text\":\"Stance Broken\",\"color\":\"red\"}"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "disable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "playsound minecraft:entity.iron_golem.damage player @s ~ ~ ~ 1 0.5"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "minecraft:netherite_axe"
         }
     }
 }

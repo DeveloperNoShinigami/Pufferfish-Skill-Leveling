@@ -1,11 +1,6 @@
 package net.bluelotuscoding.skillleveling.client;
 
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.bluelotuscoding.skillleveling.SkillLevelingMod;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * CLIENT-SIDE SKILL LEVEL DISPLAY INTEGRATION

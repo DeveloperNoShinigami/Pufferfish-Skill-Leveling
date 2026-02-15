@@ -23,9 +23,9 @@ public class ClientPacketHandler {
 
     public static void handleSyncDescriptions(String definitionId, Map<Integer, String> levelDescriptions,
             Map<Integer, String> levelExtraDescriptions, boolean mergeDescription, int maxLevel, String lootMode,
-            List<SkillPrerequisite> prerequisites) {
+            List<SkillPrerequisite> prerequisites, int toggleLevel) {
         ClientDescriptionStorage.setDescriptions(definitionId, levelDescriptions, levelExtraDescriptions,
-                mergeDescription, maxLevel, lootMode, prerequisites);
+                mergeDescription, maxLevel, lootMode, prerequisites, toggleLevel);
     }
 
     public static void handleCloseScreen() {

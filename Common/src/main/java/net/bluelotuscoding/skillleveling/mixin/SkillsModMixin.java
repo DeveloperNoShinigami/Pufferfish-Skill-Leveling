@@ -46,8 +46,9 @@ public abstract class SkillsModMixin {
             CallbackInfo ci) {
         try {
             // Get category data to check current level
-            var skillsMod = SkillsMod.getInstance();
-            var getPlayerDataMethod = SkillsMod.class.getDeclaredMethod("getPlayerData", ServerPlayerEntity.class);
+            var skillsMod = net.puffish.skillsmod.SkillsMod.getInstance();
+            var getPlayerDataMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("getPlayerData",
+                    ServerPlayerEntity.class);
             getPlayerDataMethod.setAccessible(true);
             var playerData = (PlayerData) getPlayerDataMethod.invoke(skillsMod, player);
 
@@ -55,7 +56,8 @@ public abstract class SkillsModMixin {
                 return; // Let original handle it
             }
 
-            var getCategoryMethod = SkillsMod.class.getDeclaredMethod("getCategory", Identifier.class);
+            var getCategoryMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("getCategory",
+                    Identifier.class);
             getCategoryMethod.setAccessible(true);
             var categoryConfigOpt = (java.util.Optional<?>) getCategoryMethod.invoke(skillsMod, categoryId);
 
@@ -71,10 +73,8 @@ public abstract class SkillsModMixin {
 
             if (categoryData instanceof CategoryDataExtension ext) {
                 int currentLevel = ext.addon$getSkillLevel(skillId);
-
-                // SUBSEQUENT LEVELING LOGIC (Level 1+)
-                // We only need to intervene if the skill is already unlocked (currentLevel > 0)
-                // OR if we need to block a specific loot_mode from being unlocked via the tree.
+                int maxLevel = 1;
+                int pointsPerLevel = 0;
 
                 // 1. LOOT MODE BLOCKING: Block tree unlock for tome_only or imbue_only skills
                 var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
@@ -87,38 +87,22 @@ public abstract class SkillsModMixin {
                 }
 
                 if (leveledConfig != null && !force) {
-                    // 1. LOOT MODE BLOCKING
                     if (leveledConfig.lootMode != null &&
                             (leveledConfig.lootMode.equals("tome_only") || leveledConfig.lootMode.equals("imbue_only")
                                     || leveledConfig.lootMode.equals("both"))) {
                         ci.cancel();
                         return;
                     }
-
-                    // 2. TOGGLE SKILL BLOCKING: Block standard unlock from the skill tree
-                    // Toggle skills are handled EXCLUSIVELY via SkillLevelingManager.toggleSkill
-                    if (leveledConfig.toggle) {
-                        ci.cancel();
-                        return;
-                    }
                 }
 
                 if (currentLevel > 0) {
-                    // Already has levels - this is a subsequent unlock
-                    // Check if we can add more levels
-                    int maxLevel = ext.addon$getMaxLevelForSkill(skillId);
-                    // ... (keep existing subsequent unlock logic)
-
-                    // Get max from PerLevelRewardsReward
+                    // Get max from rewards (Handles ToggleReward recursion)
                     var skillConfigOpt = categoryConfig.skills().getById(skillId);
                     if (skillConfigOpt.isPresent()) {
                         var defOpt = categoryConfig.definitions().getById(skillConfigOpt.get().definitionId());
                         if (defOpt.isPresent()) {
                             for (var reward : defOpt.get().rewards()) {
-                                if (reward
-                                        .instance() instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
-                                    maxLevel = Math.max(maxLevel, plr.getMaxLevel());
-                                }
+                                maxLevel = Math.max(maxLevel, addon$getMaxLevelFromReward(reward.instance()));
                             }
                         }
                     }
@@ -132,21 +116,20 @@ public abstract class SkillsModMixin {
                     int targetLevel = currentLevel + 1;
                     var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
                     if (!manager.checkLevelPrerequisites(player.getUuid(), categoryId, skillId, targetLevel, true)) {
-                        ci.cancel(); // Level prerequisites not met (message sent by manager)
+                        ci.cancel(); // Level prerequisites not met
                         return;
                     }
 
                     // Get points_per_level for deduction
-                    int pointsPerLevel = 0;
                     var skillConfigOpt2 = categoryConfig.skills().getById(skillId);
                     if (skillConfigOpt2.isPresent()) {
                         var defOpt2 = categoryConfig.definitions().getById(skillConfigOpt2.get().definitionId());
                         if (defOpt2.isPresent()) {
-                            // First try to get from PerLevelRewardsReward
+                            // First try to get from rewards (Recursive)
                             for (var reward : defOpt2.get().rewards()) {
-                                if (reward
-                                        .instance() instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
-                                    pointsPerLevel = plr.getPointsPerLevel();
+                                int points = addon$getPointsPerLevelFromReward(reward.instance());
+                                if (points > 0) {
+                                    pointsPerLevel = points;
                                     break;
                                 }
                             }
@@ -165,7 +148,7 @@ public abstract class SkillsModMixin {
                         getPointsLeftMethod.setAccessible(true);
                         pointsLeft = (int) getPointsLeftMethod.invoke(categoryData, categoryConfig);
                     } catch (Exception e) {
-                        // Fallback or log error
+                        // Fallback
                     }
 
                     if (pointsLeft < pointsPerLevel && !force) {
@@ -180,8 +163,7 @@ public abstract class SkillsModMixin {
                     int newLevel = ext.addon$getSkillLevel(skillId);
                     triggerPerLevelRewardsOnly(player, categoryConfig, skillId, newLevel);
 
-                    // Deduct points (handled dynamically by CategoryDataMixin.getSpentPoints)
-                    // We just need to sync the point change to the client
+                    // Deduct points
                     deductPoints(player, categoryConfig, categoryData, 0);
 
                     // Sync to client
@@ -192,11 +174,11 @@ public abstract class SkillsModMixin {
                                 totalLevel, maxLevel);
                     }
 
-                    ci.cancel(); // Don't let original run - we handled it
+                    ci.cancel();
                 }
             }
         } catch (Exception e) {
-            // On error, let original code handle it
+            // On error, let original handle it
         }
     }
 
@@ -277,9 +259,9 @@ public abstract class SkillsModMixin {
                     var defOpt = categoryConfig.definitions().getById(definitionId);
                     if (defOpt.isPresent()) {
                         for (var reward : defOpt.get().rewards()) {
-                            if (reward
+                            maxLevel = Math.max(maxLevel, addon$getMaxLevelFromReward(reward.instance()));
+                            if (perLevelReward == null && reward
                                     .instance() instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
-                                maxLevel = Math.max(maxLevel, plr.getMaxLevel());
                                 perLevelReward = plr;
                             }
                         }
@@ -366,10 +348,7 @@ public abstract class SkillsModMixin {
                     var defOpt = category.definitions().getById(skill.definitionId());
                     if (defOpt.isPresent()) {
                         for (var reward : defOpt.get().rewards()) {
-                            if (reward
-                                    .instance() instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
-                                maxLevel = Math.max(maxLevel, plr.getMaxLevel());
-                            }
+                            maxLevel = Math.max(maxLevel, addon$getMaxLevelFromReward(reward.instance()));
                         }
                     }
                     int totalLevel = mod.getSkillLevelingManager().getTotalSkillLevel(player, category.id(),
@@ -427,11 +406,11 @@ public abstract class SkillsModMixin {
             net.puffish.skillsmod.config.CategoryConfig categoryConfig,
             CategoryData categoryData, int pointsToDeduct) {
         try {
-            var skillsMod = SkillsMod.getInstance();
+            var skillsMod = net.puffish.skillsmod.SkillsMod.getInstance();
 
             // Call syncPoints to update the client with new point totals
             // This uses the original mod's sync mechanism
-            var syncPointsMethod = SkillsMod.class.getDeclaredMethod("syncPoints",
+            var syncPointsMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("syncPoints",
                     ServerPlayerEntity.class,
                     net.puffish.skillsmod.config.CategoryConfig.class,
                     CategoryData.class);
@@ -439,8 +418,42 @@ public abstract class SkillsModMixin {
             syncPointsMethod.invoke(skillsMod, player, categoryConfig, categoryData);
         } catch (Exception e) {
             // If sync fails, the client may be out of sync but will correct on next action
-            var logger = SkillLevelingMod.getInstance().getLogger();
+            var logger = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger();
             logger.error("Failed to sync points: " + e.getMessage());
         }
+    }
+
+    /**
+     * Recursively extract the max skill level from a reward.
+     */
+    private int addon$getMaxLevelFromReward(net.puffish.skillsmod.api.reward.Reward reward) {
+        if (reward instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
+            return plr.getMaxLevel();
+        }
+        if (reward instanceof net.bluelotuscoding.skillleveling.rewards.ToggleReward tr) {
+            int max = 1;
+            for (var r : tr.getEnableRewards()) {
+                max = Math.max(max, addon$getMaxLevelFromReward(r.instance()));
+            }
+            return max;
+        }
+        return 1;
+    }
+
+    /**
+     * Recursively extract the points per level from a reward.
+     */
+    private int addon$getPointsPerLevelFromReward(net.puffish.skillsmod.api.reward.Reward reward) {
+        if (reward instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
+            return plr.getPointsPerLevel();
+        }
+        if (reward instanceof net.bluelotuscoding.skillleveling.rewards.ToggleReward tr) {
+            for (var r : tr.getEnableRewards()) {
+                int points = addon$getPointsPerLevelFromReward(r.instance());
+                if (points > 0)
+                    return points;
+            }
+        }
+        return 0;
     }
 }

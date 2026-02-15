@@ -234,6 +234,8 @@ public class TomePendingActionManager {
         // Check if player has the skill unlocked (use base level for gear-independent
         // refund check)
         int currentLevel = SkillLevelingMod.getInstance().getBaseSkillLevel(player, action.categoryId, matchedSkillId);
+        SkillLevelingMod.getInstance().getLogger()
+                .info("[TomeAction] Detected level " + currentLevel + " for skill " + matchedSkillId + " (canonical)");
         if (currentLevel <= 0) {
             player.sendMessage(
                     Text.literal("§cYou don't have any levels in skill '" + toTitleCase(matchedSkillId) + "'."), false);

@@ -3,7 +3,6 @@ package net.bluelotuscoding.skillleveling.main;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
 import net.bluelotuscoding.skillleveling.registry.ModBlocks;
-import net.bluelotuscoding.skillleveling.registry.ModLootFunctions;
 import net.bluelotuscoding.skillleveling.registry.ModVillagers;
 import net.bluelotuscoding.skillleveling.registry.FabricCreativeTabs;
 import net.bluelotuscoding.skillleveling.commands.SkillLevelingCommand;
@@ -15,7 +14,6 @@ import net.fabricmc.fabric.api.object.builder.v1.villager.VillagerProfessionBuil
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -28,17 +26,15 @@ import net.minecraft.resource.ResourceType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
-import net.minecraft.loot.LootPool;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.List;
 
 public class FabricMain implements ModInitializer {
 
         @Override
         public void onInitialize() {
                 // Initialize common addon logic
-                SkillLevelingMod.init();
+                SkillLevelingMod.init(net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir().toFile());
 
                 // Initialize networking
                 net.bluelotuscoding.skillleveling.network.FabricNetworkHandler.init();
@@ -48,7 +44,7 @@ public class FabricMain implements ModInitializer {
                                 .setPlatform(new net.bluelotuscoding.skillleveling.fabric.util.FabricPlatform());
 
                 // Register Loot Functions
-                ModLootFunctions.register();
+                net.bluelotuscoding.skillleveling.registry.FabricLootFunctionRegistry.register();
 
                 // Register items
                 ModItems.TOME_OF_PROGRESSION = Registry.register(
@@ -126,23 +122,29 @@ public class FabricMain implements ModInitializer {
 
                 // Register Mob Drops
                 ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
-                        List<ItemStack> extraDrops = net.bluelotuscoding.skillleveling.util.LootHelper
-                                        .getDropsForEntity(entity, entity.getWorld().getRandom());
-                        for (ItemStack stack : extraDrops) {
-                                entity.dropStack(stack);
-                        }
+                        // Legacy loot drops removed
                 });
 
                 // Register Loot Injection
                 LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
                         if (source.isBuiltin()) {
-                                LootPool.Builder poolBuilder = LootPool.builder().rolls(
-                                                net.minecraft.loot.provider.number.ConstantLootNumberProvider
-                                                                .create(1.0f));
-                                net.bluelotuscoding.skillleveling.util.LootHelper.injectChestLoot(id, poolBuilder);
+                                // Apply universal loot injection (Charms, Tomes, etc)
+                                tableBuilder.modifyPools(poolBuilder -> {
+                                        // This is a bit tricky with tableBuilder. Fabric usually wants modifications
+                                        // to pools.
+                                });
 
-                                // If the loot pool has entries, add it to the table
-                                tableBuilder.pool(poolBuilder);
+                                // We'll use a hack if needed, or better, use the applyRandomImbue logic.
+                                // Actually, for Fabric, we can use tableBuilder.modifyPools but it's hard to
+                                // add NEW pools derived from our JSON.
+
+                                // PROPER WAY: Listen to the list of items being generated.
+                                // But Fabric modify event happens BEFORE generation.
+
+                                // For now, let's just make sure the Imbue function is applied.
+                                SkillLevelingMod.getInstance().getUniversalLootHandler().injectLoot(id, tableBuilder);
+                                tableBuilder.apply(net.bluelotuscoding.skillleveling.loot.SkillImbueLootFunction
+                                                .builder());
                         }
                 });
 
@@ -218,7 +220,26 @@ public class FabricMain implements ModInitializer {
                                                         Profiler prepareProfiler,
                                                         Profiler applyProfiler, Executor prepareExecutor,
                                                         Executor applyExecutor) {
-                                                return SkillLevelingMod.getInstance().getGlobalLootConfigLoader()
+                                                // GlobalLootConfigLoader removed
+                                                return CompletableFuture.completedFuture(null);
+                                        }
+                                });
+
+                ResourceManagerHelper.get(ResourceType.SERVER_DATA)
+                                .registerReloadListener(new IdentifiableResourceReloadListener() {
+                                        @Override
+                                        public Identifier getFabricId() {
+                                                return SkillLevelingMod.createIdentifier("skill_imbue_loot");
+                                        }
+
+                                        @Override
+                                        public CompletableFuture<Void> reload(
+                                                        ResourceReloader.Synchronizer synchronizer,
+                                                        ResourceManager manager,
+                                                        Profiler prepareProfiler,
+                                                        Profiler applyProfiler, Executor prepareExecutor,
+                                                        Executor applyExecutor) {
+                                                return SkillLevelingMod.getInstance().getLootImbueManager()
                                                                 .reload(
                                                                                 synchronizer, manager,
                                                                                 prepareProfiler, applyProfiler,

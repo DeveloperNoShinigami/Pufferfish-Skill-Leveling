@@ -78,5 +78,8 @@
   "key.skillleveling.mastery_6": "Mastery Slot 6",
   "key.skillleveling.mastery_7": "Mastery Slot 7",
   "key.skillleveling.mastery_8": "Mastery Slot 8",
-  "key.skillleveling.mastery_9": "Mastery Slot 9"
+  "key.skillleveling.mastery_9": "Mastery Slot 9",
+  "skillleveling.toggle.requires_level": "§cToggle requires at least Level 1!",
+  "skillleveling.toggle.level_too_low": "§cToggle requires Level %d!",
+  "skillleveling.toggle.failure_header": "§8[§6Skill Leveling§8] §cToggle Prerequisites not met:"
 }

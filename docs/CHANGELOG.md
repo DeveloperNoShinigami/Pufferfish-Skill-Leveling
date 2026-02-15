@@ -1,7 +1,44 @@
 # Changelog
 
-All notable changes to the **Pufferfish Skill Leveling** mod will be documented in this file.
+A record of all notable changes and improvements to the Pufferfish Skill Leveling mod.
+
+## [2026-02-14] - Command Standards & Hybrid Skill Reliability
+
+### Command Syntax Overhaul
+- **Minecraft 1.20.1 Standards**: Audited and updated all template datapacks to use standard Minecraft command syntax.
+    - **Selectors**: Replaced custom placeholders (`%player%`, `${player}`) with the standard `@s` selector.
+    - **Relative Coordinates**: Replaced custom location placeholders (`%player_x/y/z%`) with standard `~ ~ ~` coordinates.
+    - **JSON Text Components**: Migrated all `title`, `tellraw`, and `actionbar` commands to proper JSON text formatting (e.g., `{"text":"Hello","color":"red"}`).
+- **Documentation Alignment**: Updated `DATAPACK_GUIDE.md` and `FEATURES.md` to reflect these standards.
+
+### Hybrid Skill Reliability
+- **Nested Reward Fix**: Resolved a logic conflict where leveling up a disabled hybrid skill would "burn" its reward activation state. Commands and effects now correctly wait until the skill is toggled **ON** to fire for the first time.
+- **Login Synchronization**: Ensured that nested rewards correctly respect the toggle state on player join, preventing activation spam or missed triggers on login.
+- **Level Triggering**: Improved `triggerLevelRewards` and `deactivateLevelRewards` to be toggle-aware for nested reward instances.
+
+### Toggle System Enhancements
+- **Level 0 Toggle Support**: Basic toggle skills (those with `max_skill_level: 1`) can now be toggled immediately at Level 0.
+- **Tooltip Refinement**: Added "READY" status to tooltips for Level 0 toggle skills, providing clearer feedback for learners.
+- **Recursive Extraction**: Fixed a bug where hybrid skills wouldn't level past 1 by implementing recursive extraction of `maxLevel` and `pointsPerLevel` from nested rewards.
+
+### Documentation Updates
+- **Datapack Guide v3**: Comprehensive updates to command examples and technical field descriptions.
+- **Feature Reference**: Updated to include new toggle mechanics and command standards.
  
+- **Configuration Standardization**: Removed all remaining legacy aliases and fields (`required_skill`, `enchantment_levels`, `imbuement_levels`, `max_levels`) to strictly standardize the configuration schema.
+    - **Logic Cleanup**: Removed redundant parsing and fallback paths in Mixins and Reward classes.
+    - **Datapack Update**: Standardized all example definitions in the `template_pack` and `Datapack_Example`.
+    - **Documentation**: Updated `FEATURES.md` and `DATAPACK_GUIDE.md` to reflect the modern standard exclusively.
+ 
+- **Universal Loot & Imbuement Systems**: Implemented a comprehensive, cross-platform loot injection system for both chests and entities.
+    - **Loot Injection**: Added `UniversalLootHandler` to handle persistent injection for mob drops (`LivingDropsEvent`) and Global Loot Modifiers for chests.
+    - **Skill Imbuement**: Added dynamic skill imbuing for equipment found in loot, supporting dimension overrides, distance scaling, and exclusion groups.
+    - **Vanilla Gear Support**: Ensured that vanilla items (Bows, Armor) dropped by mobs are correctly identified and imbued using any applicable configuration rules.
+- **Documentation Overhaul**: Created extensive guides for the new loot systems:
+    - `Universal_Loot_System.md`: Configuration schema and injection logic.
+    - `Skill_Imbuement_System.md`: Filtering, scaling, and category-specific imbuing rules.
+    - Updated `DATAPACK_GUIDE.md`, `FEATURES.md`, and `GETTING_STARTED.md` with integrated links and paths.
+
 - **Curio Integration Finalization**: Fully integrated Skill Charms with the Curios API, allowing for dedicated charm slots and instant bonus activation. Fixed `CuriosScanner` API usage to correctly iterate and detect charms.
 - **Reward Trigger System Restoration**: Reverted the reward trigger system to the stable `stateChanged` logic. Removed the flawed `persistentActivatedLevels` persistence layer in `DataManager` that was causing "backwards" reward behavior (only firing on join). Rewards now fire immediately upon leveling up in a live session.
 - **Level 1 Reward Fix**: Resolved a critical regression where Level 1 rewards were skipped. Implemented manual reward triggering for the 0->1 transition in `CategoryDataMixin` to bypass Pufferfish's premature firing order.
@@ -103,7 +140,7 @@ All notable changes to the **Pufferfish Skill Leveling** mod will be documented 
 
 ### Added
 - **Hidden Skills Feature**: Skills can now be set as `"hidden": true`. They remain completely invisible (icons, connections, and tooltips) in the UI until their prerequisites are met.
-- **Enhanced Prerequisite System**: Added `required_skill` support for cross-category skill requirements and specialized loot-mode bypasses.
+- **Enhanced Prerequisite System**: Added `prerequisite_skills` support for cross-category skill requirements and specialized loot-mode bypasses.
 - **Datapack-driven Villager Trades**: Replaced hardcoded villager trades with a flexible JSON system (`puffish_skill_leveling/trades/`).
 - **Skill Master Reputation Config**: Added `puffish_skill_leveling/reputation.json` to configure trading prices, experience gains, and upgrade chances.
 - **Village House Integration**: Added custom Jigsaw-based houses for Skill Master villagers in Plains, Desert, Savanna, Snowy, and Taiga villages.

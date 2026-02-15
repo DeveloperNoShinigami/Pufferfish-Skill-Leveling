@@ -18,6 +18,7 @@ public class SyncSkillDescriptionsPacket {
     private final int maxLevel;
     private final String lootMode;
     private final java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prerequisites;
+    private final int toggleLevel;
 
     public SyncSkillDescriptionsPacket(String definitionId,
             Map<Integer, String> levelDescriptions,
@@ -25,7 +26,8 @@ public class SyncSkillDescriptionsPacket {
             boolean mergeDescription,
             int maxLevel,
             String lootMode,
-            java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prerequisites) {
+            java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prerequisites,
+            int toggleLevel) {
         this.definitionId = definitionId;
         this.levelDescriptions = levelDescriptions != null ? levelDescriptions : new HashMap<>();
         this.levelExtraDescriptions = levelExtraDescriptions != null ? levelExtraDescriptions : new HashMap<>();
@@ -33,6 +35,7 @@ public class SyncSkillDescriptionsPacket {
         this.maxLevel = maxLevel;
         this.lootMode = lootMode;
         this.prerequisites = prerequisites;
+        this.toggleLevel = toggleLevel;
     }
 
     public static SyncSkillDescriptionsPacket decode(PacketByteBuf buf) {
@@ -70,8 +73,10 @@ public class SyncSkillDescriptionsPacket {
                     pLevel, pCatId));
         }
 
+        int toggleLevel = buf.readVarInt();
+
         return new SyncSkillDescriptionsPacket(definitionId, levelDescs, extraDescs, mergeDescription, maxLevel,
-                lootMode, prereqs);
+                lootMode, prereqs, toggleLevel);
     }
 
     public void encode(PacketByteBuf buf) {
@@ -108,6 +113,7 @@ public class SyncSkillDescriptionsPacket {
         } else {
             buf.writeVarInt(0);
         }
+        buf.writeVarInt(toggleLevel);
     }
 
     /**
@@ -117,7 +123,7 @@ public class SyncSkillDescriptionsPacket {
     public void handleClient() {
         net.bluelotuscoding.skillleveling.client.ClientPacketHandler.handleSyncDescriptions(definitionId,
                 levelDescriptions,
-                levelExtraDescriptions, mergeDescription, maxLevel, lootMode, prerequisites);
+                levelExtraDescriptions, mergeDescription, maxLevel, lootMode, prerequisites, toggleLevel);
     }
 
     // Getters
@@ -139,5 +145,9 @@ public class SyncSkillDescriptionsPacket {
 
     public int getMaxLevel() {
         return maxLevel;
+    }
+
+    public int getToggleLevel() {
+        return toggleLevel;
     }
 }

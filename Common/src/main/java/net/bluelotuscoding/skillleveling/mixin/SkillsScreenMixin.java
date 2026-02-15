@@ -93,7 +93,7 @@ public abstract class SkillsScreenMixin {
     @org.spongepowered.asm.mixin.injection.Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true, remap = true)
     private void addon$onMouseClicked(double mouseX, double mouseY, int button,
             org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
-        if (button == 0 && optActiveCategoryData.isPresent() && addon$hoveredSkillConfig != null) {
+        if (button == 1 && optActiveCategoryData.isPresent() && addon$hoveredSkillConfig != null) {
             var activeCategoryData = optActiveCategoryData.get();
             var categoryId = activeCategoryData.getConfig().id();
             var skill = addon$hoveredSkillConfig;

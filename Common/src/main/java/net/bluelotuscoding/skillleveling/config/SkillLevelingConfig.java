@@ -23,6 +23,7 @@ public class SkillLevelingConfig {
                                                            // unlocked
     public static boolean requireUnlockForCurioImbuing = false; // Whether Curio bonuses require the base skill to be
                                                                 // unlocked
+    public static boolean debugLogging = false; // Whether to enable massive debug logging
 
     public static void load(File configDir) {
         configFile = new File(configDir, "puffish_skill_leveling.json");
@@ -43,6 +44,9 @@ public class SkillLevelingConfig {
             if (json.has("require_unlock_for_curio_imbuing")) {
                 requireUnlockForCurioImbuing = json.get("require_unlock_for_curio_imbuing").getAsBoolean();
             }
+            if (json.has("debug_logging")) {
+                debugLogging = json.get("debug_logging").getAsBoolean();
+            }
         } catch (IOException e) {
             SkillLevelingMod.getInstance().getLogger().error("Failed to load config: " + e.getMessage());
         }
@@ -52,10 +56,20 @@ public class SkillLevelingConfig {
         if (configFile == null)
             return;
 
+        try {
+            File parent = configFile.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+        } catch (Exception e) {
+            // Log error but try to continue
+        }
+
         JsonObject json = new JsonObject();
         json.addProperty("disable_skill_master_house", disableSkillMasterHouse);
         json.addProperty("require_unlock_for_imbuing", requireUnlockForImbuing);
         json.addProperty("require_unlock_for_curio_imbuing", requireUnlockForCurioImbuing);
+        json.addProperty("debug_logging", debugLogging);
 
         try (FileWriter writer = new FileWriter(configFile)) {
             GSON.toJson(json, writer);

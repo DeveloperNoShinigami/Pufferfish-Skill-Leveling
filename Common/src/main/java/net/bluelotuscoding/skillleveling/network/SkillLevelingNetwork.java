@@ -288,9 +288,11 @@ public class SkillLevelingNetwork {
         var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(definitionId);
         String lootMode = config != null ? config.lootMode : null;
 
+        int toggleLevel = manager.findMinimumToggleLevel(definitionId);
+
         // Use correct packet class name: SyncSkillDescriptionsPacket
         var packet = new SyncSkillDescriptionsPacket(definitionId, descriptions, extraDescriptions,
-                mergeDescription, maxLevel, lootMode, new java.util.ArrayList<>());
+                mergeDescription, maxLevel, lootMode, new java.util.ArrayList<>(), toggleLevel);
 
         networkHandler.sendToPlayer(packet, player);
 

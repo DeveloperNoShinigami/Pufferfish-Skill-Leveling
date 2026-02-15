@@ -19,7 +19,7 @@ import net.puffish.skillsmod.util.LegacyUtils;
 import java.util.ArrayList;
 
 public class EffectReward implements Reward {
-    public static final Identifier ID = new Identifier("puffish_skills", "effect");
+    public static final Identifier ID = net.bluelotuscoding.skillleveling.SkillLevelingMod.createIdentifier("effect");
 
     private final Identifier effectId;
     private final int amplifier;

@@ -2,5 +2,9 @@
     [
         "vitality",
         "armor_plating"
+    ],
+    [
+        "berserker_rage",
+        "berserker_stance"
     ]
 ]

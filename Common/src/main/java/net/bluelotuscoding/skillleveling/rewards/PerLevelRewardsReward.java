@@ -15,6 +15,7 @@ import net.puffish.skillsmod.config.skill.SkillRewardConfig;
 import net.puffish.skillsmod.util.DisposeContext;
 import net.puffish.skillsmod.util.LegacyUtils;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class PerLevelRewardsReward implements Reward {
     public static final Identifier ID = SkillLevelingMod.createIdentifier("per_level_rewards");
 
     private final Map<Integer, List<SkillRewardConfig>> levelRewards;
+    private final Map<Integer, List<SkillRewardConfig>> onDisableLevelRewards;
     private final String skillId;
     private final int maxLevel;
     private final int pointsPerLevel;
@@ -43,6 +45,7 @@ public class PerLevelRewardsReward implements Reward {
     private final Map<UUID, java.util.Set<Integer>> activatedLevels = new HashMap<>();
     private final Map<UUID, java.util.Set<Integer>> lastActiveLevels = new HashMap<>();
     private Identifier cachedCategoryId = null;
+    private boolean nested = false;
 
     public static class SkillPrerequisite {
         private final String skillId;
@@ -73,11 +76,13 @@ public class PerLevelRewardsReward implements Reward {
         }
     }
 
-    private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards, String skillId, int maxLevel,
+    private PerLevelRewardsReward(Map<Integer, List<SkillRewardConfig>> levelRewards,
+            Map<Integer, List<SkillRewardConfig>> onDisableLevelRewards, String skillId, int maxLevel,
             int pointsPerLevel, Map<Integer, String> levelDescriptions, Map<Integer, String> levelExtraDescriptions,
             boolean mergeDescription, List<SkillPrerequisite> requiredSkills, boolean allowPartialRewards,
             double scalingFactor) {
         this.levelRewards = levelRewards;
+        this.onDisableLevelRewards = onDisableLevelRewards != null ? onDisableLevelRewards : new HashMap<>();
         this.skillId = skillId;
         this.maxLevel = maxLevel;
         this.pointsPerLevel = pointsPerLevel;
@@ -95,6 +100,14 @@ public class PerLevelRewardsReward implements Reward {
 
     public int getMaxLevel() {
         return maxLevel;
+    }
+
+    public Map<Integer, List<SkillRewardConfig>> getLevelRewards() {
+        return levelRewards;
+    }
+
+    public Map<Integer, List<SkillRewardConfig>> getOnDisableLevelRewards() {
+        return onDisableLevelRewards;
     }
 
     public int getPointsPerLevel() {
@@ -130,6 +143,22 @@ public class PerLevelRewardsReward implements Reward {
             return baseCost;
         }
         return (int) Math.ceil(baseCost * Math.pow(scalingFactor, currentLevel - 1));
+    }
+
+    public void setNested(boolean nested) {
+        this.nested = nested;
+    }
+
+    public boolean isNested() {
+        return nested;
+    }
+
+    public void setCachedCategoryId(Identifier cachedCategoryId) {
+        this.cachedCategoryId = cachedCategoryId;
+    }
+
+    public Identifier getCachedCategoryId() {
+        return cachedCategoryId;
     }
 
     public String getDescriptionForLevel(int level) {
@@ -180,11 +209,6 @@ public class PerLevelRewardsReward implements Reward {
         return merged.toString();
     }
 
-    /**
-     * Initialize the internal trackers with the current player level.
-     * PROTECTS against multiple calls in the same session to prevent join-time
-     * re-triggering.
-     */
     public void initializeCount(UUID playerId, int level) {
         counts.put(playerId, level);
         if (level > 0) {
@@ -201,27 +225,18 @@ public class PerLevelRewardsReward implements Reward {
         }
     }
 
-    public void setCachedCategoryId(Identifier categoryId) {
-        this.cachedCategoryId = categoryId;
-    }
-
     public boolean arePrerequisitesMet(UUID playerId) {
         return arePrerequisitesMet(playerId, null);
     }
 
-    /**
-     * Check if all skill prerequisites are met for a given player
-     */
     private boolean arePrerequisitesMet(UUID playerId, Identifier categoryId) {
         var mod = SkillLevelingMod.getInstance();
         var manager = mod.getSkillLevelingManager();
 
         if (manager == null) {
-            return true; // Fail safe
+            return true;
         }
-        // LOOT MODE BYPASS: If the skill is lootable, bypass tree prerequisites.
-        // This ensures tomes and imbuing bonuses always provide rewards, as loot
-        // modes represent acquisition methods that ignore the standard tree gating.
+
         if (skillId != null) {
             var leveledCfg = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
             if (leveledCfg != null && leveledCfg.isLootable) {
@@ -233,9 +248,6 @@ public class PerLevelRewardsReward implements Reward {
             return true;
         }
 
-        // For prerequisite checking, we need to know which category this skill belongs
-        // to
-        // If it wasn't passed, we'll attempt to find it
         if (categoryId == null) {
             if (cachedCategoryId != null) {
                 categoryId = cachedCategoryId;
@@ -253,54 +265,51 @@ public class PerLevelRewardsReward implements Reward {
         if (categoryId == null) {
             mod.getLogger().warn("Could not determine category for skill " + (skillId != null ? skillId : "unknown")
                     + " during prerequisite checking");
-            return false; // Fail safe
+            return false;
         }
 
-        boolean result = manager.checkSkillPrerequisites(playerId, categoryId, skillId != null ? skillId : "unknown");
-
-        // Log if prerequisites are NOT met - helps identify hidden skill delay issues
-        if (!result) {
-            mod.getLogger().debug("[REWARD] Prerequisites NOT met for skill " + skillId + " in category " + categoryId);
-        }
-
-        return result;
+        return manager.checkSkillPrerequisites(playerId, categoryId, skillId != null ? skillId : "unknown");
     }
 
     @Override
     public void update(RewardUpdateContext context) {
         var player = context.getPlayer();
         var uuid = player.getUuid();
+
         int newCount = context.getCount();
 
-        var mod = SkillLevelingMod.getInstance();
+        var mod = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance();
         var manager = mod.getSkillLevelingManager();
 
-        // Discover or use cached categoryId
+        // FALLBACK: If cachedCategoryId is null, try to find this reward instance in
+        // the manager's registry.
         if (cachedCategoryId == null && manager != null) {
-            for (var categoryEntry : manager.getPerLevelRewardsRewards().entrySet()) {
-                if (categoryEntry.getValue().containsValue(this)) {
-                    cachedCategoryId = categoryEntry.getKey();
-                    break;
+            for (var entry : manager.getPerLevelRewardsRewards().entrySet()) {
+                for (var skillEntry : entry.getValue().entrySet()) {
+                    if (skillEntry.getValue() == this) {
+                        this.cachedCategoryId = entry.getKey();
+                        break;
+                    }
                 }
+                if (cachedCategoryId != null)
+                    break;
             }
         }
 
-        // Check root prerequisites
+        if (manager != null && cachedCategoryId != null && skillId != null) {
+            if (context.getCount() == 0) {
+                newCount = 0;
+            } else {
+                newCount = manager.getTotalSkillLevel((ServerPlayerEntity) player, cachedCategoryId, skillId);
+            }
+        }
+
         boolean prerequisitesMet = arePrerequisitesMet(uuid, cachedCategoryId);
-
-        // Effective count logic: Handle prerequisite loss correctly.
         int effectiveNewCount = (prerequisitesMet || allowPartialRewards) ? newCount : 0;
-        int effectiveOldCount = counts.getOrDefault(uuid, 0);
-
         counts.put(uuid, effectiveNewCount);
 
         var previouslyActive = lastActiveLevels.getOrDefault(uuid, java.util.Collections.emptySet());
         var currentlyActive = new java.util.HashSet<Integer>();
-
-        SkillLevelingMod.getInstance().getLogger()
-                .debug("[REWARD DEBUG] Updating skill " + skillId + " for " + player.getName().getString()
-                        + ": old=" + effectiveOldCount + ", new=" + effectiveNewCount + ", action="
-                        + context.isAction());
 
         for (var entry : levelRewards.entrySet()) {
             int level = entry.getKey();
@@ -317,29 +326,49 @@ public class PerLevelRewardsReward implements Reward {
                 currentlyActive.add(level);
 
             boolean stateChanged = (isNowActive != wasPreviouslyActive);
+            boolean isAction = context.isAction() && stateChanged;
 
-            // ACTION LOGIC: Only trigger rewards if something actually changed.
-            boolean action = context.isAction() && stateChanged;
+            if (!isNowActive && wasPreviouslyActive && stateChanged) {
+                var disableList = onDisableLevelRewards.get(level);
+                if (disableList != null) {
+                    for (var reward : disableList) {
+                        try {
+                            reward.instance().update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(
+                                    player, 1, true));
+                        } catch (Exception e) {
+                            mod.getLogger()
+                                    .error("Failed to fire disable reward for level " + level + ": " + e.getMessage());
+                        }
+                    }
+                }
+            }
 
             for (var reward : entry.getValue()) {
                 try {
-                    // Attributes re-apply whenever they are active OR if they changed state.
-                    boolean isAttribute = reward.type().toString().equals("puffish_skills:attribute");
-                    int count = isNowActive ? 1 : 0;
+                    boolean isAttribute = reward.type().toString().contains("attribute");
+                    int innerCount = isNowActive ? 1 : 0;
                     boolean effectiveAction;
 
-                    // SkillLevelingMod.getInstance().getLogger()
-                    // .info("[PerLevelRewards] Processing reward type: " + reward.type() +
-                    // ", Level: " + level +
-                    // ", isNowActive: " + isNowActive +
-                    // ", stateChanged: " + stateChanged +
-                    // ", action: " + action);
-
                     if (isAttribute) {
-                        effectiveAction = (isNowActive && (stateChanged || context.isAction()));
+                        if (!isNowActive) {
+                            boolean hasData = manager != null && cachedCategoryId != null
+                                    && manager.hasSkillData(player, cachedCategoryId, skillId);
+
+                            if (!hasData && manager != null) {
+                                var activated = activatedLevels.get(uuid);
+                                if (activated != null && activated.contains(level)) {
+                                    effectiveAction = true;
+                                } else {
+                                    effectiveAction = false;
+                                }
+                            } else {
+                                effectiveAction = false;
+                            }
+                        } else {
+                            effectiveAction = true;
+                        }
                     } else {
-                        // STANDARD LOGIC
-                        if (isNowActive && stateChanged && action) {
+                        if (isNowActive && stateChanged && isAction) {
                             var activated = activatedLevels.computeIfAbsent(uuid, k -> new java.util.HashSet<>());
                             if (!activated.contains(level)) {
                                 activated.add(level);
@@ -358,15 +387,8 @@ public class PerLevelRewardsReward implements Reward {
                         }
                     }
 
-                    if (effectiveAction) {
-                        // SkillLevelingMod.getInstance().getLogger()
-                        // .info("[PerLevelRewards] Sending update to reward instance with count=" +
-                        // count
-                        // + ", action=true");
-                    }
-
                     reward.instance().update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player,
-                            count, effectiveAction));
+                            innerCount, effectiveAction));
                 } catch (Exception e) {
                     SkillLevelingMod.getInstance().getLogger()
                             .error("Failed to apply reward for level " + level + ": " + e.getMessage());
@@ -375,13 +397,13 @@ public class PerLevelRewardsReward implements Reward {
         }
 
         lastActiveLevels.put(uuid, currentlyActive);
-
     }
 
     @Override
     public void dispose(RewardDisposeContext context) {
         var disposeContext = new DisposeContext(context.getServer());
         levelRewards.values().forEach(list -> list.forEach(cfg -> cfg.dispose(disposeContext)));
+        onDisableLevelRewards.values().forEach(list -> list.forEach(cfg -> cfg.dispose(disposeContext)));
         counts.clear();
         activatedLevels.clear();
         lastActiveLevels.clear();
@@ -400,38 +422,8 @@ public class PerLevelRewardsReward implements Reward {
         var problems = new ArrayList<Problem>();
 
         var optSkillId = rootObject.getString("skill_id").ifFailure(problems::add).getSuccess();
-        var optLevelsMap = rootObject.getObject("levels")
-                .andThen(obj -> obj.getAsMap((key, element) -> element.getAsArray()
-                        .andThen(arr -> arr.getAsList((i, e) -> SkillRewardConfig.parse(e, context))
-                                .mapFailure(Problem::combine)))
-                        .mapFailure(map -> Problem.combine(map.values())))
-                .ifFailure(problems::add).getSuccess();
-
-        var levelsPath = rootObject.getPath().getObject("levels");
-        var levelRewards = new HashMap<Integer, List<SkillRewardConfig>>();
-        optLevelsMap.ifPresent(map -> {
-            for (var entry : map.entrySet()) {
-                try {
-                    var level = Integer.parseInt(entry.getKey());
-                    var list = new ArrayList<SkillRewardConfig>();
-                    rootObject.getObject("levels").andThen(obj -> obj.getArray(entry.getKey())).ifSuccess(arr -> {
-                        arr.getAsList((i, elem) -> {
-                            var rewardContext = wrapRewardContext(context, elem);
-                            var res = SkillRewardConfig.parse(elem, rewardContext);
-                            res.ifSuccess(cfg -> {
-                                injectStableUUID(cfg.instance(), elem);
-                                list.add(cfg);
-                            });
-                            res.ifFailure(problems::add);
-                            return res;
-                        });
-                    });
-                    levelRewards.put(level, list);
-                } catch (NumberFormatException e) {
-                    problems.add(levelsPath.getObject(entry.getKey()).createProblem("Expected integer level"));
-                }
-            }
-        });
+        var levelRewards = parseLevelRewards(rootObject, "levels", context, problems);
+        var onDisableLevelRewards = parseLevelRewards(rootObject, "on_disable_levels", context, problems);
 
         int definedMaxLevel = levelRewards.keySet().stream().max(Integer::compareTo).orElse(0);
         var optMaxLevelTmp = rootObject.get("max_skill_level").getSuccess()
@@ -450,7 +442,6 @@ public class PerLevelRewardsReward implements Reward {
 
         var requiredSkills = new ArrayList<SkillPrerequisite>();
         rootObject.get("prerequisite_skills").getSuccess()
-                .or(() -> rootObject.get("required_skill").getSuccess())
                 .flatMap(e -> e.getAsArray().ifFailure(problems::add).getSuccess()).ifPresent(arr -> {
                     arr.getAsList((index, element) -> {
                         var objRes = element.getAsObject().ifFailure(problems::add);
@@ -476,15 +467,6 @@ public class PerLevelRewardsReward implements Reward {
                             requiredSkills.add(p);
                     }));
                 });
-
-        // Parse required_skill_for_level (level-gating prerequisites)
-        // This ensures the reward itself is aware of the gating
-        rootObject.get("required_skill_for_level").ifSuccess(e -> {
-            e.getAsObject().ifSuccess(obj -> {
-                // We mark the field as used to avoid "unused field" warnings.
-                // In the future, we can store these for per-level activation checks.
-            });
-        });
 
         var allowPartialRewards = rootObject.get("allow_partial_rewards").getSuccess()
                 .flatMap(e -> e.getAsBoolean().ifFailure(problems::add).getSuccess()).orElse(false);
@@ -514,14 +496,50 @@ public class PerLevelRewardsReward implements Reward {
                     }
                 }));
 
+        // Explicitly consume fields injected via Mixin or for legacy support
+        // to satisfy LegacyUtils.wrapNoUnused validation.
+        rootObject.get("required_skill_for_level").getSuccess();
+
         if (problems.isEmpty()) {
-            return Result.success(new PerLevelRewardsReward(levelRewards, optSkillId.orElse(null),
-                    optMaxLevelTmp.orElse(Math.max(1, definedMaxLevel)),
-                    optPointsPerLevelTmp.orElse(0), levelDescriptions, levelExtraDescriptions, mergeDescription,
-                    requiredSkills, allowPartialRewards, scalingFactor));
+            return Result
+                    .success(new PerLevelRewardsReward(levelRewards, onDisableLevelRewards, optSkillId.orElse(null),
+                            optMaxLevelTmp.orElse(Math.max(1, definedMaxLevel)),
+                            optPointsPerLevelTmp.orElse(0), levelDescriptions, levelExtraDescriptions, mergeDescription,
+                            requiredSkills, allowPartialRewards, scalingFactor));
         } else {
             return Result.failure(Problem.combine(problems));
         }
+    }
+
+    private static Map<Integer, List<SkillRewardConfig>> parseLevelRewards(JsonObject rootObject, String key,
+            ConfigContext context, List<Problem> problems) {
+        var rewards = new HashMap<Integer, List<SkillRewardConfig>>();
+        var path = rootObject.getPath().getObject(key);
+
+        rootObject.getObject(key).ifSuccess(obj -> {
+            obj.stream().forEach(entry -> {
+                try {
+                    int level = Integer.parseInt(entry.getKey());
+                    var list = new ArrayList<SkillRewardConfig>();
+
+                    entry.getValue().getAsArray().ifSuccess(arr -> {
+                        arr.getAsList((i, elem) -> {
+                            var rewardContext = wrapRewardContext(context, elem);
+                            return SkillRewardConfig.parse(elem, rewardContext)
+                                    .ifSuccess(cfg -> injectStableUUID(cfg.instance(), elem));
+                        })
+                                .mapFailure(f -> Problem.combine((java.util.List<Problem>) f))
+                                .ifSuccess(list::addAll)
+                                .ifFailure(problems::add);
+                    }).ifFailure(problems::add);
+
+                    rewards.put(level, list);
+                } catch (NumberFormatException e) {
+                    problems.add(path.getObject(entry.getKey()).createProblem("Expected integer level"));
+                }
+            });
+        });
+        return rewards;
     }
 
     private static ConfigContext wrapRewardContext(ConfigContext context, JsonElement data) {

@@ -33,22 +33,18 @@ public abstract class SkillDefinitionConfigMixin {
         // Pufferfish.
         rootObject.get("type").getSuccess();
         rootObject.get("max_skill_level").getSuccess();
-        rootObject.get("max_levels").getSuccess();
         rootObject.get("points_per_level").getSuccess();
         rootObject.get("merge_description").getSuccess();
         rootObject.get("descriptions").getSuccess();
         rootObject.get("extra_descriptions").getSuccess();
         rootObject.get("loot_mode").getSuccess();
         rootObject.get("category_id").getSuccess();
-        rootObject.get("enchantment_levels").getSuccess();
         rootObject.get("enchantment_cost").getSuccess();
-        rootObject.get("imbuement_levels").getSuccess();
         rootObject.get("imbuement_cost").getSuccess();
         rootObject.get("slot_opening_cost").getSuccess();
         rootObject.get("cleansing_cost").getSuccess();
         rootObject.get("hidden").getSuccess();
         rootObject.get("prerequisite_skills").getSuccess();
-        rootObject.get("required_skill").getSuccess();
         rootObject.get("required_skill_for_level").getSuccess();
         rootObject.get("toggle").getSuccess();
         rootObject.get("keybind_slot").getSuccess();
@@ -77,9 +73,6 @@ public abstract class SkillDefinitionConfigMixin {
                             if (rawRoot.has("max_skill_level") && !data.has("max_skill_level")) {
                                 data.add("max_skill_level", rawRoot.get("max_skill_level"));
                             }
-                            if (rawRoot.has("max_levels") && !data.has("max_levels")) {
-                                data.add("max_levels", rawRoot.get("max_levels"));
-                            }
                             if (rawRoot.has("points_per_level") && !data.has("points_per_level")) {
                                 data.add("points_per_level", rawRoot.get("points_per_level"));
                             }
@@ -96,9 +89,6 @@ public abstract class SkillDefinitionConfigMixin {
                             // Inject prerequisites into reward data
                             if (rawRoot.has("prerequisite_skills") && !data.has("prerequisite_skills")) {
                                 data.add("prerequisite_skills", rawRoot.get("prerequisite_skills"));
-                            }
-                            if (rawRoot.has("required_skill") && !data.has("required_skill")) {
-                                data.add("required_skill", rawRoot.get("required_skill"));
                             }
                             if (rawRoot.has("required_skill_for_level") && !data.has("required_skill_for_level")) {
                                 data.add("required_skill_for_level", rawRoot.get("required_skill_for_level"));
@@ -141,11 +131,9 @@ public abstract class SkillDefinitionConfigMixin {
 
                 List<LeveledConfigStorage.RequiredSkillEntry> requiredSkillsList = new ArrayList<>();
 
-                // Parse both "prerequisite_skills" (Pufferfish-like) and "required_skill"
-                // (Addon-like)
+                // Parse "prerequisite_skills" (Pufferfish-like standard)
                 var prereqsResult = rootObject.getArray("prerequisite_skills")
-                        .getSuccess()
-                        .or(() -> rootObject.getArray("required_skill").getSuccess());
+                        .getSuccess();
 
                 prereqsResult.ifPresent(arr -> {
                     var jsonArr = arr.getJson();
@@ -243,11 +231,9 @@ public abstract class SkillDefinitionConfigMixin {
                         .flatMap(e -> e.getAsString().getSuccess())
                         .orElse(null);
 
-                // Parse enchantment cost options (supports enchantment_cost and legacy
-                // enchantment_levels)
+                // Parse enchantment cost options
                 LeveledConfigStorage.EnchantmentCostConfig enchantmentCost = LeveledConfigStorage.EnchantmentCostConfig.FREE;
-                var costResult = rootObject.get("enchantment_cost").getSuccess()
-                        .or(() -> rootObject.get("enchantment_levels").getSuccess());
+                var costResult = rootObject.get("enchantment_cost").getSuccess();
 
                 if (costResult.isPresent()) {
                     var costElem = costResult.get().getJson();
@@ -293,8 +279,7 @@ public abstract class SkillDefinitionConfigMixin {
 
                 // Parse imbuement cost options
                 LeveledConfigStorage.EnchantmentCostConfig imbuementCost = null;
-                var imbueResult = rootObject.get("imbuement_cost").getSuccess()
-                        .or(() -> rootObject.get("imbuement_levels").getSuccess());
+                var imbueResult = rootObject.get("imbuement_cost").getSuccess();
 
                 if (imbueResult.isPresent()) {
                     imbuementCost = parseEnchantmentCost(imbueResult.get().getJson());
@@ -316,14 +301,11 @@ public abstract class SkillDefinitionConfigMixin {
 
                 // 1. Determine if we should register this skill in the addon storage
                 boolean hasAddonFeatures = rootObject.get("max_skill_level").getSuccess().isPresent() ||
-                        rootObject.get("max_levels").getSuccess().isPresent() ||
                         rootObject.get("points_per_level").getSuccess().isPresent() ||
                         rootObject.get("hidden").getSuccess().isPresent() ||
                         rootObject.get("loot_mode").getSuccess().isPresent() ||
                         rootObject.get("category_id").getSuccess().isPresent() ||
-                        rootObject.get("enchantment_levels").getSuccess().isPresent() ||
                         rootObject.get("enchantment_cost").getSuccess().isPresent() ||
-                        rootObject.get("imbuement_levels").getSuccess().isPresent() ||
                         rootObject.get("imbuement_cost").getSuccess().isPresent() ||
                         rootObject.get("slot_opening_cost").getSuccess().isPresent() ||
                         rootObject.get("cleansing_cost").getSuccess().isPresent() ||
@@ -335,7 +317,6 @@ public abstract class SkillDefinitionConfigMixin {
 
                 if (hasAddonFeatures) {
                     int finalMaxLevels = rootObject.get("max_skill_level").getSuccess()
-                            .or(() -> rootObject.get("max_levels").getSuccess())
                             .flatMap(e -> e.getAsInt().getSuccess())
                             .orElse(1); // Default to 1 for standard skills
 

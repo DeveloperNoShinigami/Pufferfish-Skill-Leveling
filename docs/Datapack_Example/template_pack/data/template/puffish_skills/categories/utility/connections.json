@@ -2,5 +2,9 @@
     [
         "speed",
         "luck"
+    ],
+    [
+        "luck",
+        "focus"
     ]
 ]

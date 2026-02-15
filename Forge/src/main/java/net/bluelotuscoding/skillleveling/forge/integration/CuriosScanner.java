@@ -14,6 +14,7 @@ public class CuriosScanner implements EquipmentScanner {
     @Override
     public List<ItemStack> getExtraEquipment(LivingEntity entity) {
         List<ItemStack> stacks = new ArrayList<>();
+        // Use getCuriosInventory if available or suppress warning
         CuriosApi.getCuriosHelper().getCuriosHandler(entity).ifPresent(handler -> {
             handler.getCurios().entrySet().forEach(entry -> {
                 ICurioStacksHandler stacksHandler = entry.getValue();

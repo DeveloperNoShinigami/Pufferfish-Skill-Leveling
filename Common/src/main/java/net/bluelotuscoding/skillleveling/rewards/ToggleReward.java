@@ -47,6 +47,14 @@ public class ToggleReward implements Reward {
         this.cachedSkillId = skillId;
     }
 
+    public List<SkillRewardConfig> getEnableRewards() {
+        return enableRewards;
+    }
+
+    public List<SkillRewardConfig> getDisableRewards() {
+        return disableRewards;
+    }
+
     @Override
     public void update(RewardUpdateContext context) {
         var player = context.getPlayer();
@@ -91,6 +99,12 @@ public class ToggleReward implements Reward {
             for (var reward : disableRewards) {
                 // Force action=true when state changes to disabled
                 reward.instance().update(new RewardUpdateContextImpl(player, 1, true));
+            }
+        } else {
+            // Steady state: Keep them disabled to allow child rewards (like PerLevel) to
+            // reset their internal triggers.
+            for (var reward : disableRewards) {
+                reward.instance().update(new RewardUpdateContextImpl(player, 0, false));
             }
         }
     }

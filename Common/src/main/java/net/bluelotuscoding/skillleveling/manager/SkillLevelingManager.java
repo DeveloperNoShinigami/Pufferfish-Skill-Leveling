@@ -160,9 +160,11 @@ public class SkillLevelingManager {
                     }
                 }
 
-                // SkillLevelingMod.getInstance().getLogger().info("[syncSkillLevelToClient]
-                // Sending sync for " + skillId
-                // + " (Def: " + definitionId + ") Toggle: " + toggle);
+                /*
+                 * SkillLevelingMod.getInstance().getLogger().
+                 * info("[syncSkillLevelToClient] Sending sync for " + skillId
+                 * + " (Def: " + definitionId + ") Toggle: " + toggle);
+                 */
 
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillLevelPacket(categoryId, skillId,
@@ -194,6 +196,15 @@ public class SkillLevelingManager {
             java.util.Map<Integer, String> levelDescriptions,
             java.util.Map<Integer, String> levelExtraDescriptions,
             boolean mergeDescription, int maxLevel) {
+        int toggleLevel = findMinimumToggleLevel(definitionId);
+        syncDescriptionsToClient(player, definitionId, levelDescriptions, levelExtraDescriptions, mergeDescription,
+                maxLevel, toggleLevel);
+    }
+
+    public void syncDescriptionsToClient(ServerPlayerEntity player, String definitionId,
+            java.util.Map<Integer, String> levelDescriptions,
+            java.util.Map<Integer, String> levelExtraDescriptions,
+            boolean mergeDescription, int maxLevel, int toggleLevel) {
         String lootMode = "";
         var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(definitionId);
         if (config != null && config.lootMode != null) {
@@ -203,18 +214,22 @@ public class SkillLevelingManager {
         try {
             var networkHandler = SkillLevelingMod.getInstance().getNetworkHandler();
             if (networkHandler != null) {
-                try {
-                    SkillLevelingMod.getInstance().getLogger()
-                            .debug("[DEBUG] Preparing to send descriptions to " + player.getName().getString() + " -> "
-                                    + definitionId + " (levels=" + levelDescriptions.size() + ", extras="
-                                    + levelExtraDescriptions.size() + ")");
-                } catch (Exception ignored) {
-                }
-                try {
-                    SkillLevelingMod.getInstance().getLogger().debug("[ADDON] Sending SyncSkillDescriptionsPacket to "
-                            + player.getName().getString() + " -> " + definitionId);
-                } catch (Exception ignored) {
-                }
+                /*
+                 * try {
+                 * SkillLevelingMod.getInstance().getLogger()
+                 * .debug("[DEBUG] Preparing to send descriptions to " +
+                 * player.getName().getString() + " -> "
+                 * + definitionId + " (levels=" + levelDescriptions.size() + ", extras="
+                 * + levelExtraDescriptions.size() + ")");
+                 * } catch (Exception ignored) {
+                 * }
+                 * try {
+                 * SkillLevelingMod.getInstance().getLogger().
+                 * debug("[ADDON] Sending SyncSkillDescriptionsPacket to "
+                 * + player.getName().getString() + " -> " + definitionId);
+                 * } catch (Exception ignored) {
+                 * }
+                 */
                 java.util.List<net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward.SkillPrerequisite> prereqsList = new java.util.ArrayList<>();
                 if (config != null && !config.requiredSkills.isEmpty()) {
                     for (var req : config.requiredSkills) {
@@ -232,7 +247,7 @@ public class SkillLevelingManager {
                 networkHandler.sendToPlayer(
                         new net.bluelotuscoding.skillleveling.network.SyncSkillDescriptionsPacket(
                                 definitionId, levelDescriptions, levelExtraDescriptions, mergeDescription, maxLevel,
-                                lootMode, prereqsList),
+                                lootMode, prereqsList, toggleLevel),
                         player);
             } else {
                 if (!networkHandlerNullWarned) {
@@ -259,14 +274,17 @@ public class SkillLevelingManager {
      * immediately.
      */
     public void syncAllSkillsToPlayer(ServerPlayerEntity player) {
-        int syncedSkills = 0;
-        try {
-            SkillLevelingMod.getInstance().getLogger()
-                    .debug("[ADDON] Starting full skill sync for player " + player.getName().getString()
-                            + " (registered skills="
-                            + perLevelRewardsRewards.values().stream().mapToInt(m -> m.size()).sum() + ")");
-        } catch (Exception ignored) {
-        }
+        /*
+         * try {
+         * SkillLevelingMod.getInstance().getLogger()
+         * .debug("[ADDON] Starting full skill sync for player " +
+         * player.getName().getString()
+         * + " (registered skills="
+         * + perLevelRewardsRewards.values().stream().mapToInt(m -> m.size()).sum() +
+         * ")");
+         * } catch (Exception ignored) {
+         * }
+         */
 
         // Phase 1: Ensure clients have all per-level descriptions first (tooltips rely
         // on these)
@@ -280,54 +298,39 @@ public class SkillLevelingManager {
                     var extraDescs = plr.getLevelExtraDescriptions();
                     boolean merge = plr.isMergeDescription();
 
-                    // Always attempt to send descriptions on join so clients receive mapping
-                    // (some clients relied on this previously; sending empty maps is safe)
                     Map<Integer, String> levelDescsSafe = levelDescs != null ? levelDescs
                             : java.util.Collections.<Integer, String>emptyMap();
                     Map<Integer, String> extraDescsSafe = extraDescs != null ? extraDescs
                             : java.util.Collections.<Integer, String>emptyMap();
-                    // Try to resolve definitionId via reflection, fallback to skillId
+
                     String definitionId = skillId;
                     try {
-                        try {
-                            var skillsMod = net.puffish.skillsmod.SkillsMod.getInstance();
-                            var getCategoryMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod(
-                                    "getCategory",
-                                    Identifier.class);
-                            getCategoryMethod.setAccessible(true);
-                            var categoryConfigOpt = (java.util.Optional<?>) getCategoryMethod.invoke(skillsMod,
-                                    categoryId);
+                        var skillsMod = net.puffish.skillsmod.SkillsMod.getInstance();
+                        var getCategoryMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("getCategory",
+                                Identifier.class);
+                        getCategoryMethod.setAccessible(true);
+                        var categoryConfigOpt = (java.util.Optional<?>) getCategoryMethod.invoke(skillsMod, categoryId);
 
-                            if (categoryConfigOpt.isPresent()) {
-                                var categoryConfig = categoryConfigOpt.get();
-                                var skillsMethod = categoryConfig.getClass().getMethod("skills");
-                                var skillsConfig = skillsMethod.invoke(categoryConfig);
+                        if (categoryConfigOpt.isPresent()) {
+                            var categoryConfig = categoryConfigOpt.get();
+                            var skillsMethod = categoryConfig.getClass().getMethod("skills");
+                            var skillsConfig = skillsMethod.invoke(categoryConfig);
+                            var getByIdMethod = skillsConfig.getClass().getMethod("getById", String.class);
+                            var skillConfigOpt = (java.util.Optional<?>) getByIdMethod.invoke(skillsConfig, skillId);
 
-                                var getByIdMethod = skillsConfig.getClass().getMethod("getById", String.class);
-                                var skillConfigOpt = (java.util.Optional<?>) getByIdMethod.invoke(skillsConfig,
-                                        skillId);
-
-                                if (skillConfigOpt.isPresent()) {
-                                    var skillConfig = skillConfigOpt.get();
-                                    definitionId = (String) skillConfig.getClass().getMethod("definitionId")
-                                            .invoke(skillConfig);
-                                }
+                            if (skillConfigOpt.isPresent()) {
+                                var skillConfig = skillConfigOpt.get();
+                                definitionId = (String) skillConfig.getClass().getMethod("definitionId")
+                                        .invoke(skillConfig);
                             }
-                        } catch (Exception ignored) {
                         }
                     } catch (Exception ignored) {
                     }
 
-                    try {
-                        SkillLevelingMod.getInstance().getLogger()
-                                .debug("[ADDON] Preparing descriptions for " + categoryId + "/" + skillId + " -> def="
-                                        + definitionId + " (levels=" + levelDescsSafe.size() + ", extras="
-                                        + extraDescsSafe.size() + ")");
-                    } catch (Exception ignored) {
-                    }
-                    // Send descriptions to client for both definitionId and skillId fallback
+                    int toggleLevel = findMinimumToggleLevel(definitionId);
+
                     syncDescriptionsToClient(player, definitionId, levelDescsSafe, extraDescsSafe, merge,
-                            plr.getMaxLevel());
+                            plr.getMaxLevel(), toggleLevel);
                     if (!definitionId.equals(skillId)) {
                         syncDescriptionsToClient(player, skillId, levelDescsSafe, extraDescsSafe, merge,
                                 plr.getMaxLevel());
@@ -347,10 +350,8 @@ public class SkillLevelingManager {
                 try {
                     int baseLevel = getBaseSkillLevel(player, categoryId, skillId);
                     int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
-
                     int maxLevel = getMaxLevel(categoryId, skillId);
 
-                    // Resolve definitionId for the level packet too
                     String definitionId = skillId;
                     try {
                         var method = skill.getClass().getMethod("definitionId");
@@ -358,9 +359,7 @@ public class SkillLevelingManager {
                     } catch (Exception ignored) {
                     }
 
-                    syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel,
-                            definitionId);
-                    syncedSkills++;
+                    syncSkillLevelToClient(player, categoryId, skillId, baseLevel, totalLevel, maxLevel, definitionId);
                 } catch (Exception e) {
                     SkillLevelingMod.getInstance().getLogger()
                             .error("Failed to sync skill " + skillId + ": " + e.getMessage());
@@ -368,11 +367,14 @@ public class SkillLevelingManager {
             }
         }
 
-        if (syncedSkills > 0) {
-            SkillLevelingMod.getInstance().getLogger()
-                    .debug("Synchronized " + syncedSkills + " skill levels and descriptions for player "
-                            + player.getName().getString());
-        }
+        /*
+         * if (syncedSkills > 0) {
+         * SkillLevelingMod.getInstance().getLogger()
+         * .debug("Synchronized " + syncedSkills +
+         * " skill levels and descriptions for player "
+         * + player.getName().getString());
+         * }
+         */
     }
 
     public void onServerStarting(MinecraftServer server) {
@@ -546,8 +548,22 @@ public class SkillLevelingManager {
         var rewards = perLevelRewardsRewards.get(categoryId);
         if (rewards != null) {
             for (var entry : rewards.entrySet()) {
-                int totalLevel = getTotalSkillLevel(player, categoryId, entry.getKey());
-                entry.getValue().initializeCount(player.getUuid(), totalLevel);
+                String skillId = entry.getKey();
+                PerLevelRewardsReward plr = entry.getValue();
+                int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
+
+                int initLevel = totalLevel;
+                // NESTED TOGGLE FIX: If the reward is nested, and the toggle is inactive,
+                // we initialize with count 0 to prevent the activation state from being
+                // "burned".
+                if (plr.isNested()) {
+                    boolean isActive = dataManager.isToggleActive(player, categoryId, skillId);
+                    if (!isActive) {
+                        initLevel = 0;
+                    }
+                }
+
+                plr.initializeCount(player.getUuid(), initLevel);
             }
         }
     }
@@ -694,9 +710,11 @@ public class SkillLevelingManager {
             // Check if skill is allowed via loot (both or imbue_only)
             var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
             if (config == null || (!"imbue_only".equals(config.lootMode) && !"both".equals(config.lootMode))) {
-                SkillLevelingMod.getInstance().getLogger()
-                        .debug("[SkillLeveling] Gear bonus skipped for " + skillId
-                                + ": base level 0 and unlock required");
+                /*
+                 * SkillLevelingMod.getInstance().getLogger()
+                 * .debug("[SkillLeveling] Gear bonus skipped for " + skillId
+                 * + ": base level 0 and unlock required");
+                 */
                 gearBonus = 0;
             }
         }
@@ -704,8 +722,11 @@ public class SkillLevelingManager {
         // Gating for Curios
         if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.requireUnlockForCurioImbuing && baseLevel == 0
                 && curioBonus > 0) {
-            SkillLevelingMod.getInstance().getLogger().debug(
-                    "[SkillLeveling] Curio bonus skipped for " + skillId + ": base level 0 and curio unlock required");
+            /*
+             * SkillLevelingMod.getInstance().getLogger().debug(
+             * "[SkillLeveling] Curio bonus skipped for " + skillId +
+             * ": base level 0 and curio unlock required");
+             */
             curioBonus = 0;
         }
 
@@ -720,16 +741,32 @@ public class SkillLevelingManager {
      */
     public int getBaseSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         // NORMALIZE: Ensure we use the canonical namespaced ID from the tree
-        skillId = getCanonicalSkillId(categoryId, skillId);
+        String canonicalId = getCanonicalSkillId(categoryId, skillId);
 
         // Try to get from Mixin first as it's the most "live" during a session
         var ext = getCategoryDataExtension(player, categoryId);
         if (ext != null) {
-            return ext.addon$getSkillLevel(skillId);
+            int level = ext.addon$getSkillLevel(canonicalId);
+            if (level > 0)
+                return level;
+            // Also try fuzzy if level is 0
+            if (!canonicalId.equals(skillId)) {
+                level = ext.addon$getSkillLevel(skillId);
+                if (level > 0)
+                    return level;
+            }
         }
 
         // FALLBACK: always check persisted storage
-        return dataManager.getSkillLevel(player, categoryId, skillId);
+        int level = dataManager.getSkillLevel(player, categoryId, canonicalId);
+        if (level > 0)
+            return level;
+
+        // Final fallback: try the raw ID in case it wasn't canonicalized in NBT
+        if (!canonicalId.equals(skillId)) {
+            level = dataManager.getSkillLevel(player, categoryId, skillId);
+        }
+        return level;
     }
 
     /**
@@ -871,11 +908,14 @@ public class SkillLevelingManager {
         for (var entry : perLevelRewardsRewards.entrySet()) {
             for (String registeredId : entry.getValue().keySet()) {
                 if (isFuzzySkillMatch(registeredId, skillId)) {
+                    SkillLevelingMod.getInstance().getLogger()
+                            .debug("[Canonical] Resolved " + skillId + " -> " + registeredId + " (cross-category)");
                     return registeredId;
                 }
             }
         }
 
+        SkillLevelingMod.getInstance().getLogger().debug("[Canonical] No match for " + skillId + ", returning as-is");
         return skillId; // Return as-is if no canonical match found
     }
 
@@ -884,7 +924,53 @@ public class SkillLevelingManager {
      */
     public int getMaxLevel(Identifier categoryId, String skillId) {
         var reward = getPerLevelRewardsReward(categoryId, skillId);
-        return reward.map(PerLevelRewardsReward::getMaxLevel).orElse(1);
+        if (reward.isPresent()) {
+            return reward.get().getMaxLevel();
+        }
+
+        // Fallback to LeveledConfigStorage which covers skills without
+        // per_level_rewards
+        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+        if (config != null) {
+            return config.maxLevels;
+        }
+
+        return 1;
+    }
+
+    /**
+     * Scans the reward tree to find the minimum level that introduces a toggle
+     * component.
+     * Used for the "Ready at Level X" tooltip.
+     */
+    public int findMinimumToggleLevel(String definitionId) {
+        var plrOpt = getPerLevelRewardsRewardByDefinitionId(definitionId);
+        if (plrOpt.isEmpty()) {
+            // Check if it's a global toggle at root
+            var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(definitionId);
+            if (config != null && config.toggle) {
+                // If it's a root ToggleReward, the toggle is available at level 1 (or 0 for
+                // loot).
+                // However, we return 0 if it's already "global" so the mixin shows standard
+                // "READY".
+                return 0;
+            }
+            return 0;
+        }
+
+        PerLevelRewardsReward plr = plrOpt.get();
+        // Hybrid skills: Check each level for a ToggleReward
+        for (int level = 1; level <= plr.getMaxLevel(); level++) {
+            var rewards = plr.getLevelRewards().get(level);
+            if (rewards != null) {
+                for (var r : rewards) {
+                    if (r.instance() instanceof ToggleReward) {
+                        return level;
+                    }
+                }
+            }
+        }
+        return 0;
     }
 
     /**
@@ -1004,15 +1090,13 @@ public class SkillLevelingManager {
                 return;
             }
 
-            int categoryCount = 0;
-            int skillCount = 0;
+            // Discovery loop...
 
             for (var category : net.puffish.skillsmod.api.SkillsAPI.streamCategories().toList()) {
                 try {
                     Identifier categoryId = category.getId();
                     SkillLevelingMod.getInstance().getLogger()
                             .debug("[CONFIG LOAD] Processing category: " + categoryId);
-                    categoryCount++;
 
                     var getCategoryMethod = net.puffish.skillsmod.SkillsMod.class.getDeclaredMethod("getCategory",
                             Identifier.class);
@@ -1049,30 +1133,15 @@ public class SkillLevelingManager {
                                                 .getMethod("rewards").invoke(definition);
 
                                         for (Object rewardObj : rewards) {
-                                            var rewardInstance = rewardObj.getClass().getMethod("instance")
-                                                    .invoke(rewardObj);
-                                            if (rewardInstance instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
-                                                plr.setCachedCategoryId(categoryId);
-                                                registerPerLevelRewardsReward(categoryId, skillId, plr);
-                                                skillCount++;
+                                            try {
+                                                var rewardInstance = rewardObj.getClass().getMethod("instance")
+                                                        .invoke(rewardObj);
+                                                if (rewardInstance instanceof net.puffish.skillsmod.api.reward.Reward r) {
+                                                    registerRewardRecursive(categoryId, skillId, r);
+                                                }
+                                            } catch (Exception e) {
                                                 SkillLevelingMod.getInstance().getLogger()
-                                                        .debug("[CONFIG LOAD] Registered PLR for: " + categoryId + "/"
-                                                                + skillId + " (maxLevel=" + plr.getMaxLevel() + ")");
-
-                                                // simple
-                                            }
-
-                                            if (rewardInstance instanceof net.bluelotuscoding.skillleveling.rewards.ToggleReward tr) {
-                                                // CRITICAL FIX: Inject identity so ToggleReward can check toggle state
-                                                tr.setCachedCategoryId(categoryId);
-                                                tr.setCachedSkillId(skillId);
-
-                                                toggleRewards.computeIfAbsent(categoryId, k -> new HashMap<>())
-                                                        .put(skillId, tr);
-                                                SkillLevelingMod.getInstance().getLogger()
-                                                        .debug("[CONFIG LOAD] Registered ToggleReward for: "
-                                                                + categoryId
-                                                                + "/" + skillId);
+                                                        .error("Failed to process reward: " + e.getMessage());
                                             }
                                         }
                                     }
@@ -1090,8 +1159,11 @@ public class SkillLevelingManager {
                 }
             }
 
-            SkillLevelingMod.getInstance().getLogger().debug("[CONFIG LOAD] Discovery complete: " + categoryCount
-                    + " categories, " + skillCount + " skills registered");
+            /*
+             * SkillLevelingMod.getInstance().getLogger().
+             * debug("[CONFIG LOAD] Discovery complete: " + categoryCount
+             * + " categories, " + skillCount + " skills registered");
+             */
             configurationsLoaded = true;
             // Sync to all online players now that configs are loaded
             if (this.server != null) {
@@ -1168,9 +1240,13 @@ public class SkillLevelingManager {
         int newBaseLevel = currentBaseLevel + 1;
         int maxLevel = getMaxLevel(categoryId, skillId);
 
-        SkillLevelingMod.getInstance().getLogger().debug("[TOME DEBUG] Advancing " + skillId + ": currentBase="
-                + currentBaseLevel + ", newBase=" + newBaseLevel + ", max=" + maxLevel + ", bypass="
-                + bypassPrerequisites);
+        /*
+         * SkillLevelingMod.getInstance().getLogger().debug("[TOME DEBUG] Advancing " +
+         * skillId + ": currentBase="
+         * + currentBaseLevel + ", newBase=" + newBaseLevel + ", max=" + maxLevel +
+         * ", bypass="
+         * + bypassPrerequisites);
+         */
 
         if (newBaseLevel > maxLevel) {
             SkillLevelingMod.getInstance().getLogger()
@@ -1272,9 +1348,16 @@ public class SkillLevelingManager {
                 .debug("[setSkillLevel] Current base level: " + currentBaseLevel + ", target level: " + level);
 
         // If we're setting a level higher than current, check requirements
+        /*
+         * if (level > currentBaseLevel && !canAdvanceToLevel(player, categoryId,
+         * skillId, level, bypassPoints)) {
+         * SkillLevelingMod.getInstance().getLogger()
+         * .warn("[setSkillLevel] FAILED: canAdvanceToLevel returned false for " +
+         * skillId);
+         * return false;
+         * }
+         */
         if (level > currentBaseLevel && !canAdvanceToLevel(player, categoryId, skillId, level, bypassPoints)) {
-            SkillLevelingMod.getInstance().getLogger()
-                    .warn("[setSkillLevel] FAILED: canAdvanceToLevel returned false for " + skillId);
             return false;
         }
 
@@ -1344,6 +1427,14 @@ public class SkillLevelingManager {
                 String skillId = skillEntry.getKey();
                 PerLevelRewardsReward plr = skillEntry.getValue();
 
+                // SKIP NESTED: If this reward is nested inside another (like ToggleReward),
+                // its parent is responsible for updating it. Updating it here would cause
+                // a double-update conflict, potentially firing deactivation rewards
+                // prematurely.
+                if (plr.isNested()) {
+                    continue;
+                }
+
                 int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
 
                 // AUTO-DISABLE LOGIC: If Loot/Learned toggle skill has no level, force disable
@@ -1358,16 +1449,15 @@ public class SkillLevelingManager {
                     }
                 }
 
-                boolean isActive = dataManager.isToggleActive(player, categoryId, skillId);
-                // Standard toggles (no lootMode) use level 1 even if baseLevel is 0, as long as
-                // toggled ON.
-                // Loot/Learned toggles use their actual totalLevel (which is > 0 if active).
-                int rewardCount = isActive ? Math.max(1, totalLevel) : 0;
+                // HYBRID REWARD LOGIC:
+                // PerLevelRewardsReward instances (root rewards) ALWAYS receive the player's
+                // actual level.
+                // This keeps passive levels active even if someone "toggles off" a hybrid
+                // skill.
+                // The nested ToggleReward child (if any) will handle its own activation state.
+                int rewardCount = totalLevel;
 
                 // Trigger update with the calculated reward count.
-                // action=false: ToggleReward/PerLevelRewardsReward internally force action=true
-                // on genuine state changes. Passing false here prevents commands from re-firing
-                // during routine sync/refresh cycles.
                 plr.update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, rewardCount, false));
             }
         }
@@ -1473,14 +1563,32 @@ public class SkillLevelingManager {
             }
         }
 
-        SkillLevelingMod.getInstance().getLogger()
-                .debug("[canAdvanceToLevel] SUCCESS: All checks passed for " + skillId + " at level " + level);
+        /*
+         * SkillLevelingMod.getInstance().getLogger()
+         * .debug("[canAdvanceToLevel] SUCCESS: All checks passed for " + skillId +
+         * " at level " + level);
+         */
         return true;
     }
 
     private void triggerLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        getPerLevelRewardsReward(categoryId, skillId).ifPresent(reward -> reward
-                .update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, level, true)));
+        getPerLevelRewardsReward(categoryId, skillId).ifPresent(reward -> {
+            int updateCount = level;
+            boolean isAction = true;
+
+            // NESTED TOGGLE FIX: If the reward is nested inside a ToggleReward,
+            // the toggle state MUST be active for the rewards to trigger actions.
+            if (reward.isNested()) {
+                boolean isActive = dataManager.isToggleActive(player, categoryId, skillId);
+                if (!isActive) {
+                    updateCount = 0; // Force count to 0 to prevent level activation
+                    isAction = false;
+                }
+            }
+
+            reward.update(
+                    new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, updateCount, isAction));
+        });
     }
 
     /**
@@ -1719,16 +1827,8 @@ public class SkillLevelingManager {
                         + (enabling ? "ENABLE" : "DISABLE"));
 
         if (enabling) {
-            // Prerequisites check
-            if (!checkSkillPrerequisites(player, categoryId, skillId)) {
-                return false;
-            }
-
-            // Loot/Learned logic: Must have at least level 1 to enable
-            boolean isLootLearned = config.lootMode != null && !config.lootMode.isEmpty();
-            if (isLootLearned && totalLevel <= 0) {
-                SkillLevelingMod.getInstance().getLogger()
-                        .info("[toggleSkill] REJECTED: Loot/Learned skill " + skillId + " is not learned/equipped.");
+            // Centralized prerequisites and level check
+            if (!checkTogglePrerequisites(player, categoryId, skillId, true)) {
                 return false;
             }
 
@@ -1840,12 +1940,28 @@ public class SkillLevelingManager {
     }
 
     private void deactivateLevelRewards(ServerPlayerEntity player, Identifier categoryId, String skillId, int level) {
-        getPerLevelRewardsReward(categoryId, skillId).ifPresent(reward -> reward
-                .update(new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, level - 1, true)));
+        getPerLevelRewardsReward(categoryId, skillId).ifPresent(reward -> {
+            int updateCount = level - 1;
+            boolean isAction = true;
+
+            // NESTED TOGGLE FIX: If the reward is nested, and the toggle is inactive,
+            // we update with count 0 to maintain consistency with the inactive state.
+            if (reward.isNested()) {
+                boolean isActive = dataManager.isToggleActive(player, categoryId, skillId);
+                if (!isActive) {
+                    updateCount = 0;
+                    isAction = false;
+                }
+            }
+
+            reward.update(
+                    new net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl(player, updateCount, isAction));
+        });
     }
 
     /**
-     * Enhanced prerequisite checking for skills with required_skill dependencies
+     * Enhanced prerequisite checking for skills with prerequisite_skills
+     * dependencies
      * 
      * @param player     The player to check
      * @param categoryId The category of the skill
@@ -1857,7 +1973,8 @@ public class SkillLevelingManager {
     }
 
     /**
-     * Enhanced prerequisite checking for skills with required_skill dependencies
+     * Enhanced prerequisite checking for skills with prerequisite_skills
+     * dependencies
      * 
      * @param playerId   The player UUID to check
      * @param categoryId The category of the skill
@@ -1994,6 +2111,94 @@ public class SkillLevelingManager {
                     player.sendMessage(net.minecraft.text.Text.literal(msg.toString().trim()), false);
                     sendCloseScreenPacket(player);
                 }
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * TOGGLE GUARD: Checks all prerequisites before allowing a skill to be toggled.
+     * Provides detailed feedback and closes screen on failure.
+     */
+    public boolean checkTogglePrerequisites(ServerPlayerEntity player, Identifier categoryId, String skillId,
+            boolean notify) {
+        String definitionId = getDefinitionId(categoryId, skillId);
+        var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(definitionId);
+        if (config == null) {
+            config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
+        }
+
+        List<String> missingPrereqs = new ArrayList<>();
+        UUID playerId = player.getUuid();
+
+        // 1. Root skill prerequisites
+        if (config != null && config.requiredSkills != null) {
+            for (var reqEntry : config.requiredSkills) {
+                Identifier reqCategoryId = categoryId;
+                if (reqEntry.categoryId != null && !reqEntry.categoryId.isEmpty()) {
+                    reqCategoryId = findCategoryByPath(reqEntry.categoryId);
+                    if (reqCategoryId == null)
+                        reqCategoryId = categoryId;
+                }
+
+                int currentLevel = getSkillLevelByUUID(playerId, reqCategoryId, reqEntry.skillId);
+                if (currentLevel < reqEntry.minLevel) {
+                    String categoryDisplay = reqEntry.categoryId != null ? " (" + reqEntry.categoryId + ")" : "";
+                    missingPrereqs.add("§c✗ " + reqEntry.skillId + categoryDisplay + " Lv" + reqEntry.minLevel
+                            + " §7[Current: " + currentLevel + "]");
+                }
+            }
+        }
+
+        // 2. Minimum level check
+        int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
+        int currentMaxLevel = getMaxLevel(categoryId, skillId);
+
+        // NEW LOGIC FOR BASIC TOGGLES:
+        // If max_skill_level is 1, we should allow toggling at level 0.
+        if (currentMaxLevel == 1) {
+            // Basic toggle skill - always allowed at any level (including 0)
+        } else if (totalLevel < 1) {
+            // Hybrid skill (levels > 1) - requires at least level 1
+            missingPrereqs.add("§c✗ " + skillId + " Lv1 §7[Current: " + totalLevel + "]");
+        }
+
+        // 3. Minimum toggle level requirement from rewards
+        int minToggleLevel = -1;
+        var perLevelMap = perLevelRewardsRewards.get(categoryId);
+        if (perLevelMap != null) {
+            var perLevelReward = perLevelMap.get(skillId);
+            if (perLevelReward != null) {
+                for (var entry : perLevelReward.getLevelRewards().entrySet()) {
+                    for (var rewardCfg : entry.getValue()) {
+                        if (rewardCfg.type().toString().equals("puffish_skill_leveling:toggle")) {
+                            if (minToggleLevel == -1 || entry.getKey() < minToggleLevel) {
+                                minToggleLevel = entry.getKey();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (minToggleLevel != -1 && totalLevel < minToggleLevel) {
+            missingPrereqs.add("§c✗ " + skillId + " Lv" + minToggleLevel + " §7[Current: " + totalLevel + "]");
+        }
+
+        if (!missingPrereqs.isEmpty()) {
+            if (notify) {
+                net.minecraft.text.MutableText msg = net.minecraft.text.Text
+                        .translatable("skillleveling.toggle.failure_header").append("\n");
+                for (int i = 0; i < missingPrereqs.size(); i++) {
+                    msg.append(net.minecraft.text.Text.literal("§7 - " + missingPrereqs.get(i)));
+                    if (i < missingPrereqs.size() - 1) {
+                        msg.append(net.minecraft.text.Text.literal("\n"));
+                    }
+                }
+                player.sendMessage(msg, false);
+                sendCloseScreenPacket(player);
             }
             return false;
         }
@@ -2144,6 +2349,56 @@ public class SkillLevelingManager {
             SkillLevelingMod.getInstance().getLogger()
                     .error("Tome of Progression failed: " + e.getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Recursively register rewards to ensure nested instances are initialized.
+     */
+    private void registerRewardRecursive(Identifier categoryId, String skillId,
+            net.puffish.skillsmod.api.reward.Reward reward) {
+        if (reward instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward plr) {
+            if (plr.getSkillId() != null && !plr.getSkillId().equals(skillId)) {
+                // Skip if it explicitly belongs to another skill (uncommon for nested)
+            } else {
+                plr.setCachedCategoryId(categoryId);
+                // Only register as the primary PLR if none exists yet for this skill
+                if (!perLevelRewardsRewards.getOrDefault(categoryId, Map.of()).containsKey(skillId)) {
+                    registerPerLevelRewardsReward(categoryId, skillId, plr);
+                }
+
+                // Drill down
+                for (var levelList : plr.getLevelRewards().values()) {
+                    for (var cfg : levelList) {
+                        registerRewardRecursive(categoryId, skillId, cfg.instance());
+                    }
+                }
+                for (var disableList : plr.getOnDisableLevelRewards().values()) {
+                    for (var cfg : disableList) {
+                        registerRewardRecursive(categoryId, skillId, cfg.instance());
+                    }
+                }
+            }
+        } else if (reward instanceof net.bluelotuscoding.skillleveling.rewards.ToggleReward tr) {
+            tr.setCachedCategoryId(categoryId);
+            tr.setCachedSkillId(skillId);
+            if (!toggleRewards.getOrDefault(categoryId, Map.of()).containsKey(skillId)) {
+                toggleRewards.computeIfAbsent(categoryId, k -> new HashMap<>()).put(skillId, tr);
+            }
+
+            // Drill down
+            for (var cfg : tr.getEnableRewards()) {
+                if (cfg.instance() instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward nestedPlr) {
+                    nestedPlr.setNested(true);
+                }
+                registerRewardRecursive(categoryId, skillId, cfg.instance());
+            }
+            for (var cfg : tr.getDisableRewards()) {
+                if (cfg.instance() instanceof net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward nestedPlr) {
+                    nestedPlr.setNested(true);
+                }
+                registerRewardRecursive(categoryId, skillId, cfg.instance());
+            }
         }
     }
 

@@ -2,6 +2,7 @@ package net.bluelotuscoding.skillleveling.mixin;
 
 import net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage;
 import net.bluelotuscoding.skillleveling.client.ClientSkillLevelStorage;
+import net.bluelotuscoding.skillleveling.client.MasteryKeybinds;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.puffish.skillsmod.client.config.skill.ClientSkillDefinitionConfig;
@@ -71,20 +72,34 @@ public class ClientSkillDefinitionConfigMixin {
             if (isToggle) {
                 int cooldown = ClientSkillLevelStorage.getRemainingCooldownSecondsByDefinitionId(defId);
                 boolean isToggledOn = ClientSkillLevelStorage.isToggledOnByDefinitionId(defId);
+                int toggleLevel = ClientDescriptionStorage.getToggleLevel(defId);
+
+                // Dynamically determine the shortcut message (Keybind vs Right-Click)
+                String toggleShortcut = "Right-Click";
+                int slot = ClientSkillLevelStorage.getKeybindSlotByDefinitionId(defId);
+                if (slot > 0 && slot <= MasteryKeybinds.KEYBINDINGS.size()) {
+                    var key = MasteryKeybinds.KEYBINDINGS.get(slot - 1);
+                    if (!key.isUnbound()) {
+                        toggleShortcut = "Press " + key.getBoundKeyLocalizedText().getString() + " or Right-Click";
+                    }
+                }
 
                 if (isToggledOn) {
                     result.append(Text.literal("§a§lENABLED"));
-                    result.append(Text.literal(" §7(Click to Disable)\n"));
-                } else {
-                    // Check if toggle is disabled due to missing requirements (level <= 0 for
-                    // loot/learned)
+                    result.append(Text.literal(" §7(" + toggleShortcut + " to Disable)\n"));
+                } else if (currentLevel < toggleLevel && toggleLevel > 1) {
+                    // Specific toggle_level requirement > 1
+                    result.append(Text.literal("§e§lREADY AT LEVEL " + toggleLevel));
+                    result.append(Text.literal(" §7(Increase level to enable)\n"));
+                } else if (currentLevel <= 0) {
+                    // Check if it's a loot/imbue skill
                     String lootMode = ClientDescriptionStorage.getLootMode(defId);
                     if (lootMode.isEmpty()) {
                         lootMode = ClientSkillLevelStorage.getLootModeByDefinitionId(defId);
                     }
                     boolean isLootLearned = lootMode != null && !lootMode.isEmpty();
 
-                    if (isLootLearned && currentLevel <= 0) {
+                    if (isLootLearned) {
                         result.append(Text.literal("§c§lDISABLED"));
                         if ("imbue_only".equals(lootMode)) {
                             result.append(Text.literal(" §7(Equip item to use)\n"));
@@ -95,12 +110,24 @@ public class ClientSkillDefinitionConfigMixin {
                         } else {
                             result.append(Text.literal(" §7(Locked)\n"));
                         }
-                    } else if (cooldown > 0) {
+                    } else if (maxLevel == 1) {
+                        // Basic toggle skill - READY at level 0
+                        result.append(Text.literal("§7§lREADY"));
+                        result.append(Text.literal(" §7(" + toggleShortcut + " to Enable)\n"));
+                    } else {
+                        // Hybrid skill NOT READY for level 0
+                        result.append(Text.literal("§c§lNOT READY"));
+                        result.append(Text.literal(" §7(Level up to toggle)\n"));
+                    }
+                } else {
+                    // Check if toggle is disabled due to missing requirements (e.g. cooldown)
+                    cooldown = ClientSkillLevelStorage.getRemainingCooldownSecondsByDefinitionId(defId);
+                    if (cooldown > 0) {
                         result.append(Text.literal("§c§lON COOLDOWN"));
                         result.append(Text.literal(" §7(" + cooldown + "s remaining)\n"));
                     } else {
                         result.append(Text.literal("§7§lREADY"));
-                        result.append(Text.literal(" §7(Click to Enable)\n"));
+                        result.append(Text.literal(" §7(" + toggleShortcut + " to Enable)\n"));
                     }
                 }
             }

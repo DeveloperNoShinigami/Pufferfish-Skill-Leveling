@@ -10,20 +10,17 @@ import net.bluelotuscoding.skillleveling.registry.ForgeVillagerTrades;
 import net.bluelotuscoding.skillleveling.registry.ModBlocks;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
 import net.bluelotuscoding.skillleveling.registry.ModVillagers;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
+import net.bluelotuscoding.skillleveling.forge.loot.LootInjectionHandler;
+
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-import java.util.List;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
@@ -31,7 +28,7 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 @Mod(SkillLevelingMod.MOD_ID)
 public class ForgeMain {
         public ForgeMain() {
-                SkillLevelingMod.init();
+                SkillLevelingMod.init(net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().toFile());
 
                 IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
@@ -39,6 +36,9 @@ public class ForgeMain {
                 ForgeItemRegistry.register(bus);
                 ForgeCreativeTabs.register(bus);
                 ForgeVillagerRegistry.register(bus);
+                net.bluelotuscoding.skillleveling.registry.ForgeLootModifierRegistry.register(bus);
+
+                net.bluelotuscoding.skillleveling.registry.ForgeLootFunctionRegistry.register(bus);
 
                 bus.addListener(this::commonSetup);
 
@@ -50,6 +50,7 @@ public class ForgeMain {
 
                 MinecraftForge.EVENT_BUS.register(this);
                 MinecraftForge.EVENT_BUS.register(new ForgeVillagerTrades());
+                MinecraftForge.EVENT_BUS.register(new LootInjectionHandler());
         }
 
         private void commonSetup(final net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) {
@@ -65,6 +66,8 @@ public class ForgeMain {
         public void onAddReloadListener(AddReloadListenerEvent event) {
                 event.addListener(SkillLevelingMod.getInstance().getTradeLoader());
                 event.addListener(SkillLevelingMod.getInstance().getReputationLoader());
+                event.addListener(SkillLevelingMod.getInstance().getLootImbueManager());
+                event.addListener(SkillLevelingMod.getInstance().getUniversalLootHandler());
         }
 
         @SubscribeEvent
@@ -83,6 +86,9 @@ public class ForgeMain {
                         SkillLevelingMod.getInstance().getSkillLevelingManager().tick(event.getServer());
                 }
         }
+
+        // Loot injection is handled by UniversalLootModifier (Chests) and
+        // LootInjectionHandler (Mobs).
 
         @Mod.EventBusSubscriber(modid = SkillLevelingMod.MOD_ID)
         public static class ForgeEvents {
@@ -114,21 +120,7 @@ public class ForgeMain {
                         }
                 }
 
-                @SubscribeEvent
-                public static void onLivingDrops(LivingDropsEvent event) {
-                        Entity entity = event.getEntity();
-                        if (!entity.getWorld().isClient) {
-                                List<ItemStack> extraDrops = net.bluelotuscoding.skillleveling.util.LootHelper
-                                                .getDropsForEntity(entity, entity.getWorld().getRandom());
-                                for (ItemStack stack : extraDrops) {
-                                        ItemEntity itemEntity = new ItemEntity(entity.getWorld(), entity.getX(),
-                                                        entity.getY(),
-                                                        entity.getZ(), stack);
-                                        itemEntity.setToDefaultPickupDelay();
-                                        event.getDrops().add(itemEntity);
-                                }
-                        }
-                }
+                // Entity drops are now handled by LootInjectionHandler (direct event).
         }
 
         public static void initInternal() {

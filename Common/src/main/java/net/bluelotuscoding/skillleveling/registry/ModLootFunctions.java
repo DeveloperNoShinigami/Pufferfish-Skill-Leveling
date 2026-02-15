@@ -1,17 +1,14 @@
 package net.bluelotuscoding.skillleveling.registry;
 
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
-import net.bluelotuscoding.skillleveling.loot.RandomizeSkillTomeLootFunction;
 import net.minecraft.loot.function.LootFunctionType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 
 public class ModLootFunctions {
-    public static LootFunctionType RANDOMIZE_SKILL_TOME;
+    public static final net.minecraft.util.Identifier RANDOMIZE_SKILL_TOME_ID = SkillLevelingMod
+            .createIdentifier("randomize_skill_tome");
+    public static final net.minecraft.util.Identifier SKILL_IMBUE_ID = SkillLevelingMod.createIdentifier("skill_imbue");
 
-    public static void register() {
-        RANDOMIZE_SKILL_TOME = Registry.register(Registries.LOOT_FUNCTION_TYPE,
-                SkillLevelingMod.createIdentifier("randomize_skill_tome"),
-                new LootFunctionType(new RandomizeSkillTomeLootFunction.Serializer()));
-    }
+    // Holds the registered instances. Populated by platform-specific registries.
+    public static LootFunctionType RANDOMIZE_SKILL_TOME;
+    public static LootFunctionType SKILL_IMBUE;
 }

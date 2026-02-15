@@ -73,6 +73,7 @@
 - [ ] Better visual feedback in anvil when imbuing/extracting
 - [ ] **Deactivation Rewards (`locked`)**: Support for rewards that trigger when a skill hits Level 0 (deactivation hook).
 - [ ] **Stackable Skill Type**: Restore `puffish_skill_leveling:stackable` to allow base Pufferfish rewards and per-level rewards to scale together.
+- [ ] **Progressive Skill Tomes**: (Deferred) Adjust tome levels based on player progression with a config toggle.
 
 ### Advanced Imbuing
 - [ ] Skill compatibility restrictions (e.g., some skills can't coexist)

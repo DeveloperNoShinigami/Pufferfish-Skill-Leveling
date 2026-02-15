@@ -13,7 +13,7 @@ Skills can have any number of levels (1 to N), each granting cumulative or disti
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `max_skill_level` | integer | 1 | Maximum levels for this skill. Alias: `max_levels`. |
+| `max_skill_level` | integer | 1 | Maximum levels for this skill. |
 | `points_per_level`| integer | 1 | Skill points required per level. |
 | `category_id` | string | — | Category string (**Mandatory** for Creative Tab items). |
 | `loot_mode` | string | — | `"tome_only"`, `"imbue_only"`, or `"both"`. |
@@ -33,30 +33,38 @@ Restores the ability for base Pufferfish rewards (e.g., attributes) to scale alo
 - **Status**: [Planned Feature] - Intention documented in roadmap; code implementation deferred.
 
 ### Toggle Skills (Trigger Skills)
-Skills can be configured as binary "On/Off" abilities (e.g., Night Vision, Rage).
+Skills can be configured as binary "On/Off" abilities (e.g., Night Vision, Rage) and assigned to Mastery Keybinds.
 
-**Technical ID**: `puffish_skill_leveling:toggle`
-
-- **Key Mechanics**:
-    - **Persistence**: Toggle state (ON/OFF) is saved and persists across world joins.
-    - **Silent Join**: Effects persist on login, but one-shot rewards (like "Enabled" messages) do not re-fire.
-    - **Cooldowns**: Supports the `cooldown` field (in seconds) to prevent spamming abilities.
-- **Configuration**: Set `"toggle": true` and assign a `"keybind_slot"` (1-9).
-- **Rewards**: Uses `enable_rewards` and `disable_rewards` blocks to define distinct actions.
-- **Visual States**: Disabled toggle skills display specific tooltips based on their `loot_mode`:
-    - `"imbue_only"`: **DISABLED (Equip item to use)**
-    - `"tome_only"`: **DISABLED (Read tome to learn)**
-    - `"both"`: **DISABLED (Equip or Learn to use)**
-    - Only skills with `level > 0` (via learning or equipping) can be toggled on.
+- **Key Mechanics**: Persistence across joins, Mastery Keybinds, Cooldowns, and Right-Click support.
+- **Hybrid Support**: Toggle skills can be combined with `per_level_rewards` for multi-level active abilities.
+- **Detailed Guide**: See [Toggle System](./Toggle_System.md) for configuration and hybrid logic.
 
 ### Enhanced Reward Types
-The addon introduces specialized rewards to support advanced progression.
+The addon introduces and enhances rewards to support advanced discovery and combat-locking.
+
+#### Advanced Effect Reward (`puffish_skill_leveling:effect`)
+While the base mod provide `puffish_skills:effect`, our version adds critical features for balanced gameplay:
+- **`persistent`**: (Boolean) Forces the effect to remain even if the player drinks milk or uses curative items (currently Forge-native).
+- **`is_protected`**: (Boolean) Protects the effect against clearing by commands (`/effect clear`), other mods, or death. The addon monitors your effect list and instantly restores missing protected effects.
+- **Recommendation**: Always use `puffish_skill_leveling:effect` for Toggle skills or high-tier mastery rewards to ensure they cannot be accidentally removed.
 
 | ID | Description | Parameters |
 |----|-------------|------------|
-| `puffish_skills:effect` | Grants potion effects. | `effect`, `amplifier`, `duration`, `show_particles`, `show_icon`, `persistent`, `is_protected`. |
-| `puffish_skill_leveling:command` | Executes server-side commands. | `command` (supports placeholder `<player>`). |
-| `puffish_skill_leveling:experience` | Grants category-specific XP. | `category`, `amount`. |
+| `puffish_skills:effect` | **Base Mod Reward**. Standard potion effects. | `effect`, `amplifier`, `duration`, `show_particles`, `show_icon`. |
+| `puffish_skill_leveling:effect` | **Advanced Reward**. Adds persistence and protection. | Everything in base mod + `persistent`, `is_protected`. |
+| `puffish_skills:command` | Executes server-side commands. | `command` (supports standard `@s`, `@a`, `@p` selectors). |
+
+### Dynamic Loot Imbuing
+Automatically applies random skills to equipment and Skill Charms found in chests or dropped by mobs.
+- **Configurable rules**: Tune imbuement based on dimension, distance from spawn, and item category.
+- **Conflict Prevention**: Uses Exclusion Groups to prevent incompatible skills on a single item.
+- **Persistent Logic**: Custom handlers ensure imbuements are applied reliably even to drops that bypass standard loot modifiers.
+
+### Universal Loot Injection
+A cross-platform system for adding custom items to any existing Minecraft loot table.
+- **Simplified JSON**: Define injections for chests and entities in a single file.
+- **Targeting**: Supports exact table IDs and loot table tags.
+- **Platform Parity**: Identical behavior on Forge and Fabric.
 
 ---
 
@@ -71,7 +79,7 @@ All XP costs (`enchantment_cost`, `imbuement_cost`, `slot_opening_cost`, `cleans
 | **Object** | `{"type": "expression", "data": {"expression": "..."}}` | Explicitly defined for complex data. |
 
 > [!NOTE]
-> **Legacy Support**: `enchantment_levels` and `imbuement_levels` are compatible aliases for `enchantment_cost` and `imbuement_cost`.
+> **Technical Costs**: All XP costs support high-flexibility formats (Scalar, Array, Expression).
 
 ---
 
@@ -79,7 +87,7 @@ All XP costs (`enchantment_cost`, `imbuement_cost`, `slot_opening_cost`, `cleans
 The addon uses a multi-layered requirement system to control progression flow.
 
 #### 1. Initial Unlock (`prerequisite_skills`)
-- **Field**: `prerequisite_skills` (or legacy `required_skill`).
+- **Field**: `prerequisite_skills`.
 - **Function**: Controls the first-time appearance and purchase availability.
 - **Scope**: Skill-wide. Once unlocked, it stays unlocked.
 
@@ -87,7 +95,7 @@ The addon uses a multi-layered requirement system to control progression flow.
 - **Field**: `required_skill_for_level`.
 - **Function**: Blocks specific level increments (e.g., Level 5 requires Sword Mastery 3).
 - **Format**: `{"level_number": [{"skill": "id", "min_level": N, "category": "cat"}]}`.
-- **Modern Standard**: This field replaces the "old" flat `required_skill` logic for depth-based gating.
+- **Modern Standard**: This field replaces the flat `prerequisite_skills` logic for depth-based gating.
 
 ### Visual Discovery (Hidden Skills)
 Skills with `"hidden": true` are completely invisible until ALL `prerequisite_skills` are satisfied.

@@ -144,9 +144,14 @@ Special items that grant skill progress when used:
 - **Skill Tome** — Grants a specific skill (lootable, craftable)
 
 ### 3. Equipment Imbuing
-Skills with `"loot_mode": "imbue_only"` can be applied to equipment via an anvil. When worn, the equipment grants the skill's bonuses. When removed, the bonuses disappear instantly.
+Skills with `"loot_mode": "imbue_only"` can be applied to equipment via an anvil. Additionally, equipment found in loot can be automatically imbued based on your configuration.
+- **Detailed Guide**: [Skill Imbuement System](Skill_Imbuement_System.md)
 
-### 4. Real-Time Attribute Sync
+### 4. Universal Loot Injection
+Add custom items to any loot table in the game with a single JSON config.
+- **Detailed Guide**: [Universal Loot System](Universal_Loot_System.md)
+
+### 5. Real-Time Attribute Sync
 All attribute changes (health, damage, speed, armor, etc.) update **instantly** in your UI when equipping or leveling skills. No relogging required.
 
 ---

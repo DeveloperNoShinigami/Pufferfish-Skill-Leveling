@@ -243,7 +243,14 @@ public class SkillLevelingCommand {
                                                                                                                                                                 .executes(SkillLevelingCommand::giveSkillTome))
                                                                                                                                                 .executes(ctx -> giveSkillTome(
                                                                                                                                                                 ctx,
-                                                                                                                                                                1)))))))));
+                                                                                                                                                                1))))))))
+                                                // DEBUG: Toggle debug logging
+                                                .then(CommandManager.literal("debug")
+                                                                .requires(source -> source.hasPermissionLevel(2))
+                                                                .then(CommandManager.argument("enabled",
+                                                                                com.mojang.brigadier.arguments.BoolArgumentType
+                                                                                                .bool())
+                                                                                .executes(SkillLevelingCommand::toggleDebug))));
         }
 
         /**
@@ -887,5 +894,19 @@ public class SkillLevelingCommand {
                         source.sendError(Text.literal("§cInventory full for " + player.getName().getString()));
                         return 0;
                 }
+        }
+
+        /**
+         * Toggle debug logging command
+         */
+        private static int toggleDebug(CommandContext<ServerCommandSource> context) {
+                boolean enabled = com.mojang.brigadier.arguments.BoolArgumentType.getBool(context, "enabled");
+                net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.debugLogging = enabled;
+                net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.save();
+
+                context.getSource().sendMessage(Text.literal(
+                                "§aDebug logging " + (enabled ? "§eENABLED" : "§7DISABLED")
+                                                + "§a. This change has been saved to the config."));
+                return 1;
         }
 }

@@ -1,12 +1,13 @@
 package net.bluelotuscoding.skillleveling.mixin;
 
-import net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.entity.player.PlayerEntity;
+import java.util.ArrayList;
+import java.util.Collections;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,48 +17,45 @@ import java.util.List;
 
 /**
  * Mixin to add skill information to tooltips for items imbued with skills.
- * Supports the new multi-skill slot system.
  */
 @Mixin(ItemStack.class)
 public abstract class ItemTooltipMixin {
 
     @Inject(method = "getTooltip", at = @At("RETURN"))
     private void onGetTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> cir) {
-        ItemStack stack = (ItemStack) (Object) this;
-        NbtCompound nbt = stack.getNbt();
+        try {
+            ItemStack stack = (ItemStack) (Object) this;
+            NbtCompound nbt = stack.getNbt();
 
-        if (nbt == null || !nbt.contains("SkillLevelingImbued")) {
-            return;
-        }
+            if (nbt != null && nbt.contains("SkillLevelingImbued")) {
+                NbtCompound imbuedNbt = nbt.getCompound("SkillLevelingImbued");
+                String skillId = imbuedNbt.getString("SkillId");
 
-        List<Text> tooltip = cir.getReturnValue();
+                if (skillId != null && !skillId.isEmpty()) {
+                    List<Text> original = cir.getReturnValue();
+                    List<Text> tooltip = new ArrayList<>(original != null ? original : Collections.emptyList());
 
-        // Migrate old format if needed (for display purposes)
-        ImbuedSkillHelper.migrateOldFormat(stack);
+                    // Convert snake_case to Title Case
+                    String displayName = convertToTitleCase(skillId);
 
-        // Get slot count and skills
-        int slots = ImbuedSkillHelper.getSlotCount(stack);
-        List<ImbuedSkillHelper.ImbuedSkill> skills = ImbuedSkillHelper.getSkills(stack);
+                    tooltip.add(Text.literal(" "));
+                    tooltip.add(Text.literal("Imbued Skill:").formatted(Formatting.GRAY));
+                    tooltip.add(Text.literal(" " + displayName).formatted(Formatting.GOLD));
 
-        // Add spacing
-        tooltip.add(Text.literal(" "));
+                    // Fetch real description for level 1 from client storage
+                    String description = net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage
+                            .getDescriptionSingle(skillId, 1);
+                    if (description != null) {
+                        tooltip.add(Text.literal(" " + description).formatted(Formatting.BLUE));
+                    } else {
+                        tooltip.add(Text.literal(" +1 Level (When Equipped)").formatted(Formatting.BLUE));
+                    }
 
-        // Show slot info if slots exist
-        if (slots > 0) {
-            int usedSlots = skills.size();
-            tooltip.add(Text.literal("◈ Equipment Slots: ")
-                    .formatted(Formatting.DARK_PURPLE)
-                    .append(Text.literal(usedSlots + "/" + slots)
-                            .formatted(usedSlots >= slots ? Formatting.RED : Formatting.GREEN)));
-        }
-
-        // Show each imbued skill
-        for (ImbuedSkillHelper.ImbuedSkill skill : skills) {
-            String displayName = convertToTitleCase(skill.skillId);
-            tooltip.add(Text.literal("  ✦ " + displayName + " ")
-                    .formatted(Formatting.GOLD)
-                    .append(Text.literal("+" + skill.level)
-                            .formatted(Formatting.AQUA)));
+                    cir.setReturnValue(tooltip);
+                }
+            }
+        } catch (Exception e) {
+            // Keep original tooltip on error
         }
     }
 

@@ -246,7 +246,7 @@ The addon provides an enhanced effect reward type with protection features for r
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `effect` | string | — | Potion effect ID (e.g., `"minecraft:night_vision"`). |
-| `amplifier` | integer | 0 | Effect strength (0 = Level I). |
+| `amplifier` | integer | 0 | Effect strength (0 = Level I). Changes take effect immediately when datapack is reloaded. |
 | `duration` | integer | — | Duration in ticks. Use `-1` for infinite (toggle skills). |
 | `persistent` | boolean | `false` | Makes the effect survive milk and curative items (Forge native). |
 | `is_protected` | boolean | `false` | Re-applies the effect if cleared by commands, death, or other mods. |

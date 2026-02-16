@@ -4,6 +4,14 @@ All notable changes to Pufferfish Skill Leveling are documented in this file. Da
 
 ---
 
+## [2026-02-16] — Effect Amplifier & Reload Fixes
+
+### Fixed
+- **Effect amplifier not updating after datapack reload:** Fixed a race condition where changing an effect's `amplifier` value in a skill's JSON definition and running `/reload` would not update the applied effect. The issue was caused by the protected effect registry being updated AFTER effect removal, causing the mixin to re-apply the old amplifier. Now updates the protected effect map BEFORE removing the old effect.
+- **Protected effects not clearing on reload:** Fixed `onServerReload()` to properly clear `toggleRewards` and `protectedEffects` maps, preventing stale reward instances from persisting after datapack changes.
+
+---
+
 ## [2026-02-15] — Toggle System Bug Fixes
 
 ### Fixed

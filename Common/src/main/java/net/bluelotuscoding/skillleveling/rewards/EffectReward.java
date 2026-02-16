@@ -55,6 +55,30 @@ public class EffectReward implements Reward {
             // Apply effect
             // If duration is -1, use a very large value (Integer.MAX_VALUE)
             int effectiveDuration = duration == -1 ? Integer.MAX_VALUE : duration;
+
+            // FIX: Minecraft's addStatusEffect() never downgrades an existing effect.
+            // If the player already has this effect at a DIFFERENT amplifier with a very
+            // long duration (our own skill-applied effect, not a short-lived potion),
+            // we must: (1) update the protected effect map FIRST so the removal mixin
+            // doesn't immediately re-apply the old amplifier, (2) remove old effect,
+            // (3) apply new effect with correct amplifier.
+            var existing = player.getStatusEffect(effect);
+            boolean needsAmplifierFix = existing != null && existing.getAmplifier() != amplifier
+                    && existing.getDuration() > 999999;
+
+            if (isProtected) {
+                // Always register/update protected effect BEFORE any removal,
+                // so the LivingEntityMixin hook uses the correct amplifier
+                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getSkillLevelingManager()
+                        .registerProtectedEffect(player.getUuid(),
+                                new net.bluelotuscoding.skillleveling.manager.SkillLevelingManager.ProtectedEffect(
+                                        effectId, amplifier, duration, ambient, showParticles, showIcon, persistent));
+            }
+
+            if (needsAmplifierFix) {
+                player.removeStatusEffect(effect);
+            }
+
             StatusEffectInstance instance = new StatusEffectInstance(effect, effectiveDuration, amplifier, ambient,
                     showParticles, showIcon);
 
@@ -64,14 +88,6 @@ public class EffectReward implements Reward {
             }
 
             player.addStatusEffect(instance);
-
-            if (isProtected) {
-                // Register for tick-based re-application
-                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getSkillLevelingManager()
-                        .registerProtectedEffect(player.getUuid(),
-                                new net.bluelotuscoding.skillleveling.manager.SkillLevelingManager.ProtectedEffect(
-                                        effectId, amplifier, duration, ambient, showParticles, showIcon, persistent));
-            }
         } else {
             if (isProtected) {
                 // Unregister from tick-based re-application BEFORE removal

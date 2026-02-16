@@ -387,11 +387,25 @@ public class SkillLevelingManager {
     public void onServerReload(MinecraftServer server) {
         SkillLevelingMod.getInstance().getLogger().info("[ADDON] Server Reload Detected. Reloading configurations.");
         this.server = server;
-        // Reload leveled skill configurations after datapack reload
+
+        // Clear ALL reward maps so new instances from the reloaded datapack are used.
+        // Without this, stale reward instances retain old config values (e.g. amplifier).
         this.configurationsLoaded = false;
         this.perLevelRewardsRewards.clear();
+        this.toggleRewards.clear();
+        this.protectedEffects.clear();
         net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.clear();
+
+        // Re-discover configurations from the freshly-loaded datapack
         ensureConfigurationsLoaded();
+
+        // Refresh all rewards for online players so protected effects, attributes,
+        // and toggle states are rebuilt with the new reward instances.
+        if (this.server != null) {
+            for (ServerPlayerEntity player : this.server.getPlayerManager().getPlayerList()) {
+                refreshAllRewards(player);
+            }
+        }
     }
 
     public void onServerStopping(MinecraftServer server) {

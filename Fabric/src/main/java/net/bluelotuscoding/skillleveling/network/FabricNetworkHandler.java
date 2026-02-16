@@ -35,11 +35,10 @@ public class FabricNetworkHandler implements NetworkHandler {
                 });
 
         // Client-side: Handle CloseSkillScreen
-        ClientPlayNetworking.registerGlobalReceiver(SkillLevelingNetwork.SKILL_PROGRESSION_UPDATE, // Assuming this is
-                                                                                                   // for close or
-                                                                                                   // similar
+        ClientPlayNetworking.registerGlobalReceiver(SkillLevelingNetwork.CLOSE_SKILL_SCREEN,
                 (client, handler, buf, responseSender) -> {
-                    // This seems to be handled differently in common, but let's follow the patterns
+                    CloseSkillScreenPacket packet = CloseSkillScreenPacket.decode(buf);
+                    client.execute(packet::handleClient);
                 });
 
         // Specifically for Toggle Cooldown
@@ -66,10 +65,9 @@ public class FabricNetworkHandler implements NetworkHandler {
 
     @Override
     public void sendToPlayer(CloseSkillScreenPacket packet, ServerPlayerEntity player) {
-        // Note: CloseSkillScreenPacket identifier might need to be added to
-        // SkillLevelingNetwork
-        // For now, let's assume it's covered by SKILL_PROGRESSION_UPDATE or similar if
-        // needed.
+        PacketByteBuf buf = PacketByteBufs.create();
+        packet.encode(buf);
+        ServerPlayNetworking.send(player, SkillLevelingNetwork.CLOSE_SKILL_SCREEN, buf);
     }
 
     @Override

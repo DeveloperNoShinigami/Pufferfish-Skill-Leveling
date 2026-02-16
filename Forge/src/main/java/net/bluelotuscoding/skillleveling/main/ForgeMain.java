@@ -99,6 +99,16 @@ public class ForgeMain {
                                 if (!serverPlayer.getWorld().isClient) {
                                         SkillLevelingMod.getInstance().getSkillLevelingManager()
                                                         .syncAllSkillsToPlayer(serverPlayer);
+
+                                        // Defer category lock initialization to next tick so it runs
+                                        // AFTER Pufferfish's own updateAllCategories sync completes.
+                                        var server = serverPlayer.getServer();
+                                        if (server != null) {
+                                                server.execute(() -> {
+                                                        net.bluelotuscoding.skillleveling.manager.CategoryLockManager
+                                                                        .initializeLocks(serverPlayer);
+                                                });
+                                        }
                                 }
                         }
                 }

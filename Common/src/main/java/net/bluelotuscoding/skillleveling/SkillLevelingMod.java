@@ -87,13 +87,10 @@ public class SkillLevelingMod {
     public static void init(java.io.File configDir) {
         instance = new SkillLevelingMod();
 
-        // INITIALIZE CONFIGURATION: Load before anything else to set logging states
+        // INITIALIZE CONFIGURATION (placeholder — config file system is planned for a future update)
         net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.load(configDir);
 
         instance.logger.info("Initializing Pufferfish Skill Leveling addon v2 (Logging Balanced)...");
-        if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.debugLogging) {
-            instance.logger.info("Debug logging is now ACTIVE via configuration.");
-        }
 
         // REGISTER REWARD TYPE: Add our per-level rewards to Skills mod's reward system
         PerLevelRewardsReward.register();

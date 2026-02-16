@@ -110,10 +110,16 @@ public class ClientSkillDefinitionConfigMixin {
                         } else {
                             result.append(Text.literal(" §7(Locked)\n"));
                         }
-                    } else if (maxLevel == 1) {
-                        // Basic toggle skill - READY at level 0
-                        result.append(Text.literal("§7§lREADY"));
-                        result.append(Text.literal(" §7(" + toggleShortcut + " to Enable)\n"));
+                    } else if (maxLevel <= 1) {
+                        // Basic/pure toggle skill - READY at level 0, or ON COOLDOWN
+                        int cd = ClientSkillLevelStorage.getRemainingCooldownSecondsByDefinitionId(defId);
+                        if (cd > 0) {
+                            result.append(Text.literal("§c§lON COOLDOWN"));
+                            result.append(Text.literal(" §7(" + cd + "s remaining)\n"));
+                        } else {
+                            result.append(Text.literal("§7§lREADY"));
+                            result.append(Text.literal(" §7(" + toggleShortcut + " to Enable)\n"));
+                        }
                     } else {
                         // Hybrid skill NOT READY for level 0
                         result.append(Text.literal("§c§lNOT READY"));

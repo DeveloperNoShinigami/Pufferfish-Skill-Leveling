@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.util.Identifier;
 
 /**
  * Stores leveled configuration data parsed from skill definitions.
@@ -13,6 +14,8 @@ import java.util.Map;
 public class LeveledConfigStorage {
 
     private static final Map<String, LeveledConfig> leveledConfigs = new HashMap<>();
+    private static final Map<Identifier, List<RequiredSkillEntry>> categoryPrerequisites = new HashMap<>();
+    private static final Map<Identifier, Boolean> categoryKeepUnlocked = new HashMap<>();
 
     public static void put(String skillId, LeveledConfig leveledConfig) {
         leveledConfigs.put(skillId, leveledConfig);
@@ -69,6 +72,29 @@ public class LeveledConfigStorage {
 
     public static void clear() {
         leveledConfigs.clear();
+        categoryPrerequisites.clear();
+        categoryKeepUnlocked.clear();
+    }
+
+    public static void putCategoryPrerequisites(Identifier id, List<RequiredSkillEntry> prereqs) {
+        categoryPrerequisites.put(id, prereqs);
+    }
+
+    public static void putCategoryPrerequisites(Identifier id, List<RequiredSkillEntry> prereqs, boolean keepUnlocked) {
+        categoryPrerequisites.put(id, prereqs);
+        categoryKeepUnlocked.put(id, keepUnlocked);
+    }
+
+    public static boolean isKeepUnlocked(Identifier id) {
+        return categoryKeepUnlocked.getOrDefault(id, false);
+    }
+
+    public static List<RequiredSkillEntry> getCategoryPrerequisites(Identifier id) {
+        return categoryPrerequisites.get(id);
+    }
+
+    public static java.util.Set<Identifier> getAllGatedCategories() {
+        return categoryPrerequisites.keySet();
     }
 
     public static class LeveledConfig {

@@ -139,6 +139,10 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                 manager.syncSkillLevelToClient(addon$owner, addon$categoryId, skillId, level, totalLevel, maxLevel);
             }
         }
+
+        if (addon$owner != null) {
+            net.bluelotuscoding.skillleveling.manager.CategoryLockManager.updateLocks(addon$owner);
+        }
     }
 
     @Override
@@ -374,13 +378,20 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
     }
 
     /**
-     * Intercept getSkillState to properly check level vs maxLevel.
+     * Intercept getSkillState with a clean priority system:
+     * 1. Prerequisites First: If custom prerequisites fail → LOCKED (regardless of level/type).
+     * 2. Mastery Second: If max level reached → UNLOCKED (Gold).
+     * 3. Toggle Logic Third:
+     *    - Loot/Imbue toggle at Level 0 → LOCKED.
+     *    - Standard Toggle / Learned Hybrid → AVAILABLE/AFFORDABLE (bypasses parents).
+     * 4. Default: Pufferfish logic for everything else.
      */
     @Inject(method = "getSkillState", at = @At("HEAD"), cancellable = true)
     private void onGetSkillState(CategoryConfig category, SkillConfig skill, SkillDefinitionConfig definition,
             CallbackInfoReturnable<Skill.State> cir) {
         int level = addon$getSkillLevel(skill.id());
         int maxLevel = addon$getMaxLevelFromDefinition(category, skill);
+        var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
 
         int totalLevel;
         if (addon$owner != null) {
@@ -388,31 +399,60 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                     .calculateEquipmentBonus(addon$owner, category.id(), skill.id());
             totalLevel = level + bonus;
         } else {
-            // Fallback for client if needed (though ClientCategoryDataMixin usually handles
-            // it)
             totalLevel = level;
         }
 
-        // Mastery Check: ONLY show as UNLOCKED (Golden highlight) if at max level
-        if (maxLevel > 0 && totalLevel >= maxLevel) {
+        // ── Priority 1: Prerequisites ──
+        // If custom prerequisites fail, the skill is LOCKED (regardless of level/type).
+        if (leveledConfig != null && !leveledConfig.requiredSkills.isEmpty()) {
+            boolean allMet = true;
+            for (var req : leveledConfig.requiredSkills) {
+                String reqCategoryId = req.categoryId != null ? req.categoryId : category.id().toString();
+                int reqLevel = addon$getSkillLevelCrossCategory(reqCategoryId, req.skillId);
+                if (reqLevel < req.minLevel) {
+                    allMet = false;
+                    break;
+                }
+            }
+            if (!allMet) {
+                cir.setReturnValue(Skill.State.LOCKED);
+                return;
+            }
+        }
+
+        // ── Priority 2: Mastery ──
+        // If max level is reached and NOT a toggle, the skill is UNLOCKED (Gold).
+        // Toggle skills skip mastery — they remain togglable (handled in Priority 3).
+        if (maxLevel > 0 && totalLevel >= maxLevel && (leveledConfig == null || !leveledConfig.toggle)) {
             cir.setReturnValue(Skill.State.UNLOCKED);
             return;
         }
 
-        // Progression Check: If we have progress but not at max level
-        if (totalLevel > 0 || level > 0) {
-            var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
+        // ── Priority 3: Toggle Logic ──
+        if (leveledConfig != null && leveledConfig.toggle) {
+            boolean isLootLearned = leveledConfig.lootMode != null && !leveledConfig.lootMode.isEmpty();
 
-            // For loot-only skills (imbue_only, tome_only, both):
-            // Show as UNLOCKED if they are Level 1+ but not maxed (no border, active icon)
-            if (leveledConfig != null && leveledConfig.lootMode != null
-                    && (leveledConfig.lootMode.equals("tome_only") || leveledConfig.lootMode.equals("imbue_only")
-                            || leveledConfig.lootMode.equals("both"))) {
-                cir.setReturnValue(Skill.State.UNLOCKED);
+            if (isLootLearned && totalLevel == 0) {
+                // Loot/Imbue toggle at Level 0 → LOCKED (not yet found/learned)
+                cir.setReturnValue(Skill.State.LOCKED);
                 return;
             }
 
-            // For normal skills:
+            // Standard Toggle / Learned Hybrid → AVAILABLE/AFFORDABLE
+            // Bypasses parent skill checks so toggles are always accessible
+            if (addon$owner != null && level < maxLevel
+                    && net.bluelotuscoding.skillleveling.points.SkillPointManager
+                            .canAffordLevel(addon$owner, category.id(), skill.id(), level + 1)) {
+                cir.setReturnValue(Skill.State.AFFORDABLE);
+            } else {
+                cir.setReturnValue(Skill.State.AVAILABLE);
+            }
+            return;
+        }
+
+        // ── Priority 4: Default ──
+        // For skills with progression but not yet mastered:
+        if (totalLevel > 0 || level > 0) {
             if (level < maxLevel) {
                 if (addon$owner != null && net.bluelotuscoding.skillleveling.points.SkillPointManager
                         .canAffordLevel(addon$owner, category.id(), skill.id(), level + 1)) {
@@ -421,11 +461,12 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                     cir.setReturnValue(Skill.State.AVAILABLE);
                 }
             } else {
-                // Base at max, but total isn't (penalty) -> show as active
+                // Base at max, but total isn't (e.g., equipment penalty) → still active
                 cir.setReturnValue(Skill.State.UNLOCKED);
             }
             return;
         }
+        // Level 0 non-toggle: falls through to Pufferfish default (parent checks, etc.)
     }
 
     /**
@@ -573,18 +614,35 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
 
     @Unique
     private int addon$getMaxLevelFromDefinition(CategoryConfig category, SkillConfig skill) {
+        // Check LeveledConfigStorage first — it has the authoritative parsed value
+        var leveledConfig = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skill.id());
+        if (leveledConfig != null && leveledConfig.maxLevels > 0) {
+            return leveledConfig.maxLevels;
+        }
+
         var definitionOpt = category.definitions().getById(skill.definitionId());
         if (definitionOpt.isEmpty()) {
-            return 1;
+            // If config says 0 (pure toggle), respect that
+            return leveledConfig != null ? leveledConfig.maxLevels : 1;
         }
         var definition = definitionOpt.get();
 
-        int maxLevel = 1;
+        // Check for PerLevelRewardsReward at top level AND nested inside toggle rewards
+        int maxLevel = leveledConfig != null ? leveledConfig.maxLevels : 1;
         for (var reward : definition.rewards()) {
             var inst = reward.instance();
             if (inst instanceof PerLevelRewardsReward plr) {
                 if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
                     maxLevel = Math.max(maxLevel, plr.getMaxLevel());
+                }
+            } else if (inst instanceof net.bluelotuscoding.skillleveling.rewards.ToggleReward toggleReward) {
+                // Search inside toggle's enable_rewards for nested PerLevelRewardsReward
+                for (var enableReward : toggleReward.getEnableRewards()) {
+                    if (enableReward.instance() instanceof PerLevelRewardsReward plr) {
+                        if (plr.getSkillId() == null || plr.getSkillId().equals(skill.id())) {
+                            maxLevel = Math.max(maxLevel, plr.getMaxLevel());
+                        }
+                    }
                 }
             }
         }

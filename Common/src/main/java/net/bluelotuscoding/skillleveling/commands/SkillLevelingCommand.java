@@ -902,11 +902,10 @@ public class SkillLevelingCommand {
         private static int toggleDebug(CommandContext<ServerCommandSource> context) {
                 boolean enabled = com.mojang.brigadier.arguments.BoolArgumentType.getBool(context, "enabled");
                 net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.debugLogging = enabled;
-                net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.save();
 
                 context.getSource().sendMessage(Text.literal(
                                 "§aDebug logging " + (enabled ? "§eENABLED" : "§7DISABLED")
-                                                + "§a. This change has been saved to the config."));
+                                                + "§a (runtime only, resets on restart)."));
                 return 1;
         }
 }

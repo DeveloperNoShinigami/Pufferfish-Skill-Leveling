@@ -1,68 +1,62 @@
 package net.bluelotuscoding.skillleveling.client;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Field;
-
 /**
  * SIDE-SAFE CLIENT UTILITY
  * 
- * Provides reflected access to MinecraftClient to avoid NoClassDefFoundError
- * and MixinTransformerError on server threads, especially in common packets.
+ * Provides safe access to MinecraftClient methods without causing
+ * NoClassDefFoundError on dedicated servers. Uses inner classes so that
+ * MinecraftClient is only resolved when actually invoked (client-side only).
+ * 
+ * Direct class references (not Class.forName strings) ensure the build system
+ * correctly remaps class names for production environments (SRG/Mojmap).
  */
 public class SideSafeClient {
 
-    private static Class<?> mcClass;
-    private static Method getInstanceMethod;
-    private static Field currentScreenField;
-    private static Method setScreenMethod;
-    private static Field playerField;
-
-    static {
-        try {
-            mcClass = Class.forName("net.minecraft.client.MinecraftClient");
-            getInstanceMethod = mcClass.getMethod("getInstance");
-            currentScreenField = mcClass.getField("currentScreen");
-            setScreenMethod = mcClass.getMethod("setScreen", Class.forName("net.minecraft.client.gui.screen.Screen"));
-            playerField = mcClass.getField("player");
-        } catch (Exception ignored) {
-            // Probably on a dedicated server or class not yet available
-        }
-    }
-
     public static Object getMinecraft() {
-        if (getInstanceMethod == null)
-            return null;
         try {
-            return getInstanceMethod.invoke(null);
-        } catch (Exception e) {
+            return ClientAccess.getMinecraft();
+        } catch (NoClassDefFoundError e) {
             return null;
         }
     }
 
     public static Object getPlayer() {
-        Object mc = getMinecraft();
-        if (mc == null || playerField == null)
-            return null;
         try {
-            return playerField.get(mc);
-        } catch (Exception e) {
+            return ClientAccess.getPlayer();
+        } catch (NoClassDefFoundError e) {
             return null;
         }
     }
 
     public static void closeScreen() {
-        Object mc = getMinecraft();
-        if (mc == null || setScreenMethod == null)
-            return;
         try {
-            // check if current screen is not null
-            Object current = currentScreenField.get(mc);
-            if (current != null) {
-                setScreenMethod.invoke(mc, (Object) null);
+            ClientAccess.closeScreen();
+        } catch (NoClassDefFoundError e) {
+            // Not on client side — should never happen since this is only called
+            // from client packet handlers
+        }
+    }
+
+    /**
+     * Inner class that holds all direct MinecraftClient references.
+     * Only loaded by the JVM when one of its methods is first called,
+     * ensuring dedicated servers never trigger class resolution.
+     */
+    private static class ClientAccess {
+        static Object getMinecraft() {
+            return net.minecraft.client.MinecraftClient.getInstance();
+        }
+
+        static Object getPlayer() {
+            var mc = net.minecraft.client.MinecraftClient.getInstance();
+            return mc != null ? mc.player : null;
+        }
+
+        static void closeScreen() {
+            var mc = net.minecraft.client.MinecraftClient.getInstance();
+            if (mc != null && mc.currentScreen != null) {
+                mc.execute(() -> mc.setScreen(null));
             }
-        } catch (Exception e) {
-            // Log if needed, but usually we just want to fail gracefully if client isn't
-            // there
         }
     }
 }

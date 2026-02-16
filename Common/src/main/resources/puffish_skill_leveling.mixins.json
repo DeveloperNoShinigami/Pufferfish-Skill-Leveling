@@ -4,10 +4,12 @@
 	"package": "net.bluelotuscoding.skillleveling.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
+		"CategoryConfigMixin",
 		"SkillDefinitionConfigMixin",
 		"CategoryDataMixin",
 		"SkillsModMixin",
 		"PlayerDataMixin",
+		"CategoryImplMixin",
 		"ServerChatMixin",
 		"AnvilScreenHandlerMixin",
 		"LivingEntityMixin",

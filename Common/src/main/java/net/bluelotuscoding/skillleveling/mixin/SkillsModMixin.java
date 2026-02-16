@@ -205,6 +205,8 @@ public abstract class SkillsModMixin {
                 // Send level 0 to indicate locked
                 mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skillId, 0, 0, 1, 0);
 
+                // Re-evaluate category locks after skill refund
+                net.bluelotuscoding.skillleveling.manager.CategoryLockManager.updateLocks(player);
             }
         } catch (Exception e) {
             var logger = SkillLevelingMod.getInstance().getLogger();
@@ -322,6 +324,9 @@ public abstract class SkillsModMixin {
             for (var skill : categoryConfig.skills().getAll()) {
                 mod.getSkillLevelingManager().syncSkillLevelToClient(player, categoryId, skill.id(), 0, 0, 1);
             }
+
+            // Re-evaluate category locks after full reset
+            net.bluelotuscoding.skillleveling.manager.CategoryLockManager.updateLocks(player);
         } catch (Exception e) {
             var logger = SkillLevelingMod.getInstance().getLogger();
             logger.error("Failed to sync skill reset: " + e.getMessage());

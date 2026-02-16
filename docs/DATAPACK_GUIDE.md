@@ -1,431 +1,588 @@
-# Datapack Guide: Point A to Point Z
+# Datapack Guide
 
-Welcome to the definitive manual for the **Pufferfish Skill Leveling Addon**. This guide is structured as a journey: it begins with the simple foundation (Point A) and advances through every technical feature, concluding with complex economy configurations (Point Z).
+A progressive tutorial that starts with the basics and builds to expert-level configurations. Each section adds complexity — skip ahead to what you need or read through for the full journey.
 
-> [!IMPORTANT]
-> This addon provides the systems; you provide the content. You must create these files for your skills to exist in the world.
+**Prerequisites:** You've followed [Getting Started](./GETTING_STARTED.md) and have a working datapack with at least one skill.
 
 ---
 
-## 🛠️ Point A: The Foundation (Structure)
+## Table of Contents
 
-Before you write a single line of logic, your folder hierarchy must be perfect. Minecraft ignores datapacks with even tiny structural errors.
+- [Point A: Datapack Structure](#-point-a-datapack-structure)
+- [Point B: The Definition Schema](#-point-b-the-definition-schema)
+- [Point C: Loot Modes & Discovery](#-point-c-loot-modes--discovery)
+- [Point D: The Gating Systems](#-point-d-the-gating-systems)
+- [Point E: Descriptions & Tooltips](#-point-e-descriptions--tooltips)
+- [Point F: Per-Level Rewards](#-point-f-per-level-rewards)
+- [Point G: Costs & XP Expressions](#-point-g-costs--xp-expressions)
+- [Point H: The Anvil & Imbuing Ecosystem](#%EF%B8%8F-point-h-the-anvil--imbuing-ecosystem)
+- [Point I: Items & Artifacts](#-point-i-items--artifacts)
+- [Point J: The Skill Master](#-point-j-the-skill-master)
+- [Best Practices](#-best-practices)
+- [Troubleshooting](#-troubleshooting)
 
-### 1. The Directory Tree
+---
+
+## 🛠 Point A: Datapack Structure
+
+Your datapack must follow this exact folder hierarchy. Minecraft silently ignores packs with structural errors — no error messages, just missing skills.
+
+### Directory Layout
+
 ```
 your_datapack/
 ├── pack.mcmeta
 └── data/
     ├── <your_namespace>/
     │   └── puffish_skills/
-    │       ├── config.json      <-- (Essential) Registry of your categories
-    │       └── categories/      <-- Folder for category logic
+    │       ├── config.json                 ← Registry of your categories
+    │       └── categories/
     │           └── <category_id>/
-    │               ├── category.json
-    │               ├── definitions.json
-    │               ├── skills.json
-    │               └── connections.json
-    └── puffish_skill_leveling/  <-- (Namespace) Addon Configuration
-        ├── loot_modifiers/      <-- Universal Loot Injection
-        ├── skill_imbue_loot/    <-- Item Imbuing / Tooltip Scaling
-        ├── skill_master_reputation/ <-- Trading & Reputation Economy 
-        └── skill_master_trades/ <-- Custom Villager Trade Pools
+    │               ├── category.json       ← Category icon, background, gating
+    │               ├── definitions.json    ← Skill definitions (rewards, levels, etc.)
+    │               ├── skills.json         ← Positions on the skill tree
+    │               └── connections.json    ← Lines between skill nodes
+    └── puffish_skill_leveling/             ← Addon-specific configs
+        ├── loot_modifiers/                 ← Universal loot injection
+        ├── skill_imbue_loot/               ← Dynamic imbuing rules
+        ├── skill_master_reputation/        ← Villager reputation config
+        └── skill_master_trades/            ← Custom trade pools
 ```
 
-### 2. pack.mcmeta
+### pack.mcmeta
+
 ```json
 {
     "pack": {
         "pack_format": 15,
-        "description": "My Custom Skill Leveling Pack"
+        "description": "My Skill Leveling Pack"
     }
 }
 ```
 
----
+### config.json
 
-## 📖 Point B: The Schema (Field Reference)
-
-Every skill in `definitions.json` is an object keyed by its **Unique ID**.
-
-### 📋 The Exhaustive Field Reference
-
-| Field | Type | Required? | Description |
-| :--- | :--- | :--- | :--- |
-| `type` | string | [Opt] | Defaults to `puffish_skills:default`. Can be omitted for standard/toggle skills. Can be omitted for standard/toggle skills. |
-| `category_id` | string | **YES** | Must match the folder name. Required for Creative Tab Items. |
-| `title` | string | **YES** | **MUST match the ID key** for clear command/data tracking. |
-| `points_per_level`| int | **YES** | Point cost per level (Set to `0` for loot-only skills). |
-| `metadata` | object | **YES** | Required by parser. Use `{}` if no extra data is needed. |
-| `max_skill_level` | int | [Opt] | The level ceiling (Default: 1). |
-| `loot_mode` | string | [Opt] | Path: `"both"`, `"tome_only"`, or `"imbue_only"`. |
-| `hidden` | boolean | [Opt] | If true, icon is invisible until prerequisites are met. |
-| `merge_description`| boolean | [Opt] | If true, current-level tooltips list all previous rank bonuses. |
-| `descriptions` | map | [Opt] | Map of level-based tooltips (Keyed `"1"`, `"2"`, etc). |
-| `extra_descriptions`| map | [Opt] | Map of "Next Rank" previews (Key `"0"` is for first unlock). |
-| `prerequisite_skills`| array | [Opt] | **Initial Reveal/Buy** requirements. |
-| `required_skill_for_level` | object | [Opt] | Gates **specific levels** (e.g., Lvl 5 requires mastery). |
-| `enchantment_cost` | mixed | [Opt] | XP cost for Anvil combining. Supports Scalar/Array/Math. |
-| `imbuement_cost` | mixed | [Opt] | XP cost for Sigil imbuing. Supports Scalar/Array/Math. |
-| `slot_opening_cost`| mixed | [Opt] | XP cost for Opening Slots. Supports Scalar/Array/Math. |
-| `cleansing_cost` | mixed | [Opt] | XP cost for Extracting Tomes. Supports Scalar/Array/Math. |
-
----
-
-## 🗡️ Point C: Visibility & Discovery
-
-Control how players find your skills using specialized acquisition states.
-
-### 1. Loot Modes (`loot_mode`)
-| Mode | Discovery Path | Use Case |
-| :--- | :--- | :--- |
-| `"both"` | Tree Purchase + Gear Imbuing | Standard progression skills. |
-| `"tome_only"` | Tree Purchase + Tome Use | Skills that exist ONLY for the player, not gear. |
-| `"imbue_only"`| **Hidden from Tree** | Equipment-only enchantments (Item Passives). |
-
-### 2. Hidden Skills (`hidden`)
-When a skill is `"hidden": true`, the player cannot see the icon, lines, or text in the tree. It "reveals" (becomes visible) only when ALL **Point D-1 Prerequisites** are satisfied.
-
----
-
-## 🏹 Point D: The Gating Systems (Mastery Logic)
-
-The addon allows you to link categories and create complex dependencies.
-
-### 1. Initial Unlocks (`prerequisite_skills`)
-These control when a skill first appears or becomes purchasable. Use the `category` field for cross-category requirements.
+This file tells Pufferfish Skills where to find your categories. It goes at `data/<namespace>/puffish_skills/config.json`:
 
 ```json
-"advanced_fletching": {
-    "title": "advanced_fletching",
-    "prerequisite_skills": [
-        { 
-            "skill": "basic_archery", 
-            "min_level": 5 
-        },
-        { 
-            "skill": "woodworking", 
-            "min_level": 3, 
-            "category": "utility" 
-        } 
+{
+    "categories": ["combat", "utility"]
+}
+```
+
+Each entry must match a folder name inside `categories/`.
+
+---
+
+## 📋 Point B: The Definition Schema
+
+Every skill lives in `definitions.json` as a JSON object keyed by its **unique ID**. Below is every field the addon recognizes.
+
+### Complete Field Reference
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `type` | string | No | `puffish_skills:default` | Skill type. Omit for standard skills. |
+| `category_id` | string | **Yes** | — | Must match the folder name. Needed for tome generation. |
+| `title` | string | **Yes** | — | Display name. Should match the JSON key for clarity. |
+| `description` | string | No | — | Base tooltip description (before any level info). |
+| `icon` | object | **Yes** | — | `{ "type": "item", "data": { "item": "minecraft:..." } }` |
+| `max_skill_level` | integer | No | 1 | Maximum number of levels. Omit for pure toggles. |
+| `points_per_level` | integer | **Yes** | — | Point cost per level. Use `0` for loot-only skills. |
+| `metadata` | object | **Yes** | — | **Required** even if empty (`{}`). Parser fails without it. |
+| `loot_mode` | string | No | — | `"both"`, `"tome_only"`, or `"imbue_only"`. |
+| `toggle` | boolean | No | `false` | Makes this an on/off ability. |
+| `keybind_slot` | integer | No | — | Mastery keybind slot (1–9). |
+| `cooldown` | integer | No | — | Ticks before re-enabling after disable. |
+| `hidden` | boolean | No | `false` | Invisible until prerequisites are met. |
+| `merge_description` | boolean | No | `false` | Stack all previous level tooltips. |
+| `descriptions` | object | No | — | Level-based tooltips: `{ "1": "...", "2": "..." }`. |
+| `extra_descriptions` | object | No | — | Shift-held previews: `{ "0": "...", "1": "..." }`. |
+| `prerequisite_skills` | array | No | — | Skills required before this one appears. |
+| `required_skill_for_level` | object | No | — | Per-level gating: `{ "3": [...requirements] }`. |
+| `enchantment_cost` | mixed | No | — | XP cost for Anvil use. Scalar, array, or expression. |
+| `imbuement_cost` | mixed | No | — | XP cost for manual imbuing. |
+| `slot_opening_cost` | mixed | No | — | XP cost for opening gear slots. |
+| `cleansing_cost` | mixed | No | — | XP cost for skill extraction. |
+
+### Minimal Valid Skill
+
+```json
+{
+    "my_skill": {
+        "category_id": "combat",
+        "title": "My Skill",
+        "icon": { "type": "item", "data": { "item": "minecraft:stone" } },
+        "points_per_level": 1,
+        "metadata": {}
+    }
+}
+```
+
+This creates a 1-level skill with no custom rewards — effectively a standard Pufferfish Skills skill.
+
+---
+
+## 🗡 Point C: Loot Modes & Discovery
+
+### Loot Modes
+
+Control how skills are acquired:
+
+| Mode | In Skill Tree? | Can Imbue to Gear? | Use Case |
+|------|---------------|-------------------|----------|
+| `"both"` | Yes | Yes | Standard progression skills. |
+| `"tome_only"` | Yes | No | Player-only abilities that don't belong on equipment. |
+| `"imbue_only"` | **Hidden** | Yes | Hidden from the tree entirely. Equipment-exclusive passives. |
+
+```json
+"loot_mode": "both"
+```
+
+### Hidden Skills
+
+When `"hidden": true`, the skill is completely invisible until all `prerequisite_skills` are met — no icon, no connection lines, no tooltip. Use this for prestige or discovery content.
+
+```json
+"hidden": true,
+"prerequisite_skills": [
+    { "skill": "master_swordsman", "min_level": 5 }
+]
+```
+
+---
+
+## 🏹 Point D: The Gating Systems
+
+Three levels of gating control when players can access content.
+
+### 1. Initial Unlock (`prerequisite_skills`)
+
+Defines what a player needs before this skill appears or becomes purchasable. Uses skill-level requirements, optionally across categories.
+
+```json
+"prerequisite_skills": [
+    { "skill": "basic_archery", "min_level": 5 },
+    { "skill": "woodworking", "min_level": 3, "category": "utility" }
+]
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `skill` | Yes | Skill ID to check. |
+| `min_level` | Yes | Minimum level the player must have. |
+| `category` | No | Category containing the skill. Defaults to current category. |
+
+### 2. Tiered Level Gating (`required_skill_for_level`)
+
+Blocks specific level increments. Perfect for creating "tier gates" where players need mastery elsewhere before reaching the peak of a high-end skill.
+
+```json
+"required_skill_for_level": {
+    "3": [
+        { "skill": "breath_control", "min_level": 3 }
+    ],
+    "5": [
+        { "skill": "breath_control", "min_level": 5 },
+        { "skill": "ancient_essence", "min_level": 1, "category": "ancient" }
     ]
 }
 ```
 
-### 2. Tiered Gating (`required_skill_for_level`)
-This blocks **specific levels** of a skill, forcing players to master other branches before reaching the peak of a high-tier skill.
+**How to read this:** Level 3 of this skill requires `breath_control` at Level 3. Level 5 also requires `ancient_essence` at Level 1 from the `ancient` category.
+
+### 3. Category Gating (`prerequisite_skills` in `category.json`)
+
+Locks **entire categories** — not just individual skills. Players can't even open the category until requirements are met.
+
+> **Important:** This goes in `category.json`, not `definitions.json`.
 
 ```json
-"dragons_breath": {
-    "max_skill_level": 5,
-    "required_skill_for_level": {
-        "3": [
-            { 
-                "skill": "breath_control", 
-                "min_level": 3 
+{
+    "icon": { "type": "item", "data": { "item": "minecraft:nether_star" } },
+    "background": "minecraft:textures/block/obsidian.png",
+    "prerequisite_skills": [
+        { "skill": "warrior_strength", "level": 5, "category": "combat" },
+        { "skill": "mana_pool", "level": 3, "category": "magic" }
+    ],
+    "keep_unlocked": true
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `prerequisite_skills` | array | — | `{ "skill", "level", "category" }` objects. All must pass. |
+| `keep_unlocked` | boolean | `false` | If `true`, category stays unlocked permanently once first met. |
+
+**Behaviors:**
+- Evaluated on player join and whenever a skill level changes.
+- With `keep_unlocked: false`, refunding skills below requirements re-locks the category.
+- With `keep_unlocked: true`, once met, the category stays open even if requirements are later lost.
+
+---
+
+## 🧪 Point E: Descriptions & Tooltips
+
+Give players clear feedback about what each level does and what comes next.
+
+### `descriptions` — Current Level Tooltips
+
+Shows what the player currently has. The key is the level number as a string.
+
+```json
+"descriptions": {
+    "1": "§7+5% Movement Speed",
+    "2": "§7+10% Movement Speed",
+    "3": "§6+15% Movement Speed §c(MAX)"
+}
+```
+
+### `extra_descriptions` — Next Rank Previews
+
+Shown when the player holds Shift. Key `"0"` is shown before the first purchase.
+
+```json
+"extra_descriptions": {
+    "0": "§7Next: +5% Movement Speed",
+    "1": "§7Next: +10% Movement Speed",
+    "2": "§7Next: +15% Movement Speed (Final)"
+}
+```
+
+### `merge_description`
+
+Set to `true` to stack all previous level descriptions together — useful for skills that accumulate bonuses rather than replace them.
+
+### Toggle Skill Tooltips
+
+Toggle skills automatically show status text (READY, ENABLED, ON COOLDOWN, DISABLED) without extra configuration. This is generated by the addon based on the skill's state.
+
+---
+
+## 👑 Point F: Per-Level Rewards
+
+The `puffish_skill_leveling:per_level_rewards` reward type is the core of the addon. It maps level numbers to arrays of rewards.
+
+### Basic Example: Attribute Scaling
+
+```json
+"rewards": [
+    {
+        "type": "puffish_skill_leveling:per_level_rewards",
+        "data": {
+            "skill_id": "warrior_strength",
+            "levels": {
+                "1": [
+                    {
+                        "type": "puffish_skills:attribute",
+                        "data": {
+                            "attribute": "generic.attack_damage",
+                            "value": 1.0,
+                            "operation": "addition"
+                        }
+                    }
+                ],
+                "2": [
+                    {
+                        "type": "puffish_skills:attribute",
+                        "data": {
+                            "attribute": "generic.attack_damage",
+                            "value": 2.0,
+                            "operation": "addition"
+                        }
+                    }
+                ],
+                "3": [
+                    {
+                        "type": "puffish_skills:attribute",
+                        "data": {
+                            "attribute": "generic.attack_damage",
+                            "value": 3.0,
+                            "operation": "addition"
+                        }
+                    }
+                ]
             }
-        ],
-        "5": [
-            { 
-                "skill": "breath_control", 
-                "min_level": 5 
-            },
-            { 
-                "skill": "ancient_essence", 
-                "min_level": 1, 
-                "category": "ancient" 
-            }
-        ]
+        }
+    }
+]
+```
+
+### Mixed Rewards Example
+
+Each level can have multiple rewards of different types:
+
+```json
+"3": [
+    {
+        "type": "puffish_skills:attribute",
+        "data": {
+            "attribute": "generic.attack_damage",
+            "value": 3.0,
+            "operation": "addition"
+        }
+    },
+    {
+        "type": "puffish_skill_leveling:effect",
+        "data": {
+            "effect": "minecraft:glowing",
+            "duration": 100,
+            "amplifier": 0,
+            "is_protected": true
+        }
+    },
+    {
+        "type": "puffish_skills:command",
+        "data": {
+            "command": "title @s actionbar {\"text\":\"Rank 3 Unlocked!\",\"color\":\"gold\"}"
+        }
+    }
+]
+```
+
+### Available Reward Types
+
+| Reward ID | Source | Description |
+|-----------|--------|-------------|
+| `puffish_skills:attribute` | Base mod | Modify player attributes (damage, health, speed, etc.). |
+| `puffish_skills:command` | Base mod | Execute server commands. Supports `@s`, `~ ~ ~` selectors. |
+| `puffish_skills:effect` | Base mod | Apply potion effects (basic). |
+| `puffish_skill_leveling:effect` | Addon | Enhanced effects with `persistent` and `is_protected`. |
+| `puffish_skill_leveling:toggle` | Addon | Wrap rewards in an on/off toggle. See [Toggle System](./Toggle_System.md). |
+| `puffish_skill_leveling:per_level_rewards` | Addon | Level-mapped rewards (this section). |
+
+### Toggle + Per-Level Rewards
+
+Toggle rewards can wrap per-level rewards to create abilities that are both level-able and toggle-able. See [Toggle System — Hybrid Patterns](./Toggle_System.md#-hybrid-patterns) for detailed examples.
+
+---
+
+## 💎 Point G: Costs & XP Expressions
+
+All cost fields support three formats:
+
+### 1. Integer (Scalar)
+```json
+"enchantment_cost": 5
+```
+Cost = 5 × target level. Level 2 = 10 XP, Level 3 = 15 XP.
+
+### 2. Array (Per-Level)
+```json
+"enchantment_cost": [5, 10, 20, 35, 50]
+```
+Exact costs per level. Index 0 = Level 1, Index 1 = Level 2, etc.
+
+### 3. Expression (Math Formula)
+```json
+"enchantment_cost": {
+    "type": "expression",
+    "data": { "expression": "level * 5 + 10" }
+}
+```
+Uses the `level` variable. Standard math operators: `+`, `-`, `*`, `/`, `^`.
+
+### Which Costs Apply Where?
+
+| Field | When It's Charged |
+|-------|-------------------|
+| `enchantment_cost` | Combining Skill Tome + equipment in Anvil |
+| `imbuement_cost` | Using Sigil of Imbuing |
+| `slot_opening_cost` | Using Sigil of Imbuement to open a slot |
+| `cleansing_cost` | Using Tome of Cleansing to extract a skill |
+
+---
+
+## ⚒️ Point H: The Anvil & Imbuing Ecosystem
+
+The Anvil is the workstation for all skill-to-equipment interactions.
+
+### Opening Skill Slots
+
+Equipment starts with 0 skill slots. Use a **Sigil of Imbuement** to open one (up to 3 per item).
+
+| Anvil Input | Result | XP Cost |
+|-------------|--------|---------|
+| Equipment + Sigil of Imbuement | Equipment with new empty slot | `slot_opening_cost` |
+
+### Applying Skills
+
+| Anvil Input | Result | XP Cost |
+|-------------|--------|---------|
+| Slotted Equipment + Skill Tome | Skill applied to first empty slot | `enchantment_cost` |
+
+### Upgrading Imbued Skills
+
+| Anvil Input | Result |
+|-------------|--------|
+| Equipment with Skill Lv1 + Matching Skill Tome | Skill upgrades to Lv2 |
+
+The skill level on gear caps at `max_skill_level`.
+
+### Extracting Skills
+
+| Anvil Input | Result | XP Cost |
+|-------------|--------|---------|
+| Equipment + Tome of Cleansing I | Skill from Slot 1 returned as Tome | `cleansing_cost` |
+| Equipment + Tome of Cleansing II | Skill from Slot 2 returned as Tome | `cleansing_cost` |
+| Equipment + Tome of Cleansing III | Skill from Slot 3 returned as Tome | `cleansing_cost` |
+
+The slot remains open after extraction.
+
+### Ranking Up Tomes
+
+Combine two identical Skill Tomes at the same level to create a higher-level version:
+
+| Anvil Input | Result |
+|-------------|--------|
+| Skill Tome Lv1 + Skill Tome Lv1 | Skill Tome Lv2 |
+| Skill Tome Lv3 + Skill Tome Lv3 | Skill Tome Lv4 |
+
+Cannot exceed `max_skill_level`.
+
+### Paid vs. Granted Levels
+
+The addon tracks how each level was earned:
+
+| Source | Type | Refund Value |
+|--------|------|-------------|
+| Spent skill points | **Paid** | Full point refund |
+| Skill Tome / Imbuing | **Granted** | 0 points returned |
+
+This prevents players from "laundering" found tomes into free skill points by leveling up then refunding.
+
+---
+
+## 📜 Point I: Items & Artifacts
+
+| Item | How to Use |
+|------|-----------|
+| **Blank Tome** | Base crafting material for all specialized tomes. |
+| **Skill Tome** | Right-click or combine with gear. Grants +1 level to a specific skill. |
+| **Skill Charm** | Curios accessory — imbue it with skills just like armor. |
+| **Sigil of Imbuement** | Opens a new skill slot on equipment (Anvil). |
+| **Tome of Progression** | Right-click to open a GUI. Select any skill to level up by 1. |
+| **Tome of Clear Mind** | Right-click. Select a skill to refund 1 level and recover points. |
+| **Tome of Greater Clear Mind** | Right-click. Select a skill to fully reset to Level 0. |
+| **Tome of Cleansing (I/II/III)** | Use in Anvil. Extracts a skill from equipment slot 1, 2, or 3. |
+
+---
+
+## 👑 Point J: The Skill Master
+
+The Skill Master is a custom villager profession that trades skill-related items.
+
+### Tier Progression
+
+| Tier | Name | Notable Offers |
+|------|------|----------------|
+| 1 | Novice | Basic tomes, Blank Tomes |
+| 2 | Apprentice | Tome of Clear Mind, Tome of Cleansing, Tome of Progression |
+| 3 | Journeyman | Tome Upgrades (lower + emeralds → higher), mid-level tomes |
+| 4 | Expert | Advanced skill trades, better pricing |
+| 5 | Master | Sigils of Imbuement, highest-level tomes |
+
+### Mastery Pricing
+
+The Skill Master rewards skilled players. As you master more skills across all categories, his prices decrease and his trade pool expands.
+
+### Skill Master Houses
+
+Custom jigsaw-based buildings that spawn in villages across all biome types (Plains, Desert, Savanna, Snowy, Taiga). They contain:
+- The Skill Scribe Table workstation
+- Tiered loot barrels with progression materials
+
+### Admin Commands
+
+| Command | Description |
+|---------|-------------|
+| `/skillleveling villager forceProfession` | Convert the villager you're looking at. |
+| `/skillleveling villager setTier <1-5>` | Directly set tier. |
+| `/skillleveling villager reset` | Reset trades and experience to 0. |
+
+---
+
+## 🧠 Best Practices
+
+### Naming Consistency
+Always make your JSON key match your `title` field. This keeps admin commands and server logs readable:
+```json
+"warrior_strength": {
+    "title": "warrior_strength",
+    ...
+}
+```
+
+### Define All Levels
+If `max_skill_level` is 5, define rewards for levels 1 through 5. Skipping levels causes inconsistent behavior.
+
+### Use Protected Effects for Toggles
+Any potion effect on a toggle skill should use `puffish_skill_leveling:effect` with `is_protected: true`. Without it, milk or death will remove the effect while the toggle is still "on."
+
+### Use Commands for Player Feedback
+Add `tellraw` or `title ... actionbar` commands to important level-ups so players know something happened:
+```json
+{
+    "type": "puffish_skills:command",
+    "data": {
+        "command": "title @s actionbar {\"text\":\"Rank 3 Unlocked!\",\"color\":\"gold\"}"
     }
 }
 ```
 
----
-
-## 🧪 Point E: Polish & Descriptions
-
-Manage tooltips to guide players through their multi-rank journey.
-
-### 1. Level 0: The Unlocked State
-Players have a "Level 0" state when they can see a skill but haven't bought any levels yet.
-- **`descriptions: { "0": "..." }`**: Flavor text for the base skill.
-- **`extra_descriptions: { "0": "..." }`**: A preview of what Level 1 will grant.
-
-### 2. Numbering Logic
-| State | Current Bonus (`descriptions`) | Next Rank Preview (`extra_descriptions`) |
-| :--- | :--- | :--- |
-| **Unlocked** | Lvl 0 Text | Lvl 1 Preview |
-| **Rank 1** | Lvl 1 Text | Lvl 2 Preview |
-| **Maxed** | Max Level Text | "— MAXED OUT —" |
-
----
-
----
-
-## 👑 Point F: Technical Rewards (`per_level_rewards`)
-
-This is the core power of the addon. Use it to specify exactly what happens at every single level increment. **Do not skip levels**; if your `max_skill_level` is 5, you must define rewards for levels 1, 2, 3, 4, and 5 in the map for consistent behavior.
-
-#### Example: Continuous Progression (Stackable)
-The `puffish_skill_leveling:stackable` type is a **hybrid**. It supports both standard rewards (applied once when the skill is first unlocked) and per-level rewards (applied/incremented at every level).
-
-```json
-"champion_seal": {
-    "type": "puffish_skill_leveling:stackable",
-    "max_skill_level": 5,
-    "rewards": [
-        {
-            "type": "puffish_skills:attribute",
-            "data": {
-                "attribute": "generic.max_health",
-                "value": 2,
-                "operation": "addition"
-            }
-        },
-        {
-            "type": "puffish_skill_leveling:per_level_rewards",
-            "data": {
-                "skill_id": "champion_seal",
-                "levels": {
-                    "1": [
-                        {
-                            "type": "puffish_skills:command",
-                            "data": {
-                                "command": "tellraw @s {\"text\":\"Rank 1!\",\"color\":\"gray\"}"
-                            }
-                        }
-                    ],
-                    "2": [
-                        {
-                            "type": "puffish_skills:command",
-                            "data": {
-                                "command": "tellraw @s {\"text\":\"Rank 2!\",\"color\":\"gray\"}"
-                            }
-                        }
-                    ],
-                    "3": [
-                        {
-                            "type": "puffish_skills:command",
-                            "data": {
-                                "command": "tellraw @s {\"text\":\"Rank 3!\",\"color\":\"gray\"}"
-                            }
-                        }
-                    ],
-                    "4": [
-                        {
-                            "type": "puffish_skills:command",
-                            "data": {
-                                "command": "tellraw @s {\"text\":\"Rank 4!\",\"color\":\"gray\"}"
-                            }
-                        }
-                    ],
-                    "5": [
-                        {
-                            "type": "puffish_skills:command",
-                            "data": {
-                                "command": "tellraw @s {\"text\":\"Rank 5!\",\"color\":\"gray\"}"
-                            }
-                        }
-                    ]
-                }
-            }
-        }
-    ],
-    "metadata": {}
-}
+### Test with Admin Commands
+Use these commands liberally during development to verify your skills work:
+```
+/skillleveling set @s combat warrior_strength 3
+/skillleveling refund @s combat warrior_strength all
+/skillleveling info @s combat warrior_strength
 ```
 
+### Progressive Disclosure for Players
+Use `hidden: true` for high-tier skills and let prerequisites reveal them naturally. Don't overwhelm players with a fully visible tree of 50 skills — let them discover as they progress.
+
+### Category Gating for Progression Paths
+Use category-level `prerequisite_skills` to create clear advancement tracks:
+- **Combat → Advanced Combat** (requires Warrior Strength Lv5)
+- **Magic → Arcane Mastery** (requires Mana Pool Lv3 + Basic Spells Lv3)
+
 ---
 
-## 🔘 Point F.1: Toggle Skills
-Any skill can be made into a "Toggle Skill" by adding the `toggle` field. These skills are active abilities assigned to Mastery Keybinds.
+## 🆘 Troubleshooting
 
-- **Hybrid Rewards**: Toggle skills can wrap `per_level_rewards` to create powerful leveling abilities.
-- **Detailed Guide**: See [Toggle System](./Toggle_System.md) for a full breakdown of keybinds, cooldowns, and hybrid interactions.
+### Skills don't appear after `/reload`
 
----
+| Symptom | Likely Cause | Fix |
+|---------|-------------|-----|
+| Entire category missing | Folder structure wrong or `config.json` doesn't list the category | Check folder names match exactly |
+| Individual skill missing | Missing `metadata: {}` field | Add `"metadata": {}` to the definition |
+| Skill shows but no rewards | `skill_id` in `per_level_rewards` doesn't match the definition key | Ensure `skill_id` matches exactly |
 
-## 💎 Point G: Technical Economies (Costs)
+### Common Field Mistakes
 
-All cost fields (`enchantment_cost`, `imbuement_cost`, `slot_opening_cost`, `cleansing_cost`) support three formats:
+| Mistake | Result |
+|---------|--------|
+| No `metadata: {}` | Skill fails to load silently |
+| No `category_id` | Tomes won't generate for this skill |
+| `points_per_level` missing | Skill can't be leveled in the tree |
+| `skill_id` mismatch in rewards | Rewards apply to wrong skill or not at all |
 
-1.  **Integer (Scalar)**: `5` -> (Target Level * 5 XP Levels).
-2.  **Array**: `[5, 10, 15, 20, 30]` -> Specific hardcoded cost per rank.
-3.  **Expression**: `"level * 2 + (level^2)"` -> Evaluated math using the `level` variable.
+### Useful Debug Commands
 
-### 4. Comprehensive Example: Arcane Striker
-This example combines everything: 5 Levels, Mixed Rewards (Attributes + Effects + Commands), and a Mathematical Enchantment Cost.
-
-```json
-"arcane_striker": {
-    "title": "Arcane Striker",
-    "description": "Infuse your strikes with magic.",
-    "icon": {
-        "type": "item",
-        "data": { "item": "minecraft:amethyst_shard" }
-    },
-    "max_skill_level": 5,
-    "loot_mode": "both",
-    "enchantment_cost": {
-        "type": "expression",
-        "data": { "expression": "level * 5 + 10" }
-    },
-    "imbuement_cost": 5,
-    "rewards": [
-        {
-            "type": "puffish_skill_leveling:per_level_rewards",
-            "data": {
-                "skill_id": "arcane_striker",
-                "levels": {
-                    "1": [
-                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 1, "operation": "addition" } }
-                    ],
-                    "2": [
-                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 2, "operation": "addition" } }
-                    ],
-                    "3": [
-                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 3, "operation": "addition" } },
-                        { "type": "puffish_skill_leveling:effect", "data": { "effect": "minecraft:glowing", "duration": 100, "amplifier": 0, "is_protected": true } }
-                    ],
-                    "4": [
-                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 4, "operation": "addition" } },
-                        { "type": "puffish_skill_leveling:effect", "data": { "effect": "minecraft:glowing", "duration": 120, "amplifier": 0, "is_protected": true } }
-                    ],
-                    "5": [
-                        { "type": "puffish_skills:attribute", "data": { "attribute": "generic.attack_damage", "value": 5, "operation": "addition" } },
-                        { "type": "puffish_skill_leveling:effect", "data": { "effect": "minecraft:glowing", "duration": 140, "amplifier": 0, "is_protected": true } },
-                        { "type": "puffish_skills:command", "data": { "command": "particle minecraft:witch ~ ~ ~ 0 0 0 1 10" } }
-                    ]
-                }
-            }
-        }
-    ],
-    "metadata": { "icon": "arcane_striker_icon" }
-}
+```
+/reload                                          — Reload all datapacks
+/skillleveling get @s <category> <skill>         — Check current level
+/skillleveling set @s <category> <skill> 0       — Reset for testing
+/skillleveling info @s <category> <skill>        — Full diagnostic
 ```
 
----
+### Check Server Logs
 
-## 💰 Point H: The Skill Master (Point Z)
-
-The **Skill Master** is the professional curator of your datapack's ecosystem. He isn't just a merchant; he is a specialist who facilitates the transfer of power between gear and players.
-
-### 1. Reputation & Tiers
-The Skill Master has a unique **Reputation System**. As you trade with him, his tier increases (I through V), unlocking more advanced services.
-- **What to Lookout For**: At Tier IV and V, the Master begins offering **"Special Upgrade Trades"**. He can transform low-level Skill Tomes into higher ranks for a high XP and resource cost.
-- **Trade Variety**: He sells more than just tomes. He is the primarily source for **Sigils of Imbuement** and **Tomes of Cleansing**.
-
-### 2. Reputation & Trade Scaling
-The Skill Master values long-term relationships. Authors can configure his professional behavior through internal registry files:
-- **Scaling Tiers**: You can control how much experience he gains per trade, making the reach to Master level a true late-game achievement for players.
-- **Economic Perks**: At higher tiers, the Master becomes more efficient, offering significant discounts on basic tomes and better exchange rates for resources.
-
-### 3. Structural Presence
-The Skill Master isn't just a villager; he has a physical home in the world.
-- **Skill Master House**: Custom jigsaw-based buildings that generate in villages, featuring his specialized **Skill Scribe Table** workstation.
-- **Loot Reflection**: Players should lookout for any chests and barrels found within the Skill Master House. These containers are the primary source for rare structural skills and progression materials that won't appear in standard dungeon loot.
+If something isn't working, check your server log (`logs/latest.log`). The addon logs warnings for:
+- Missing definitions or categories
+- Invalid prerequisite references
+- Malformed reward configurations
 
 ---
 
-## ⚒️ Point I: The Anvil & Imbuing Ecosystem
-
-The anvil is the primary workstation for modifying both your Tomes and your Equipment.
-
-### 1. Tome Combining (Rank Up)
-Authors should note that players can increase the rank of a Skill Tome by combining duplicates.
-- **Process**: Place **Skill Tome (Rank X)** + **Skill Tome (Rank X)** in an anvil.
-- **Result**: A **Skill Tome (Rank X+1)**.
-- **Limit**: Cannot exceed the `max_skill_level` defined in your JSON.
-
-### 2. Imbuing (Applying to Gear)
-To apply a skill to gear, players need an **Open Skill Slot** (Max 3).
-- **Opening a Slot**: Place gear + **Sigil of Imbuement** in an anvil. Cost: `slot_opening_cost`.
-- **Applying a Skill**: Place gear + **Skill Tome** in an anvil with a **Sigil of Imbuing**. Cost: `imbuement_cost`.
-- **Lookout Warning**: Do not confuse the **Sigil of Imbuement** (opens slot) with the **Sigil of Imbuing** (applies tome). The slot must be opened *first*.
-- **Requirements**: Only skills with `loot_mode: "both"` or `"imbue_only"` can be imbued.
-
-### 3. Upgrading Imbued Gear
-Equipment-bound skills can be leveled up directly on the item.
-- **Process**: Place imbued gear + **Matching Skill Tome** (any rank) in an anvil.
-- **Logic**: If gear has Lvl 1 "Strength" + any "Strength" Tome -> Gear upgrades to Lvl 2.
-- **Limit**: Strictly capped by the skill's `max_skill_level`.
-
-### 4. Cleansing (Extraction)
-Extraction allows players to recover tomes without destroying the gear or the skill.
-- **Process**: Place gear + **Tome of Cleansing (I, II, or III)** in an anvil.
-- **Slot Targeting**: Tome I targets Slot 1, Tome II targets Slot 2, etc.
-- **Result**: The skill returns as a **Skill Tome** at its current level. The slot remains open.
-- **Cost**: Defined by your `cleansing_cost` field.
-
----
-
-## 📜 Point J: Specialized Progression Items
-
-The addon includes several unique artifacts that authors can use as quest rewards or rare loot.
-
-| Item | Usage |
-| :--- | :--- |
-| **Blank Tome** | The base crafting material for all specialized tomes. |
-| **Tome of Progression**| Allows a player to manually select and advance **any** skill by 1 level via a GUI. |
-| **Tome of Clear Mind** | Safely refunds **1 level** of a selected skill, returning any points spent. |
-| **Tome of Greater Clear Mind** | Performs a **Full Reset** of a skill, returning all points. |
-| **Skill Charm** | A **Curios** accessory that provides portable imbuement slots for skills. |
-
----
-
-## 🧠 Point K: Point Bypass Logic (Paid vs. Granted)
-
-Technical authors must understand how the addon tracks progression to balance their economies.
-
-1.  **Paid Levels**: Levels purchased by the player using Skill Points. These can be refunded for points.
-2.  **Granted Levels**: Levels gained via **Skill Tomes** or **Equipment Imbuing**. These **bypass** point costs.
-3.  **Refund Interaction**: If a player refunds a "Granted" level, they receive **0 points**. The level is simply removed. This prevents players from "laundering" finding a Tome into free skill points.
-
----
-
-## 🎲 Point L: Dynamic Loot & Imbuement
-
-The addon allows you to inject custom loot (like Skill Charms) and dynamically imbue skills onto equipment found in the world.
-
-### 1. Universal Loot Injection
-Define custom drops for mobs and chests in a single, persistent configuration.
-- **Path**: `data/puffish_skill_leveling/loot_modifiers/universal_loot.json`
-- **Detailed Guide**: [Universal Loot System](Universal_Loot_System.md)
-
-### 2. Skill Imbuement Logic
-Control how skills are applied to drops based on dimensions, distance, and item categories.
-- **Path**: `data/puffish_skill_leveling/skill_imbue_loot/config.json`
-- **Detailed Guide**: [Skill Imbuement System](Skill_Imbuement_System.md)
-
----
-
-## 💎 Point M: Grandmaster Author Tips
-
-Specialized advice for creating high-quality, production-ready packs.
-
-### 1. The "Clean Tree" Technique
-- **Hidden Skills**: Use `hidden: true` for "Prestige" skills. Don't clutter the UI with Rank 5 Mastery icons if the player hasn't even mastered Rank 1.
-- **Category Linking**: Link your categories! Make a high-level "Mining" skill a prerequisite for a "Heavy Armor" skill in Combat. This forces players to value multiple specializations.
-
-### 2. Consistency is King
-- **Lookout**: Always ensure your `title` matches the JSON key. If they differ, server logs and admin commands like `/skillleveling get` will become confusing to read.
-- **Metadata**: Never forget `"metadata": {}`. The parser is extremely strict; a missing metadata block is the #1 cause of "Missing Skill" errors in the dev console.
-
----
-
-## 🆘 Troubleshooting & Admin Logic
-
-### Common Errors
-- **Missing Items**: Did you set `category_id`?
-- **Crash on Load**: Is `metadata` missing?
-- **No Progress**: Did you forget `points_per_level`?
-
-### Developer Commands
-- `/reload`: The most important tool. Flushes cache and re-parses all JSON.
-- `/skillleveling give tome <player> <category> <skill> [loot_mode] [level]`: Generate custom tomes for testing.
-- `/skillleveling get <p> <cat> <skill>`: View exact data values.
-- `/skillleveling set <p> <cat> <skill> <lvl>`: Manually force a rank.
-- `/skillleveling villager setTier <1-5>`: Force a Skill Master to rank up.
-
----
-*Created for Pufferfish Skill Leveling v2.5.0+*
+*For toggle skill configuration, see [Toggle System](./Toggle_System.md). For loot configuration, see [Universal Loot System](./Universal_Loot_System.md) and [Skill Imbuement System](./Skill_Imbuement_System.md).*

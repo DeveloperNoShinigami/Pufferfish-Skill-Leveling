@@ -1,101 +1,122 @@
-# Feature Roadmap
+# Roadmap
 
-## ✅ Completed Features
+Current development status and future plans for Pufferfish Skill Leveling.
 
-### Core System
-- [x] Multi-Level Skill Progression (`max_skill_level`, `points_per_level`)
-- [x] Per-Level Rewards System
-- [x] Session-Local Reward Protection (Join-time stability)
-- [x] Prerequisite Skills with Level Requirements
-- [x] Dynamic Tooltips with Level Info
-- [x] Real-Time Attribute Sync
+---
 
-### Skill Tomes & Crafting
-- [x] Tome of Progression (advance any skill)
+## Completed Features
+
+### Core Systems
+- [x] Multi-level skill progression (1–999 levels)
+- [x] Per-level rewards with nested support
+- [x] Level tracking with NBT persistence
+- [x] Paid vs granted level distinction for refunds
+- [x] Admin commands (`/skillleveling set`, `get`, `refund`, `info`)
+- [x] Client/server sync for UI rendering
+- [x] Architectury multi-loader (Forge + Fabric)
+
+### Toggle System
+- [x] Pure toggles (on/off abilities, maxLevel 0)
+- [x] Basic toggles (single-level unlockable toggles)
+- [x] Hybrid toggles (multi-level + toggleable)
+- [x] Mastery keybinds (slots 1–9)
+- [x] Cooldowns (tick-based)
+- [x] Auto-disable on death
+- [x] Protected effects (survive milk/death)
+- [x] ToggleReward type with enable/disable containers
+
+### Prerequisite & Gating
+- [x] Prerequisite skills on individual skill definitions
+- [x] Cross-category prerequisites
+- [x] Required skill for level (tier gates)
+- [x] Hidden skills (reveal on prerequisite met)
+- [x] Category gating with `prerequisite_skills`
+- [x] `keep_unlocked` for permanent category access
+
+### Description System
+- [x] Level descriptions (current rank tooltip)
+- [x] Extra descriptions (next rank preview on Shift)
+- [x] Merge description mode (stacking previous levels)
+- [x] Dynamic tooltip injection (level info, toggle status, cooldowns)
+
+### Loot & Acquisition
+- [x] Loot mode system (`both`, `tome_only`, `imbue_only`)
+- [x] Universal Loot Injection (chest and entity groups)
+- [x] Weighted entry selection with per-entry drop chance
+- [x] Skill Tome entries (random and targeted)
+- [x] Skill Charm entries
+
+### Equipment & Imbuing
+- [x] Sigil of Imbuement (slot opening, up to 3)
+- [x] Skill Tome anvil application
+- [x] Skill upgrading via matching Tome
+- [x] Tome of Cleansing (I/II/III) for extraction
+- [x] Tome Ranking (combine identical-level Tomes)
+- [x] XP cost system (scalar, array, expression)
+
+### Dynamic Skill Imbuement
+- [x] Equipment spawns with pre-imbued skills from loot
+- [x] Dimension overrides
+- [x] Distance scaling with brackets
+- [x] Category settings (per-equipment-type tuning)
+- [x] Exclusion groups
+- [x] Item blacklist/whitelist
+- [x] Loot table whitelist
+- [x] 16 equipment categories (sword through skill_charm)
+
+### Progression Items
+- [x] Blank Tome (base crafting material)
+- [x] Skill Tome (grant specific skill level)
+- [x] Tome of Progression (choose-any skill level)
 - [x] Tome of Clear Mind (refund 1 level)
-- [x] Tome of Greater Clear Mind (reset skill)
-- [x] Skill Tome (grants specific skill)
-- [x] Blank Tome as a base crafting material
-- [x] Full crafting recipes for all tome types
+- [x] Tome of Greater Clear Mind (full skill reset)
+- [x] Skill Charm (Curios-compatible accessory)
 
-### Equipment Imbuing
-- [x] Single-Skill Imbuing via Anvil
-- [x] Multi-Skill Slot System (up to 3 per item)
-- [x] Sigil of Imbuement (opens slots)
-- [x] Tiered Tome of Cleansing (I, II, III) for targeted extraction
-- [x] Configurable Costs (`slot_opening_cost`, `cleansing_cost`)
-- [x] Correct `loot_mode` preservation on extraction
-- [x] Stacked attribute bonuses from multiple skills
-- [x] Visual feedback (Enchantment glint on Skill Tomes)
-
-### Integrations
-- [x] **Curios API Support**: Dedicated accessory slots for Skill Charms and auto-sync activation.
-
-### Skill Master Villager (Overhauled)
-- [x] Workstation registration (Skill Scribe Table)
-- [x] **Dynamic trade scaling**: 5-12 slots across 5 tiers.
-- [x] **Intelligent level distribution**: Tier-based tome levels (T1-T5).
-- [x] **Mastery System**: Reputation and special offers linked to player skill levels.
-- [x] **Tome Update Trades**: Emeralds + Tome(L) -> Tome(L+1).
-- [x] **Mastery Messaging**: Golden highlight and chat notifications for legendary status.
-- [x] **Loot Mode Awareness**: Trades respect `loot_mode` settings (imbue-only vs generic).
-- [x] **Admin Tooling**: Commands to force/set/reset the villager.
-
-### World Integration
-- [x] Tiered mob drop integration for Blank Tomes and Skill Tomes
-- [x] Global structure injection (Village, Dungeon, Nether, End)
-- [x] **Skill Master Houses**: Custom Jigsaw-based village buildings.
-- [x] **Structural Loot**: Skill Master Barrels with tiered progression loot.
-
-### Advanced Mechanics
-- [x] **Hidden Skills**: Visual discovery mode (invisible icons/tooltips until requirements met).
-- [x] **Enhanced Prerequisites**: Cross-category locking and specialized bypasses.
-- [x] **External Configuration**: Full datapack support for Trading, Reputation, and Loot.
-- [x] **Toggle Skills**: Support for 9 custom keybinds to manually activate/deactivate skills.
-- [x] **Toggle Stability**: Full state persistence across joins, silent login, and fixed first-click desync.
-- [x] **Effect Rewards**: Native Potion Effect support (`puffish_skills:effect`) with infinite duration handling.
+### Village Integration
+- [x] Skill Master villager profession
+- [x] Skill Scribe Table workstation
+- [x] 5-tier trade progression with mastery pricing
+- [x] Village structure generation (Plains, Desert, Savanna, Snowy, Taiga)
+- [x] Tiered loot barrels in structures
 
 ---
 
-## 🧪 Implemented (Experimental - Needs Testing)
-*These features are implemented but not yet recommended for general use. They may change or be removed.*
+## Experimental / In Development
 
-- [x] **Dynamic Cost Scaling**: Exponential cost multipliers for skills (`scaling_factor`).
-- [x] **Partial Rewards**: Logic to keep rewards active even if prerequisites are lost (`allow_partial_rewards`).
-- [x] **Reward Synergies**: Cross-category requirements within specific rewards (`prerequisite_skills` in Rewards).
+- [ ] Expression-based cost formulas for more complex scaling
+- [ ] Additional toggle patterns and edge cases
 
 ---
 
-## 🚀 Planned Features (Next Phase)
+## Planned Features
 
-### Progression Mechanics
-- [ ] Tooltip preview for slot opening costs
-- [ ] Better visual feedback in anvil when imbuing/extracting
-- [ ] **Deactivation Rewards (`locked`)**: Support for rewards that trigger when a skill hits Level 0 (deactivation hook).
-- [ ] **Stackable Skill Type**: Restore `puffish_skill_leveling:stackable` to allow base Pufferfish rewards and per-level rewards to scale together.
-- [ ] **Progressive Skill Tomes**: (Deferred) Adjust tome levels based on player progression with a config toggle.
+### Short Term
+- [ ] Persistent config file system (`config/puffish_skill_leveling/config.json`)
+  - [ ] `disable_skill_master_house` — disable Skill Master House structure generation
+  - [ ] `require_unlock_for_imbuing` — gate imbued gear bonuses behind base skill unlock
+  - [ ] `require_unlock_for_curio_imbuing` — gate curio imbued bonuses behind base skill unlock
+  - [ ] `debug_logging` — persistent debug logging toggle (currently runtime-only via command)
+- [ ] More datapack template categories (magic-focused, ranged-focused)
+- [ ] Expanded template pack with demo datapacks covering every feature
+- [ ] In-game configuration UI for server admins
 
-### Advanced Imbuing
-- [ ] Skill compatibility restrictions (e.g., some skills can't coexist)
-- [ ] Slot type restrictions (e.g., armor-only skills)
+### Medium Term
+- [ ] Skill synergy system (bonus effects for specific skill combinations)
+- [ ] Party/team skill sharing (share passive bonuses with nearby allies)
+- [ ] Achievement-based progression (grant levels from advancement triggers)
+- [ ] Custom GUI screens for imbued equipment inspection
 
-### World & Loot
-- [ ] **Apotheosis-style Skill Loot**: Automatically injecting randomized skills/imbuements into standard loot tables.
-
-### User Interface & Controls
-- [ ] **Timed Toggles**: Duration-based activation (`timed_toggle`) with `on_expiry` reward support.
-- [ ] **Re-implement Targeted Tome Selection Mode**: Restore functionality for Tomes that require selecting a specific skill (removed due to mixin crash).
-
-### 📚 Documentation & Technical 
-- [ ] **Comprehensive Developer Guide**: In-depth technical manual for modders and developers. Covers Java API, internal mixins, and deep-level JSON schema customization for advanced modding.
-
----
-
-## 🐛 Current Bugs & Known Issues
-*All major critical bugs from the v2.5.0 cycle have been resolved.*
-
-- [ ] **Hidden Skill Category Warning**: "Could not determine category for skill..." warnings sometimes appear during initial registry mapping for hidden skills.
+### Long Term
+- [ ] Skill specializations (branching paths within a single skill)
+- [ ] Cross-mod integration API for third-party addon support
+- [ ] Web-based datapack builder tool
+- [ ] Skill leaderboards and statistics tracking
 
 ---
 
-*Last Updated: 2026-02-11*
+## Known Limitations
+
+- Toggle keybinds are limited to 9 slots (corresponding to hotbar slots 1–9).
+- Curios integration requires the Curios API mod to be installed separately.
+- Village structures use jigsaw pooling—structure frequency depends on vanilla village generation.
+- Expression-based costs use a custom parser; complex math functions are not yet supported.

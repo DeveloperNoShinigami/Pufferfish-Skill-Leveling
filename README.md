@@ -1,97 +1,76 @@
-# Pufferfish Skill Leveling Addon
+# Pufferfish Skill Leveling
 
-**An addon for Pufferfish's Skills mod that adds multi-level skill progression, skill tomes, equipment imbuing, and the specialized Skill Master villager.**
+A multi-level progression addon for [Pufferfish Skills](https://modrinth.com/mod/puffish-skills) on Minecraft 1.20.1. Extends the base skill tree system with leveling, toggleable abilities, equipment imbuing, loot injection, and more — all driven by datapacks.
 
-> [!IMPORTANT]
-> **This is an ADDON** — it requires the base [Pufferfish Skills](https://www.curseforge.com/minecraft/mc-mods/pufferfish-skills) mod. All features are optional and designed to work alongside the original mod without conflicts.
-
----
-
-## 📖 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [1. Getting Started](./docs/GETTING_STARTED.md) | **Point A**: Installation & First Level |
-| [2. Features Reference](./docs/FEATURES.md) | **Point B**: Complete List of Mechanics |
-| [3. Datapack Guide](./docs/DATAPACK_GUIDE.md) | **Point C**: Beginner to Advanced Tutorial |
-| [4. Feature Roadmap](./docs/ROADMAP.md) | **Point Z**: Experimental & Future Work |
+Supports **Forge** and **Fabric** from a shared codebase via Architectury.
 
 ---
 
-## ✨ Key Features
+## Documentation
 
-### Multi-Level Skills
-- Skills can have multiple levels (1 to N).
-- Each level grants rewards and contributes to "Mastery".
-- Dynamic tooltips show current total level (Base + Bonuses).
+| Guide | Description |
+|-------|-------------|
+| [Getting Started](docs/GETTING_STARTED.md) | First-time setup, creating your first datapack and skill |
+| [Features](docs/FEATURES.md) | Complete feature reference with quick examples |
+| [Datapack Guide](docs/DATAPACK_GUIDE.md) | Full datapack schema, field reference, and best practices |
+| [Toggle System](docs/Toggle_System.md) | Pure, basic, and hybrid toggle skills with examples |
+| [Skill Master](docs/Skill_Master_System.md) | Villager profession, trades, tiers, and mastery pricing |
+| [Skill Imbuement](docs/Skill_Imbuement_System.md) | Dynamic skill imbuing on loot equipment |
+| [Universal Loot](docs/Universal_Loot_System.md) | Injecting Skill Tomes and items into loot tables |
+| [Changelog](docs/CHANGELOG.md) | Version history and recent fixes |
+| [Roadmap](docs/ROADMAP.md) | Completed, planned, and experimental features |
 
-### Toggle Skills
-- Primary active abilities (e.g., Rage, Night Vision).
-- **Keybind Support**: Assign skills to 9 dedicated mastery slots.
-- **State Persistence**: Toggle states are saved across sessions.
-- **Smart Logic**: Supports cooldowns and auto-disabling on gear removal.
-
-### Refined Effect Rewards
-- Native `puffish_skills:effect` reward type with advanced controls.
-- **Persistence**: Effects can be made immune to milk and curative items.
-- **Protection**: High-performance, event-based re-application system ensures effects remain active even after death or clearing.
-- **Smart Overwrite**: Intelligently respects stronger active potion effects.
-
-### Skill Master Villager
-- Dedicated profession for trading skill-related items.
-- **Dynamic Trading Pool**: Offers change based on your progression and "Mastery".
-- **Reputation System**: Villager tiers up as you trade; higher tiers unlock better wares.
-- **Tome Upgrades**: Exchange lower-level tomes and emeralds for higher-level ones.
-
-### Overhauled Skill Tomes
-- **Skill Tome** — Primary way to learn and level up specific skills.
-- **Sigil of Imbuement** — Rare sigils used to enchant equipment with skills.
-- **Tome of Clear Mind** — Refund skill levels and reclaim points.
-- **Tome of Cleansing** — Specialized extraction tomes to remove skills from gear.
-- **Blank Tome** — The foundation for crafting advanced tomes.
-
-### Equipment Imbuing
-- Apply skills to weapons and armor via the Anvil.
-- Bonuses update attribute stats (Hearts, Damage, etc.) in real-time.
-
-### Curios Integration
-- **Skill Charms**: Dedicated items that provide skill bonuses when placed in Curio slots.
-- **Auto-Sync**: Charms activate bonuses immediately upon equipping without needing base skill unlocks.
+A working template datapack is included at `docs/Datapack_Example/template_pack/`.
 
 ---
 
-## 🎮 Staff Commands
+## Key Features
+
+- **Multi-level skills** — Up to 999 levels per skill with per-level rewards
+- **Toggle abilities** — On/off skills with cooldowns, keybinds, and auto-disable on death
+- **Category gating** — Lock entire skill categories behind prerequisite requirements
+- **Equipment imbuing** — Sigils open slots; Skill Tomes apply, upgrade, and extract skills via anvil
+- **Dynamic imbuement** — Loot equipment spawns with pre-imbued skills based on dimension, distance, and category
+- **Universal loot injection** — Drop Skill Tomes and Charms from chests and mobs
+- **Skill Master villager** — Custom profession with mastery-scaled trades and village structures
+- **Curios integration** — Skill Charms work as wearable accessories
+- **Datapack-driven** — Every skill, reward, cost, and loot rule is defined in JSON
+
+---
+
+## Admin Commands
+
+All commands require permission level 2 (operator).
 
 | Command | Description |
 |---------|-------------|
-| `/skillleveling get <player> <category> <skill>` | View current base skill level |
-| `/skillleveling set <player> <category> <skill> <level>` | Set base level (Admin Override) |
-| `/skillleveling refund <player> <category> <skill> [amount\|all]` | Refund levels and return points |
-| `/skillleveling villager forceProfession` | Turn a villager into a Skill Master |
-| `/skillleveling villager setTier <1-5>` | Directly set a Skill Master's level |
-| `/skillleveling villager reset` | Reset looking-at Skill Master to Tier 1 / 0 Exp |
-| `/skillleveling info <player> <cat> <skill>` | Detailed level and point breakdown |
+| `/skillleveling set <player> <category> <skill> <level>` | Set a skill to a specific level |
+| `/skillleveling get <player> <category> <skill>` | View a player's current skill level |
+| `/skillleveling refund <player> <category> <skill>` | Refund all paid points from a skill |
+| `/skillleveling info <player> <category> <skill>` | Show detailed skill state (level, paid/granted, toggle) |
 
 ---
 
-## ⚠️ Requirements
+## Requirements
 
-- **[Pufferfish Skills](https://www.curseforge.com/minecraft/mc-mods/pufferfish-skills)** v0.17.1+
-- **Minecraft 1.20.1**
-- **Forge** or **Fabric** (latest versions recommended)
-
----
-
-## 🤝 Compatibility
-- **Curios API**: Full support for dedicated accessory slots and skill-imbued charms.
-- **Native Attribute Sync**: Works seamlessly with any mod using Minecraft's attributes.
-- **Clean NBT Storage**: Uses standard player data paths for maximum reliability.
-- **Namespace Agnostic**: Works across any namespace defined in your datapacks.
+- **Minecraft** 1.20.1
+- **Pufferfish Skills** v0.17.1
+- **Architectury API** (matching your loader version)
+- **Forge** or **Fabric** (with Fabric API)
+- **Curios API** *(optional, for Skill Charm support)*
 
 ---
 
-## 📄 License
-This project is open source. See the repository for license details.
+## Building
+
+```bash
+./gradlew build
+```
+
+Output JARs are placed in `Forge/build/libs/` and `Fabric/build/libs/`.
 
 ---
-*For issues, feature requests, or contributions, visit the project repository.*
+
+## License
+
+See [LICENSE.txt](LICENSE.txt) for code and [LICENSE-RESOURCES.txt](LICENSE-RESOURCES.txt) for assets.

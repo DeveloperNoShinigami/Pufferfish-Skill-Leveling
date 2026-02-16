@@ -6,6 +6,7 @@ import net.minecraft.util.Identifier;
 import net.bluelotuscoding.skillleveling.mixin_interface.SkillLevelHolder;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +30,7 @@ public class SkillLevelingDataManager {
     private static class PlayerCache {
         final Map<Identifier, Map<String, Integer>> levels = new ConcurrentHashMap<>();
         final Map<Identifier, Map<String, Boolean>> toggles = new ConcurrentHashMap<>();
+        final Set<Identifier> unlockedCategories = ConcurrentHashMap.newKeySet();
     }
 
     public SkillLevelingDataManager() {
@@ -109,6 +111,15 @@ public class SkillLevelingDataManager {
             skillTag.put("ToggleStates", togglesTag);
         }
 
+        // Save Unlocked Categories (for keep_unlocked persistence)
+        if (!cache.unlockedCategories.isEmpty()) {
+            net.minecraft.nbt.NbtList unlockedList = new net.minecraft.nbt.NbtList();
+            for (Identifier catId : cache.unlockedCategories) {
+                unlockedList.add(net.minecraft.nbt.NbtString.of(catId.toString()));
+            }
+            skillTag.put("UnlockedCategories", unlockedList);
+        }
+
         if (player instanceof SkillLevelHolder holder) {
             holder.addon$setSkillLevelingData(skillTag);
         }
@@ -154,6 +165,17 @@ public class SkillLevelingDataManager {
                                 toggles.put(skillId, catTag.getBoolean(skillId));
                             }
                             cache.toggles.put(catId, toggles);
+                        }
+                    }
+                }
+
+                // Load Unlocked Categories (for keep_unlocked persistence)
+                if (skillTag.contains("UnlockedCategories", 9)) {
+                    net.minecraft.nbt.NbtList unlockedList = skillTag.getList("UnlockedCategories", 8);
+                    for (int i = 0; i < unlockedList.size(); i++) {
+                        Identifier catId = Identifier.tryParse(unlockedList.getString(i));
+                        if (catId != null) {
+                            cache.unlockedCategories.add(catId);
                         }
                     }
                 }
@@ -240,6 +262,36 @@ public class SkillLevelingDataManager {
 
         catToggleData.put(skillId, active);
         saveToNbt(player, cache);
+    }
+
+    /**
+     * Check if a category has been previously unlocked for this player.
+     * Used with keep_unlocked to persist unlock state across sessions.
+     */
+    public boolean isCategoryPreviouslyUnlocked(ServerPlayerEntity player, Identifier categoryId) {
+        var cache = getPlayerCache(player);
+        return cache.unlockedCategories.contains(categoryId);
+    }
+
+    /**
+     * Mark a category as having been unlocked for this player.
+     * Persisted to NBT so it survives across relogs.
+     */
+    public void markCategoryUnlocked(ServerPlayerEntity player, Identifier categoryId) {
+        var cache = getPlayerCache(player);
+        if (cache.unlockedCategories.add(categoryId)) {
+            saveToNbt(player, cache);
+        }
+    }
+
+    /**
+     * Remove a category from the previously-unlocked set (e.g. on skill reset).
+     */
+    public void markCategoryLocked(ServerPlayerEntity player, Identifier categoryId) {
+        var cache = getPlayerCache(player);
+        if (cache.unlockedCategories.remove(categoryId)) {
+            saveToNbt(player, cache);
+        }
     }
 
     private <T> Map<String, T> getCategoryData(Map<Identifier, Map<String, T>> playerData,

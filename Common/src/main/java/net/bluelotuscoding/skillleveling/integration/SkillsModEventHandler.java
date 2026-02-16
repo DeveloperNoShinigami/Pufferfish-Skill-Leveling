@@ -199,6 +199,9 @@ public class SkillsModEventHandler {
                     // FULL SYNC: Send all skill level data to joining player
                     levelingManager.syncAllSkillsToPlayer(player);
 
+                    // CATEGORY GATING: Initialize category lock states on join
+                    net.bluelotuscoding.skillleveling.manager.CategoryLockManager.initializeLocks(player);
+
                     // JOIN LOGGING: Track player connections for debugging
                     logger.debug("Synchronized skill level data for joining player: " + player.getName().getString());
                 });

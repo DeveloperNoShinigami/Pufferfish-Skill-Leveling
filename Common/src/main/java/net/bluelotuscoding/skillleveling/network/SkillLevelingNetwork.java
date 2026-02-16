@@ -36,6 +36,7 @@ public class SkillLevelingNetwork {
     public static final Identifier FULL_SKILL_SYNC = SkillLevelingMod.createIdentifier("full_skill_sync");
     public static final Identifier TOGGLE_COOLDOWN = SkillLevelingMod.createIdentifier("toggle_cooldown");
     public static final Identifier REQUEST_TOGGLE_SKILL = SkillLevelingMod.createIdentifier("request_toggle_skill");
+    public static final Identifier CLOSE_SKILL_SCREEN = SkillLevelingMod.createIdentifier("close_skill_screen");
 
     // ================================================
     // SERVER-TO-CLIENT SYNCHRONIZATION

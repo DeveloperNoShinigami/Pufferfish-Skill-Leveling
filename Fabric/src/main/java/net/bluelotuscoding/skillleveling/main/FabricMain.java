@@ -256,5 +256,16 @@ public class FabricMain implements ModInitializer {
                         SkillLevelingMod.getInstance().getSkillLevelingManager()
                                         .refreshAllRewards(newPlayer);
                 });
+
+                // Player join: initialize category locks after Pufferfish syncs
+                net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN
+                                .register((handler, sender, server) -> {
+                                        var player = handler.getPlayer();
+                                        // Defer to next tick so Pufferfish's updateAllCategories runs first
+                                        server.execute(() -> {
+                                                net.bluelotuscoding.skillleveling.manager.CategoryLockManager
+                                                                .initializeLocks(player);
+                                        });
+                                });
         }
 }

@@ -63,40 +63,19 @@ public abstract class SkillDefinitionConfigMixin {
                 if (rewardElement.isJsonObject()) {
                     var rewardObj = rewardElement.getAsJsonObject();
                     var typeElement = rewardObj.get("type");
-                    if (typeElement != null && typeElement.isJsonPrimitive()
-                            && typeElement.getAsString().equals("puffish_skill_leveling:per_level_rewards")) {
-                        var dataElement = rewardObj.get("data");
-                        if (dataElement != null && dataElement.isJsonObject()) {
-                            var data = dataElement.getAsJsonObject();
+                    if (typeElement != null && typeElement.isJsonPrimitive()) {
+                        String rewardType = typeElement.getAsString();
 
-                            // Inject missing fields from top level using raw GSON
-                            if (rawRoot.has("max_skill_level") && !data.has("max_skill_level")) {
-                                data.add("max_skill_level", rawRoot.get("max_skill_level"));
-                            }
-                            if (rawRoot.has("points_per_level") && !data.has("points_per_level")) {
-                                data.add("points_per_level", rawRoot.get("points_per_level"));
-                            }
-                            if (rawRoot.has("merge_description") && !data.has("merge_description")) {
-                                data.add("merge_description", rawRoot.get("merge_description"));
-                            }
-                            if (rawRoot.has("descriptions") && !data.has("descriptions")) {
-                                data.add("descriptions", rawRoot.get("descriptions"));
-                            }
-                            if (rawRoot.has("extra_descriptions") && !data.has("extra_descriptions")) {
-                                data.add("extra_descriptions", rawRoot.get("extra_descriptions"));
-                            }
-
-                            // Inject prerequisites into reward data
-                            if (rawRoot.has("prerequisite_skills") && !data.has("prerequisite_skills")) {
-                                data.add("prerequisite_skills", rawRoot.get("prerequisite_skills"));
-                            }
-                            if (rawRoot.has("required_skill_for_level") && !data.has("required_skill_for_level")) {
-                                data.add("required_skill_for_level", rawRoot.get("required_skill_for_level"));
-                            }
-
-                            // Ensure skill_id is set if missing
-                            if (!data.has("skill_id")) {
-                                data.addProperty("skill_id", id);
+                        if (rewardType.equals("puffish_skill_leveling:per_level_rewards")) {
+                            // Direct per_level_rewards at top level
+                            addon$injectFieldsIntoPerLevelData(rewardObj, rawRoot, id);
+                        } else if (rewardType.equals("puffish_skill_leveling:toggle")) {
+                            // Toggle reward — look inside enable_rewards for nested per_level_rewards
+                            var dataElement = rewardObj.get("data");
+                            if (dataElement != null && dataElement.isJsonObject()) {
+                                var toggleData = dataElement.getAsJsonObject();
+                                addon$injectFieldsIntoNestedRewards(toggleData, "enable_rewards", rawRoot, id);
+                                addon$injectFieldsIntoNestedRewards(toggleData, "disable_rewards", rawRoot, id);
                             }
                         }
                     }
@@ -316,13 +295,15 @@ public abstract class SkillDefinitionConfigMixin {
                         !requiredSkillsList.isEmpty();
 
                 if (hasAddonFeatures) {
-                    int finalMaxLevels = rootObject.get("max_skill_level").getSuccess()
-                            .flatMap(e -> e.getAsInt().getSuccess())
-                            .orElse(1); // Default to 1 for standard skills
-
                     boolean toggle = rootObject.get("toggle").getSuccess()
                             .flatMap(e -> e.getAsBoolean().getSuccess())
                             .orElse(false);
+
+                    // Default maxLevel: 0 for pure toggles (no purchasable levels), 1 for standard skills
+                    int defaultMaxLevel = toggle ? 0 : 1;
+                    int finalMaxLevels = rootObject.get("max_skill_level").getSuccess()
+                            .flatMap(e -> e.getAsInt().getSuccess())
+                            .orElse(defaultMaxLevel);
                     int keybindSlot = rootObject.get("keybind_slot").getSuccess()
                             .flatMap(e -> e.getAsInt().getSuccess())
                             .orElse(0);
@@ -382,5 +363,74 @@ public abstract class SkillDefinitionConfigMixin {
             }
         }
         return LeveledConfigStorage.EnchantmentCostConfig.FREE;
+    }
+
+    /**
+     * Inject top-level fields (descriptions, max_skill_level, etc.) into a
+     * per_level_rewards data object.
+     */
+    @Unique
+    private static void addon$injectFieldsIntoPerLevelData(com.google.gson.JsonObject rewardObj,
+            com.google.gson.JsonObject rawRoot, String id) {
+        var dataElement = rewardObj.get("data");
+        if (dataElement == null || !dataElement.isJsonObject()) {
+            return;
+        }
+        var data = dataElement.getAsJsonObject();
+
+        // Inject missing fields from top level using raw GSON
+        if (rawRoot.has("max_skill_level") && !data.has("max_skill_level")) {
+            data.add("max_skill_level", rawRoot.get("max_skill_level"));
+        }
+        if (rawRoot.has("points_per_level") && !data.has("points_per_level")) {
+            data.add("points_per_level", rawRoot.get("points_per_level"));
+        }
+        if (rawRoot.has("merge_description") && !data.has("merge_description")) {
+            data.add("merge_description", rawRoot.get("merge_description"));
+        }
+        if (rawRoot.has("descriptions") && !data.has("descriptions")) {
+            data.add("descriptions", rawRoot.get("descriptions"));
+        }
+        if (rawRoot.has("extra_descriptions") && !data.has("extra_descriptions")) {
+            data.add("extra_descriptions", rawRoot.get("extra_descriptions"));
+        }
+
+        // Inject prerequisites into reward data
+        if (rawRoot.has("prerequisite_skills") && !data.has("prerequisite_skills")) {
+            data.add("prerequisite_skills", rawRoot.get("prerequisite_skills"));
+        }
+        if (rawRoot.has("required_skill_for_level") && !data.has("required_skill_for_level")) {
+            data.add("required_skill_for_level", rawRoot.get("required_skill_for_level"));
+        }
+
+        // Ensure skill_id is set if missing
+        if (!data.has("skill_id")) {
+            data.addProperty("skill_id", id);
+        }
+    }
+
+    /**
+     * Search inside a toggle reward's sub-reward arrays (enable_rewards, disable_rewards)
+     * for nested per_level_rewards and inject top-level fields into them.
+     */
+    @Unique
+    private static void addon$injectFieldsIntoNestedRewards(com.google.gson.JsonObject toggleData,
+            String arrayKey, com.google.gson.JsonObject rawRoot, String id) {
+        var arrayElement = toggleData.get(arrayKey);
+        if (arrayElement == null || !arrayElement.isJsonArray()) {
+            return;
+        }
+        var nestedRewards = arrayElement.getAsJsonArray();
+        for (int j = 0; j < nestedRewards.size(); j++) {
+            var nestedElem = nestedRewards.get(j);
+            if (nestedElem.isJsonObject()) {
+                var nestedObj = nestedElem.getAsJsonObject();
+                var nestedType = nestedObj.get("type");
+                if (nestedType != null && nestedType.isJsonPrimitive()
+                        && nestedType.getAsString().equals("puffish_skill_leveling:per_level_rewards")) {
+                    addon$injectFieldsIntoPerLevelData(nestedObj, rawRoot, id);
+                }
+            }
+        }
     }
 }

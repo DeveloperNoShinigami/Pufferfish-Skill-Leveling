@@ -1,54 +1,74 @@
 # Getting Started with Pufferfish Skill Leveling
 
-This guide will walk you through setting up and using the **Pufferfish Skill Leveling Addon**. This addon extends the official Pufferfish Skills mod with multi-level progression, skill tomes, and equipment imbuing.
+Welcome! This guide walks you through installing the addon and creating your first multi-level skill. No prior datapack experience is required — just follow along step by step.
 
-> [!IMPORTANT]
-> **This addon requires the base Pufferfish Skills mod.** All features are optional and designed to work alongside the original mod without conflicts.
-
----
-
-## Installation
-
-1. Install [Pufferfish Skills](https://www.curseforge.com/minecraft/mc-mods/pufferfish-skills) (v0.17.1+ for MC 1.20)
-2. Install this addon (Pufferfish Skill Leveling)
-3. Launch Minecraft — both mods will load together
-
-> [!NOTE]
-> The addon does **not** include a production datapack. You must create your own using the guide below.
+> **Requires:** [Pufferfish Skills](https://www.curseforge.com/minecraft/mc-mods/pufferfish-skills) v0.17.1+ for Minecraft 1.20.1 (Forge or Fabric).
 
 ---
 
-## Quick Start: Creating Your First Multi-Level Skill
+## Step 1: Install the Mods
 
-### Step 1: Create a Datapack
+1. Download and install [Pufferfish Skills](https://www.curseforge.com/minecraft/mc-mods/pufferfish-skills).
+2. Download and install this addon — **Pufferfish Skill Leveling**.
+3. Place both `.jar` files in your `mods/` folder and launch Minecraft.
 
-Create a new datapack in your world's `datapacks` folder with this structure:
+> The addon does **not** ship with a built-in datapack. You create one to define your skills, which gives you full control over your server's progression.
+
+---
+
+## Step 2: Create a Datapack
+
+Every skill you create lives inside a **datapack**. Here's the folder structure you need:
 
 ```
-my_skills/
+<your_world>/datapacks/my_skills/
 ├── pack.mcmeta
 └── data/
     └── my_skills/
         └── puffish_skills/
             └── categories/
                 └── combat/
-                    ├── category.json
-                    ├── definitions.json
-                    ├── skills.json
-                    └── connections.json
+                    ├── category.json      ← How the category looks
+                    ├── definitions.json   ← Your skill definitions (the important one!)
+                    ├── skills.json        ← Skill positions on the tree
+                    └── connections.json   ← Lines between skills
 ```
 
-### Step 2: Define a Multi-Level Skill
+Create `pack.mcmeta`:
 
-In `definitions.json`, create a skill with multiple levels:
+```json
+{
+    "pack": {
+        "pack_format": 15,
+        "description": "My Custom Skills"
+    }
+}
+```
+
+Create `category.json`:
+
+```json
+{
+    "icon": {
+        "type": "item",
+        "data": { "item": "minecraft:iron_sword" }
+    },
+    "background": "minecraft:textures/block/stone.png"
+}
+```
+
+---
+
+## Step 3: Create Your First Skill
+
+Open `definitions.json` and paste this — a 3-level attack damage skill:
 
 ```json
 {
     "warrior_strength": {
-        "type": "puffish_skills:default",
         "category_id": "combat",
         "title": "Warrior's Strength",
-        "description": "Increases your attack damage.",
+        "description": "Increases your melee attack damage.",
         "icon": {
             "type": "item",
             "data": { "item": "minecraft:iron_sword" }
@@ -56,9 +76,9 @@ In `definitions.json`, create a skill with multiple levels:
         "max_skill_level": 3,
         "points_per_level": 1,
         "descriptions": {
-            "1": "Level 1: +1 Attack Damage",
-            "2": "Level 2: +2 Attack Damage",
-            "3": "Level 3: +3 Attack Damage"
+            "1": "§7+1 Attack Damage",
+            "2": "§7+2 Attack Damage",
+            "3": "§6+3 Attack Damage §c(MAX)"
         },
         "rewards": [
             {
@@ -81,7 +101,7 @@ In `definitions.json`, create a skill with multiple levels:
                                 "type": "puffish_skills:attribute",
                                 "data": {
                                     "attribute": "generic.attack_damage",
-                                    "value": 1.0,
+                                    "value": 2.0,
                                     "operation": "addition"
                                 }
                             }
@@ -91,7 +111,7 @@ In `definitions.json`, create a skill with multiple levels:
                                 "type": "puffish_skills:attribute",
                                 "data": {
                                     "attribute": "generic.attack_damage",
-                                    "value": 1.0,
+                                    "value": 3.0,
                                     "operation": "addition"
                                 }
                             }
@@ -105,10 +125,11 @@ In `definitions.json`, create a skill with multiple levels:
 }
 ```
 
-> [!WARNING]
-> **The `metadata` field is required!** Even if empty (`"metadata": {}`), it must be present or the configuration will fail to load.
+> **Common mistake:** Forgetting `"metadata": {}`. It's required even if empty — the parser will fail without it.
 
-### Step 3: Add to the Skill Tree
+---
+
+## Step 4: Place It on the Skill Tree
 
 In `skills.json`:
 
@@ -123,69 +144,78 @@ In `skills.json`:
 }
 ```
 
-### Step 4: Test It!
+And `connections.json` (empty for now):
 
-1. Run `/reload` in-game
-2. Open the Puffish Skills UI (default: `K` key)
-3. Your new skill should appear with level indicators
-
----
-
-## Feature Overview
-
-### 1. Multi-Level Skills
-Skills can have any number of levels, each with distinct rewards. Players unlock levels one at a time, spending skill points per level.
-
-### 2. Skill Tomes
-Special items that grant skill progress when used:
-- **Tome of Progression** — Advances a skill by 1 level
-- **Tome of Clear Mind** — Refunds 1 level of a skill
-- **Tome of Greater Clear Mind** — Resets a skill to level 0
-- **Skill Tome** — Grants a specific skill (lootable, craftable)
-
-### 3. Equipment Imbuing
-Skills with `"loot_mode": "imbue_only"` can be applied to equipment via an anvil. Additionally, equipment found in loot can be automatically imbued based on your configuration.
-- **Detailed Guide**: [Skill Imbuement System](Skill_Imbuement_System.md)
-
-### 4. Universal Loot Injection
-Add custom items to any loot table in the game with a single JSON config.
-- **Detailed Guide**: [Universal Loot System](Universal_Loot_System.md)
-
-### 5. Real-Time Attribute Sync
-All attribute changes (health, damage, speed, armor, etc.) update **instantly** in your UI when equipping or leveling skills. No relogging required.
+```json
+{}
+```
 
 ---
 
-## Loot Modes
+## Step 5: Test It
 
-Controls how skills can be acquired:
+1. Run `/reload` in-game.
+2. Open the skill tree (default key: `K`).
+3. Click your skill to level it up — the tooltip updates with each level.
 
-| Mode | Skill Tree | Imbuing | Use Case |
-|------|------------|---------|----------|
-| `"both"` (default) | ✅ | ✅ | Standard skills |
-| `"tome_only"` | ✅ | ❌ | Tree-exclusive (no equipment) |
-| `"imbue_only"` | ❌ | ✅ | Equipment-only enchantments |
+That's it! You've created a multi-level skill.
 
 ---
 
-## Commands
+## Understanding What You Just Made
 
-| Command | Description |
-|---------|-------------|
-| `/skillleveling get <player> <category> <skill>` | View current skill level |
-| `/skillleveling set <player> <category> <skill> <level>` | Set skill to specific level |
-| `/skillleveling advance <player> <category> <skill>` | Advance skill by 1 level |
-| `/skillleveling refund <player> <category> <skill> [amount]` | Refund levels |
-| `/skillleveling refund <player> <category> <skill> all` | Reset skill to 0 |
+| Field | What It Does |
+|-------|--------------|
+| `max_skill_level` | How many times players can level this skill. |
+| `points_per_level` | Skill points spent per level-up. |
+| `descriptions` | Tooltip text for each level. Uses Minecraft `§` color codes. |
+| `per_level_rewards` | The actual gameplay effect at each level. Each level replaces the previous one. |
+| `metadata` | Required field — use `{}` if empty. |
 
----
-
-## Next Steps
-
-- **[Point B: Features Reference](./FEATURES.md)** — Complete list of all addon features and mechanics.
-- **[Point C: Datapack Guide](./DATAPACK_GUIDE.md)** — Detailed journey from your first skill to advanced mastery logic.
-- **[Point Z: Feature Roadmap](./ROADMAP.md)** — Experimental features and future development plans.
+**How rewards work:** At Level 1 you get +1 damage. When you level to 2, Level 1's reward is removed and Level 2's reward (+2 damage) is applied. You always have exactly the reward matching your current level.
 
 ---
 
-*For issues or feature requests, open an issue on the project repository.*
+## What's Next?
+
+### Quick Wins
+- **Add more skills** — duplicate the pattern above with different IDs and rewards.
+- **Connect skills** — add entries to `connections.json` to draw lines between skills (creates tree structure).
+
+### Explore Features
+
+| Feature | Difficulty | Guide |
+|---------|------------|-------|
+| Add tooltip descriptions | Beginner | [Datapack Guide — Descriptions](./DATAPACK_GUIDE.md#-point-e-descriptions--tooltips) |
+| Require one skill before another | Beginner | [Datapack Guide — Gating](./DATAPACK_GUIDE.md#-point-d-the-gating-systems) |
+| Toggle abilities (Night Vision, Rage) | Intermediate | [Toggle System](./Toggle_System.md) |
+| Lock categories behind skill requirements | Intermediate | [Datapack Guide — Category Gating](./DATAPACK_GUIDE.md#3-category-gating-prerequisite_skills-in-categoryjson) |
+| Apply skills to equipment via Anvil | Advanced | [Datapack Guide — Anvil & Imbuing](./DATAPACK_GUIDE.md#%EF%B8%8F-point-h-the-anvil--imbuing-ecosystem) |
+| Add skill items to loot tables | Advanced | [Universal Loot System](./Universal_Loot_System.md) |
+| Dynamic XP cost formulas | Advanced | [Datapack Guide — Costs](./DATAPACK_GUIDE.md#-point-g-costs--xp-expressions) |
+
+### Full Documentation
+
+| Guide | What It Covers |
+|-------|----------------|
+| [Features Reference](./FEATURES.md) | Complete list of every feature with field tables |
+| [Datapack Guide](./DATAPACK_GUIDE.md) | Progressive tutorial from basics to expert configurations |
+| [Toggle System](./Toggle_System.md) | Active abilities, keybinds, cooldowns, hybrid patterns |
+| [Skill Imbuement System](./Skill_Imbuement_System.md) | Random loot imbuing, dimension scaling |
+| [Universal Loot System](./Universal_Loot_System.md) | Adding custom items to any loot table |
+
+---
+
+## Useful Commands
+
+| Command | What It Does |
+|---------|--------------|
+| `/reload` | Reloads all datapacks. Use after every change. |
+| `/skillleveling get <player> <category> <skill>` | Check a player's current level. |
+| `/skillleveling set <player> <category> <skill> <level>` | Force-set a level (great for testing). |
+| `/skillleveling advance <player> <category> <skill>` | Level up by 1 (respects requirements). |
+| `/skillleveling refund <player> <category> <skill> all` | Reset a skill back to 0. |
+
+---
+
+*Having trouble? Check the [Datapack Guide — Troubleshooting](./DATAPACK_GUIDE.md#-troubleshooting) section.*

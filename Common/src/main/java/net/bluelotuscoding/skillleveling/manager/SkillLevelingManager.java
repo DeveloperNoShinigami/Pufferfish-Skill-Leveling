@@ -507,6 +507,10 @@ public class SkillLevelingManager {
                     .error("Error during onPlayerJoin auto-initialization: " + e.getMessage());
         }
 
+        // CATEGORY GATING: Lock categories whose prerequisites are not met BEFORE syncing.
+        // Must happen before syncAllSkillsToPlayer so the client sees correct lock state immediately.
+        net.bluelotuscoding.skillleveling.manager.CategoryLockManager.initializeLocks(player);
+
         // Sync all skill levels and descriptions to client for UI display
         // This triggers SkillsMod updates, so rewards must be pre-seeded by now!
         syncAllSkillsToPlayer(player);
@@ -704,31 +708,9 @@ public class SkillLevelingManager {
         int gearBonus = calculateGearBonus(player, categoryId, skillId);
         int curioBonus = calculateCurioBonus(player, categoryId, skillId);
 
-        // Gating for regular Equipment (Gear)
-        if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.requireUnlockForImbuing && baseLevel == 0
-                && gearBonus > 0) {
-            // Check if skill is allowed via loot (both or imbue_only)
-            var config = net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.get(skillId);
-            if (config == null || (!"imbue_only".equals(config.lootMode) && !"both".equals(config.lootMode))) {
-                /*
-                 * SkillLevelingMod.getInstance().getLogger()
-                 * .debug("[SkillLeveling] Gear bonus skipped for " + skillId
-                 * + ": base level 0 and unlock required");
-                 */
-                gearBonus = 0;
-            }
-        }
-
-        // Gating for Curios
-        if (net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.requireUnlockForCurioImbuing && baseLevel == 0
-                && curioBonus > 0) {
-            /*
-             * SkillLevelingMod.getInstance().getLogger().debug(
-             * "[SkillLeveling] Curio bonus skipped for " + skillId +
-             * ": base level 0 and curio unlock required");
-             */
-            curioBonus = 0;
-        }
+        // NOTE: Gating for equipment imbuing (require_unlock_for_imbuing) and
+        // curio imbuing (require_unlock_for_curio_imbuing) are planned for a
+        // future config update. Currently, all imbued bonuses apply unconditionally.
 
         int bonusLevel = gearBonus + curioBonus;
         int total = baseLevel + bonusLevel;
@@ -2157,9 +2139,9 @@ public class SkillLevelingManager {
         int currentMaxLevel = getMaxLevel(categoryId, skillId);
 
         // NEW LOGIC FOR BASIC TOGGLES:
-        // If max_skill_level is 1, we should allow toggling at level 0.
-        if (currentMaxLevel == 1) {
-            // Basic toggle skill - always allowed at any level (including 0)
+        // If max_skill_level is 0 or 1, it's a pure/basic toggle - allow at any level.
+        if (currentMaxLevel <= 1) {
+            // Pure toggle (0) or basic toggle (1) - always allowed
         } else if (totalLevel < 1) {
             // Hybrid skill (levels > 1) - requires at least level 1
             missingPrereqs.add("§c✗ " + skillId + " Lv1 §7[Current: " + totalLevel + "]");

@@ -72,10 +72,13 @@ public abstract class ClientCategoryDataMixin {
     }
 
     /**
-     * Intercept getSkillState on the client to:
-     * - Show UNLOCKED (highlighted) at max level
-     * - Show AFFORDABLE/AVAILABLE below max level for re-purchase
-     * - Ensure imbue_only/tome_only skills stay UNLOCKED and don't look buyable
+     * Intercept getSkillState on the client with same priority system as server:
+     * 1. Prerequisites First: If custom prerequisites fail → LOCKED.
+     * 2. Mastery Second: If max level reached → UNLOCKED (Gold).
+     * 3. Toggle Logic Third:
+     *    - Loot/Imbue toggle at Level 0 → LOCKED.
+     *    - Standard Toggle / Learned Hybrid → AVAILABLE/AFFORDABLE (bypasses parents).
+     * 4. Default: Normal progression logic.
      */
     @Inject(method = "getSkillState", at = @At("HEAD"), cancellable = true)
     private void onGetSkillState(ClientSkillConfig skill, CallbackInfoReturnable<Skill.State> cir) {
@@ -87,73 +90,30 @@ public abstract class ClientCategoryDataMixin {
         String skillId = skill.id();
         String defId = skill.definitionId();
 
-        // 1. Get current levels and max level using robust lookups
         int baseLevel = ClientSkillLevelStorage.getBaseLevel(categoryId, skillId);
-        // SYNC FIX: Use the total level synced from server instead of recalculating
-        // locally.
-        // This ensures Curio bonuses (which aren't scanned in the basic EquipmentSlot
-        // loop)
-        // are correctly reflected in the GUI state (Golden/Unlocked).
         int totalLevel = ClientSkillLevelStorage.getLevel(categoryId, skillId);
-
-        // Use the same robust max level logic as tooltips
         int maxLevel = Math.max(
                 ClientDescriptionStorage.getMaxLevel(defId),
                 ClientSkillLevelStorage.getMaxLevel(categoryId, skillId));
 
-        // State will be determined below
-        Skill.State determinedState = null;
-
-        // TOGGLE SKILL UI RULES:
-        // 1. Never show UNLOCKED (Golden) for toggle skills.
-        // 2. Imbue/Loot: LOCKED if level 0, AVAILABLE if level > 0.
-        // 3. Standard: Always AVAILABLE.
-        if (ClientSkillLevelStorage.isToggle(categoryId, skillId)) {
-            String lootMode = ClientDescriptionStorage.getLootMode(defId);
-            if (lootMode.isEmpty()) {
-                // Fallback to SyncPacket data for toggles not in description sync
-                lootMode = ClientSkillLevelStorage.getLootModeByDefinitionId(defId);
-            }
-            boolean isLootLearned = lootMode != null && !lootMode.isEmpty();
-
-            if (isLootLearned) {
-                if (totalLevel > 0) {
-                    determinedState = Skill.State.AVAILABLE;
-                } else {
-                    determinedState = Skill.State.LOCKED;
-                }
-            } else {
-                // Standard toggle: Always AVAILABLE
-                determinedState = Skill.State.AVAILABLE;
-            }
-
-            cir.setReturnValue(determinedState);
-            return;
-        }
-
-        // DYNAMIC PREREQUISITE CHECK: Skills deactivate and lock/hide when
-        // prerequisites are lost
+        // ── Priority 1: Prerequisites ──
+        // If custom prerequisites fail, the skill is LOCKED (regardless of level/type).
         if (defId != null) {
             try {
                 boolean prereqsMet = addon$checkClientPrerequisites(categoryId, defId);
-                boolean hidden = ClientSkillLevelStorage.isHidden(categoryId, skillId);
-
-                // If prerequisites are NOT met, keep skill locked/hidden
                 if (!prereqsMet) {
-                    determinedState = Skill.State.LOCKED;
-                    cir.setReturnValue(determinedState);
+                    cir.setReturnValue(Skill.State.LOCKED);
                     return;
                 }
 
-                // If prerequisites ARE met but skill is level 0 and was hidden,
-                // we MUST explicitly override the state to reveal it.
+                // If prerequisites ARE met and skill was hidden at level 0, reveal it
+                boolean hidden = ClientSkillLevelStorage.isHidden(categoryId, skillId);
                 if (hidden && totalLevel == 0) {
                     if (isAffordable(skill)) {
-                        determinedState = Skill.State.AFFORDABLE;
+                        cir.setReturnValue(Skill.State.AFFORDABLE);
                     } else {
-                        determinedState = Skill.State.AVAILABLE;
+                        cir.setReturnValue(Skill.State.AVAILABLE);
                     }
-                    cir.setReturnValue(determinedState);
                     return;
                 }
             } catch (Exception e) {
@@ -161,35 +121,55 @@ public abstract class ClientCategoryDataMixin {
             }
         }
 
-        // 2. Decide State
-
-        // Mastery Check: ONLY show as UNLOCKED (Golden) if TOTAL level reaches max
-        if (maxLevel > 0 && totalLevel >= maxLevel) {
-            determinedState = Skill.State.UNLOCKED;
-            cir.setReturnValue(determinedState);
+        // ── Priority 2: Mastery ──
+        // If max level is reached and NOT a toggle, the skill is UNLOCKED (Gold).
+        // Toggle skills skip mastery — they remain togglable (handled in Priority 3).
+        boolean isToggle = ClientSkillLevelStorage.isToggle(categoryId, skillId);
+        if (maxLevel > 0 && totalLevel >= maxLevel && !isToggle) {
+            cir.setReturnValue(Skill.State.UNLOCKED);
             return;
         }
 
-        // Progression Check: If we are below max level
-        if (totalLevel > 0 || baseLevel > 0 || !ClientSkillLevelStorage.isHidden(categoryId, skillId)) {
-            // If baseLevel < maxLevel, it might be buyable or just an active loot skill
-            if (baseLevel < maxLevel) {
-                // If it's a loot-only skill, it shouldn't look "buyable" (AFFORDABLE/AVAILABLE)
-                // in a way that suggests spending points if it's not possible.
-                if (isAffordable(skill)) {
-                    determinedState = Skill.State.AFFORDABLE;
-                } else {
-                    determinedState = Skill.State.AVAILABLE;
-                }
-                cir.setReturnValue(determinedState);
-                return;
-            } else {
-                // Base at max, but total might not be (penalty) - show UNLOCKED
-                determinedState = Skill.State.UNLOCKED;
-                cir.setReturnValue(determinedState);
+        // ── Priority 3: Toggle Logic ──
+        if (isToggle) {
+            String lootMode = ClientDescriptionStorage.getLootMode(defId);
+            if (lootMode.isEmpty()) {
+                lootMode = ClientSkillLevelStorage.getLootModeByDefinitionId(defId);
+            }
+            boolean isLootLearned = lootMode != null && !lootMode.isEmpty();
+
+            if (isLootLearned && totalLevel == 0) {
+                // Loot/Imbue toggle at Level 0 → LOCKED
+                cir.setReturnValue(Skill.State.LOCKED);
                 return;
             }
+
+            // Standard Toggle / Learned Hybrid → AVAILABLE/AFFORDABLE
+            // Bypasses parent skill checks so toggles are always accessible
+            if (isAffordable(skill)) {
+                cir.setReturnValue(Skill.State.AFFORDABLE);
+            } else {
+                cir.setReturnValue(Skill.State.AVAILABLE);
+            }
+            return;
         }
+
+        // ── Priority 4: Default ──
+        // For skills with progression but not yet mastered:
+        if (totalLevel > 0 || baseLevel > 0) {
+            if (baseLevel < maxLevel) {
+                if (isAffordable(skill)) {
+                    cir.setReturnValue(Skill.State.AFFORDABLE);
+                } else {
+                    cir.setReturnValue(Skill.State.AVAILABLE);
+                }
+            } else {
+                // Base at max, but total isn't (e.g., equipment penalty) → still active
+                cir.setReturnValue(Skill.State.UNLOCKED);
+            }
+            return;
+        }
+        // Level 0 non-toggle: falls through to Pufferfish default (parent checks, etc.)
     }
 
     @Unique

@@ -1,0 +1,10 @@
+{
+    "title": "Berserker",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:diamond_axe"
+        }
+    },
+    "background": "textures/gui/advancements/backgrounds/stone.png"
+}

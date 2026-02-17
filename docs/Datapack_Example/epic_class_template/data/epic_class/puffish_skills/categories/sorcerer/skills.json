@@ -1,0 +1,27 @@
+{
+    "arcane_power": {
+        "x": 0,
+        "y": 0,
+        "definition": "arcane_power"
+    },
+    "mana_shield": {
+        "x": 100,
+        "y": 0,
+        "definition": "mana_shield"
+    },
+    "spell_mastery": {
+        "x": 0,
+        "y": 50,
+        "definition": "spell_mastery"
+    },
+    "mystic_knowledge": {
+        "x": 100,
+        "y": 50,
+        "definition": "mystic_knowledge"
+    },
+    "sorcerer_mastery": {
+        "x": 50,
+        "y": 100,
+        "definition": "sorcerer_mastery"
+    }
+}

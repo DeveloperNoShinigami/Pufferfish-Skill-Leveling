@@ -37,6 +37,9 @@ video_guide/
 crash_reports/
 docs/crash_reports/
 Apotheosis-1.20_source_dont_edit/
+docs/BRIDGE_TIER_*.md
+puffish_skills-*_source_do_not_edit/
+epicclassmod-*_source_do_not_edit/
 
 # Minecraft Run directory
 **/run/

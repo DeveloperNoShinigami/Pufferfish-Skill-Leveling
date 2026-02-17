@@ -1,0 +1,443 @@
+{
+    "shield_bash": {
+        "type": "puffish_skills:default",
+        "category_id": "warrior",
+        "title": "Shield Bash",
+        "description": "Master the defensive combat arts.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:shield"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +2 Armor",
+            "2": "Level 2: +4 Armor",
+            "3": "Level 3: +6 Armor",
+            "4": "Level 4: +8 Armor",
+            "5": "Level 5: +10 Armor"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +2 Armor",
+            "1": "Next Rank: +2 Armor",
+            "2": "Next Rank: +2 Armor",
+            "3": "Next Rank: +2 Armor",
+            "4": "Next Rank: +2 Armor",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "shield_bash",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 2.0
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 4.0
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 6.0
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 8.0
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 10.0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "shield_bash_icon_id"
+        }
+    },
+    "fortitude": {
+        "type": "puffish_skills:default",
+        "category_id": "warrior",
+        "title": "Fortitude",
+        "description": "Increases your maximum health.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:golden_apple"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +2 HP",
+            "2": "Level 2: +4 HP",
+            "3": "Level 3: +6 HP",
+            "4": "Level 4: +8 HP",
+            "5": "Level 5: +10 HP"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +2 Max HP",
+            "1": "Next Rank: +2 Max HP",
+            "2": "Next Rank: +2 Max HP",
+            "3": "Next Rank: +2 Max HP",
+            "4": "Next Rank: +2 Max HP",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "fortitude",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 2.0
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 4.0
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 6.0
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 8.0
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 10.0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "fortitude_icon_id"
+        }
+    },
+    "battle_cry": {
+        "type": "puffish_skills:default",
+        "category_id": "warrior",
+        "title": "Battle Cry",
+        "description": "Increases your attack damage.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:iron_axe"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +1 Attack Damage",
+            "2": "Level 2: +2 Attack Damage",
+            "3": "Level 3: +3 Attack Damage",
+            "4": "Level 4: +4 Attack Damage",
+            "5": "Level 5: +5 Attack Damage"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +1 Attack",
+            "1": "Next Rank: +1 Attack",
+            "2": "Next Rank: +1 Attack",
+            "3": "Next Rank: +1 Attack",
+            "4": "Next Rank: +1 Attack",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "battle_cry",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "addition",
+                                    "value": 1.0
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "addition",
+                                    "value": 2.0
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "addition",
+                                    "value": 3.0
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "addition",
+                                    "value": 4.0
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "addition",
+                                    "value": 5.0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "battle_cry_icon_id"
+        }
+    },
+    "iron_will": {
+        "type": "puffish_skills:default",
+        "category_id": "warrior",
+        "title": "Iron Will",
+        "description": "Increases your knockback resistance.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:anvil"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +10% Knockback Resistance",
+            "2": "Level 2: +20% Knockback Resistance",
+            "3": "Level 3: +30% Knockback Resistance",
+            "4": "Level 4: +40% Knockback Resistance",
+            "5": "Level 5: +50% Knockback Resistance"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +10% KB Resist",
+            "1": "Next Rank: +10% KB Resist",
+            "2": "Next Rank: +10% KB Resist",
+            "3": "Next Rank: +10% KB Resist",
+            "4": "Next Rank: +10% KB Resist",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "iron_will",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.knockback_resistance",
+                                    "operation": "addition",
+                                    "value": 0.1
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.knockback_resistance",
+                                    "operation": "addition",
+                                    "value": 0.2
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.knockback_resistance",
+                                    "operation": "addition",
+                                    "value": 0.3
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.knockback_resistance",
+                                    "operation": "addition",
+                                    "value": 0.4
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.knockback_resistance",
+                                    "operation": "addition",
+                                    "value": 0.5
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "iron_will_icon_id"
+        }
+    },
+    "warrior_mastery": {
+        "type": "puffish_skills:default",
+        "category_id": "warrior",
+        "title": "Warrior Mastery",
+        "description": "Complete warrior mastery.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:netherite_sword"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 3,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +5% Attack Speed",
+            "2": "Level 2: +10% Attack Speed",
+            "3": "Level 3: +15% Attack Speed"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +5% Attack Speed",
+            "1": "Next Rank: +5% Attack Speed",
+            "2": "Next Rank: +5% Attack Speed",
+            "3": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "warrior_mastery",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.05
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.10
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.15
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "warrior_mastery_icon_id"
+        }
+    }
+}

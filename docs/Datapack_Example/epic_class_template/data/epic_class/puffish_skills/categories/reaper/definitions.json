@@ -1,0 +1,236 @@
+{
+    "soul_harvest": {
+        "type": "puffish_skills:default",
+        "category_id": "reaper",
+        "title": "Soul Harvest",
+        "description": "Increases your attack damage.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:soul_sand"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +1 Attack Damage",
+            "2": "Level 2: +2 Attack Damage",
+            "3": "Level 3: +3 Attack Damage",
+            "4": "Level 4: +4 Attack Damage",
+            "5": "Level 5: +5 Attack Damage"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +1 Attack",
+            "1": "Next Rank: +1 Attack",
+            "2": "Next Rank: +1 Attack",
+            "3": "Next Rank: +1 Attack",
+            "4": "Next Rank: +1 Attack",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "soul_harvest",
+                    "levels": {
+                        "1": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 1.0}}],
+                        "2": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 2.0}}],
+                        "3": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 3.0}}],
+                        "4": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 4.0}}],
+                        "5": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 5.0}}]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "soul_harvest_icon_id"
+        }
+    },
+    "death_touch": {
+        "type": "puffish_skills:default",
+        "category_id": "reaper",
+        "title": "Death Touch",
+        "description": "Increases your attack speed.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:wither_skeleton_skull"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +5% Attack Speed",
+            "2": "Level 2: +10% Attack Speed",
+            "3": "Level 3: +15% Attack Speed",
+            "4": "Level 4: +20% Attack Speed",
+            "5": "Level 5: +25% Attack Speed"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +5% Attack Speed",
+            "1": "Next Rank: +5% Attack Speed",
+            "2": "Next Rank: +5% Attack Speed",
+            "3": "Next Rank: +5% Attack Speed",
+            "4": "Next Rank: +5% Attack Speed",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "death_touch",
+                    "levels": {
+                        "1": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_speed", "operation": "multiply_base", "value": 0.05}}],
+                        "2": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_speed", "operation": "multiply_base", "value": 0.10}}],
+                        "3": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_speed", "operation": "multiply_base", "value": 0.15}}],
+                        "4": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_speed", "operation": "multiply_base", "value": 0.20}}],
+                        "5": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.attack_speed", "operation": "multiply_base", "value": 0.25}}]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "death_touch_icon_id"
+        }
+    },
+    "shadow_walk": {
+        "type": "puffish_skills:default",
+        "category_id": "reaper",
+        "title": "Shadow Walk",
+        "description": "Increases your movement speed.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:phantom_membrane"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +5% Movement Speed",
+            "2": "Level 2: +10% Movement Speed",
+            "3": "Level 3: +15% Movement Speed",
+            "4": "Level 4: +20% Movement Speed",
+            "5": "Level 5: +25% Movement Speed"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +5% Speed",
+            "1": "Next Rank: +5% Speed",
+            "2": "Next Rank: +5% Speed",
+            "3": "Next Rank: +5% Speed",
+            "4": "Next Rank: +5% Speed",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "shadow_walk",
+                    "levels": {
+                        "1": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.movement_speed", "operation": "multiply_base", "value": 0.05}}],
+                        "2": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.movement_speed", "operation": "multiply_base", "value": 0.10}}],
+                        "3": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.movement_speed", "operation": "multiply_base", "value": 0.15}}],
+                        "4": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.movement_speed", "operation": "multiply_base", "value": 0.20}}],
+                        "5": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.movement_speed", "operation": "multiply_base", "value": 0.25}}]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "shadow_walk_icon_id"
+        }
+    },
+    "life_steal": {
+        "type": "puffish_skills:default",
+        "category_id": "reaper",
+        "title": "Life Steal",
+        "description": "Increases your maximum health.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:nether_star"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +2 HP",
+            "2": "Level 2: +4 HP",
+            "3": "Level 3: +6 HP",
+            "4": "Level 4: +8 HP",
+            "5": "Level 5: +10 HP"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +2 Max HP",
+            "1": "Next Rank: +2 Max HP",
+            "2": "Next Rank: +2 Max HP",
+            "3": "Next Rank: +2 Max HP",
+            "4": "Next Rank: +2 Max HP",
+            "5": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "life_steal",
+                    "levels": {
+                        "1": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.max_health", "operation": "addition", "value": 2.0}}],
+                        "2": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.max_health", "operation": "addition", "value": 4.0}}],
+                        "3": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.max_health", "operation": "addition", "value": 6.0}}],
+                        "4": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.max_health", "operation": "addition", "value": 8.0}}],
+                        "5": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.max_health", "operation": "addition", "value": 10.0}}]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "life_steal_icon_id"
+        }
+    },
+    "reaper_mastery": {
+        "type": "puffish_skills:default",
+        "category_id": "reaper",
+        "title": "Reaper Mastery",
+        "description": "Complete reaper mastery.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:dragon_breath"
+            }
+        },
+        "loot_mode": "both",
+        "max_skill_level": 3,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Level 1: +2 Armor",
+            "2": "Level 2: +4 Armor",
+            "3": "Level 3: +6 Armor"
+        },
+        "extra_descriptions": {
+            "0": "Unlock: +2 Armor",
+            "1": "Next Rank: +2 Armor",
+            "2": "Next Rank: +2 Armor",
+            "3": "§6MAXED"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "reaper_mastery",
+                    "levels": {
+                        "1": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.armor", "operation": "addition", "value": 2.0}}],
+                        "2": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.armor", "operation": "addition", "value": 4.0}}],
+                        "3": [{"type": "puffish_skills:attribute", "data": {"attribute": "minecraft:generic.armor", "operation": "addition", "value": 6.0}}]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "reaper_mastery_icon_id"
+        }
+    }
+}

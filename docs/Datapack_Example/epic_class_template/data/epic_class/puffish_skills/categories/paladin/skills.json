@@ -1,0 +1,27 @@
+{
+    "holy_light": {
+        "x": 0,
+        "y": 0,
+        "definition": "holy_light"
+    },
+    "sanctuary": {
+        "x": 100,
+        "y": 0,
+        "definition": "sanctuary"
+    },
+    "divine_shield": {
+        "x": 0,
+        "y": 50,
+        "definition": "divine_shield"
+    },
+    "righteous_fury": {
+        "x": 100,
+        "y": 50,
+        "definition": "righteous_fury"
+    },
+    "paladin_mastery": {
+        "x": 50,
+        "y": 100,
+        "definition": "paladin_mastery"
+    }
+}

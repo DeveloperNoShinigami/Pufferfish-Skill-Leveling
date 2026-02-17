@@ -1,0 +1,10 @@
+{
+    "title": "Archer",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:bow"
+        }
+    },
+    "background": "textures/gui/advancements/backgrounds/stone.png"
+}

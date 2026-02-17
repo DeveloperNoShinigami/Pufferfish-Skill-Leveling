@@ -1,0 +1,17 @@
+{
+  "name": "epicclassmod:sorcerer",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "epicclassmod:sorcerer",
+        "processors": "minecraft:empty",
+        "rotation": "none",
+        "mirror": "none"
+      }
+    }
+  ]
+}

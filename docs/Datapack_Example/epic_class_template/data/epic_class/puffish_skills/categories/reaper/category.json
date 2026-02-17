@@ -1,0 +1,10 @@
+{
+    "title": "Reaper",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:netherite_hoe"
+        }
+    },
+    "background": "textures/gui/advancements/backgrounds/stone.png"
+}

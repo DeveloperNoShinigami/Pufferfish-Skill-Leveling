@@ -10,6 +10,7 @@ import net.bluelotuscoding.skillleveling.registry.ForgeVillagerTrades;
 import net.bluelotuscoding.skillleveling.registry.ModBlocks;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
 import net.bluelotuscoding.skillleveling.registry.ModVillagers;
+import net.bluelotuscoding.skillleveling.bridge.forge.EpicClassBridgeForgeLoader;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.bluelotuscoding.skillleveling.forge.loot.LootInjectionHandler;
@@ -29,6 +30,7 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 public class ForgeMain {
         public ForgeMain() {
                 SkillLevelingMod.init(net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().toFile());
+                EpicClassBridgeForgeLoader.init();
 
                 IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 

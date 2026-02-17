@@ -1,0 +1,27 @@
+{
+    "eagle_eye": {
+        "x": 0,
+        "y": 0,
+        "definition": "eagle_eye"
+    },
+    "swift_draw": {
+        "x": 100,
+        "y": 0,
+        "definition": "swift_draw"
+    },
+    "piercing_shot": {
+        "x": 0,
+        "y": 50,
+        "definition": "piercing_shot"
+    },
+    "agility": {
+        "x": 100,
+        "y": 50,
+        "definition": "agility"
+    },
+    "archer_mastery": {
+        "x": 50,
+        "y": 100,
+        "definition": "archer_mastery"
+    }
+}

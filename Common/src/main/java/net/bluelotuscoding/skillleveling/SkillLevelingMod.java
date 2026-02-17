@@ -6,6 +6,8 @@ import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
 import net.bluelotuscoding.skillleveling.rewards.EffectReward;
 import net.bluelotuscoding.skillleveling.rewards.ToggleReward;
 import net.bluelotuscoding.skillleveling.util.AddonLogger;
+import net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager;
+import net.bluelotuscoding.skillleveling.bridge.EpicClassBridge;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -89,6 +91,8 @@ public class SkillLevelingMod {
 
         // INITIALIZE CONFIGURATION (placeholder — config file system is planned for a future update)
         net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.load(configDir);
+        BridgeConfigManager.load(configDir);
+        EpicClassBridge.loadConfig(BridgeConfigManager.getConfig());
 
         instance.logger.info("Initializing Pufferfish Skill Leveling addon v2 (Logging Balanced)...");
 

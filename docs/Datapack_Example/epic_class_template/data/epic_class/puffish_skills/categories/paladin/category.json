@@ -1,0 +1,10 @@
+{
+    "title": "Paladin",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:golden_sword"
+        }
+    },
+    "background": "textures/gui/advancements/backgrounds/stone.png"
+}

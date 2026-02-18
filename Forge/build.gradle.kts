@@ -38,6 +38,7 @@ dependencies {
 loom {
 	mixin.defaultRefmapName.set("puffish_skill_leveling-refmap.json")
 	forge.mixinConfig("puffish_skill_leveling.mixins.json")
+	forge.mixinConfig("puffish_skill_leveling_bridge.mixins.json")
 }
 
 tasks.test {

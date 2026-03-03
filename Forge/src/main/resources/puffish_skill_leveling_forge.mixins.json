@@ -1,0 +1,32 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "net.bluelotuscoding.skillleveling.bridge.forge.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "client": [
+        "ClassBookScreenMixin",
+        "ClientClassStateMixin",
+        "DialogueScreenMixin",
+        "ClientPacketHandlerMixin",
+        "NpcQuestGiverRendererMixin",
+        "ClientLevelStateMixin"
+    ],
+    "mixins": [
+        "NetworkSyncMixin",
+        "PlayerClassDataMixin",
+        "PlayerLevelDataMixin",
+        "PlayerLevelAllocateMixin",
+        "PassiveUnlocksMixin",
+        "PlayerXpNeededForNextMixin",
+        "SkillsModExperienceMixin",
+        "PufferfishExperienceMixin",
+        "MobLevelHandlerMixin",
+        "AllocateStatPacketMixin",
+        "NpcQuestGiverEntityMixin",
+        "ChooseClassPacketMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 0
+    },
+    "refmap": "puffish_skill_leveling-refmap.json"
+}

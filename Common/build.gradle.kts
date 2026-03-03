@@ -43,3 +43,7 @@ tasks.jar {
         attributes["Fabric-Loom-Remap"] = "true"
     }
 }
+
+loom {
+    mixin.defaultRefmapName.set("puffish_skill_leveling-refmap.json")
+}

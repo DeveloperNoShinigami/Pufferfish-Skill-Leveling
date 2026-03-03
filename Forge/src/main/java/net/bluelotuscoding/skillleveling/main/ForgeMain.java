@@ -29,9 +29,7 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 @Mod(SkillLevelingMod.MOD_ID)
 public class ForgeMain {
         public ForgeMain() {
-                SkillLevelingMod.init(net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().toFile());
-                EpicClassBridgeForgeLoader.init();
-
+                SkillLevelingMod.preInit();
                 IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
                 ForgeBlockRegistry.register(bus);
@@ -53,9 +51,16 @@ public class ForgeMain {
                 MinecraftForge.EVENT_BUS.register(this);
                 MinecraftForge.EVENT_BUS.register(new ForgeVillagerTrades());
                 MinecraftForge.EVENT_BUS.register(new LootInjectionHandler());
+
+                if (net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient()) {
+                        MinecraftForge.EVENT_BUS.register(
+                                        new net.bluelotuscoding.skillleveling.bridge.forge.ClientSyncHandler());
+                }
         }
 
         private void commonSetup(final net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) {
+                SkillLevelingMod.init(net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().toFile());
+                EpicClassBridgeForgeLoader.init();
                 initInternal();
         }
 
@@ -70,6 +75,11 @@ public class ForgeMain {
                 event.addListener(SkillLevelingMod.getInstance().getReputationLoader());
                 event.addListener(SkillLevelingMod.getInstance().getLootImbueManager());
                 event.addListener(SkillLevelingMod.getInstance().getUniversalLootHandler());
+
+                event.addListener(SkillLevelingMod.getInstance().getEpicClassDataLoader());
+                event.addListener(SkillLevelingMod.getInstance().getJobMasterDataLoader());
+                event.addListener(SkillLevelingMod.getInstance().getEpicAttributeDataLoader());
+                event.addListener(SkillLevelingMod.getInstance().getBridgeDataLoader());
         }
 
         @SubscribeEvent
@@ -101,8 +111,9 @@ public class ForgeMain {
                                 if (!serverPlayer.getWorld().isClient) {
                                         SkillLevelingMod.getInstance().getSkillLevelingManager()
                                                         .syncAllSkillsToPlayer(serverPlayer);
+                                        SkillLevelingMod.getInstance().syncBridgeContent(serverPlayer);
 
-                                        // Defer category lock initialization to next tick so it runs
+                                        // Defer category lock initialization...
                                         // AFTER Pufferfish's own updateAllCategories sync completes.
                                         var server = serverPlayer.getServer();
                                         if (server != null) {

@@ -1,0 +1,76 @@
+{
+    "class_name": "gunslinger",
+    "display_name": "Gunslinger",
+    "display_name_key": "class.epicclassmod.gunslinger.title",
+    "lore_key": "class.epicclassmod.gunslinger.desc",
+    "skill_category_id": "gunslinger",
+    "job_master_id": "job_master_gunslinger",
+    "epic_class_proxy": "ARCHER",
+    "book_lore": "A master of modern ballistics. Relying on agility and precision, they dominate from a distance.",
+    "class_weapon_type": "Handguns / Rifles",
+    "class_weapon_icon": "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}",
+    "class_weapon_items": [
+        "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}",
+        "minecraft:iron_sword"
+    ],
+    "attributes": {
+        "minecraft:generic.max_health": {
+            "value": 14.0,
+            "operation": "BASE"
+        },
+        "irons_spellbooks:max_mana": {
+            "value": 50.0,
+            "operation": "BASE"
+        },
+        "minecraft:generic.attack_damage": {
+            "value": 2.0,
+            "operation": "BASE"
+        },
+        "minecraft:generic.armor": {
+            "value": 2.0,
+            "operation": "BASE"
+        }
+    },
+    "gui_title": "class.epicclassmod.gunslinger.title",
+    "gui_description": "Swift and precise marksman.",
+    "preview_animation": "wom:biped/living/enderblaster_onehand_idle",
+    "preview_armor_base": "minecraft:iron_",
+    "preview_mainhand_item": "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}",
+    "preview_offhand_item": "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}",
+    "starting_items": [
+        "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\", AmmoCount:7}",
+        "tacz:ammo{AmmoId:\"tacz:50ae\", Count:64}"
+    ],
+    "gui_stats": [
+        {
+            "label_key": "class.epicclassmod.stat.health",
+            "icon": "epicclassmod:textures/gui/icons/heart.png",
+            "stat_type": "hearts",
+            "count": 7
+        },
+        {
+            "label_key": "Mana",
+            "icon": "epicclassmod:textures/gui/icons/shield.png",
+            "stat_type": "number",
+            "count": 50
+        }
+    ],
+    "gui_passives": [
+        {
+            "pufferfish_skill_id": "quick_draw",
+            "icon": "epicclassmod:textures/gui/icons/sword.png"
+        },
+        {
+            "pufferfish_skill_id": "lead_rain",
+            "icon": "epicclassmod:textures/gui/icons/chest.png"
+        },
+        {
+            "pufferfish_skill_id": "ghost_step",
+            "icon": "epicclassmod:textures/gui/icons/boots.png"
+        },
+        {
+            "pufferfish_skill_id": "killshot",
+            "icon": "epicclassmod:textures/gui/icons/helm.png"
+        }
+    ]
+}

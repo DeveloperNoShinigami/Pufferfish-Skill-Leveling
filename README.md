@@ -10,17 +10,18 @@ Supports **Forge** and **Fabric** from a shared codebase via Architectury.
 
 | Guide | Description |
 |-------|-------------|
-| [Getting Started](docs/GETTING_STARTED.md) | First-time setup, creating your first datapack and skill |
+| [Getting Started](docs/core_features/GETTING_STARTED.md) | First-time setup, creating your first datapack and skill |
 | [Features](docs/FEATURES.md) | Complete feature reference with quick examples |
-| [Datapack Guide](docs/DATAPACK_GUIDE.md) | Full datapack schema, field reference, and best practices |
-| [Toggle System](docs/Toggle_System.md) | Pure, basic, and hybrid toggle skills with examples |
-| [Skill Master](docs/Skill_Master_System.md) | Villager profession, trades, tiers, and mastery pricing |
-| [Skill Imbuement](docs/Skill_Imbuement_System.md) | Dynamic skill imbuing on loot equipment |
-| [Universal Loot](docs/Universal_Loot_System.md) | Injecting Skill Tomes and items into loot tables |
+| [Datapack Guide](docs/core_features/DATAPACK_GUIDE.md) | Full datapack schema, field reference, and best practices |
+| [Epic Classes Bridge](docs/rise_of_heroes_integration/EPIC_CLASSES_DATAPACK_GUIDE.md) | Native integration with the Epic Classes mod (Rise of Heroes) |
+| [Toggle System](docs/core_features/Toggle_System.md) | Pure, basic, and hybrid toggle skills with examples |
+| [Skill Master](docs/core_features/Skill_Master_System.md) | Villager profession, trades, tiers, and mastery pricing |
+| [Skill Imbuement](docs/core_features/Skill_Imbuement_System.md) | Dynamic skill imbuing on loot equipment |
+| [Universal Loot](docs/core_features/Universal_Loot_System.md) | Injecting Skill Tomes and items into loot tables |
 | [Changelog](docs/CHANGELOG.md) | Version history and recent fixes |
 | [Roadmap](docs/ROADMAP.md) | Completed, planned, and experimental features |
 
-A working template datapack is included at `docs/Datapack_Example/template_pack/`.
+A working template datapack is included at `docs/Datapack_Example/epic_class_template/`.
 
 ---
 
@@ -34,7 +35,8 @@ A working template datapack is included at `docs/Datapack_Example/template_pack/
 - **Universal loot injection** — Drop Skill Tomes and Charms from chests and mobs
 - **Skill Master villager** — Custom profession with mastery-scaled trades and village structures
 - **Curios integration** — Skill Charms work as wearable accessories
-- **Datapack-driven** — Every skill, reward, cost, and loot rule is defined in JSON
+- **Epic Classes Bridge** — Native datapack support for `Epic Classes`, bridging job masters, starting NBT items, and multi-file MMORPG skill trees.
+- **Datapack-driven** — Every skill, reward, cost, loot rule, and epic class is defined in JSON
 
 ---
 

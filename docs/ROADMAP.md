@@ -79,6 +79,13 @@ Current development status and future plans for Pufferfish Skill Leveling.
 - [x] Village structure generation (Plains, Desert, Savanna, Snowy, Taiga)
 - [x] Tiered loot barrels in structures
 
+### Epic Classes Integration
+- [x] Full Rise of Heroes datapack support
+- [x] S2C Network sync for bridge data
+- [x] NBT Item icon parsing for class previews
+- [x] 10 Multi-file standardized skill categories
+- [x] Custom Job Master config and loading
+
 ---
 
 ## Experimental / In Development
@@ -108,7 +115,7 @@ Current development status and future plans for Pufferfish Skill Leveling.
 
 ### Long Term
 - [ ] Skill specializations (branching paths within a single skill)
-- [ ] Cross-mod integration API for third-party addon support
+- [x] Cross-mod integration API for third-party addon support (Epic Classes Addon)
 - [ ] Web-based datapack builder tool
 - [ ] Skill leaderboards and statistics tracking
 

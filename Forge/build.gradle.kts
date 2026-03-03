@@ -6,6 +6,7 @@ plugins {
 repositories {
 	maven(url = "https://maven.puffish.net/")
 	maven(url = "https://maven.theillusivec4.top/")
+	maven(url = "https://www.cursemaven.com")
 }
 
 base.archivesName.set("${project.properties["archives_base_name"]}")
@@ -32,13 +33,20 @@ dependencies {
 	// Dependency on the core Pufferfish Skills mod from maven repository
 	modImplementation("net.puffish:skillsmod:${project.properties["skills_version"]}:forge")
 
+	// Epic Class Mod (local jar for mixin targets)
+	modImplementation(files("../libs/epicclassmod-1.8.0.jar"))
+
 	implementation(project(path = ":Common", configuration = "namedElements"))
+
+	// Epic Fight Mod — compile-only (optional at runtime; players must install it separately)
+	// Architectury Loom remaps this automatically; fg.deobf() is ForgeGradle-only and not needed here.
+	modCompileOnly("curse.maven:epic-fight-mod-405076:7617763")
 }
 
 loom {
 	mixin.defaultRefmapName.set("puffish_skill_leveling-refmap.json")
 	forge.mixinConfig("puffish_skill_leveling.mixins.json")
-	forge.mixinConfig("puffish_skill_leveling_bridge.mixins.json")
+	forge.mixinConfig("puffish_skill_leveling_forge.mixins.json")
 }
 
 tasks.test {
@@ -55,6 +63,7 @@ tasks.jar {
 }
 
 tasks.processResources {
+    dependsOn(project(":Common").tasks.classes)
 	from(project(":Common").sourceSets.main.get().resources)
 
 	inputs.property("version", project.properties["mod_version"])

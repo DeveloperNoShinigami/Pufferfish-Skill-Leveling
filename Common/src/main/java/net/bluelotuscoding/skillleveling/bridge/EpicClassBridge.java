@@ -1,25 +1,48 @@
 package net.bluelotuscoding.skillleveling.bridge;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager;
+import net.bluelotuscoding.skillleveling.bridge.config.EpicClassDef;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.Category;
+import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.api.SkillsAPI;
 
 public final class EpicClassBridge {
     private static final Map<String, Identifier> CLASS_TO_CATEGORY = new HashMap<>();
     private static final Map<Identifier, String> CATEGORY_TO_CLASS = new HashMap<>();
     private static final Map<String, String> RAW_CLASS_MAPPINGS = new HashMap<>();
+    private static final Map<String, Identifier> PASSIVE_TO_SKILL = new HashMap<>();
+    private static final Map<String, Integer> PASSIVE_TO_LEVEL = new HashMap<>();
+    private static final Map<UUID, Identifier> PLAYER_ACTIVE_CATEGORY = new HashMap<>();
+
+    /**
+     * Cache of Pufferfish skill display strings, loaded from the server's
+     * ResourceManager.
+     * Key: "categoryId:skillId" (e.g. "necromancer:skeleton_mastery")
+     * Value: [title, description] as plain strings from definitions.json
+     */
+    private static final Map<String, String[]> SKILL_DISPLAY_CACHE = new HashMap<>();
+    private static final Gson SKILL_GSON = new Gson();
+
+    private static final Map<String, Identifier> RESOLVED_MAPPINGS = new HashMap<>();
 
     private static boolean enabled = false;
     private static boolean autoActivateCategory = true;
     private static boolean lockOtherCategories = true;
     private static boolean syncOnLogin = true;
-    private static boolean categoriesResolved = false;
 
     private EpicClassBridge() {
     }
@@ -37,13 +60,29 @@ public final class EpicClassBridge {
         RAW_CLASS_MAPPINGS.clear();
         CLASS_TO_CATEGORY.clear();
         CATEGORY_TO_CLASS.clear();
-        categoriesResolved = false;
+        RESOLVED_MAPPINGS.clear();
 
         // Store raw mappings for later resolution
         for (var entry : config.classToCategoryMap.entrySet()) {
             String className = normalizeClassName(entry.getKey());
             if (!className.isEmpty() && entry.getValue() != null && !entry.getValue().isBlank()) {
                 RAW_CLASS_MAPPINGS.put(className, entry.getValue());
+            }
+        }
+
+        PASSIVE_TO_SKILL.clear();
+        PASSIVE_TO_LEVEL.clear();
+        for (var entry : config.classPassiveToSkillMap.entrySet()) {
+            String passiveKey = entry.getKey().trim().toUpperCase(Locale.ROOT);
+            Identifier skillId = resolveSkillId(entry.getValue());
+            if (skillId != null) {
+                PASSIVE_TO_SKILL.put(passiveKey, skillId);
+
+                // Also load the level requirement if it exists
+                Integer level = config.classPassiveToLevelMap.get(entry.getKey());
+                if (level != null) {
+                    PASSIVE_TO_LEVEL.put(passiveKey, level);
+                }
             }
         }
 
@@ -55,37 +94,130 @@ public final class EpicClassBridge {
      * Called lazily when first needed after Pufferfish Skills is initialized.
      */
     private static void ensureCategoriesResolved() {
-        if (categoriesResolved || RAW_CLASS_MAPPINGS.isEmpty()) {
+        if (RAW_CLASS_MAPPINGS.isEmpty() || RESOLVED_MAPPINGS.size() == RAW_CLASS_MAPPINGS.size()) {
             return;
         }
 
-        // Check if Skills API is ready
+        // Check if Skills API is ready - it must have at least one category to be
+        // considered ready
         try {
-            var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
-            if (manager == null) {
+            if (SkillsAPI.streamCategories().findAny().isEmpty()) {
                 return; // Not ready yet
             }
         } catch (Exception e) {
             return; // Not ready yet
         }
 
-        CLASS_TO_CATEGORY.clear();
-        CATEGORY_TO_CLASS.clear();
-
         for (var entry : RAW_CLASS_MAPPINGS.entrySet()) {
             String className = entry.getKey();
-            Identifier categoryId = resolveCategoryId(entry.getValue());
-            if (categoryId == null) {
-                logWarn("Could not resolve category for class " + className + ": " + entry.getValue());
+            if (RESOLVED_MAPPINGS.containsKey(className)) {
                 continue;
             }
 
-            CLASS_TO_CATEGORY.put(className, categoryId);
-            CATEGORY_TO_CLASS.put(categoryId, className);
+            Identifier categoryId = resolveCategoryId(entry.getValue());
+            if (categoryId != null) {
+                CLASS_TO_CATEGORY.put(className, categoryId);
+                CATEGORY_TO_CLASS.put(categoryId, className);
+                RESOLVED_MAPPINGS.put(className, categoryId);
+                logInfo("[Bridge] Resolved mapping: '" + className + "' -> category '" + categoryId + "'");
+            } else {
+                logWarn("[Bridge] Failed to resolve category for '" + className + "' (raw lookup: " + entry.getValue()
+                        + ")");
+            }
         }
 
-        categoriesResolved = true;
-        logInfo("Epic Class bridge mappings resolved: " + CLASS_TO_CATEGORY.size() + " categories");
+        if (RESOLVED_MAPPINGS.size() == RAW_CLASS_MAPPINGS.size()) {
+            logInfo("Epic Class bridge mappings FULLY resolved: " + CLASS_TO_CATEGORY.size() + " categories");
+        }
+    }
+
+    /**
+     * Reads the Pufferfish skill definitions.json for every registered
+     * skill_category_id
+     * using the server's ResourceManager, and caches title + description for each
+     * skill.
+     * Call this on server start / world load, before the class select screen is
+     * opened.
+     *
+     * @param rm the server resource manager (from
+     *           MinecraftServer.getResourceManager())
+     */
+    public static void loadSkillDisplayData(ResourceManager rm) {
+        SKILL_DISPLAY_CACHE.clear();
+        var defs = EpicClassConfigManager.getClasses();
+        if (defs == null || defs.isEmpty()) {
+            return;
+        }
+
+        for (var def : defs.values()) {
+            if (def.skill_category_id == null || def.gui_passives == null) {
+                continue;
+            }
+            String catId = def.skill_category_id;
+
+            // Try every namespace in the resource manager for the definitions.json
+            for (String ns : rm.getAllNamespaces()) {
+                Identifier resId = new Identifier(ns,
+                        "puffish_skills/categories/" + catId + "/definitions.json");
+                var optResource = rm.getResource(resId);
+                if (optResource.isEmpty()) {
+                    continue;
+                }
+                try (var stream = optResource.get().getInputStream();
+                        var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+                    JsonObject root = SKILL_GSON.fromJson(reader, JsonObject.class);
+                    if (root == null) {
+                        continue;
+                    }
+                    for (var skillEntry : root.entrySet()) {
+                        String skillId = skillEntry.getKey();
+                        JsonObject skillObj = skillEntry.getValue().getAsJsonObject();
+                        String title = skillObj.has("title")
+                                ? skillObj.get("title").getAsString()
+                                : skillId.replace("_", " ");
+                        String description = "";
+                        if (skillObj.has("description")) {
+                            var descElem = skillObj.get("description");
+                            if (descElem.isJsonArray()) {
+                                StringBuilder sb = new StringBuilder();
+                                var arr = descElem.getAsJsonArray();
+                                for (int i = 0; i < arr.size(); i++) {
+                                    if (i > 0)
+                                        sb.append("\n");
+                                    sb.append(arr.get(i).getAsString());
+                                }
+                                description = sb.toString();
+                            } else {
+                                description = descElem.getAsString();
+                            }
+                        }
+                        SKILL_DISPLAY_CACHE.put(catId + ":" + skillId, new String[] { title, description });
+                    }
+                    logInfo("Loaded skill display data for category '" + catId
+                            + "' (" + root.size() + " skills) from namespace '" + ns + "'");
+                    break; // Found it in this namespace, stop scanning
+                } catch (Exception e) {
+                    logWarn("Failed to load skill display data for " + resId + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns [title, description] for a Pufferfish skill from the cached
+     * definitions.json data.
+     * Returns null if the skill entry is not found in the cache.
+     *
+     * @param categoryId the skill_category_id (e.g. "necromancer")
+     * @param skillId    the pufferfish_skill_id (e.g. "skeleton_mastery")
+     */
+    public static String[] getSkillDisplay(String categoryId, String skillId) {
+        return SKILL_DISPLAY_CACHE.get(categoryId + ":" + skillId);
+    }
+
+    /** Clears the skill display cache (call on world unload / server stop). */
+    public static void invalidateSkillDisplayCache() {
+        SKILL_DISPLAY_CACHE.clear();
     }
 
     public static boolean isEnabled() {
@@ -96,6 +228,16 @@ public final class EpicClassBridge {
         return syncOnLogin;
     }
 
+    /**
+     * Returns all configured category IDs from the bridge config.
+     * Useful for fallback scenarios when player context isn't available.
+     */
+    public static java.util.Set<Identifier> getConfiguredCategories() {
+        ensureCategoriesResolved();
+        return CLASS_TO_CATEGORY.values().stream()
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
     public static Optional<String> getClassForCategory(Identifier categoryId) {
         ensureCategoriesResolved();
         return Optional.ofNullable(CATEGORY_TO_CLASS.get(categoryId));
@@ -104,11 +246,150 @@ public final class EpicClassBridge {
     public static Optional<Identifier> getCategoryForClass(String classTypeName) {
         ensureCategoriesResolved();
         String normalized = normalizeClassName(classTypeName);
-        return Optional.ofNullable(CLASS_TO_CATEGORY.get(normalized));
+        Identifier categoryId = CLASS_TO_CATEGORY.get(normalized);
+        if (categoryId == null) {
+            // Fallback for custom classes: check the EpicClassDef directly
+            // getClassDef now handles normalization and prefixes internally.
+            EpicClassDef def = EpicClassConfigManager.getClassDef(classTypeName);
+            if (def != null && def.skill_category_id != null) {
+                categoryId = resolveCategoryId(def.skill_category_id);
+            }
+        }
+        return Optional.ofNullable(categoryId);
     }
 
-    public static void onClassChanged(ServerPlayerEntity player, String classTypeName) {
+    public static boolean isPassiveMapped(String className, int slot) {
+        if (!enabled)
+            return false;
+        String key = normalizeClassName(className) + "_" + slot;
+        return PASSIVE_TO_SKILL.containsKey(key);
+    }
+
+    public static String getMappedSkillId(String className, int slot) {
+        String key = normalizeClassName(className) + "_" + slot;
+        Identifier id = PASSIVE_TO_SKILL.get(key);
+        return id != null ? id.toString() : null;
+    }
+
+    public static int getRequiredLevel(String className, int slot) {
+        String key = normalizeClassName(className) + "_" + slot;
+        return PASSIVE_TO_LEVEL.getOrDefault(key, 0);
+    }
+
+    public static boolean isPassiveUnlocked(Object player, String className, int slot) {
+        if (!enabled)
+            return false;
+
+        String key = normalizeClassName(className) + "_" + slot;
+        Identifier skillId = PASSIVE_TO_SKILL.get(key);
+
+        if (skillId == null) {
+            return false;
+        }
+
+        if (!(player instanceof PlayerEntity sp)) {
+            return false;
+        }
+
+        return getCategoryForClass(className)
+                .flatMap(catId -> SkillsAPI.getCategory(catId))
+                .flatMap(category -> category.getSkill(skillId.getPath()))
+                .map((Skill skill) -> {
+                    if (sp instanceof ServerPlayerEntity ssp) {
+                        Skill.State state = skill.getState(ssp);
+                        return state == Skill.State.UNLOCKED;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+
+    public static boolean isPassiveVisible(Object player, String className, int slot) {
+        if (!enabled)
+            return true;
+
+        String key = normalizeClassName(className) + "_" + slot;
+        Identifier skillId = PASSIVE_TO_SKILL.get(key);
+
+        if (skillId == null) {
+            return true;
+        }
+
+        if (!(player instanceof PlayerEntity sp)) {
+            return true;
+        }
+
+        return getCategoryForClass(className)
+                .flatMap(catId -> SkillsAPI.getCategory(catId))
+                .flatMap(category -> category.getSkill(skillId.getPath()))
+                .map((Skill skill) -> {
+                    if (sp instanceof ServerPlayerEntity ssp) {
+                        Skill.State state = skill.getState(ssp);
+                        if (state == Skill.State.UNLOCKED)
+                            return true;
+                    }
+
+                    return !isSkillHidden(skill);
+                })
+                .orElse(true);
+    }
+
+    private static boolean isSkillHidden(net.puffish.skillsmod.api.Skill skill) {
+        try {
+            // Check for isHidden method via reflection
+            var method = skill.getClass().getMethod("isHidden");
+            return (boolean) method.invoke(skill);
+        } catch (Exception e) {
+            return false; // Default to visible if cannot determine
+        }
+    }
+
+    public static Optional<Identifier> getActiveCategory(Object player) {
+        if (player == null) {
+            return Optional.empty();
+        }
+
+        UUID uuid = null;
+        if (player instanceof PlayerEntity sp) {
+            uuid = sp.getUuid();
+        }
+
+        if (uuid != null) {
+            Identifier catId = PLAYER_ACTIVE_CATEGORY.get(uuid);
+            if (catId != null) {
+                return Optional.of(catId);
+            }
+        }
+
+        // Fallback for client or if map is not populated yet
+        try {
+            String className = SkillLevelingMod.getInstance().getPlatform().getEpicClassName(player);
+            if (className != null && !className.isEmpty() && !"NONE".equals(className)) {
+                return getCategoryForClass(className);
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Cleans up player-specific tracking data when they disconnect.
+     * Called by PlayerCleanupListener to prevent memory leaks.
+     */
+    public static void cleanupPlayerData(Object player) {
+        if (player instanceof PlayerEntity sp) {
+            PLAYER_ACTIVE_CATEGORY.remove(sp.getUuid());
+        }
+    }
+
+    public static void onClassChanged(Object player, String classTypeName) {
         if (!enabled || player == null || classTypeName == null) {
+            return;
+        }
+
+        if (!(player instanceof PlayerEntity sp)) {
             return;
         }
 
@@ -118,29 +399,50 @@ public final class EpicClassBridge {
             return;
         }
 
-        if ("NONE".equals(normalized)) {
+        // 1. ALWAYS store and sync the custom name to client first.
+        // This ensures UI (icons, job title) works even if category mapping fails or is
+        // delayed.
+        net.bluelotuscoding.skillleveling.util.Platform platform = SkillLevelingMod.getInstance().getPlatform();
+        platform.setCustomClassName(sp, classTypeName);
+        platform.syncCustomClassName(sp);
+
+        if ("none".equals(normalized)) {
+            PLAYER_ACTIVE_CATEGORY.remove(sp.getUuid());
             if (lockOtherCategories) {
-                lockAllMappedCategories(player);
+                lockAllMappedCategories(sp);
             }
             return;
         }
 
-        Identifier categoryId = CLASS_TO_CATEGORY.get(normalized);
+        Identifier categoryId = getCategoryForClass(classTypeName).orElse(null);
         if (categoryId == null) {
-            logDebug("No mapping for class: " + normalized);
+            logDebug("No mapping for class: " + normalized + " (raw: " + classTypeName + ")");
             return;
         }
 
+        // Track the active category for this player (used for exp syncing)
+        PLAYER_ACTIVE_CATEGORY.put(sp.getUuid(), categoryId);
+
         if (autoActivateCategory) {
-            unlockCategory(player, categoryId);
+            unlockCategory(sp, categoryId);
+
+            // Force an initial sync when the category is first unlocked
+            // This ensures Epic Class UI mirrors the Pufferfish start immediately.
+            int level = platform.getPufferfishLevel(sp, categoryId);
+            int xp = platform.getPufferfishExperience(sp, categoryId);
+            platform.syncEpicClassLevel(sp, level, xp, 0);
         }
 
         if (lockOtherCategories) {
-            lockOtherMappedCategories(player, normalized);
+            lockOtherMappedCategories(sp, normalized);
         }
     }
 
-    private static void unlockCategory(ServerPlayerEntity player, Identifier categoryId) {
+    private static void unlockCategory(Object player, Identifier categoryId) {
+        if (!(player instanceof PlayerEntity sp)) {
+            return;
+        }
+
         Optional<Category> categoryOpt = SkillsAPI.getCategory(categoryId);
         if (categoryOpt.isEmpty()) {
             logWarn("Mapped category not found: " + categoryId);
@@ -148,24 +450,32 @@ public final class EpicClassBridge {
         }
 
         Category category = categoryOpt.get();
-        if (!category.isUnlocked(player)) {
-            category.unlock(player);
+        if (sp instanceof ServerPlayerEntity ssp) {
+            if (!category.isUnlocked(ssp)) {
+                category.unlock(ssp);
+            }
         }
     }
 
-    private static void lockCategory(ServerPlayerEntity player, Identifier categoryId) {
+    private static void lockCategory(Object player, Identifier categoryId) {
+        if (!(player instanceof PlayerEntity sp)) {
+            return;
+        }
+
         Optional<Category> categoryOpt = SkillsAPI.getCategory(categoryId);
         if (categoryOpt.isEmpty()) {
             return;
         }
 
         Category category = categoryOpt.get();
-        if (category.isUnlocked(player)) {
-            category.lock(player);
+        if (sp instanceof ServerPlayerEntity ssp) {
+            if (category.isUnlocked(ssp)) {
+                category.lock(ssp);
+            }
         }
     }
 
-    private static void lockOtherMappedCategories(ServerPlayerEntity player, String selectedClassName) {
+    private static void lockOtherMappedCategories(Object player, String selectedClassName) {
         for (var entry : CLASS_TO_CATEGORY.entrySet()) {
             if (!entry.getKey().equals(selectedClassName)) {
                 lockCategory(player, entry.getValue());
@@ -173,7 +483,7 @@ public final class EpicClassBridge {
         }
     }
 
-    private static void lockAllMappedCategories(ServerPlayerEntity player) {
+    private static void lockAllMappedCategories(Object player) {
         for (var entry : CLASS_TO_CATEGORY.entrySet()) {
             lockCategory(player, entry.getValue());
         }
@@ -185,11 +495,34 @@ public final class EpicClassBridge {
         }
 
         var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+        if (manager == null) {
+            return null;
+        }
+
+        // 1. Try to find by path (most common for datapacks)
         Identifier resolved = manager.findCategoryByPath(rawId);
         if (resolved != null) {
             return resolved;
         }
 
+        // 2. Try to interpret as a full Identifier if it has a colon
+        if (rawId.contains(":")) {
+            try {
+                Identifier id = new Identifier(rawId);
+                if (SkillsAPI.getCategory(id).isPresent()) {
+                    return id;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return null; // Return null to allow retry later
+    }
+
+    private static Identifier resolveSkillId(String rawId) {
+        if (rawId == null || rawId.isBlank()) {
+            return null;
+        }
         try {
             return new Identifier(rawId);
         } catch (Exception e) {
@@ -201,7 +534,23 @@ public final class EpicClassBridge {
         if (classTypeName == null) {
             return "";
         }
-        return classTypeName.trim().toUpperCase(Locale.ROOT);
+        String normalized = classTypeName.trim().toLowerCase(Locale.ROOT);
+        if (normalized.startsWith("epic_classes:")) {
+            return normalized.substring("epic_classes:".length());
+        }
+        return normalized;
+    }
+
+    public static String formatValue(String pattern, double value) {
+        if (pattern == null || pattern.isEmpty()) {
+            return String.valueOf(value);
+        }
+        try {
+            java.text.DecimalFormat df = new java.text.DecimalFormat(pattern);
+            return df.format(value);
+        } catch (Exception e) {
+            return String.valueOf(value);
+        }
     }
 
     private static void logInfo(String message) {

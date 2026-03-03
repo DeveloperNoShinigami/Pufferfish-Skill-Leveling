@@ -389,7 +389,8 @@ public class SkillLevelingManager {
         this.server = server;
 
         // Clear ALL reward maps so new instances from the reloaded datapack are used.
-        // Without this, stale reward instances retain old config values (e.g. amplifier).
+        // Without this, stale reward instances retain old config values (e.g.
+        // amplifier).
         this.configurationsLoaded = false;
         this.perLevelRewardsRewards.clear();
         this.toggleRewards.clear();
@@ -521,8 +522,10 @@ public class SkillLevelingManager {
                     .error("Error during onPlayerJoin auto-initialization: " + e.getMessage());
         }
 
-        // CATEGORY GATING: Lock categories whose prerequisites are not met BEFORE syncing.
-        // Must happen before syncAllSkillsToPlayer so the client sees correct lock state immediately.
+        // CATEGORY GATING: Lock categories whose prerequisites are not met BEFORE
+        // syncing.
+        // Must happen before syncAllSkillsToPlayer so the client sees correct lock
+        // state immediately.
         net.bluelotuscoding.skillleveling.manager.CategoryLockManager.initializeLocks(player);
 
         // Sync all skill levels and descriptions to client for UI display
@@ -656,9 +659,9 @@ public class SkillLevelingManager {
         if (catMap != null)
             return catMap;
 
-        // Fallback: search by path
+        // Fallback: search by path (CASE-INSENSITIVE)
         for (var entry : perLevelRewardsRewards.entrySet()) {
-            if (entry.getKey().getPath().equals(categoryId.getPath())) {
+            if (entry.getKey().getPath().equalsIgnoreCase(categoryId.getPath())) {
                 return entry.getValue();
             }
         }
@@ -2534,9 +2537,9 @@ public class SkillLevelingManager {
             return categoryId;
         }
 
-        // Path search fallback for namespace migrations
+        // Path search fallback for namespace migrations (CASE-INSENSITIVE)
         return SkillsAPI.streamCategories()
-                .filter(cat -> cat.getId().getPath().equals(categoryId.getPath()))
+                .filter(cat -> cat.getId().getPath().equalsIgnoreCase(categoryId.getPath()))
                 .map(net.puffish.skillsmod.api.Category::getId)
                 .findFirst()
                 .orElse(categoryId);
@@ -2560,8 +2563,9 @@ public class SkillLevelingManager {
             }
         }
 
+        // CASE-INSENSITIVE path matching
         return SkillsAPI.streamCategories()
-                .filter(cat -> cat.getId().getPath().equals(categoryPath))
+                .filter(cat -> cat.getId().getPath().equalsIgnoreCase(categoryPath))
                 .map(net.puffish.skillsmod.api.Category::getId)
                 .findFirst()
                 .orElse(null);

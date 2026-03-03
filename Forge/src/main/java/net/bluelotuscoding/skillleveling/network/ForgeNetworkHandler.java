@@ -61,15 +61,6 @@ public class ForgeNetworkHandler implements NetworkHandler {
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
-        CHANNEL.registerMessage(id++, SyncToggleCooldownPacket.class, SyncToggleCooldownPacket::encode,
-                SyncToggleCooldownPacket::decode, (packet, contextSupplier) -> {
-                    var context = contextSupplier.get();
-                    if (context.getDirection().getReceptionSide().isClient()) {
-                        context.enqueueWork(packet::handleClient);
-                    }
-                    context.setPacketHandled(true);
-                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-
         CHANNEL.registerMessage(id++, RequestToggleSkillPacket.class, RequestToggleSkillPacket::encode,
                 RequestToggleSkillPacket::decode, (packet, contextSupplier) -> {
                     var context = contextSupplier.get();
@@ -83,6 +74,71 @@ public class ForgeNetworkHandler implements NetworkHandler {
                     }
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+
+        CHANNEL.registerMessage(id++,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket.class,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket::encode,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket::decode,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket::handle,
+                Optional.of(NetworkDirection.PLAY_TO_SERVER));
+
+        CHANNEL.registerMessage(id++,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket.class,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket::encode,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket::decode,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket.class,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket::encode,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket::decode,
+                net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket::handle,
+                Optional.of(NetworkDirection.PLAY_TO_SERVER));
+
+        CHANNEL.registerMessage(id++,
+                net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket.class,
+                net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket::encode,
+                net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket::decode,
+                net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, SyncBridgeContentPacket.class, SyncBridgeContentPacket::write,
+                SyncBridgeContentPacket::read, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(() -> {
+                            net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
+                                    .setClassesOnClient(packet.getClassDefinitions());
+                            net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
+                                    .setAttributePagesOnClient(packet.getClassAttributePages());
+                        });
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, SyncCustomClassPacket.class, SyncCustomClassPacket::write,
+                SyncCustomClassPacket::read, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(() -> {
+                            net.bluelotuscoding.skillleveling.client.ClientCustomClassState
+                                    .setCustomClass(packet.getPlayerId(), packet.getClassId());
+                        });
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+    }
+
+    @Override
+    public void sendToPlayer(SyncBridgeContentPacket packet, ServerPlayerEntity player) {
+        CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    @Override
+    public void sendToPlayer(SyncCustomClassPacket packet, ServerPlayerEntity player) {
+        CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     @Override

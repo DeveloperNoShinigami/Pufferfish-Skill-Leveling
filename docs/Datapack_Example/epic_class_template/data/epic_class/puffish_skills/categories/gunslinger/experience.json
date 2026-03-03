@@ -1,0 +1,17 @@
+{
+    "level_limit": 20,
+    "experience_per_level": {
+        "type": "puffish_skills:expression",
+        "data": {
+            "expression": "min(level ^ 1.8 + 15, 1000)"
+        }
+    },
+    "sources": [
+        {
+            "type": "puffish_skills:kill_entity",
+            "data": {
+                "experience": 8
+            }
+        }
+    ]
+}

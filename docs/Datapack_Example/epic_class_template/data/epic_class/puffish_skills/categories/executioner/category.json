@@ -1,0 +1,9 @@
+{
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "wom:antitheus"
+        }
+    },
+    "background": "minecraft:textures/block/obsidian.png"
+}

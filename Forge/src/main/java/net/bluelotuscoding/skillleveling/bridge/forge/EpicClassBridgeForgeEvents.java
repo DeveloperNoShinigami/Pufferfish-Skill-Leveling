@@ -9,6 +9,13 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+/**
+ * Handles Epic Class Bridge integration for class changes and player tracking.
+ * 
+ * Note: Experience syncing is now handled by PlayerLevelDataMixin which
+ * intercepts
+ * the addXp() method directly for real-time event-based syncing.
+ */
 public class EpicClassBridgeForgeEvents {
     private static final int CHECK_INTERVAL_TICKS = 20;
     private final Map<UUID, String> lastClass = new ConcurrentHashMap<>();
@@ -25,22 +32,25 @@ public class EpicClassBridgeForgeEvents {
             return;
         }
 
-        String className = EpicClassBridgeForgeAccess.getClassName(player);
-        if (className == null) {
-            return;
-        }
+        String className = net.bluelotuscoding.skillleveling.bridge.data.CustomClassData.getCustomClass(player);
+        if (className != null) {
+            lastClass.put(player.getUuid(), className);
 
-        lastClass.put(player.getUuid(), className);
-        var server = player.getServer();
-        if (server != null) {
-            server.execute(() -> EpicClassBridge.onClassChanged(player, className));
+            var server = player.getServer();
+            if (server != null) {
+                // Initial sync on login. We use a slight delay or execute on next tick
+                // to ensure Pufferfish categories are loaded and ready.
+                server.execute(() -> EpicClassBridge.onClassChanged(player, className));
+            }
         }
     }
 
     @SubscribeEvent
     public void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayerEntity player) {
-            lastClass.remove(player.getUuid());
+            UUID playerUuid = player.getUuid();
+            lastClass.remove(playerUuid);
+            EpicClassBridge.cleanupPlayerData(player);
         }
     }
 
@@ -63,19 +73,17 @@ public class EpicClassBridgeForgeEvents {
             return;
         }
 
-        String className = EpicClassBridgeForgeAccess.getClassName(player);
-        if (className == null) {
+        String className = net.bluelotuscoding.skillleveling.bridge.data.CustomClassData.getCustomClass(player);
+        if (className == null || "epic_classes:none".equals(className)) {
             return;
         }
 
-        String cached = lastClass.get(player.getUuid());
-        if (cached == null) {
-            lastClass.put(player.getUuid(), className);
-            return;
-        }
+        UUID playerUuid = player.getUuid();
 
-        if (!className.equals(cached)) {
-            lastClass.put(player.getUuid(), className);
+        // Check if class changed or if this is the first detection
+        String cached = lastClass.get(playerUuid);
+        if (cached == null || !className.equals(cached)) {
+            lastClass.put(playerUuid, className);
             EpicClassBridge.onClassChanged(player, className);
         }
     }

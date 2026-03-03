@@ -25,27 +25,44 @@ public final class BridgeConfigManager {
             return;
         }
 
-        if (!configDir.exists() && !configDir.mkdirs()) {
-            logWarn("Bridge config folder could not be created: " + configDir.getAbsolutePath());
+        File modConfigDir = new File(configDir, SkillLevelingMod.MOD_ID);
+        if (!modConfigDir.exists() && !modConfigDir.mkdirs()) {
+            logWarn("Bridge config folder could not be created: " + modConfigDir.getAbsolutePath());
             return;
         }
 
-        configFile = new File(configDir, FILE_NAME);
+        // Clean up legacy root config if it still exists
+        File legacyFile = new File(configDir, FILE_NAME);
+        if (legacyFile.exists()) {
+            logInfo("Found legacy root config file, attempting to delete: " + legacyFile.getName());
+            legacyFile.delete();
+        }
+
+        configFile = new File(modConfigDir, FILE_NAME);
+        boolean needsSave = false;
         if (configFile.exists()) {
             try (Reader reader = Files.newBufferedReader(configFile.toPath(), StandardCharsets.UTF_8)) {
                 BridgeConfig loadedConfig = GSON.fromJson(reader, BridgeConfig.class);
                 if (loadedConfig != null) {
                     config = loadedConfig;
+                    // Merge any defaults that were added after this file was first created
+                    needsSave = config.applyMissingDefaults();
                 }
             } catch (Exception e) {
                 logWarn("Failed to read bridge config, using defaults: " + e.getMessage());
             }
         } else {
+            needsSave = true;
+        }
+        if (needsSave) {
             save();
         }
 
         if (config.classToCategoryMap == null) {
             config.classToCategoryMap = new java.util.HashMap<>();
+        }
+        if (config.categorySyncEnabled == null) {
+            config.categorySyncEnabled = new java.util.HashMap<>();
         }
 
         loaded = true;
@@ -68,19 +85,20 @@ public final class BridgeConfigManager {
         return config;
     }
 
+    public static void setConfig(BridgeConfig newConfig) {
+        config = newConfig;
+        loaded = true;
+    }
+
     public static boolean isLoaded() {
         return loaded;
     }
 
     private static void logInfo(String message) {
-        if (SkillLevelingMod.getInstance() != null) {
-            SkillLevelingMod.getInstance().getLogger().info(message);
-        }
+        net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER.info(message);
     }
 
     private static void logWarn(String message) {
-        if (SkillLevelingMod.getInstance() != null) {
-            SkillLevelingMod.getInstance().getLogger().warn(message);
-        }
+        net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER.warn(message);
     }
 }

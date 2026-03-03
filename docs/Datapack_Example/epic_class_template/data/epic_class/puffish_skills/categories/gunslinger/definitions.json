@@ -1,0 +1,239 @@
+{
+    "quick_draw": {
+        "type": "puffish_skills:default",
+        "category_id": "gunslinger",
+        "title": "Quick Draw",
+        "description": "Reduces weapon draw time and increases fundamental speed.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:iron_sword"
+            }
+        },
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Rank 1: +2% Attack Speed",
+            "2": "Rank 2: +4% Attack Speed",
+            "3": "Rank 3: +6% Attack Speed",
+            "4": "Rank 4: +8% Attack Speed",
+            "5": "Rank 5: +10% Attack Speed"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "quick_draw",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.02
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.04
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.06
+                                }
+                            }
+                        ],
+                        "4": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.08
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.10
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "quick_draw"
+        }
+    },
+    "lead_rain": {
+        "type": "puffish_skills:default",
+        "category_id": "gunslinger",
+        "title": "Lead Rain",
+        "description": "Increases projectile power and velocity for long-range dominance.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:iron_ingot"
+            }
+        },
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Rank 1: +3% Projectile Damage",
+            "5": "Rank 5: +15% Projectile Damage"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "lead_rain",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.movement_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.03
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.movement_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.15
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "lead_rain"
+        }
+    },
+    "ghost_step": {
+        "type": "puffish_skills:default",
+        "category_id": "gunslinger",
+        "title": "Ghost Step",
+        "description": "Swift movements make you harder to hit.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:feather"
+            }
+        },
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Rank 1: +2% Movement Speed",
+            "5": "Rank 5: +10% Movement Speed"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "ghost_step",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.movement_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.02
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.movement_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.10
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "ghost_step"
+        }
+    },
+    "killshot": {
+        "type": "puffish_skills:default",
+        "category_id": "gunslinger",
+        "title": "Killshot",
+        "description": "Focus your aim for devastating critical hits.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:flint"
+            }
+        },
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Rank 1: +5% Critical Strike Chance",
+            "5": "Rank 5: +25% Critical Strike Chance"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "killshot",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.luck",
+                                    "operation": "addition",
+                                    "value": 1.0
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.luck",
+                                    "operation": "addition",
+                                    "value": 5.0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "killshot"
+        }
+    }
+}

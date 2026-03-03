@@ -18,6 +18,7 @@ import net.puffish.skillsmod.util.PrefixedLogger;
  */
 public class AddonLogger {
 
+    public static final AddonLogger LOGGER = new AddonLogger();
     private final PrefixedLogger logger;
 
     public AddonLogger() {

@@ -1,0 +1,14 @@
+[
+    [
+        "quick_draw",
+        "lead_rain"
+    ],
+    [
+        "lead_rain",
+        "ghost_step"
+    ],
+    [
+        "ghost_step",
+        "killshot"
+    ]
+]

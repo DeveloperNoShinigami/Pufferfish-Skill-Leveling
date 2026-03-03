@@ -1,0 +1,360 @@
+{
+    "attributes_by_class": {
+        "shadowmancer": [
+            {
+                "id": "page_0",
+                "slots": [
+                    {
+                        "id": "shadow_dmg",
+                        "name": "Shadow Strike",
+                        "attribute_id": "irons_spellbooks:shadow_spell_power",
+                        "icon": "minecraft:wither_skeleton_skull",
+                        "description": "Increases shadow spell damage.",
+                        "value": "min(points * 0.05, 0.50)",
+                        "format": "+#%",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 20
+                    },
+                    {
+                        "id": "void_step",
+                        "name": "Void Step",
+                        "attribute_id": "minecraft:generic.movement_speed",
+                        "icon": "minecraft:ender_eye",
+                        "description": "Increases your movement speed.",
+                        "value": "points * 0.01",
+                        "format": "+#%",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 10
+                    },
+                    {
+                        "id": "shadow_res",
+                        "name": "Cloak of Shadows",
+                        "attribute_id": "irons_spellbooks:shadow_resistence",
+                        "icon": "minecraft:netherite_chestplate",
+                        "description": "Increases resistance to shadow damage.",
+                        "value": "points * 0.02",
+                        "format": "+#%",
+                        "operation": "ADDITION",
+                        "max_points": 15
+                    },
+                    {
+                        "id": "dark_mana",
+                        "name": "Dark Mana",
+                        "attribute_id": "epicfight:max_mana",
+                        "icon": "irons_spellbooks:mana_upgrade_orb",
+                        "description": "Increases max mana for shadow spells.",
+                        "value": "points * 10",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 10
+                    },
+                    {
+                        "id": "soul_harvest",
+                        "name": "Soul Harvest",
+                        "attribute_id": "minecraft:generic.attack_damage",
+                        "icon": "minecraft:fermented_spider_eye",
+                        "description": "Increases base attack damage.",
+                        "value": "points * 0.5",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 10
+                    },
+                    {
+                        "id": "night_vision",
+                        "name": "Night Vision",
+                        "attribute_id": "minecraft:generic.luck",
+                        "icon": "minecraft:golden_carrot",
+                        "description": "Increases luck in the dark.",
+                        "value": "points * 1.0",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 5
+                    }
+                ]
+            },
+            {
+                "id": "page_1",
+                "slots": [
+                    {
+                        "id": "void_cloak",
+                        "name": "Void Cloak",
+                        "attribute_id": "minecraft:generic.armor",
+                        "icon": "minecraft:phantom_membrane",
+                        "description": "Provides natural armor from the void.",
+                        "value": "points * 2.0",
+                        "format": "+# Armor",
+                        "operation": "ADDITION",
+                        "max_points": 10
+                    }
+                ]
+            }
+        ],
+        "necromancer": [
+            {
+                "id": "page_0",
+                "slots": [
+                    {
+                        "id": "max_mana",
+                        "name": "Max Mana",
+                        "attribute_id": "irons_spellbooks:max_mana",
+                        "icon": "irons_spellbooks:mana_upgrade_orb",
+                        "format": "+#.#",
+                        "value": "points * 5.0",
+                        "operation": "ADDITION",
+                        "max_points": 20,
+                        "description": "Increases your maximum mana capacity."
+                    },
+                    {
+                        "id": "minion_hp",
+                        "name": "Minion HP",
+                        "attribute_id": "minecraft:generic.max_health",
+                        "icon": "minecraft:zombie_head",
+                        "format": "+#%",
+                        "value": "points * 0.1",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 10,
+                        "description": "Increases health of summoned minions."
+                    },
+                    {
+                        "id": "minion_dmg",
+                        "name": "Minion Damage",
+                        "attribute_id": "minecraft:generic.attack_damage",
+                        "icon": "minecraft:iron_sword",
+                        "format": "+#%",
+                        "value": "points * 0.05",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 10,
+                        "description": "Increases damage of summoned minions."
+                    },
+                    {
+                        "id": "death_aura",
+                        "name": "Death Aura",
+                        "attribute_id": "irons_spellbooks:blood_spell_power",
+                        "icon": "minecraft:wither_rose",
+                        "format": "+#%",
+                        "value": "points * 0.02",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 15,
+                        "description": "Increases blood_spell power."
+                    },
+                    {
+                        "id": "life_tap",
+                        "name": "Life Tap",
+                        "attribute_id": "minecraft:generic.attack_speed",
+                        "icon": "minecraft:ghast_tear",
+                        "format": "+#%",
+                        "value": "points * 0.05",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 5,
+                        "description": "Increases attack speed slightly."
+                    },
+                    {
+                        "id": "bone_armor",
+                        "name": "Bone Armor",
+                        "attribute_id": "minecraft:generic.armor",
+                        "icon": "minecraft:bone",
+                        "format": "+#",
+                        "value": "points * 1.0",
+                        "operation": "ADDITION",
+                        "max_points": 20,
+                        "description": "Increases base armor."
+                    }
+                ]
+            },
+            {
+                "id": "page_1",
+                "slots": [
+                    {
+                        "id": "mana_regen",
+                        "name": "Mana Regen",
+                        "attribute_id": "irons_spellbooks:mana_regen",
+                        "icon": "minecraft:blaze_powder",
+                        "format": "+#.#",
+                        "value": "points * 0.1",
+                        "operation": "ADDITION",
+                        "max_points": 10,
+                        "description": "Increases your mana regeneration speed."
+                    }
+                ]
+            }
+        ],
+        "gunslinger": [
+            {
+                "id": "page_0",
+                "slots": [
+                    {
+                        "id": "max_mana",
+                        "name": "Maximum Mana",
+                        "attribute_id": "irons_spellbooks:max_mana",
+                        "icon": "irons_spellbooks:mana_upgrade_orb",
+                        "format": "+#",
+                        "value": "points * 10.0",
+                        "operation": "ADDITION",
+                        "max_points": 20,
+                        "description": "Increases your maximum mana capacity."
+                    },
+                    {
+                        "id": "gunslinger_dmg",
+                        "name": "Ballistics",
+                        "attribute_id": "tacz:attack_damage_multiplier",
+                        "icon": "minecraft:iron_ingot",
+                        "format": "+#%",
+                        "value": "points * 0.05",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 20,
+                        "description": "Increases overall projectile damage."
+                    },
+                    {
+                        "id": "gunslinger_speed",
+                        "name": "Agile Combatant",
+                        "attribute_id": "minecraft:generic.movement_speed",
+                        "icon": "minecraft:feather",
+                        "format": "+#%",
+                        "value": "points * 0.02",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 10,
+                        "description": "Increases movement speed."
+                    },
+                    {
+                        "id": "gunslinger_luck",
+                        "name": "Precision Luck",
+                        "attribute_id": "minecraft:generic.luck",
+                        "icon": "minecraft:rabbit_foot",
+                        "format": "+#",
+                        "value": "points * 1.0",
+                        "operation": "ADDITION",
+                        "max_points": 10,
+                        "description": "Increases critical hit luck."
+                    },
+                    {
+                        "id": "life_tap",
+                        "name": "Adrenaline",
+                        "attribute_id": "minecraft:generic.attack_speed",
+                        "icon": "minecraft:ghast_tear",
+                        "format": "+#%",
+                        "value": "points * 0.05",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 10,
+                        "description": "Increases attack speed slightly."
+                    },
+                    {
+                        "id": "gunslinger_armor",
+                        "name": "Kevlar Plating",
+                        "attribute_id": "minecraft:generic.armor",
+                        "icon": "minecraft:netherite_chestplate",
+                        "format": "+#",
+                        "value": "points * 1.5",
+                        "operation": "ADDITION",
+                        "max_points": 20,
+                        "description": "Increases base armor."
+                    }
+                ]
+            },
+            {
+                "id": "page_1",
+                "slots": [
+                    {
+                        "id": "mana_regen",
+                        "name": "Focus Regen",
+                        "attribute_id": "irons_spellbooks:mana_regen",
+                        "icon": "minecraft:blaze_powder",
+                        "format": "+#.#",
+                        "value": "points * 0.1",
+                        "operation": "ADDITION",
+                        "max_points": 10,
+                        "description": "Increases your mana regeneration speed."
+                    }
+                ]
+            }
+        ],
+        "executioner": [
+            {
+                "id": "page_0",
+                "slots": [
+                    {
+                        "id": "max_mana",
+                        "name": "Dark Concentration",
+                        "attribute_id": "irons_spellbooks:max_mana",
+                        "icon": "irons_spellbooks:mana_upgrade_orb",
+                        "format": "+#",
+                        "value": "points * 5.0",
+                        "operation": "ADDITION",
+                        "max_points": 10,
+                        "description": "Increases your maximum mana capacity."
+                    },
+                    {
+                        "id": "executioner_dmg",
+                        "name": "Brute Force",
+                        "attribute_id": "minecraft:generic.attack_damage",
+                        "icon": "minecraft:netherite_axe",
+                        "format": "+#",
+                        "value": "points * 2.0",
+                        "operation": "ADDITION",
+                        "max_points": 20,
+                        "description": "Increases base attack damage."
+                    },
+                    {
+                        "id": "executioner_impact",
+                        "name": "Staggering Blows",
+                        "attribute_id": "epicfight:impact",
+                        "icon": "minecraft:obsidian",
+                        "format": "+#",
+                        "value": "points * 0.5",
+                        "operation": "ADDITION",
+                        "max_points": 10,
+                        "description": "Increases strike impact."
+                    },
+                    {
+                        "id": "executioner_speed",
+                        "name": "Relentless Pursuit",
+                        "attribute_id": "minecraft:generic.movement_speed",
+                        "icon": "minecraft:sugar",
+                        "format": "+#%",
+                        "value": "points * 0.01",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 10,
+                        "description": "Increases movement speed while in combat."
+                    },
+                    {
+                        "id": "life_tap",
+                        "name": "Bloodthirst",
+                        "attribute_id": "minecraft:generic.attack_speed",
+                        "icon": "minecraft:ghast_tear",
+                        "format": "+#%",
+                        "value": "points * 0.05",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 10,
+                        "description": "Increases attack speed slightly."
+                    },
+                    {
+                        "id": "executioner_armor",
+                        "name": "Dread Shell",
+                        "attribute_id": "minecraft:generic.armor",
+                        "icon": "minecraft:bone",
+                        "format": "+#",
+                        "value": "points * 2.0",
+                        "operation": "ADDITION",
+                        "max_points": 20,
+                        "description": "Increases base armor."
+                    }
+                ]
+            },
+            {
+                "id": "page_1",
+                "slots": [
+                    {
+                        "id": "mana_regen",
+                        "name": "Stamina Recovery",
+                        "attribute_id": "irons_spellbooks:mana_regen",
+                        "icon": "minecraft:blaze_powder",
+                        "format": "+#.#",
+                        "value": "points * 0.1",
+                        "operation": "ADDITION",
+                        "max_points": 10,
+                        "description": "Increases your mana regeneration speed."
+                    }
+                ]
+            }
+        ]
+    }
+}

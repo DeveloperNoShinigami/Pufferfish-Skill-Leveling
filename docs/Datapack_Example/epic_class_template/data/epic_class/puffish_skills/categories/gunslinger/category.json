@@ -1,0 +1,10 @@
+{
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "tacz:modern_kinetic_gun",
+            "nbt": "{GunId:\"tacz:deagle\"}"
+        }
+    },
+    "background": "minecraft:textures/block/iron_block.png"
+}

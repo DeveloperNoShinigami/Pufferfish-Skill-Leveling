@@ -4,6 +4,21 @@ All notable changes to Pufferfish Skill Leveling are documented in this file. Da
 
 ---
 
+## [2026-03-03] — Epic Classes Bridge & DataPack Restructure
+
+### Added
+- **Native DataPack Support:** Epic Class definitions, Attributes, and Job Masters can now be loaded dynamically via datapacks (`data/puffish_skills_leveling/rise_of_heros/`).
+- **NBT Parsing Support:** Added `PuffishItemHelper` to correctly parse and render item NBT (e.g., custom attributes, tacz attachments) in class selection preview menus.
+- **Client Synchronization:** Implemented S2C packet (`SyncBridgeContentPacket`) to ensure custom DataPack configurations render correctly on the client side UI.
+- **Multi-File Category Standard:** Upgraded all 10 base class skill trees (Warrior, Archer, Berserker, Paladin, Sorcerer, Necromancer, Reaper, Shadowmancer, Gunslinger, Executioner) to a structured multi-file format (category.json, definitions.json, skills.json, connections.json, experience.json).
+- **MMORPG Attribute Scaling:** Introduced `epic_class_attributes.json` mapping, allowing fine-tuned progression scaling aligned with the expected MMORPG stat curve.
+
+### Fixed
+- **Forge Build Compilation:** Resolved missing import errors in `CustomClassSelectScreen` and `PuffishItemHelper`.
+- **Class Start Items:** Starting items logic now natively mirrors Epic Fight/Epic Classes standard granting behavior, correctly applying NBT metadata to granted items.
+
+---
+
 ## [2026-02-16] — Effect Amplifier & Reload Fixes
 
 ### Fixed

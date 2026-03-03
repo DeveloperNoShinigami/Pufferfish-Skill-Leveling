@@ -1,0 +1,22 @@
+{
+    "quick_draw": {
+        "x": 0,
+        "y": 0,
+        "definition": "quick_draw"
+    },
+    "lead_rain": {
+        "x": 0,
+        "y": 50,
+        "definition": "lead_rain"
+    },
+    "ghost_step": {
+        "x": 0,
+        "y": 100,
+        "definition": "ghost_step"
+    },
+    "killshot": {
+        "x": 0,
+        "y": 150,
+        "definition": "killshot"
+    }
+}

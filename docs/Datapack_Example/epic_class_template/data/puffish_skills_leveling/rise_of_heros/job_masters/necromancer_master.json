@@ -1,0 +1,11 @@
+{
+    "id": "necromancer_master",
+    "name_key": "npc.epicclassmod.job_master.necromancer",
+    "texture": "epicclassmod:textures/entity/npc/necromancer.png",
+    "dialogue_key": "main__gui.epicclassmod.quest.job_master.necromancer",
+    "equipment": {
+        "HEAD": "minecraft:wither_skeleton_skull",
+        "CHEST": "minecraft:netherite_chestplate",
+        "MAINHAND": "minecraft:bone"
+    }
+}

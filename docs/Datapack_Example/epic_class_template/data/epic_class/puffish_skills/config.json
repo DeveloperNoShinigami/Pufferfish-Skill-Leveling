@@ -6,6 +6,10 @@
         "berserker",
         "reaper",
         "sorcerer",
-        "archer"
+        "archer",
+        "necromancer",
+        "shadowmancer",
+        "gunslinger",
+        "executioner"
     ]
 }

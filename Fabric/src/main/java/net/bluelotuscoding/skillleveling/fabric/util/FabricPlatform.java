@@ -20,4 +20,67 @@ public class FabricPlatform implements Platform {
     public boolean isForge() {
         return false;
     }
+
+    @Override
+    public net.minecraft.nbt.NbtCompound getPersistentData(Object player) {
+        // Standard Fabric doesn't have persistent data on entities without CC or
+        // similar.
+        // For now we return a new compound to satisfy the interface and prevent
+        // crashes.
+        return new net.minecraft.nbt.NbtCompound();
+    }
+
+    @Override
+    public void resetEpicClassStats(Object player) {
+        // Epic Class is Forge-only
+    }
+
+    @Override
+    public void setEpicClassStatPoints(Object player, int amount) {
+        // Epic Class is Forge-only
+    }
+
+    @Override
+    public void syncEpicClassLevel(Object player, int level, int xp,
+            int lastGain) {
+        // No-op on Fabric
+    }
+
+    @Override
+    public int getPufferfishLevel(Object player,
+            net.minecraft.util.Identifier categoryId) {
+        return 0;
+    }
+
+    @Override
+    public int getPufferfishExperience(Object player,
+            net.minecraft.util.Identifier categoryId) {
+        return 0;
+    }
+
+    @Override
+    public void addPufferfishExperience(Object player, int amount) {
+        // No-op on Fabric
+    }
+
+    @Override
+    public String getEpicClassName(Object player) {
+        return null;
+    }
+
+    @Override
+    public int getPufferfishPoints(Object player,
+            net.minecraft.util.Identifier categoryId) {
+        return 0;
+    }
+
+    @Override
+    public void syncCustomClassName(Object player) {
+        // No-op on Fabric
+    }
+
+    @Override
+    public void setCustomClassName(Object player, String name) {
+        // No-op on Fabric
+    }
 }

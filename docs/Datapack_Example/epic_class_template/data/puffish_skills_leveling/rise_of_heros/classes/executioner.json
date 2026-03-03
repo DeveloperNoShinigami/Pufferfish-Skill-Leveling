@@ -1,0 +1,75 @@
+{
+    "class_name": "executioner",
+    "display_name": "Executioner",
+    "display_name_key": "class.epicclassmod.executioner.title",
+    "lore_key": "class.epicclassmod.executioner.desc",
+    "skill_category_id": "executioner",
+    "job_master_id": "job_master_executioner",
+    "epic_class_proxy": "BERSERKER",
+    "book_lore": "Ruthless and unstoppable. They wield massive weapons to sever heads and break shields.",
+    "class_weapon_type": "Scythe / Heavy Blades",
+    "class_weapon_icon": "wom:antitheus",
+    "class_weapon_items": [
+        "wom:antitheus",
+        "minecraft:iron_axe"
+    ],
+    "attributes": {
+        "minecraft:generic.max_health": {
+            "value": 24.0,
+            "operation": "BASE"
+        },
+        "irons_spellbooks:max_mana": {
+            "value": 0.0,
+            "operation": "BASE"
+        },
+        "minecraft:generic.attack_damage": {
+            "value": 8.0,
+            "operation": "BASE"
+        },
+        "minecraft:generic.armor": {
+            "value": 6.0,
+            "operation": "BASE"
+        }
+    },
+    "gui_title": "class.epicclassmod.executioner.title",
+    "gui_description": "Welds death incarnate.",
+    "preview_animation": "wom:biped/living/antitheus_idle",
+    "preview_armor_base": "minecraft:netherite_",
+    "preview_mainhand_item": "wom:antitheus",
+    "preview_offhand_item": "",
+    "starting_items": [
+        "wom:antitheus"
+    ],
+    "gui_stats": [
+        {
+            "label_key": "class.epicclassmod.stat.health",
+            "icon": "epicclassmod:textures/gui/icons/heart.png",
+            "stat_type": "hearts",
+            "count": 12
+        },
+        {
+            "label_key": "Attack Damage",
+            "icon": "epicclassmod:textures/gui/icons/sword.png",
+            "stat_type": "number",
+            "count": 8
+        }
+    ],
+    "gui_passives": [
+        {
+            "pufferfish_skill_id": "behead",
+            "icon": "epicclassmod:textures/gui/icons/sword.png"
+        },
+        {
+            "pufferfish_skill_id": "siphon",
+            "icon": "epicclassmod:textures/gui/icons/heart.png"
+        },
+        {
+            "pufferfish_skill_id": "quake",
+            "icon": "epicclassmod:textures/gui/icons/chest.png"
+        },
+        {
+            "pufferfish_skill_id": "terrorize",
+            "icon": "epicclassmod:textures/gui/icons/helm.png"
+        }
+    ]
+}

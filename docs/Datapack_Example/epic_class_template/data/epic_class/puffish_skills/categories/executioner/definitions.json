@@ -1,0 +1,222 @@
+{
+    "behead": {
+        "type": "puffish_skills:default",
+        "category_id": "executioner",
+        "title": "Behead",
+        "description": "Deal massive bonus damage to low-health targets.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:zombie_head"
+            }
+        },
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Rank 1: +5% Attack Damage",
+            "5": "Rank 5: +25% Attack Damage"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "behead",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "multiply_base",
+                                    "value": 0.05
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "multiply_base",
+                                    "value": 0.25
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "behead"
+        }
+    },
+    "siphon": {
+        "type": "puffish_skills:default",
+        "category_id": "executioner",
+        "title": "Siphon",
+        "description": "Extract life essence from your kills.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:ghast_tear"
+            }
+        },
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Rank 1: +0.5 HP per kill (Luck-based)",
+            "5": "Rank 5: +2.5 HP per kill (Luck-based)"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "siphon",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.luck",
+                                    "operation": "addition",
+                                    "value": 1.0
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.luck",
+                                    "operation": "addition",
+                                    "value": 5.0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "siphon"
+        }
+    },
+    "quake": {
+        "type": "puffish_skills:default",
+        "category_id": "executioner",
+        "title": "Quake",
+        "description": "Your strikes carry immense weight, breaking through defense.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:obsidian"
+            }
+        },
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Rank 1: +0.2 Impact, +2% Armor Negation",
+            "5": "Rank 5: +1.0 Impact, +10% Armor Negation"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "quake",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "epicfight:impact",
+                                    "operation": "addition",
+                                    "value": 0.2
+                                }
+                            },
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "epicfight:armor_negation",
+                                    "operation": "multiply_base",
+                                    "value": 0.02
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "epicfight:impact",
+                                    "operation": "addition",
+                                    "value": 1.0
+                                }
+                            },
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "epicfight:armor_negation",
+                                    "operation": "multiply_base",
+                                    "value": 0.10
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "quake"
+        }
+    },
+    "terrorize": {
+        "type": "puffish_skills:default",
+        "category_id": "executioner",
+        "title": "Terrorize",
+        "description": "Your presence intimidates enemies, reducing their attack and speed.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:wither_skeleton_skull"
+            }
+        },
+        "max_skill_level": 5,
+        "merge_description": false,
+        "descriptions": {
+            "1": "Rank 1: Grants Resistance I",
+            "5": "Rank 5: Grants Resistance III"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "terrorize",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor_toughness",
+                                    "operation": "addition",
+                                    "value": 2.0
+                                }
+                            }
+                        ],
+                        "5": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor_toughness",
+                                    "operation": "addition",
+                                    "value": 10.0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "terrorize"
+        }
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "title": "Shadowmancer",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:wither_skeleton_skull"
+        }
+    },
+    "background": "textures/gui/advancements/backgrounds/stone.png"
+}

@@ -53,6 +53,10 @@ public class SkillLevelingMod {
     private final AddonLogger logger;
     private final net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader tradeLoader;
     private final net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader reputationLoader;
+    private final net.bluelotuscoding.skillleveling.bridge.config.EpicClassDataLoader epicClassDataLoader;
+    private final net.bluelotuscoding.skillleveling.bridge.config.JobMasterDataLoader jobMasterDataLoader;
+    private final net.bluelotuscoding.skillleveling.bridge.config.EpicAttributeDataLoader epicAttributeDataLoader;
+    private final net.bluelotuscoding.skillleveling.bridge.config.BridgeDataLoader bridgeDataLoader;
 
     private final net.bluelotuscoding.skillleveling.loot.LootImbueManager lootImbueManager;
     private final net.bluelotuscoding.skillleveling.loot.UniversalLootHandler universalLootHandler;
@@ -68,6 +72,10 @@ public class SkillLevelingMod {
         this.logger = new AddonLogger();
         this.tradeLoader = new net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader();
         this.reputationLoader = new net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader();
+        this.epicClassDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.EpicClassDataLoader();
+        this.jobMasterDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.JobMasterDataLoader();
+        this.epicAttributeDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.EpicAttributeDataLoader();
+        this.bridgeDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.BridgeDataLoader();
 
         this.lootImbueManager = new net.bluelotuscoding.skillleveling.loot.LootImbueManager();
         this.universalLootHandler = new net.bluelotuscoding.skillleveling.loot.UniversalLootHandler();
@@ -86,13 +94,21 @@ public class SkillLevelingMod {
      * 3. Hook into Skills mod events for skill unlock/lock detection
      * 4. Set up server lifecycle listeners for data management
      */
-    public static void init(java.io.File configDir) {
-        instance = new SkillLevelingMod();
+    public static void preInit() {
+        if (instance == null) {
+            instance = new SkillLevelingMod();
+        }
+    }
 
-        // INITIALIZE CONFIGURATION (placeholder — config file system is planned for a future update)
+    public static void init(java.io.File configDir) {
+        preInit();
+
+        // INITIALIZE CONFIGURATION (placeholder — config file system is planned for a
+        // future update)
         net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.load(configDir);
         BridgeConfigManager.load(configDir);
         EpicClassBridge.loadConfig(BridgeConfigManager.getConfig());
+        net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager.load(configDir);
 
         instance.logger.info("Initializing Pufferfish Skill Leveling addon v2 (Logging Balanced)...");
 
@@ -156,6 +172,22 @@ public class SkillLevelingMod {
         return reputationLoader;
     }
 
+    public net.bluelotuscoding.skillleveling.bridge.config.EpicClassDataLoader getEpicClassDataLoader() {
+        return epicClassDataLoader;
+    }
+
+    public net.bluelotuscoding.skillleveling.bridge.config.JobMasterDataLoader getJobMasterDataLoader() {
+        return jobMasterDataLoader;
+    }
+
+    public net.bluelotuscoding.skillleveling.bridge.config.EpicAttributeDataLoader getEpicAttributeDataLoader() {
+        return epicAttributeDataLoader;
+    }
+
+    public net.bluelotuscoding.skillleveling.bridge.config.BridgeDataLoader getBridgeDataLoader() {
+        return bridgeDataLoader;
+    }
+
     public net.bluelotuscoding.skillleveling.loot.LootImbueManager getLootImbueManager() {
         return lootImbueManager;
     }
@@ -182,6 +214,17 @@ public class SkillLevelingMod {
 
     public static Identifier createIdentifier(String path) {
         return new Identifier(MOD_ID, path);
+    }
+
+    public void syncBridgeContent(ServerPlayerEntity player) {
+        if (this.networkHandler != null) {
+            this.networkHandler.sendToPlayer(
+                    new net.bluelotuscoding.skillleveling.network.SyncBridgeContentPacket(
+                            net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager.getClasses(),
+                            net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
+                                    .getAttributePagesMap()),
+                    player);
+        }
     }
 
     // ================================================

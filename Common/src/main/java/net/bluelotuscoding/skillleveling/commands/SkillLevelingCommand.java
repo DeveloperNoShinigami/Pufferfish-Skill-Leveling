@@ -12,15 +12,19 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.mixin_interface.CategoryDataExtension;
+import net.minecraft.village.VillagerData;
 import net.puffish.skillsmod.SkillsMod;
-import net.puffish.skillsmod.server.data.CategoryData;
+import net.puffish.skillsmod.api.Category;
+import net.puffish.skillsmod.api.Skill;
+import net.puffish.skillsmod.commands.arguments.CategoryArgumentType;
+import net.puffish.skillsmod.commands.arguments.SkillArgumentType;
 import net.puffish.skillsmod.server.data.PlayerData;
+import net.puffish.skillsmod.server.data.CategoryData;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.village.VillagerData;
 
 /**
  * Simplified commands for managing skill levels in the addon.
@@ -35,222 +39,190 @@ import net.minecraft.village.VillagerData;
 public class SkillLevelingCommand {
 
         public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-                dispatcher.register(
-                                CommandManager.literal("skillleveling")
-                                                .requires(source -> source.hasPermissionLevel(2))
-                                                .then(CommandManager.literal("villager")
-                                                                .then(CommandManager.literal("setTier")
-                                                                                .then(CommandManager.argument("tier",
+                var root = CommandManager.literal("skillleveling")
+                                .requires(source -> source.hasPermissionLevel(2));
+
+                // VILLAGER
+                root.then(CommandManager.literal("villager")
+                                .then(CommandManager.literal("setTier")
+                                                .then(CommandManager.argument("tier", IntegerArgumentType.integer(1, 5))
+                                                                .executes(SkillLevelingCommand::setVillagerTier)))
+                                .then(CommandManager.literal("forceProfession")
+                                                .executes(SkillLevelingCommand::forceVillagerProfession))
+                                .then(CommandManager.literal("reset")
+                                                .executes(SkillLevelingCommand::resetVillager)));
+
+                // INTEGRATIONS
+                root.then(CommandManager.literal("integrations")
+                                .then(CommandManager.argument("modid", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> {
+                                                        builder.suggest("epicclassmod");
+                                                        return builder.buildFuture();
+                                                })
+                                                .then(CommandManager.argument("action", StringArgumentType.word())
+                                                                .suggests((ctx, builder) -> {
+                                                                        String modid = StringArgumentType.getString(ctx,
+                                                                                        "modid");
+                                                                        if ("epicclassmod".equals(modid)) {
+                                                                                builder.suggest("clear_given");
+                                                                                builder.suggest("clear_stats");
+                                                                                builder.suggest("set_sp");
+                                                                        }
+                                                                        return builder.buildFuture();
+                                                                })
+                                                                .executes(SkillLevelingCommand::handleIntegration)
+                                                                .then(CommandManager
+                                                                                .argument("amount", IntegerArgumentType
+                                                                                                .integer())
+                                                                                .executes(SkillLevelingCommand::handleIntegration)))));
+
+                // GET
+                root.then(CommandManager.literal("get")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                .then(CommandManager
+                                                                .argument("category", CategoryArgumentType.category())
+                                                                .then(CommandManager.argument("skill",
+                                                                                SkillArgumentType.skillFromCategory(
+                                                                                                "category"))
+                                                                                .executes(SkillLevelingCommand::getSkillLevel)))));
+
+                // SET
+                root.then(CommandManager.literal("set")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                .then(CommandManager
+                                                                .argument("category", CategoryArgumentType.category())
+                                                                .then(CommandManager.argument("skill",
+                                                                                SkillArgumentType.skillFromCategory(
+                                                                                                "category"))
+                                                                                .then(CommandManager.argument("level",
                                                                                                 IntegerArgumentType
-                                                                                                                .integer(1, 5))
-                                                                                                .executes(SkillLevelingCommand::setVillagerTier)))
-                                                                .then(CommandManager.literal("forceProfession")
-                                                                                .executes(SkillLevelingCommand::forceVillagerProfession))
-                                                                .then(CommandManager.literal("reset")
-                                                                                .executes(SkillLevelingCommand::resetVillager)))
-                                                // GET: View current skill level
-                                                .then(CommandManager.literal("get")
+                                                                                                                .integer(0))
+                                                                                                .executes(SkillLevelingCommand::setSkillLevel))))));
+
+                // REFUND
+                root.then(CommandManager.literal("refund")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                .then(CommandManager
+                                                                .argument("category", CategoryArgumentType.category())
+                                                                .then(CommandManager.argument("skill",
+                                                                                SkillArgumentType.skillFromCategory(
+                                                                                                "category"))
+                                                                                .executes(ctx -> refundLevels(ctx, 1))
+                                                                                .then(CommandManager.argument("amount",
+                                                                                                IntegerArgumentType
+                                                                                                                .integer(1))
+                                                                                                .suggests((ctx, builder) -> {
+                                                                                                        try {
+                                                                                                                var player = EntityArgumentType
+                                                                                                                                .getPlayer(ctx, "player");
+                                                                                                                Category category = CategoryArgumentType
+                                                                                                                                .getCategory(ctx,
+                                                                                                                                                "category");
+                                                                                                                Skill skill = SkillArgumentType
+                                                                                                                                .getSkillFromCategory(
+                                                                                                                                                ctx,
+                                                                                                                                                "skill",
+                                                                                                                                                category);
+                                                                                                                int currentLevel = getLevel(
+                                                                                                                                player,
+                                                                                                                                category.getId(),
+                                                                                                                                skill.getId());
+                                                                                                                for (int i = 1; i <= currentLevel; i++) {
+                                                                                                                        builder.suggest(String
+                                                                                                                                        .valueOf(i));
+                                                                                                                }
+                                                                                                        } catch (Exception e) {
+                                                                                                        }
+                                                                                                        return builder.buildFuture();
+                                                                                                })
+                                                                                                .executes(ctx -> refundLevels(
+                                                                                                                ctx,
+                                                                                                                IntegerArgumentType
+                                                                                                                                .getInteger(ctx, "amount"))))
+                                                                                .then(CommandManager.literal("all")
+                                                                                                .executes(SkillLevelingCommand::refundAllLevels))))));
+
+                // INFO
+                root.then(CommandManager.literal("info")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                .then(CommandManager
+                                                                .argument("category", CategoryArgumentType.category())
+                                                                .then(CommandManager.argument("skill",
+                                                                                SkillArgumentType.skillFromCategory(
+                                                                                                "category"))
+                                                                                .executes(SkillLevelingCommand::showSkillInfo)))));
+
+                // LIST
+                root.then(CommandManager.literal("list")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                .executes(SkillLevelingCommand::listPlayerSkills)));
+
+                // PREREQUISITES
+                root.then(CommandManager.literal("prerequisites")
+                                .then(CommandManager.argument("category", CategoryArgumentType.category())
+                                                .then(CommandManager
+                                                                .argument("skill",
+                                                                                SkillArgumentType.skillFromCategory(
+                                                                                                "category"))
+                                                                .executes(SkillLevelingCommand::showPrerequisites))));
+
+                // CATEGORYLEVEL
+                root.then(CommandManager.literal("categorylevel")
+                                .then(CommandManager.literal("sync")
+                                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                                .then(CommandManager.argument("category",
+                                                                                CategoryArgumentType.category())
+                                                                                .then(CommandManager.argument("skill",
+                                                                                                SkillArgumentType
+                                                                                                                .skillFromCategory(
+                                                                                                                                "category"))
+                                                                                                .executes(SkillLevelingCommand::forceSync)))))
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                .then(CommandManager
+                                                                .argument("category", CategoryArgumentType.category())
                                                                 .then(CommandManager
-                                                                                .argument("player", EntityArgumentType
-                                                                                                .player())
-                                                                                .then(CommandManager.argument(
-                                                                                                "category",
-                                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
-                                                                                                                .category())
+                                                                                .argument("level", IntegerArgumentType
+                                                                                                .integer(0))
+                                                                                .executes(SkillLevelingCommand::setCategoryLevel)))));
+
+                // GIVE
+                root.then(CommandManager.literal("give")
+                                .then(CommandManager.literal("tome")
+                                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                                .then(CommandManager.argument("category",
+                                                                                CategoryArgumentType.category())
+                                                                                .then(CommandManager.argument("skill",
+                                                                                                SkillArgumentType
+                                                                                                                .skillFromCategory(
+                                                                                                                                "category"))
                                                                                                 .then(CommandManager
-                                                                                                                .argument("skill",
-                                                                                                                                net.puffish.skillsmod.commands.arguments.SkillArgumentType
-                                                                                                                                                .skillFromCategory(
-                                                                                                                                                                "category"))
-                                                                                                                .executes(SkillLevelingCommand::getSkillLevel)))))
-                                                // SET: Set skill level directly (adjusts points accordingly)
-                                                .then(CommandManager.literal("set")
-                                                                .then(CommandManager
-                                                                                .argument("player", EntityArgumentType
-                                                                                                .player())
-                                                                                .then(CommandManager.argument(
-                                                                                                "category",
-                                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
-                                                                                                                .category())
-                                                                                                .then(CommandManager
-                                                                                                                .argument("skill",
-                                                                                                                                net.puffish.skillsmod.commands.arguments.SkillArgumentType
-                                                                                                                                                .skillFromCategory(
-                                                                                                                                                                "category"))
+                                                                                                                .argument("loot_mode",
+                                                                                                                                StringArgumentType
+                                                                                                                                                .word())
+                                                                                                                .suggests((ctx, builder) -> {
+                                                                                                                        builder.suggest("both");
+                                                                                                                        builder.suggest("tome_only");
+                                                                                                                        builder.suggest("imbue_only");
+                                                                                                                        return builder.buildFuture();
+                                                                                                                })
                                                                                                                 .then(CommandManager
                                                                                                                                 .argument("level",
                                                                                                                                                 IntegerArgumentType
-                                                                                                                                                                .integer(0))
-                                                                                                                                .executes(SkillLevelingCommand::setSkillLevel))))))
-                                                // REFUND: Reduce skill level and refund points
-                                                .then(CommandManager.literal("refund")
-                                                                .then(CommandManager
-                                                                                .argument("player", EntityArgumentType
-                                                                                                .player())
-                                                                                .then(CommandManager.argument(
-                                                                                                "category",
-                                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
-                                                                                                                .category())
-                                                                                                .then(CommandManager
-                                                                                                                .argument("skill",
-                                                                                                                                net.puffish.skillsmod.commands.arguments.SkillArgumentType
-                                                                                                                                                .skillFromCategory(
-                                                                                                                                                                "category"))
-                                                                                                                // refund
-                                                                                                                // <player>
-                                                                                                                // <category>
-                                                                                                                // <skill>
-                                                                                                                // -
-                                                                                                                // refunds
-                                                                                                                // 1
-                                                                                                                // level
-                                                                                                                .executes(ctx -> refundLevels(
-                                                                                                                                ctx,
-                                                                                                                                1))
-                                                                                                                // refund
-                                                                                                                // <player>
-                                                                                                                // <category>
-                                                                                                                // <skill>
-                                                                                                                // <amount>
-                                                                                                                .then(CommandManager
-                                                                                                                                .argument("amount",
-                                                                                                                                                IntegerArgumentType
                                                                                                                                                                 .integer(1))
-                                                                                                                                .suggests((ctx, builder) -> {
-                                                                                                                                        try {
-                                                                                                                                                var player = EntityArgumentType
-                                                                                                                                                                .getPlayer(ctx, "player");
-                                                                                                                                                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType
-                                                                                                                                                                .getCategory(ctx,
-                                                                                                                                                                                "category");
-                                                                                                                                                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType
-                                                                                                                                                                .getSkillFromCategory(
-                                                                                                                                                                                ctx,
-                                                                                                                                                                                "skill",
-                                                                                                                                                                                category);
-                                                                                                                                                int currentLevel = getLevel(
-                                                                                                                                                                player,
-                                                                                                                                                                category.getId(),
-                                                                                                                                                                skill.getId());
-                                                                                                                                                for (int i = 1; i <= currentLevel; i++) {
-                                                                                                                                                        builder.suggest(String
-                                                                                                                                                                        .valueOf(i));
-                                                                                                                                                }
-                                                                                                                                        } catch (Exception e) {
-                                                                                                                                        }
-                                                                                                                                        return builder.buildFuture();
-                                                                                                                                })
-                                                                                                                                .executes(ctx -> refundLevels(
-                                                                                                                                                ctx,
-                                                                                                                                                IntegerArgumentType
-                                                                                                                                                                .getInteger(ctx, "amount"))))
-                                                                                                                // refund
-                                                                                                                // <player>
-                                                                                                                // <category>
-                                                                                                                // <skill>
-                                                                                                                // all
-                                                                                                                .then(CommandManager
-                                                                                                                                .literal("all")
-                                                                                                                                .executes(SkillLevelingCommand::refundAllLevels))))))
-                                                // INFO: Show detailed skill information
-                                                .then(CommandManager.literal("info")
-                                                                .then(CommandManager
-                                                                                .argument("player", EntityArgumentType
-                                                                                                .player())
-                                                                                .then(CommandManager.argument(
-                                                                                                "category",
-                                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
-                                                                                                                .category())
-                                                                                                .then(CommandManager
-                                                                                                                .argument("skill",
-                                                                                                                                net.puffish.skillsmod.commands.arguments.SkillArgumentType
-                                                                                                                                                .skillFromCategory(
-                                                                                                                                                                "category"))
-                                                                                                                .executes(SkillLevelingCommand::showSkillInfo)))))
-                                                // LIST: List all skills for a player
-                                                .then(CommandManager.literal("list")
-                                                                .then(CommandManager
-                                                                                .argument("player", EntityArgumentType
-                                                                                                .player())
-                                                                                .executes(SkillLevelingCommand::listPlayerSkills)))
-                                                // PREREQUISITES: Show skill prerequisites
-                                                .then(CommandManager.literal("prerequisites")
-                                                                .then(CommandManager.argument("category",
-                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
-                                                                                                .category())
-                                                                                .then(CommandManager.argument("skill",
-                                                                                                net.puffish.skillsmod.commands.arguments.SkillArgumentType
-                                                                                                                .skillFromCategory(
-                                                                                                                                "category"))
-                                                                                                .executes(SkillLevelingCommand::showPrerequisites))))
-                                                // CATEGORYLEVEL: Set player's category level (calculates XP needed)
-                                                .then(CommandManager.literal("categorylevel")
-                                                                .then(CommandManager.literal("sync")
-                                                                                .then(CommandManager.argument("player",
-                                                                                                EntityArgumentType
-                                                                                                                .player())
-                                                                                                .then(CommandManager
-                                                                                                                .argument("category",
-                                                                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
-                                                                                                                                                .category())
-                                                                                                                .then(CommandManager
-                                                                                                                                .argument("skill",
-                                                                                                                                                net.puffish.skillsmod.commands.arguments.SkillArgumentType
-                                                                                                                                                                .skillFromCategory(
-                                                                                                                                                                                "category"))
-                                                                                                                                .executes(SkillLevelingCommand::forceSync)))))
-                                                                .then(CommandManager
-                                                                                .argument("player", EntityArgumentType
-                                                                                                .player())
-                                                                                .then(CommandManager.argument(
-                                                                                                "category",
-                                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
-                                                                                                                .category())
-                                                                                                .then(CommandManager
-                                                                                                                .argument("level",
-                                                                                                                                IntegerArgumentType
-                                                                                                                                                .integer(0))
-                                                                                                                .executes(SkillLevelingCommand::setCategoryLevel)))))
-                                                // GIVE: Give a Skill Tome
-                                                .then(CommandManager.literal("give")
-                                                                .then(CommandManager.literal("tome")
-                                                                                .then(CommandManager.argument("player",
-                                                                                                EntityArgumentType
-                                                                                                                .player())
-                                                                                                .then(CommandManager
-                                                                                                                .argument("category",
-                                                                                                                                net.puffish.skillsmod.commands.arguments.CategoryArgumentType
-                                                                                                                                                .category())
-                                                                                                                .then(CommandManager
-                                                                                                                                .argument("skill",
-                                                                                                                                                net.puffish.skillsmod.commands.arguments.SkillArgumentType
-                                                                                                                                                                .skillFromCategory(
-                                                                                                                                                                                "category"))
-                                                                                                                                .then(CommandManager
-                                                                                                                                                .argument("loot_mode",
-                                                                                                                                                                StringArgumentType
-                                                                                                                                                                                .word())
-                                                                                                                                                .suggests((ctx, builder) -> {
-                                                                                                                                                        builder.suggest("both");
-                                                                                                                                                        builder.suggest("tome_only");
-                                                                                                                                                        builder.suggest("imbue_only");
-                                                                                                                                                        return builder.buildFuture();
-                                                                                                                                                })
-                                                                                                                                                .then(CommandManager
-                                                                                                                                                                .argument("level",
-                                                                                                                                                                                IntegerArgumentType
-                                                                                                                                                                                                .integer(1))
-                                                                                                                                                                .executes(SkillLevelingCommand::giveSkillTome))
-                                                                                                                                                .executes(ctx -> giveSkillTome(
-                                                                                                                                                                ctx,
-                                                                                                                                                                1))))))))
-                                                // DEBUG: Toggle debug logging
-                                                .then(CommandManager.literal("debug")
-                                                                .requires(source -> source.hasPermissionLevel(2))
-                                                                .then(CommandManager.argument("enabled",
-                                                                                com.mojang.brigadier.arguments.BoolArgumentType
-                                                                                                .bool())
-                                                                                .executes(SkillLevelingCommand::toggleDebug))));
+                                                                                                                                .executes(SkillLevelingCommand::giveSkillTome))
+                                                                                                                .executes(ctx -> giveSkillTome(
+                                                                                                                                ctx,
+                                                                                                                                1))))))));
+
+                // DEBUG
+                root.then(CommandManager.literal("debug")
+                                .requires(source -> source.hasPermissionLevel(2))
+                                .then(CommandManager
+                                                .argument("enabled",
+                                                                com.mojang.brigadier.arguments.BoolArgumentType.bool())
+                                                .executes(SkillLevelingCommand::toggleDebug)));
+
+                dispatcher.register(root);
         }
 
         /**
@@ -259,10 +231,8 @@ public class SkillLevelingCommand {
         private static int getSkillLevel(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
                 var source = context.getSource();
                 var player = EntityArgumentType.getPlayer(context, "player");
-                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
-                                "category");
-                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
-                                "skill", category);
+                Category category = CategoryArgumentType.getCategory(context, "category");
+                Skill skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
                 int currentLevel = getLevel(player, category.getId(), skill.getId());
                 int maxLevel = getMaxLevel(category.getId(), skill.getId());
@@ -285,10 +255,8 @@ public class SkillLevelingCommand {
         private static int setSkillLevel(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
                 var source = context.getSource();
                 var player = EntityArgumentType.getPlayer(context, "player");
-                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
-                                "category");
-                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
-                                "skill", category);
+                Category category = CategoryArgumentType.getCategory(context, "category");
+                Skill skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
                 var targetLevel = IntegerArgumentType.getInteger(context, "level");
 
                 int maxLevel = getMaxLevel(category.getId(), skill.getId());
@@ -306,7 +274,8 @@ public class SkillLevelingCommand {
                         // Sync to client
                         var addon = SkillLevelingMod.getInstance();
                         if (addon != null) {
-                                int totalLevel = addon.getSkillLevelingManager().getSkillLevel(player, category.getId(),
+                                int totalLevel = addon.getSkillLevelingManager().getTotalSkillLevel(player,
+                                                category.getId(),
                                                 skill.getId());
                                 addon.getSkillLevelingManager().syncSkillLevelToClient(player, category.getId(),
                                                 skill.getId(), targetLevel, totalLevel, maxLevel);
@@ -330,10 +299,8 @@ public class SkillLevelingCommand {
                         throws CommandSyntaxException {
                 var source = context.getSource();
                 var player = EntityArgumentType.getPlayer(context, "player");
-                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
-                                "category");
-                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
-                                "skill", category);
+                Category category = CategoryArgumentType.getCategory(context, "category");
+                Skill skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
                 int currentLevel = getLevel(player, category.getId(), skill.getId());
 
@@ -376,7 +343,8 @@ public class SkillLevelingCommand {
                         // Sync our addon's level display
                         var addon = SkillLevelingMod.getInstance();
                         if (addon != null) {
-                                int totalLevel = addon.getSkillLevelingManager().getSkillLevel(player, category.getId(),
+                                int totalLevel = addon.getSkillLevelingManager().getTotalSkillLevel(player,
+                                                category.getId(),
                                                 skill.getId());
                                 addon.getSkillLevelingManager().syncSkillLevelToClient(player, category.getId(),
                                                 skill.getId(), newLevel, totalLevel, maxLevel);
@@ -399,10 +367,8 @@ public class SkillLevelingCommand {
         private static int refundAllLevels(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
                 var source = context.getSource();
                 var player = EntityArgumentType.getPlayer(context, "player");
-                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
-                                "category");
-                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
-                                "skill", category);
+                Category category = CategoryArgumentType.getCategory(context, "category");
+                Skill skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
                 int currentLevel = getLevel(player, category.getId(), skill.getId());
 
@@ -514,10 +480,8 @@ public class SkillLevelingCommand {
         private static int forceSync(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
                 var source = context.getSource();
                 var player = EntityArgumentType.getPlayer(context, "player");
-                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
-                                "category");
-                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
-                                "skill", category);
+                Category category = CategoryArgumentType.getCategory(context, "category");
+                Skill skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
                 var addon = SkillLevelingMod.getInstance();
                 if (addon == null) {
@@ -530,7 +494,7 @@ public class SkillLevelingCommand {
                 int currentLevel = getLevel(player, category.getId(), skill.getId());
                 int maxLevel = getMaxLevel(category.getId(), skill.getId());
 
-                int totalLevel = manager.getSkillLevel(player, category.getId(), skill.getId());
+                int totalLevel = manager.getTotalSkillLevel(player, category.getId(), skill.getId());
                 // Send level update (base and total)
                 manager.syncSkillLevelToClient(player, category.getId(), skill.getId(), currentLevel, totalLevel,
                                 maxLevel);
@@ -582,10 +546,8 @@ public class SkillLevelingCommand {
         private static int showSkillInfo(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
                 var source = context.getSource();
                 var player = EntityArgumentType.getPlayer(context, "player");
-                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
-                                "category");
-                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
-                                "skill", category);
+                Category category = CategoryArgumentType.getCategory(context, "category");
+                Skill skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
                 int currentLevel = getLevel(player, category.getId(), skill.getId());
                 int maxLevel = getMaxLevel(category.getId(), skill.getId());
@@ -627,21 +589,22 @@ public class SkillLevelingCommand {
                                 .literal(String.format("§6═══ Skills for §e%s §6═══", player.getName().getString())));
 
                 // Iterate through all categories and skills
-                net.puffish.skillsmod.api.SkillsAPI.streamCategories().forEach(category -> {
-                        category.streamSkills().forEach(skill -> {
-                                int level = getLevel(player, category.getId(), skill.getId());
-                                int maxLevel = getMaxLevel(category.getId(), skill.getId());
+                net.puffish.skillsmod.api.SkillsAPI.streamCategories()
+                                .forEach((net.puffish.skillsmod.api.Category category) -> {
+                                        category.streamSkills().forEach((net.puffish.skillsmod.api.Skill skill) -> {
+                                                int level = getLevel(player, category.getId(), skill.getId());
+                                                int maxLevel = getMaxLevel(category.getId(), skill.getId());
 
-                                if (level > 0) {
-                                        source.sendMessage(Text.literal(String.format(
-                                                        "§a%s:%s §7- Level §6%d§7/§6%d",
-                                                        category.getId().getPath(),
-                                                        skill.getId(),
-                                                        level,
-                                                        maxLevel)));
-                                }
-                        });
-                });
+                                                if (level > 0) {
+                                                        source.sendMessage(Text.literal(String.format(
+                                                                        "§a%s:%s §7- Level §6%d§7/§6%d",
+                                                                        category.getId().getPath(),
+                                                                        skill.getId(),
+                                                                        level,
+                                                                        maxLevel)));
+                                                }
+                                        });
+                                });
 
                 return 1;
         }
@@ -652,10 +615,8 @@ public class SkillLevelingCommand {
         private static int showPrerequisites(CommandContext<ServerCommandSource> context)
                         throws CommandSyntaxException {
                 var source = context.getSource();
-                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
-                                "category");
-                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
-                                "skill", category);
+                Category category = CategoryArgumentType.getCategory(context, "category");
+                Skill skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
                 var addon = SkillLevelingMod.getInstance();
                 var manager = addon.getSkillLevelingManager();
@@ -683,8 +644,7 @@ public class SkillLevelingCommand {
         private static int setCategoryLevel(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
                 var source = context.getSource();
                 var player = EntityArgumentType.getPlayer(context, "player");
-                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
-                                "category");
+                Category category = CategoryArgumentType.getCategory(context, "category");
                 var targetLevel = IntegerArgumentType.getInteger(context, "level");
 
                 try {
@@ -704,7 +664,8 @@ public class SkillLevelingCommand {
                         }
 
                         var categoryConfig = (net.puffish.skillsmod.config.CategoryConfig) categoryConfigOpt.get();
-                        var experienceOpt = categoryConfig.experience();
+                        var experienceOpt = (java.util.Optional<?>) categoryConfig.getClass().getMethod("experience")
+                                        .invoke(categoryConfig);
 
                         if (experienceOpt.isEmpty()) {
                                 source.sendError(Text.literal("§cCategory does not have experience configured"));
@@ -712,10 +673,10 @@ public class SkillLevelingCommand {
                         }
 
                         var experience = experienceOpt.get();
-                        var curve = experience.curve();
+                        var curve = experience.getClass().getMethod("curve").invoke(experience);
 
                         // Check level limit
-                        int levelLimit = curve.getLevelLimit();
+                        int levelLimit = (int) curve.getClass().getMethod("getLevelLimit").invoke(curve);
                         if (targetLevel < 0 || targetLevel > levelLimit) {
                                 source.sendError(Text.literal(
                                                 String.format("§cLevel must be between 0 and %d", levelLimit)));
@@ -725,7 +686,8 @@ public class SkillLevelingCommand {
                         // Calculate XP needed for target level
                         int requiredXP = 0;
                         if (targetLevel > 0) {
-                                requiredXP = curve.getRequiredTotal(targetLevel - 1);
+                                requiredXP = (int) curve.getClass().getMethod("getRequiredTotal", int.class)
+                                                .invoke(curve, targetLevel - 1);
                         }
 
                         // Set the experience using SkillsMod.setExperience
@@ -868,10 +830,8 @@ public class SkillLevelingCommand {
                         throws CommandSyntaxException {
                 var source = context.getSource();
                 var player = EntityArgumentType.getPlayer(context, "player");
-                var category = net.puffish.skillsmod.commands.arguments.CategoryArgumentType.getCategory(context,
-                                "category");
-                var skill = net.puffish.skillsmod.commands.arguments.SkillArgumentType.getSkillFromCategory(context,
-                                "skill", category);
+                Category category = CategoryArgumentType.getCategory(context, "category");
+                Skill skill = SkillArgumentType.getSkillFromCategory(context, "skill", category);
 
                 String lootMode = "both";
                 try {
@@ -908,4 +868,81 @@ public class SkillLevelingCommand {
                                                 + "§a (runtime only, resets on restart)."));
                 return 1;
         }
+
+        /**
+         * Handle integration commands (e.g. clearing given tags for epicclassmod)
+         */
+        private static int handleIntegration(CommandContext<ServerCommandSource> context)
+                        throws CommandSyntaxException {
+                var source = context.getSource();
+                String modid = StringArgumentType.getString(context, "modid");
+                String action = StringArgumentType.getString(context, "action");
+
+                if ("epicclassmod".equals(modid)) {
+                        if ("clear_given".equals(action)) {
+                                ServerPlayerEntity player = source.getPlayer();
+                                if (player == null) {
+                                        source.sendError(Text.literal(
+                                                        "Must be run by a player to target self, or add player arg (TODO)"));
+                                        return 0;
+                                }
+
+                                var data = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance()
+                                                .getPlatform().getPersistentData(player);
+                                int cleared = 0;
+                                var keys = new java.util.ArrayList<>(data.getKeys());
+                                for (String key : keys) {
+                                        if (key.startsWith("ecm_start_items_") || key.startsWith("ecm_items_received_")
+                                                        || key.equals("ecm_class_chosen")
+                                                        || key.equals("ecm_mana_applied_once")
+                                                        || key.equals("ecm_applied_attributes")) {
+                                                data.remove(key);
+                                                cleared++;
+                                        }
+                                }
+
+                                if (cleared > 0) {
+                                        source.sendMessage(Text.literal("§aSuccessfully cleared §e" + cleared
+                                                        + "§a integration tags for §6" + player.getName().getString()));
+                                        return 1;
+                                } else {
+                                        source.sendError(
+                                                        Text.literal("§cFailed to clear any tags or none were found."));
+                                        return 0;
+                                }
+                        } else if ("clear_stats".equals(action)) {
+                                ServerPlayerEntity player = source.getPlayer();
+                                if (player == null) {
+                                        source.sendError(Text.literal("Must be run by a player"));
+                                        return 0;
+                                }
+                                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getPlatform()
+                                                .resetEpicClassStats(player);
+                                source.sendMessage(Text.literal("§aReset and refunded Epic Class stat points for §6"
+                                                + player.getName().getString()));
+                                return 1;
+                        } else if ("set_sp".equals(action)) {
+                                ServerPlayerEntity player = source.getPlayer();
+                                if (player == null) {
+                                        source.sendError(Text.literal("Must be run by a player"));
+                                        return 0;
+                                }
+                                try {
+                                        int amount = IntegerArgumentType.getInteger(context, "amount");
+                                        net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getPlatform()
+                                                        .setEpicClassStatPoints(player, amount);
+                                        source.sendMessage(Text.literal("§aSet Epic Class stat points to §e" + amount
+                                                        + " §afor §6" + player.getName().getString()));
+                                        return 1;
+                                } catch (Exception e) {
+                                        source.sendError(Text.literal("§cUsage: ... set_sp <amount>"));
+                                        return 0;
+                                }
+                        }
+                }
+
+                source.sendError(Text.literal("§cUnknown integration or action: " + modid + "/" + action));
+                return 0;
+        }
+
 }

@@ -50,6 +50,16 @@ public class FabricNetworkHandler implements NetworkHandler {
     }
 
     @Override
+    public void sendToPlayer(SyncBridgeContentPacket packet, ServerPlayerEntity player) {
+        // Not implemented for Fabric yet
+    }
+
+    @Override
+    public void sendToPlayer(SyncCustomClassPacket packet, ServerPlayerEntity player) {
+        // Not implemented for Fabric yet
+    }
+
+    @Override
     public void sendToPlayer(SyncSkillLevelPacket packet, ServerPlayerEntity player) {
         PacketByteBuf buf = PacketByteBufs.create();
         packet.encode(buf);

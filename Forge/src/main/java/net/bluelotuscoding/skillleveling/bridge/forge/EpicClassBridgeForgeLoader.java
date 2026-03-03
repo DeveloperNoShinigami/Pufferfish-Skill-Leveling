@@ -28,6 +28,8 @@ public final class EpicClassBridgeForgeLoader {
         }
 
         MinecraftForge.EVENT_BUS.register(new EpicClassBridgeForgeEvents());
+        MinecraftForge.EVENT_BUS.register(new ClassBookScreenRenderer());
+        MinecraftForge.EVENT_BUS.register(new PlayerCleanupListener());
         SkillLevelingMod.getInstance().getLogger().info("Epic Class bridge enabled");
     }
 }

@@ -80,20 +80,12 @@ public abstract class PlayerXpNeededForNextMixin {
             // check)
             if (puffishXpNeeded <= 0) {
                 cir.setReturnValue(Integer.MAX_VALUE);
-                SkillLevelingMod.getInstance().getLogger().debug(
-                        "[Bridge] xpNeededForNext(" + level + ") at max level, returning MAX_VALUE");
                 return;
             }
 
             cir.setReturnValue(puffishXpNeeded);
 
-            SkillLevelingMod.getInstance().getLogger().debug(
-                    "[Bridge] xpNeededForNext(" + level + ") returning Puffish value: "
-                            + puffishXpNeeded + " from category: " + firstCategory);
-
         } catch (Exception e) {
-            SkillLevelingMod.getInstance().getLogger().debug(
-                    "[Bridge] PlayerXpNeededForNextMixin error: " + e.getMessage());
             // Let Epic Class use its default on error
         }
     }

@@ -81,6 +81,11 @@ public class FabricPlatform implements Platform {
 
     @Override
     public void setCustomClassName(Object player, String name) {
-        // No-op on Fabric
+        // Fabric implementation pending Epic Classes integration
+    }
+
+    @Override
+    public void sendAdvanceClassScreen(Object player, String parentClassId) {
+        // Fabric implementation pending Epic Classes networking integration
     }
 }

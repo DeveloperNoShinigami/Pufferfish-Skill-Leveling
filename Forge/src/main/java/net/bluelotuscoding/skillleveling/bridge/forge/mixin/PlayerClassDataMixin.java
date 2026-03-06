@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 
-@Mixin(value = PlayerClassData.class, remap = false)
+@Mixin(targets = "com.example.epicclassmod.data.PlayerClassData", remap = false)
 public class PlayerClassDataMixin {
 
     /**

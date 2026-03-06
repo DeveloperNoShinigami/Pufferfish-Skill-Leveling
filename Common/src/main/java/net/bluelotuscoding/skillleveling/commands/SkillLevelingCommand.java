@@ -214,15 +214,92 @@ public class SkillLevelingCommand {
                                                                                                                                 ctx,
                                                                                                                                 1))))))));
 
-                // DEBUG
-                root.then(CommandManager.literal("debug")
-                                .requires(source -> source.hasPermissionLevel(2))
-                                .then(CommandManager
-                                                .argument("enabled",
-                                                                com.mojang.brigadier.arguments.BoolArgumentType.bool())
-                                                .executes(SkillLevelingCommand::toggleDebug)));
+                // ADVANCECLASS
+                root.then(CommandManager.literal("advanceclass")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                .executes(SkillLevelingCommand::advanceClass))
+                                .executes(ctx -> {
+                                        try {
+                                                return advanceClass(ctx, ctx.getSource().getPlayerOrThrow());
+                                        } catch (Exception e) {
+                                                return 0;
+                                        }
+                                }));
 
                 dispatcher.register(root);
+        }
+
+        private static int advanceClass(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+                return advanceClass(context, EntityArgumentType.getPlayer(context, "player"));
+        }
+
+        private static int advanceClass(CommandContext<ServerCommandSource> context, ServerPlayerEntity player)
+                        throws CommandSyntaxException {
+                var source = context.getSource();
+                var platform = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getPlatform();
+
+                // 1. Check player's current class using Platform abstraction
+                String currentClassName = platform.getEpicClassName(player);
+
+                if (currentClassName == null || currentClassName.isEmpty()
+                                || currentClassName.equals("epic_classes:none")) {
+                        source.sendMessage(Text.literal("§cYou do not have a base class selected."));
+                        return 0;
+                }
+
+                // 2. Query getChildClasses
+                java.util.List<net.bluelotuscoding.skillleveling.bridge.config.EpicClassDef> children = net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
+                                .getChildClasses(currentClassName);
+
+                if (children.isEmpty()) {
+                        source.sendMessage(Text.literal("§cYour class has no further advancements available."));
+                        return 0;
+                }
+
+                // 3. Validate Max Pufferfish Tier
+                net.bluelotuscoding.skillleveling.bridge.config.EpicClassDef def = net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
+                                .getClassDef(currentClassName);
+
+                if (def == null) {
+                        source.sendMessage(Text.literal("§cClass definition not found for: " + currentClassName));
+                        return 0;
+                }
+
+                if (def.skill_category_id != null && !def.skill_category_id.isEmpty()) {
+                        net.minecraft.util.Identifier categoryId = new net.minecraft.util.Identifier(
+                                        def.skill_category_id);
+                        var categoryOptional = net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId);
+
+                        if (categoryOptional.isPresent()) {
+                                net.puffish.skillsmod.api.Category category = categoryOptional.get();
+                                var addon = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance();
+                                var manager = addon.getSkillLevelingManager();
+
+                                int[] totals = new int[2]; // 0 = player level, 1 = max level
+
+                                // Calculate total player level vs total category max level
+                                category.streamSkills().forEach((net.puffish.skillsmod.api.Skill skill) -> {
+                                        totals[0] += manager.getTotalSkillLevel(player, categoryId, skill.getId());
+                                        totals[1] += manager.getMaxLevel(categoryId, skill.getId());
+                                });
+
+                                int playerTotalLevel = totals[0];
+                                int categoryMaxPossibleLevel = totals[1];
+
+                                if (playerTotalLevel < categoryMaxPossibleLevel) {
+                                        source.sendMessage(Text.literal(
+                                                        "§cYou must master your current class before advancing. ("
+                                                                        + playerTotalLevel + "/"
+                                                                        + categoryMaxPossibleLevel + ")"));
+                                        return 0;
+                                }
+                        }
+                }
+
+                // 4. Send Packet via Platform to open UI
+                platform.sendAdvanceClassScreen(player, currentClassName);
+                source.sendMessage(Text.literal("§aOpening Class Advancement screen..."));
+                return 1;
         }
 
         /**
@@ -854,19 +931,6 @@ public class SkillLevelingCommand {
                         source.sendError(Text.literal("§cInventory full for " + player.getName().getString()));
                         return 0;
                 }
-        }
-
-        /**
-         * Toggle debug logging command
-         */
-        private static int toggleDebug(CommandContext<ServerCommandSource> context) {
-                boolean enabled = com.mojang.brigadier.arguments.BoolArgumentType.getBool(context, "enabled");
-                net.bluelotuscoding.skillleveling.config.SkillLevelingConfig.debugLogging = enabled;
-
-                context.getSource().sendMessage(Text.literal(
-                                "§aDebug logging " + (enabled ? "§eENABLED" : "§7DISABLED")
-                                                + "§a (runtime only, resets on restart)."));
-                return 1;
         }
 
         /**

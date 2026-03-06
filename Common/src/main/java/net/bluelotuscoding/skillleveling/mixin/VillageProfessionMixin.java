@@ -57,12 +57,7 @@ public abstract class VillageProfessionMixin {
                     });
 
             if (!nearbyVillagers.isEmpty()) {
-                SkillLevelingMod.getInstance().getLogger().debug("Villager " + self.getUuid()
-                        + " blocked from becoming Skill Master: " + nearbyVillagers.size() + " already exist nearby.");
                 ci.cancel();
-            } else {
-                SkillLevelingMod.getInstance().getLogger()
-                        .debug("Villager " + self.getUuid() + " allowed to become Skill Master.");
             }
         }
     }

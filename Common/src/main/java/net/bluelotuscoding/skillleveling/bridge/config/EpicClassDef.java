@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 public class EpicClassDef {
     public String class_name;
+    public String class_parent;
     public String display_name_key;
     public String lore_key;
 

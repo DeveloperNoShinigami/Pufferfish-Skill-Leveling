@@ -103,6 +103,13 @@ public class ForgeNetworkHandler implements NetworkHandler {
                 net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket::handle,
                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
 
+        CHANNEL.registerMessage(id++,
+                net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket.class,
+                net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket::encode,
+                net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket::decode,
+                net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
         CHANNEL.registerMessage(id++, SyncBridgeContentPacket.class, SyncBridgeContentPacket::write,
                 SyncBridgeContentPacket::read, (packet, contextSupplier) -> {
                     var context = contextSupplier.get();
@@ -143,24 +150,11 @@ public class ForgeNetworkHandler implements NetworkHandler {
 
     @Override
     public void sendToPlayer(SyncSkillLevelPacket packet, ServerPlayerEntity player) {
-        try {
-            SkillLevelingMod.getInstance().getLogger()
-                    .debug("Sending SyncSkillLevelPacket to " + player.getName().getString());
-        } catch (Exception ignored) {
-        }
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     @Override
     public void sendToPlayer(SyncSkillDescriptionsPacket packet, ServerPlayerEntity player) {
-        try {
-            SkillLevelingMod.getInstance().getLogger()
-                    .debug("Sending SyncSkillDescriptionsPacket to " + player.getName().getString()
-                            + " -> " + packet.getDefinitionId() + " (levels=" + packet.getLevelDescriptions().size()
-                            + ", extras="
-                            + packet.getLevelExtraDescriptions().size() + ")");
-        } catch (Exception ignored) {
-        }
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 

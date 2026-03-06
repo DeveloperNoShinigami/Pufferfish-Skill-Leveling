@@ -72,14 +72,6 @@ public abstract class ClassBookScreenMixin {
     private static java.lang.reflect.Field addon$activeTooltipBtnField = null;
     @Unique
     private static java.lang.reflect.Field addon$statPointsField = null;
-    @Unique
-    private static java.lang.reflect.Field addon$rectXField = null;
-    @Unique
-    private static java.lang.reflect.Field addon$rectYField = null;
-    @Unique
-    private static java.lang.reflect.Field addon$rectWField = null;
-    @Unique
-    private static java.lang.reflect.Field addon$rectHField = null;
 
     @Unique
     private static java.lang.reflect.Field addon$drawXField = null;
@@ -102,6 +94,15 @@ public abstract class ClassBookScreenMixin {
     private static java.lang.reflect.Method addon$pageSizeToScreenWMethod = null;
     @Unique
     private static java.lang.reflect.Method addon$pageSizeToScreenHMethod = null;
+
+    @Unique
+    private static java.lang.reflect.Field addon$rectXField = null;
+    @Unique
+    private static java.lang.reflect.Field addon$rectYField = null;
+    @Unique
+    private static java.lang.reflect.Field addon$rectWField = null;
+    @Unique
+    private static java.lang.reflect.Field addon$rectHField = null;
 
     @Unique
     private float addon$getGlobalScale() {
@@ -203,16 +204,6 @@ public abstract class ClassBookScreenMixin {
             addon$statPointsField = levelStateClazz.getDeclaredField("statPoints");
             addon$statPointsField.setAccessible(true);
 
-            Class<?> rectClazz = Class.forName("com.example.epicclassmod.util.Rect");
-            addon$rectXField = rectClazz.getDeclaredField("x");
-            addon$rectYField = rectClazz.getDeclaredField("y");
-            addon$rectWField = rectClazz.getDeclaredField("w");
-            addon$rectHField = rectClazz.getDeclaredField("h");
-            addon$rectXField.setAccessible(true);
-            addon$rectYField.setAccessible(true);
-            addon$rectWField.setAccessible(true);
-            addon$rectHField.setAccessible(true);
-
             Class<?> screenClazz = Class.forName("com.example.epicclassmod.client.ClassBookScreen");
             addon$activeTooltipBtnField = screenClazz.getDeclaredField("activeTooltipBtn");
             addon$activeTooltipBtnField.setAccessible(true);
@@ -265,9 +256,6 @@ public abstract class ClassBookScreenMixin {
         String customId = ClientCustomClassState.getCustomClass(mc.player.getUuid());
         if (customId != null && !"epic_classes:none".equals(customId)) {
             EpicClassDef res = EpicClassConfigManager.getClassDef(customId);
-            if (res == null) {
-                System.err.println("DEBUG: [ClassBookScreen] No definition for: " + customId);
-            }
             return res;
         }
 
@@ -1187,7 +1175,19 @@ public abstract class ClassBookScreenMixin {
         }
         addon$initReflection();
         if (addon$rectXField == null) {
-            return false;
+            try {
+                Class<?> rectClass = rect.getClass();
+                addon$rectXField = rectClass.getDeclaredField("x");
+                addon$rectYField = rectClass.getDeclaredField("y");
+                addon$rectWField = rectClass.getDeclaredField("w");
+                addon$rectHField = rectClass.getDeclaredField("h");
+                addon$rectXField.setAccessible(true);
+                addon$rectYField.setAccessible(true);
+                addon$rectWField.setAccessible(true);
+                addon$rectHField.setAccessible(true);
+            } catch (Exception e) {
+                return false;
+            }
         }
 
         try {

@@ -355,6 +355,95 @@
                     }
                 ]
             }
+        ],
+        "lich": [
+            {
+                "id": "page_0",
+                "slots": [
+                    {
+                        "id": "soul_rend",
+                        "name": "Soul Rend",
+                        "attribute_id": "irons_spellbooks:blood_spell_power",
+                        "icon": "minecraft:wither_skeleton_skull",
+                        "format": "+#%",
+                        "value": "points * 0.05",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 20,
+                        "description": "Increases blood spell power."
+                    },
+                    {
+                        "id": "max_mana",
+                        "name": "Dark Concentration",
+                        "attribute_id": "irons_spellbooks:max_mana",
+                        "icon": "irons_spellbooks:mana_upgrade_orb",
+                        "format": "+#",
+                        "value": "points * 5.0",
+                        "operation": "ADDITION",
+                        "max_points": 10,
+                        "description": "Increases your maximum mana capacity."
+                    },
+                    {
+                        "id": "death_lord",
+                        "name": "Death Lord",
+                        "attribute_id": "minecraft:generic.max_health",
+                        "icon": "minecraft:zombie_head",
+                        "format": "+#%",
+                        "value": "points * 0.1",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 10,
+                        "description": "Increases health of summoned minions."
+                    },
+                    {
+                        "id": "minion_dmg",
+                        "name": "Minion Damage",
+                        "attribute_id": "minecraft:generic.attack_damage",
+                        "icon": "minecraft:iron_sword",
+                        "format": "+#%",
+                        "value": "points * 0.05",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 10,
+                        "description": "Increases damage of summoned minions."
+                    },
+                    {
+                        "id": "life_tap",
+                        "name": "Life Tap",
+                        "attribute_id": "minecraft:generic.attack_speed",
+                        "icon": "minecraft:ghast_tear",
+                        "format": "+#%",
+                        "value": "points * 0.05",
+                        "operation": "MULTIPLY_BASE",
+                        "max_points": 5,
+                        "description": "Increases attack speed slightly."
+                    },
+                    {
+                        "id": "bone_armor",
+                        "name": "Bone Armor",
+                        "attribute_id": "minecraft:generic.armor",
+                        "icon": "minecraft:bone",
+                        "format": "+#",
+                        "value": "points * 1.0",
+                        "operation": "ADDITION",
+                        "max_points": 20,
+                        "description": "Increases base armor."
+                    }
+                ]
+            },
+            {
+                "id": "page_1",
+                "slots": [
+                    {
+                        "id": "mana_regen",
+                        "name": "Mana Regen",
+                        "attribute_id": "irons_spellbooks:mana_regen",
+                        "icon": "minecraft:blaze_powder",
+                        "format": "+#.#",
+                        "value": "points * 0.1",
+                        "operation": "ADDITION",
+                        "max_points": 10,
+                        "description": "Increases your mana regeneration speed."
+                    }
+                ]
+            }
         ]
     }
 }

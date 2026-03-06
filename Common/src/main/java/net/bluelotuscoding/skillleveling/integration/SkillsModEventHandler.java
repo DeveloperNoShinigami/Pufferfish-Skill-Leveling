@@ -97,9 +97,6 @@ public class SkillsModEventHandler {
                     levelingManager.initializeSkillData(player, categoryId, skillId);
 
                     // LOG FOR DEBUGGING: Helps administrators track addon behavior
-                    SkillLevelingMod.getInstance().getLogger().debug(
-                            "Initialized skill level data for player " + player.getName().getString()
-                                    + " - " + categoryId + ":" + skillId + " at level 1");
                 }
             }
         }
@@ -138,8 +135,6 @@ public class SkillsModEventHandler {
         // }
 
         // LOG THE EVENT: For debugging and administrative oversight
-        SkillLevelingMod.getInstance().getLogger().debug(
-                "Skill locked: " + categoryId + ":" + skillId + " (level data preserved)");
     }
 
     /**
@@ -179,8 +174,6 @@ public class SkillsModEventHandler {
             });
         }
 
-        SkillLevelingMod.getInstance().getLogger().debug(
-                "Synchronization complete. Initialized " + initializedCount[0] + " skill level entries.");
     }
 
     /**
@@ -203,7 +196,6 @@ public class SkillsModEventHandler {
                     net.bluelotuscoding.skillleveling.manager.CategoryLockManager.initializeLocks(player);
 
                     // JOIN LOGGING: Track player connections for debugging
-                    logger.debug("Synchronized skill level data for joining player: " + player.getName().getString());
                 });
             }
         } catch (Exception e) {

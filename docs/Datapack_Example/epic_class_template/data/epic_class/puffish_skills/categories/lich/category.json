@@ -1,0 +1,10 @@
+{
+    "title": "Lich",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "goety:shadow_essence"
+        }
+    },
+    "background": "textures/gui/advancements/backgrounds/nether.png"
+}

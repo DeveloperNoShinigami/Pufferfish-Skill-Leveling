@@ -1,21 +1,44 @@
 {
     "enabled": true,
     "classToCategoryMap": {
-        "WARRIOR": "warrior",
-        "NECROMANCER": "necromancer",
-        "REAPER": "reaper",
-        "PALADIN": "paladin",
-        "SORCERER": "sorcerer",
-        "ARCHER": "archer",
-        "BERSERKER": "berserker",
-        "GUNSLINGER": "gunslinger",
-        "EXECUTIONER": "executioner"
+        "WARRIOR": [
+            "warrior"
+        ],
+        "NECROMANCER": [
+            "necromancer"
+        ],
+        "LICH": [
+            "necromancer",
+            "lich"
+        ],
+        "REAPER": [
+            "reaper"
+        ],
+        "PALADIN": [
+            "paladin"
+        ],
+        "SORCERER": [
+            "sorcerer"
+        ],
+        "ARCHER": [
+            "archer"
+        ],
+        "BERSERKER": [
+            "berserker"
+        ],
+        "GUNSLINGER": [
+            "gunslinger"
+        ],
+        "EXECUTIONER": [
+            "executioner"
+        ]
     },
     "categorySyncEnabled": {
         "sorcerer": true,
         "warrior": true,
         "berserker": true,
         "necromancer": true,
+        "lich": true,
         "archer": true,
         "reaper": true,
         "paladin": true,
@@ -59,7 +82,11 @@
         "NECROMANCER_3": "necromancer_passive_3",
         "NECROMANCER_2": "necromancer_passive_2",
         "NECROMANCER_1": "necromancer_passive_1",
-        "NECROMANCER_0": "necromancer_passive_0"
+        "NECROMANCER_0": "necromancer_passive_0",
+        "LICH_0": "soul_reaper",
+        "LICH_1": "spectral_ward",
+        "LICH_2": "immortality",
+        "LICH_3": "terror_aura"
     },
     "classPassiveToLevelMap": {
         "PALADIN_0": 1,
@@ -97,7 +124,11 @@
         "EXECUTIONER_0": 1,
         "EXECUTIONER_1": 5,
         "EXECUTIONER_2": 10,
-        "EXECUTIONER_3": 20
+        "EXECUTIONER_3": 20,
+        "LICH_0": 1,
+        "LICH_1": 5,
+        "LICH_2": 10,
+        "LICH_3": 20
     },
     "autoActivateCategory": true,
     "lockOtherCategories": true,

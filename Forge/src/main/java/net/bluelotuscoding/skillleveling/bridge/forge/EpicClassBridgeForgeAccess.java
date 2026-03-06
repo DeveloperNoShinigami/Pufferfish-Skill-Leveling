@@ -106,8 +106,6 @@ public final class EpicClassBridgeForgeAccess {
                 }
             }
         } catch (Exception e) {
-            SkillLevelingMod.getInstance().getLogger().debug(
-                    "[Bridge] Reflection error calling Experience." + methodName + ": " + e.getMessage());
         }
         return null;
     }

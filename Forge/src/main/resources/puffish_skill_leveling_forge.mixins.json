@@ -9,7 +9,8 @@
         "DialogueScreenMixin",
         "ClientPacketHandlerMixin",
         "NpcQuestGiverRendererMixin",
-        "ClientLevelStateMixin"
+        "ClientLevelStateMixin",
+        "ClientPacketHandlersMixin"
     ],
     "mixins": [
         "NetworkSyncMixin",

@@ -40,7 +40,10 @@ public class EpicClassBridgeForgeEvents {
             if (server != null) {
                 // Initial sync on login. We use a slight delay or execute on next tick
                 // to ensure Pufferfish categories are loaded and ready.
-                server.execute(() -> EpicClassBridge.onClassChanged(player, className));
+                server.execute(() -> {
+                    EpicClassBridge.onClassChanged(player, className);
+                    EpicClassBridge.syncOnPlayerLogin(player);
+                });
             }
         }
     }

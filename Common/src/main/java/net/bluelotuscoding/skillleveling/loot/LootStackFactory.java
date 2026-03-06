@@ -17,8 +17,6 @@ import java.util.List;
 public final class LootStackFactory {
 
     public static ItemStack createStack(UnifiedLootConfig.LootEntry entry, Random random) {
-        SkillLevelingMod.getInstance().getLogger()
-                .debug("[LootStackFactory] Creating stack for entry: " + entry.type() + " (" + entry.name() + ")");
         if ("skill_tome".equals(entry.type())) {
             return createSkillTome(entry, random);
         }

@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class BridgeConfig {
     public boolean enabled = true;
-    public Map<String, String> classToCategoryMap = new HashMap<>();
+    public Map<String, java.util.List<String>> classToCategoryMap = new HashMap<>();
     public Map<String, Boolean> categorySyncEnabled = new HashMap<>();
     public Map<String, String> statToSkillMap = new HashMap<>();
     public Map<String, String> classPassiveToSkillMap = new HashMap<>();
@@ -16,13 +16,13 @@ public class BridgeConfig {
 
     public BridgeConfig() {
         // Default mappings (category path only; namespace resolved at runtime)
-        classToCategoryMap.put("WARRIOR", "warrior");
-        classToCategoryMap.put("PALADIN", "paladin");
-        classToCategoryMap.put("BERSERKER", "berserker");
-        classToCategoryMap.put("REAPER", "reaper");
-        classToCategoryMap.put("SORCERER", "sorcerer");
-        classToCategoryMap.put("ARCHER", "archer");
-        classToCategoryMap.put("NECROMANCER", "necromancer");
+        classToCategoryMap.put("WARRIOR", java.util.Collections.singletonList("warrior"));
+        classToCategoryMap.put("PALADIN", java.util.Collections.singletonList("paladin"));
+        classToCategoryMap.put("BERSERKER", java.util.Collections.singletonList("berserker"));
+        classToCategoryMap.put("REAPER", java.util.Collections.singletonList("reaper"));
+        classToCategoryMap.put("SORCERER", java.util.Collections.singletonList("sorcerer"));
+        classToCategoryMap.put("ARCHER", java.util.Collections.singletonList("archer"));
+        classToCategoryMap.put("NECROMANCER", java.util.Collections.singletonList("necromancer"));
 
         // Default sync flags (true for all mapped categories)
         categorySyncEnabled.put("warrior", true);
@@ -37,7 +37,9 @@ public class BridgeConfig {
         for (String className : classToCategoryMap.keySet()) {
             int[] levels = getLevelsForClass(className);
             for (int i = 0; i < 4; i++) {
-                classPassiveToSkillMap.put(className + "_" + i, classToCategoryMap.get(className) + "_passive_" + i);
+                // By default, passive skills map to the first category in the list
+                String firstCategory = classToCategoryMap.get(className).get(0);
+                classPassiveToSkillMap.put(className + "_" + i, firstCategory + "_passive_" + i);
                 classPassiveToLevelMap.put(className + "_" + i, levels[i]);
             }
         }

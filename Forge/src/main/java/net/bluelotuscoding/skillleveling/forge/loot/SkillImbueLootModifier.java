@@ -26,8 +26,6 @@ public class SkillImbueLootModifier extends LootModifier {
     @Override
     protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot,
             LootContext context) {
-        SkillLevelingMod.getInstance().getLogger()
-                .debug("[SkillImbueLootModifier] doApply triggered. Queried ID: " + context.getQueriedLootTableId());
         net.minecraft.util.Identifier lootTableId = context.getQueriedLootTableId();
         if (lootTableId == null) {
             lootTableId = net.bluelotuscoding.skillleveling.loot.LootMatchingUtil.inferLootTableId(context);

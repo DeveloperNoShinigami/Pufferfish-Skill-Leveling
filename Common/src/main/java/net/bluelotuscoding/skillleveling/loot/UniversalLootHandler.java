@@ -152,9 +152,6 @@ public class UniversalLootHandler extends JsonDataLoader {
     }
 
     private void injectIntoPool(net.minecraft.loot.LootTable.Builder builder, UnifiedLootConfig.LootGroup group) {
-        SkillLevelingMod.getInstance().getLogger()
-                .debug("[UniversalLootHandler] injectIntoPool triggered for group with " + group.entries().size()
-                        + " entries.");
         // Create a new pool for this group
         var poolBuilder = net.minecraft.loot.LootPool.builder()
                 .rolls(net.minecraft.loot.provider.number.UniformLootNumberProvider.create(group.rolls().min(),
@@ -285,11 +282,7 @@ public class UniversalLootHandler extends JsonDataLoader {
     private void processEntry(List<ItemStack> generatedLoot, UnifiedLootConfig.LootEntry entry,
             net.minecraft.world.World world, @Nullable net.minecraft.util.math.Vec3d origin,
             @Nullable net.minecraft.entity.Entity entity, Random random, @Nullable Identifier lootTableId) {
-        SkillLevelingMod.getInstance().getLogger()
-                .debug("[UniversalLootHandler] Processing entry: " + entry.type() + " (" + entry.name()
-                        + ") - Chance: " + entry.chance());
         if (entry.chance() < 1.0f && random.nextFloat() >= entry.chance()) {
-            SkillLevelingMod.getInstance().getLogger().debug("[UniversalLootHandler]   -> Chance failed.");
             return;
         }
 

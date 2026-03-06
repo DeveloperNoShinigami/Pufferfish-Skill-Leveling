@@ -262,9 +262,6 @@ public class SkillLevelingNetwork {
      */
     public static void sendSkillLevelUpdate(ServerPlayerEntity player, Identifier categoryId, String skillId,
             int currentLevel, int maxLevel) {
-        var logger = SkillLevelingMod.getInstance().getLogger();
-        logger.debug("Syncing skill level to " + player.getName().getString()
-                + ": " + categoryId + ":" + skillId + " = " + currentLevel + "/" + maxLevel);
     }
 
     /**
@@ -296,11 +293,6 @@ public class SkillLevelingNetwork {
                 mergeDescription, maxLevel, lootMode, new java.util.ArrayList<>(), toggleLevel);
 
         networkHandler.sendToPlayer(packet, player);
-
-        // LOGGING: Track description updates for debugging
-        var logger = addon.getLogger();
-        logger.debug("Sent skill description update to " + player.getName().getString()
-                + ": " + definitionId + " (merge=" + mergeDescription + ")");
     }
 
     /**
@@ -333,14 +325,8 @@ public class SkillLevelingNetwork {
      * for initial connection or full resynchronization scenarios.
      */
     public static void sendFullSkillSync(ServerPlayerEntity player) {
-        // SYNC LOGGING: Track full synchronization events
-        var logger = SkillLevelingMod.getInstance().getLogger();
-        logger.debug("Performing full skill data sync for " + player.getName().getString());
-
         // COMPLETE SYNC: Send all available skill data
         syncPlayerSkillData(player);
-
-        logger.debug("Full skill data sync completed for " + player.getName().getString());
     }
 
     // ================================================

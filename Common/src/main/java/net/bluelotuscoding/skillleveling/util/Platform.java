@@ -80,4 +80,9 @@ public interface Platform {
          * Updates the custom class name in persistent storage (Forge only).
          */
         void setCustomClassName(Object player, String name);
+
+        /**
+         * Sends a network packet to the player to open the class advancement screen.
+         */
+        void sendAdvanceClassScreen(Object player, String parentClassId);
 }

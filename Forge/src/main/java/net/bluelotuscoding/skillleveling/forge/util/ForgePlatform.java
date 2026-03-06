@@ -167,4 +167,13 @@ public class ForgePlatform implements Platform {
             net.bluelotuscoding.skillleveling.bridge.data.CustomClassData.setCustomClass(sp, name);
         }
     }
+
+    @Override
+    public void sendAdvanceClassScreen(Object player, String parentClassId) {
+        if (player instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
+            net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler.CHANNEL.send(
+                    net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> serverPlayer),
+                    new net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket(parentClassId));
+        }
+    }
 }

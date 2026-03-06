@@ -4,6 +4,20 @@ All notable changes to Pufferfish Skill Leveling are documented in this file. Da
 
 ---
 
+## [2026-03-05] — Advanced Class Sync & Quest Fixes
+
+### Added
+- **Login Category Sync:** `syncOnPlayerLogin` repopulates the player's active Pufferfish category from NBT on login, fixing level syncing after server restarts.
+- **Dynamic Advancement Titles:** Class advancement screen now shows "Choose your 2nd class", "Choose your 3rd class", etc., dynamically based on class tree depth.
+- **Quest Dialog Suppression:** `ClientPacketHandlersMixin` intercepts and blocks the initial quest dialog from re-triggering during class advancement (session-scoped flag).
+
+### Fixed
+- **Level syncing to wrong category:** `getCategoryForClass` now checks `RESOLVED_MAPPINGS` first instead of blindly returning the first array element. This fixes advanced classes (e.g., Lich) incorrectly syncing to their parent's level (Necromancer).
+- **Advancement gate bypass:** Added null guard in `/skillleveling advanceclass` so the max-level check blocks (instead of silently passing) when a class definition is not found.
+- **Mixin annotation mismatch:** `ClientPacketHandlersMixin` changed from direct class reference (`@Mixin(ClientPacketHandlers.class)`) to string-based target (`@Mixin(targets = "...")`) matching the project's existing pattern, fixing silent mixin application failure.
+
+---
+
 ## [2026-03-03] — Epic Classes Bridge & DataPack Restructure
 
 ### Added

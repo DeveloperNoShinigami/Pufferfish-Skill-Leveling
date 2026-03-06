@@ -204,11 +204,8 @@ public class LootImbueManager extends JsonDataLoader {
     public void applyRandomImbue(ItemStack stack, net.minecraft.world.World world, @Nullable Vec3d origin,
             @Nullable net.minecraft.entity.Entity entity, Random random, @Nullable Identifier lootTableId) {
         String itemId = net.minecraft.registry.Registries.ITEM.getId(stack.getItem()).toString();
-        SkillLevelingMod.getInstance().getLogger()
-                .debug("[LootImbueManager] applyRandomImbue triggered for " + itemId + " Table: " + lootTableId);
 
         if (config.itemBlacklist.contains(itemId)) {
-            SkillLevelingMod.getInstance().getLogger().debug("LootImbueManager: Filtered " + itemId + " (Blacklisted)");
             return;
         }
 
@@ -222,8 +219,6 @@ public class LootImbueManager extends JsonDataLoader {
                 }
             }
             if (!whitelisted) {
-                SkillLevelingMod.getInstance().getLogger()
-                        .debug("LootImbueManager: Filtered " + itemId + " (Not Whitelisted)");
                 return;
             }
         } else {
@@ -231,16 +226,12 @@ public class LootImbueManager extends JsonDataLoader {
             // Equipment/Charms.
             LootCategory cat = LootCategory.forItem(stack);
             if (cat == LootCategory.NONE) {
-                SkillLevelingMod.getInstance().getLogger()
-                        .debug("LootImbueManager: Filtered " + itemId + " (No valid LootCategory)");
                 return;
             }
         }
 
         if (!config.lootTableWhitelist.isEmpty()) {
             if (lootTableId == null || !config.lootTableWhitelist.contains(lootTableId.toString())) {
-                SkillLevelingMod.getInstance().getLogger().debug(
-                        "LootImbueManager: Filtered " + itemId + " (LootTable " + lootTableId + " not in whitelist)");
                 return;
             }
         }
@@ -250,8 +241,6 @@ public class LootImbueManager extends JsonDataLoader {
 
         // If not configured for this dimension, do nothing
         if (override == null) {
-            SkillLevelingMod.getInstance().getLogger()
-                    .debug("LootImbueManager: Filtered " + itemId + " (Dimension " + dimId + " not configured)");
             return;
         }
 
@@ -276,8 +265,6 @@ public class LootImbueManager extends JsonDataLoader {
         }
 
         if (random.nextDouble() > chance) {
-            SkillLevelingMod.getInstance().getLogger()
-                    .debug("LootImbueManager: Skipped " + itemId + " - Chance match failed (Roll > " + chance + ")");
             return;
         }
 
@@ -286,10 +273,6 @@ public class LootImbueManager extends JsonDataLoader {
             skillCount = 1 + random.nextInt(maxSkills);
         }
 
-        SkillLevelingMod.getInstance().getLogger()
-                .debug(
-                        "LootImbueManager: Proceeding to imbue " + skillCount + " skills to " + itemId + " (Table: "
-                                + (lootTableId != null ? lootTableId : "UNKNOWN") + ", Dim: " + dimId + ")");
 
         // Ensure max slot count on item is sufficient
         if (ImbuedSkillHelper.getSlotCount(stack) < skillCount) {
@@ -317,7 +300,6 @@ public class LootImbueManager extends JsonDataLoader {
         pool.addAll(config.global);
 
         if (pool.isEmpty()) {
-            SkillLevelingMod.getInstance().getLogger().debug("LootImbueManager: Pool empty for " + stack.getItem());
             return;
         }
 

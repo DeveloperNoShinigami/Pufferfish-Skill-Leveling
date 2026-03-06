@@ -25,6 +25,9 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.util.Identifier;
 import net.minecraft.text.OrderedText;
 import net.minecraft.util.Hand;
+import yesman.epicfight.api.animation.AnimationManager;
+import yesman.epicfight.api.asset.AssetAccessor;
+import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.gameasset.Armatures;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -52,6 +55,7 @@ public class CustomClassSelectScreen extends Screen {
 
     private final List<Object> allChoices = new ArrayList<>();
     private int currentIndex = 0;
+    private final String parentClassId;
 
     private static final List<String> ARMOR_SUFFIXES = List.of("helmet", "chestplate", "leggings", "boots");
 
@@ -118,18 +122,33 @@ public class CustomClassSelectScreen extends Screen {
     }
 
     public CustomClassSelectScreen() {
-        super(Text.translatable("screen.epicclassmod.class_select"));
+        this(null);
+    }
 
-        // Setup choices: Base classes first
-        allChoices.add(PlayerClassData.ClassType.WARRIOR);
-        allChoices.add(PlayerClassData.ClassType.PALADIN);
-        allChoices.add(PlayerClassData.ClassType.BERSERKER);
-        allChoices.add(PlayerClassData.ClassType.REAPER);
-        allChoices.add(PlayerClassData.ClassType.SORCERER);
-        allChoices.add(PlayerClassData.ClassType.ARCHER);
+    public CustomClassSelectScreen(String parentClassId) {
+        super(parentClassId == null ? Text.translatable("screen.epicclassmod.class_select")
+                : Text.literal("Class Advancement"));
+        this.parentClassId = parentClassId;
 
-        // Then custom classes
-        allChoices.addAll(EpicClassConfigManager.getClasses().values());
+        if (parentClassId == null) {
+            // Setup choices: Base classes first
+            allChoices.add(PlayerClassData.ClassType.WARRIOR);
+            allChoices.add(PlayerClassData.ClassType.PALADIN);
+            allChoices.add(PlayerClassData.ClassType.BERSERKER);
+            allChoices.add(PlayerClassData.ClassType.REAPER);
+            allChoices.add(PlayerClassData.ClassType.SORCERER);
+            allChoices.add(PlayerClassData.ClassType.ARCHER);
+
+            // Then custom classes that are base level (no parent)
+            for (EpicClassDef def : EpicClassConfigManager.getClasses().values()) {
+                if (def.class_parent == null || def.class_parent.trim().isEmpty()) {
+                    allChoices.add(def);
+                }
+            }
+        } else {
+            // Advanced Classes
+            allChoices.addAll(EpicClassConfigManager.getChildClasses(parentClassId));
+        }
     }
 
     private void prevClass() {
@@ -263,21 +282,18 @@ public class CustomClassSelectScreen extends Screen {
             if (customDef.preview_animation != null && !customDef.preview_animation.isEmpty()) {
                 try {
                     Identifier animId = new Identifier(customDef.preview_animation);
-                    yesman.epicfight.api.asset.AssetAccessor<? extends yesman.epicfight.api.animation.types.StaticAnimation> anim = yesman.epicfight.api.animation.AnimationManager
+                    AssetAccessor<? extends StaticAnimation> anim = AnimationManager
                             .byKey(animId);
                     if (anim != null) {
                         epicPreview.setAnimation(anim);
                     } else {
-                        epicPreview.setAnimation(
-                                (yesman.epicfight.api.asset.AssetAccessor<? extends yesman.epicfight.api.animation.types.StaticAnimation>) null);
+                        epicPreview.setAnimation((AssetAccessor<? extends StaticAnimation>) null);
                     }
                 } catch (Exception e) {
-                    epicPreview.setAnimation(
-                            (yesman.epicfight.api.asset.AssetAccessor<? extends yesman.epicfight.api.animation.types.StaticAnimation>) null);
+                    epicPreview.setAnimation((AssetAccessor<? extends StaticAnimation>) null);
                 }
             } else {
-                epicPreview.setAnimation(
-                        (yesman.epicfight.api.asset.AssetAccessor<? extends yesman.epicfight.api.animation.types.StaticAnimation>) null);
+                epicPreview.setAnimation((AssetAccessor<? extends StaticAnimation>) null);
             }
         } else if (choice instanceof PlayerClassData.ClassType t) {
             // Provide default idle animations for base classes
@@ -291,15 +307,14 @@ public class CustomClassSelectScreen extends Screen {
             };
 
             try {
-                yesman.epicfight.api.asset.AssetAccessor<? extends yesman.epicfight.api.animation.types.StaticAnimation> anim = yesman.epicfight.api.animation.AnimationManager
+                AssetAccessor<? extends StaticAnimation> anim = AnimationManager
                         .byKey(idleAnimId);
                 epicPreview.setAnimation(anim);
             } catch (Exception e) {
                 epicPreview.setAnimation(null);
             }
         } else {
-            epicPreview.setAnimation(
-                    (yesman.epicfight.api.asset.AssetAccessor<? extends yesman.epicfight.api.animation.types.StaticAnimation>) null);
+            epicPreview.setAnimation((AssetAccessor<? extends StaticAnimation>) null);
         }
     }
 
@@ -401,8 +416,10 @@ public class CustomClassSelectScreen extends Screen {
         }
 
         MinecraftClient.getInstance().setScreen(null);
-        OpenDialoguePacket fake = new OpenDialoguePacket(-1, "main__gui.epicclassmod.quest.main.1", false);
-        ClientPacketHandlers.scheduleMainDialogue(fake, 2500L);
+        if (this.parentClassId == null) {
+            OpenDialoguePacket fake = new OpenDialoguePacket(-1, "main__gui.epicclassmod.quest.main.1", false);
+            ClientPacketHandlers.scheduleMainDialogue(fake, 2500L);
+        }
     }
 
     private void drawStringAtPx(DrawContext g, TextRenderer font, String text, int xPx, int yPx, int color,
@@ -498,7 +515,7 @@ public class CustomClassSelectScreen extends Screen {
 
         super.render(g, mx, my, pt);
 
-        drawStringPxBase(g, textRenderer, tr("gui.epicclassmod.class_select.title"),
+        drawStringPxBase(g, textRenderer, getDynamicTitle(),
                 pageToScreenX(popupX + 260) - pageSizeToScreenW(60), pageToScreenY(popupY + 12), CLR_TITLE, 1.1f,
                 false);
 
@@ -710,6 +727,32 @@ public class CustomClassSelectScreen extends Screen {
         } else {
             player.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
         }
+    }
+
+    private String getDynamicTitle() {
+        if (this.parentClassId == null || this.parentClassId.isEmpty()
+                || this.parentClassId.equals("epic_classes:none")) {
+            return tr("gui.epicclassmod.class_select.title");
+        }
+
+        int depth = 1;
+        EpicClassDef def = EpicClassConfigManager.getClassDef(this.parentClassId);
+        while (def != null && def.class_parent != null && !def.class_parent.isEmpty()) {
+            depth++;
+            def = EpicClassConfigManager.getClassDef(def.class_parent);
+        }
+
+        int targetTier = depth + 1;
+        String suffix = "th";
+        if (targetTier % 10 == 1 && targetTier % 100 != 11) {
+            suffix = "st";
+        } else if (targetTier % 10 == 2 && targetTier % 100 != 12) {
+            suffix = "nd";
+        } else if (targetTier % 10 == 3 && targetTier % 100 != 13) {
+            suffix = "rd";
+        }
+
+        return "Choose your " + targetTier + suffix + " class";
     }
 
     private String getJobName(Object choice) {
@@ -1000,8 +1043,6 @@ public class CustomClassSelectScreen extends Screen {
         // 1. Try standard suffix first
         ItemStack stack = modItem(base + standardSuf, ItemStack.EMPTY);
         if (!stack.isEmpty()) {
-            net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                    .debug("[Preview] Resolved armor " + slot + " for " + idOrBase + " -> " + base + standardSuf);
             return stack;
         }
 
@@ -1011,8 +1052,6 @@ public class CustomClassSelectScreen extends Screen {
             Identifier id = ForgeRegistries.ITEMS.getKey(item);
             if (id != null && id.toString().startsWith(base)) {
                 if (item instanceof ArmorItem armor && armor.getSlotType() == slot) {
-                    net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                            .debug("[Preview] Resolved armor " + slot + " for " + idOrBase + " via search -> " + id);
                     return new ItemStack(item);
                 }
             }

@@ -44,9 +44,6 @@ public class AllocateStatPacketMixin {
             Object sender = getSender.invoke(context);
 
             if (sender instanceof ServerPlayerEntity player) {
-                net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER.debug(
-                        "AllocateStatPacketMixin.onHandleReturn triggered for "
-                                + player.getName().getString());
 
                 // enqueueWork schedules on the server thread AFTER the packet's own work
                 Method enqueueWork = null;
@@ -60,14 +57,9 @@ public class AllocateStatPacketMixin {
                 if (enqueueWork != null) {
                     final ServerPlayerEntity finalPlayer = player;
                     enqueueWork.invoke(context, (Runnable) () -> {
-                        net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER.debug(
-                                "Running post-allocation sync for "
-                                        + finalPlayer.getName().getString());
                         EpicClassSyncHelper.forceSync(finalPlayer);
                     });
                 } else {
-                    net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER
-                            .debug("Could not find enqueueWork method, syncing directly");
                     // Fallback: sync directly (may be slightly early but better than nothing)
                     EpicClassSyncHelper.forceSync(player);
                 }

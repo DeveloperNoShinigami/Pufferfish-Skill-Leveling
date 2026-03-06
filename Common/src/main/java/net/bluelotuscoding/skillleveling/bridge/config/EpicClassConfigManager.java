@@ -217,6 +217,29 @@ public class EpicClassConfigManager {
         return def;
     }
 
+    public static List<EpicClassDef> getChildClasses(String parentClassId) {
+        if (parentClassId == null)
+            return java.util.Collections.emptyList();
+        String normalizedParent = parentClassId.toLowerCase(java.util.Locale.ROOT);
+        if (normalizedParent.startsWith("epic_classes:")) {
+            normalizedParent = normalizedParent.substring("epic_classes:".length());
+        }
+
+        List<EpicClassDef> children = new java.util.ArrayList<>();
+        for (EpicClassDef def : classDefinitions.values()) {
+            if (def.class_parent != null) {
+                String normalizedDefParent = def.class_parent.toLowerCase(java.util.Locale.ROOT);
+                if (normalizedDefParent.startsWith("epic_classes:")) {
+                    normalizedDefParent = normalizedDefParent.substring("epic_classes:".length());
+                }
+                if (normalizedDefParent.equals(normalizedParent)) {
+                    children.add(def);
+                }
+            }
+        }
+        return children;
+    }
+
     public static Map<String, JobMasterDef> getJobMasters() {
         return jobMasterDefinitions;
     }

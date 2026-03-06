@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class SkillMasterTradeProvider {
 
     public static void fillTrades(VillagerEntity villager, TradeOfferList trades, int tier, ServerPlayerEntity player) {
-        SkillLevelingMod.getInstance().getLogger().debug("Filling trades for Skill Master at tier " + tier);
 
         // 1. Add custom trades from datapacks
         var loader = SkillLevelingMod.getInstance().getTradeLoader();

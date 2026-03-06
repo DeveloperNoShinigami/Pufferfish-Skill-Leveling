@@ -18,7 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 import java.util.function.Supplier;
 
-@Mixin(value = ChooseClassPacket.class, remap = false)
+@Mixin(targets = "com.example.epicclassmod.network.ChooseClassPacket", remap = false)
 public abstract class ChooseClassPacketMixin {
 
     /**

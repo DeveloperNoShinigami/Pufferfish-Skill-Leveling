@@ -21,9 +21,9 @@ import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.api.SkillsAPI;
 
 public final class EpicClassBridge {
-    private static final Map<String, Identifier> CLASS_TO_CATEGORY = new HashMap<>();
+    private static final Map<String, java.util.List<Identifier>> CLASS_TO_CATEGORY = new HashMap<>();
     private static final Map<Identifier, String> CATEGORY_TO_CLASS = new HashMap<>();
-    private static final Map<String, String> RAW_CLASS_MAPPINGS = new HashMap<>();
+    private static final Map<String, java.util.List<String>> RAW_CLASS_MAPPINGS = new HashMap<>();
     private static final Map<String, Identifier> PASSIVE_TO_SKILL = new HashMap<>();
     private static final Map<String, Integer> PASSIVE_TO_LEVEL = new HashMap<>();
     private static final Map<UUID, Identifier> PLAYER_ACTIVE_CATEGORY = new HashMap<>();
@@ -65,7 +65,7 @@ public final class EpicClassBridge {
         // Store raw mappings for later resolution
         for (var entry : config.classToCategoryMap.entrySet()) {
             String className = normalizeClassName(entry.getKey());
-            if (!className.isEmpty() && entry.getValue() != null && !entry.getValue().isBlank()) {
+            if (!className.isEmpty() && entry.getValue() != null && !entry.getValue().isEmpty()) {
                 RAW_CLASS_MAPPINGS.put(className, entry.getValue());
             }
         }
@@ -109,26 +109,47 @@ public final class EpicClassBridge {
         }
 
         for (var entry : RAW_CLASS_MAPPINGS.entrySet()) {
-            String className = entry.getKey();
+            String className = entry.getKey().toLowerCase(java.util.Locale.ROOT);
             if (RESOLVED_MAPPINGS.containsKey(className)) {
                 continue;
             }
 
-            Identifier categoryId = resolveCategoryId(entry.getValue());
-            if (categoryId != null) {
-                CLASS_TO_CATEGORY.put(className, categoryId);
-                CATEGORY_TO_CLASS.put(categoryId, className);
-                RESOLVED_MAPPINGS.put(className, categoryId);
-                logInfo("[Bridge] Resolved mapping: '" + className + "' -> category '" + categoryId + "'");
-            } else {
-                logWarn("[Bridge] Failed to resolve category for '" + className + "' (raw lookup: " + entry.getValue()
-                        + ")");
+            java.util.List<Identifier> categoryIds = new java.util.ArrayList<>();
+            boolean allResolved = true;
+            for (String rawCat : entry.getValue()) {
+                Identifier categoryId = resolveCategoryId(rawCat);
+                if (categoryId != null) {
+                    categoryIds.add(categoryId);
+                    CATEGORY_TO_CLASS.put(categoryId, className);
+                } else {
+                    allResolved = false;
+                    logWarn("[Bridge] Failed to resolve category for '" + className + "' (raw lookup: " + rawCat + ")");
+                }
+            }
+
+            if (!categoryIds.isEmpty()) {
+                CLASS_TO_CATEGORY.put(className, categoryIds);
+                Identifier activeCategory = resolveCategoryId(className);
+                if (activeCategory == null) {
+                    activeCategory = new Identifier("puffish_skills", className.toLowerCase(java.util.Locale.ROOT));
+                }
+                RESOLVED_MAPPINGS.put(className, activeCategory);
+                logInfo("[Bridge] Resolved mapping: '" + className + "' -> " + categoryIds.size()
+                        + " categories (Active branch: " + activeCategory + ")");
             }
         }
 
         if (RESOLVED_MAPPINGS.size() == RAW_CLASS_MAPPINGS.size()) {
             logInfo("Epic Class bridge mappings FULLY resolved: " + CLASS_TO_CATEGORY.size() + " categories");
         }
+    }
+
+    public static void clearResolutionCache() {
+        CLASS_TO_CATEGORY.clear();
+        CATEGORY_TO_CLASS.clear();
+        RESOLVED_MAPPINGS.clear();
+        PLAYER_ACTIVE_CATEGORY.clear();
+        logInfo("[Bridge] Resolution caches cleared.");
     }
 
     /**
@@ -234,8 +255,11 @@ public final class EpicClassBridge {
      */
     public static java.util.Set<Identifier> getConfiguredCategories() {
         ensureCategoriesResolved();
-        return CLASS_TO_CATEGORY.values().stream()
-                .collect(java.util.stream.Collectors.toSet());
+        java.util.Set<Identifier> allCategories = new java.util.HashSet<>();
+        for (java.util.List<Identifier> list : CLASS_TO_CATEGORY.values()) {
+            allCategories.addAll(list);
+        }
+        return allCategories;
     }
 
     public static Optional<String> getClassForCategory(Identifier categoryId) {
@@ -243,19 +267,33 @@ public final class EpicClassBridge {
         return Optional.ofNullable(CATEGORY_TO_CLASS.get(categoryId));
     }
 
-    public static Optional<Identifier> getCategoryForClass(String classTypeName) {
+    public static java.util.List<Identifier> getCategoriesForClass(String classTypeName) {
         ensureCategoriesResolved();
         String normalized = normalizeClassName(classTypeName);
-        Identifier categoryId = CLASS_TO_CATEGORY.get(normalized);
-        if (categoryId == null) {
+        java.util.List<Identifier> categoryIds = CLASS_TO_CATEGORY.get(normalized);
+        if (categoryIds == null || categoryIds.isEmpty()) {
             // Fallback for custom classes: check the EpicClassDef directly
             // getClassDef now handles normalization and prefixes internally.
             EpicClassDef def = EpicClassConfigManager.getClassDef(classTypeName);
             if (def != null && def.skill_category_id != null) {
-                categoryId = resolveCategoryId(def.skill_category_id);
+                Identifier categoryId = resolveCategoryId(def.skill_category_id);
+                if (categoryId != null) {
+                    return java.util.Collections.singletonList(categoryId);
+                }
             }
+            return java.util.Collections.emptyList();
         }
-        return Optional.ofNullable(categoryId);
+        return categoryIds;
+    }
+
+    public static Optional<Identifier> getCategoryForClass(String classTypeName) {
+        ensureCategoriesResolved();
+        String normalized = normalizeClassName(classTypeName);
+        Identifier resolved = RESOLVED_MAPPINGS.get(normalized);
+        if (resolved != null) {
+            return Optional.of(resolved);
+        }
+        return getCategoriesForClass(classTypeName).stream().findFirst();
     }
 
     public static boolean isPassiveMapped(String className, int slot) {
@@ -384,6 +422,44 @@ public final class EpicClassBridge {
         }
     }
 
+    /**
+     * Re-populates PLAYER_ACTIVE_CATEGORY from the player's stored class name
+     * on login. This ensures the correct category persists across server restarts.
+     */
+    public static void syncOnPlayerLogin(Object player) {
+        if (!enabled || !syncOnLogin || player == null) {
+            return;
+        }
+        if (!(player instanceof PlayerEntity sp)) {
+            return;
+        }
+        ensureCategoriesResolved();
+        net.bluelotuscoding.skillleveling.util.Platform platform = SkillLevelingMod.getInstance().getPlatform();
+        String className = platform.getEpicClassName(sp);
+        if (className == null || className.isEmpty()
+                || "NONE".equalsIgnoreCase(className)
+                || "epic_classes:none".equalsIgnoreCase(className)) {
+            return;
+        }
+        String normalized = normalizeClassName(className);
+        Identifier targetCategory = RESOLVED_MAPPINGS.get(normalized);
+        if (targetCategory == null) {
+            java.util.List<Identifier> cats = getCategoriesForClass(className);
+            if (!cats.isEmpty()) {
+                targetCategory = cats.get(cats.size() - 1);
+            }
+        }
+        if (targetCategory != null) {
+            PLAYER_ACTIVE_CATEGORY.put(sp.getUuid(), targetCategory);
+            int level = platform.getPufferfishLevel(sp, targetCategory);
+            int xp = platform.getPufferfishExperience(sp, targetCategory);
+            platform.syncEpicClassLevel(sp, level, xp, 0);
+            logInfo("[Bridge] Login sync for " + sp.getName().getString()
+                    + ": class=" + className + " category=" + targetCategory
+                    + " level=" + level);
+        }
+    }
+
     public static void onClassChanged(Object player, String classTypeName) {
         if (!enabled || player == null || classTypeName == null) {
             return;
@@ -414,22 +490,44 @@ public final class EpicClassBridge {
             return;
         }
 
-        Identifier categoryId = getCategoryForClass(classTypeName).orElse(null);
-        if (categoryId == null) {
+        java.util.List<Identifier> categoryIds = getCategoriesForClass(classTypeName);
+        if (categoryIds == null || categoryIds.isEmpty()) {
             logDebug("No mapping for class: " + normalized + " (raw: " + classTypeName + ")");
             return;
         }
 
-        // Track the active category for this player (used for exp syncing)
-        PLAYER_ACTIVE_CATEGORY.put(sp.getUuid(), categoryId);
+        // Build the safe classes list (including parents)
+        java.util.Set<String> safeClasses = new java.util.HashSet<>();
+        safeClasses.add(normalized);
+
+        net.bluelotuscoding.skillleveling.bridge.config.EpicClassDef def = net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
+                .getClassDef(normalized);
+
+        while (def != null && def.class_parent != null && !def.class_parent.isEmpty()) {
+            safeClasses.add(def.class_parent.toLowerCase(java.util.Locale.ROOT));
+            def = net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager.getClassDef(def.class_parent);
+        }
+
+        Identifier targetCategory = RESOLVED_MAPPINGS.get(normalized);
+        if (targetCategory == null) {
+            targetCategory = categoryIds.get(categoryIds.size() - 1);
+        }
+        PLAYER_ACTIVE_CATEGORY.put(sp.getUuid(), targetCategory);
 
         if (autoActivateCategory) {
-            unlockCategory(sp, categoryId);
+            // Unlock ALL safe classes
+            java.util.List<Identifier> safeCategoryIds = new java.util.ArrayList<>();
+            for (String safeClassName : safeClasses) {
+                java.util.List<Identifier> mappings = getCategoriesForClass(safeClassName);
+                if (mappings != null) {
+                    safeCategoryIds.addAll(mappings);
+                }
+            }
+            unlockCategories(sp, safeCategoryIds);
 
-            // Force an initial sync when the category is first unlocked
-            // This ensures Epic Class UI mirrors the Pufferfish start immediately.
-            int level = platform.getPufferfishLevel(sp, categoryId);
-            int xp = platform.getPufferfishExperience(sp, categoryId);
+            // Sync ONLY the targetCategory (the advanced class) level, NOT the sum
+            int level = platform.getPufferfishLevel(sp, targetCategory);
+            int xp = platform.getPufferfishExperience(sp, targetCategory);
             platform.syncEpicClassLevel(sp, level, xp, 0);
         }
 
@@ -438,54 +536,69 @@ public final class EpicClassBridge {
         }
     }
 
-    private static void unlockCategory(Object player, Identifier categoryId) {
+    private static void unlockCategories(Object player, java.util.List<Identifier> categoryIds) {
         if (!(player instanceof PlayerEntity sp)) {
             return;
         }
 
-        Optional<Category> categoryOpt = SkillsAPI.getCategory(categoryId);
-        if (categoryOpt.isEmpty()) {
-            logWarn("Mapped category not found: " + categoryId);
-            return;
-        }
+        for (Identifier categoryId : categoryIds) {
+            Optional<Category> categoryOpt = SkillsAPI.getCategory(categoryId);
+            if (categoryOpt.isEmpty()) {
+                logWarn("Mapped category not found: " + categoryId);
+                continue;
+            }
 
-        Category category = categoryOpt.get();
-        if (sp instanceof ServerPlayerEntity ssp) {
-            if (!category.isUnlocked(ssp)) {
-                category.unlock(ssp);
+            Category category = categoryOpt.get();
+            if (sp instanceof ServerPlayerEntity ssp) {
+                if (!category.isUnlocked(ssp)) {
+                    category.unlock(ssp);
+                }
             }
         }
     }
 
-    private static void lockCategory(Object player, Identifier categoryId) {
+    private static void lockCategories(Object player, java.util.List<Identifier> categoryIds) {
         if (!(player instanceof PlayerEntity sp)) {
             return;
         }
 
-        Optional<Category> categoryOpt = SkillsAPI.getCategory(categoryId);
-        if (categoryOpt.isEmpty()) {
-            return;
-        }
+        for (Identifier categoryId : categoryIds) {
+            Optional<Category> categoryOpt = SkillsAPI.getCategory(categoryId);
+            if (categoryOpt.isEmpty()) {
+                continue;
+            }
 
-        Category category = categoryOpt.get();
-        if (sp instanceof ServerPlayerEntity ssp) {
-            if (category.isUnlocked(ssp)) {
-                category.lock(ssp);
+            Category category = categoryOpt.get();
+            if (sp instanceof ServerPlayerEntity ssp) {
+                if (category.isUnlocked(ssp)) {
+                    category.lock(ssp);
+                }
             }
         }
     }
 
     private static void lockOtherMappedCategories(Object player, String selectedClassName) {
+        java.util.Set<String> safeClasses = new java.util.HashSet<>();
+        safeClasses.add(selectedClassName);
+
+        net.bluelotuscoding.skillleveling.bridge.config.EpicClassDef def = net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
+                .getClassDef(selectedClassName);
+
+        while (def != null && def.class_parent != null && !def.class_parent.isEmpty()) {
+            safeClasses.add(def.class_parent.toLowerCase(java.util.Locale.ROOT));
+            def = net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager.getClassDef(def.class_parent);
+        }
+
         for (var entry : CLASS_TO_CATEGORY.entrySet()) {
-            if (!entry.getKey().equals(selectedClassName)) {
-                lockCategory(player, entry.getValue());
+            if (!safeClasses.contains(entry.getKey())) {
+                lockCategories(player, entry.getValue());
             }
         }
     }
 
     private static void lockAllMappedCategories(Object player) {
         for (var entry : CLASS_TO_CATEGORY.entrySet()) {
-            lockCategory(player, entry.getValue());
+            lockCategories(player, entry.getValue());
         }
     }
 
@@ -562,6 +675,5 @@ public final class EpicClassBridge {
     }
 
     private static void logDebug(String message) {
-        SkillLevelingMod.getInstance().getLogger().debug(message);
     }
 }

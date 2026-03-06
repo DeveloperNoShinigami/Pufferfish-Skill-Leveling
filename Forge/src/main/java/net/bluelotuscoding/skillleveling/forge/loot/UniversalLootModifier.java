@@ -93,10 +93,6 @@ public class UniversalLootModifier extends LootModifier {
                 this.chestInjectionGroups = chestInjectionGroups;
                 this.entityDropGroups = entityDropGroups;
 
-                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                .debug("[UniversalLoot] Constructor called. Groups: " + chestInjectionGroups.size()
-                                                + " chest, "
-                                                + entityDropGroups.size() + " entity.");
         }
 
         // ========== Core Logic ==========
@@ -104,9 +100,6 @@ public class UniversalLootModifier extends LootModifier {
         @Override
         protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot,
                         LootContext context) {
-                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                .debug("[UniversalLoot] doApply triggered. Queried ID: "
-                                                + context.getQueriedLootTableId());
 
                 Identifier lootTableId = context.getQueriedLootTableId();
                 if (lootTableId == null) {
@@ -114,22 +107,14 @@ public class UniversalLootModifier extends LootModifier {
                 }
 
                 if (lootTableId == null) {
-                        net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                        .debug("[UniversalLoot] Could not resolve Loot Table ID. Skipping.");
                         return generatedLoot;
                 }
 
                 String id = lootTableId.toString();
-                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                .debug("[UniversalLoot] Processing loot table: " + id);
-                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                .debug("[UniversalLoot] doApply entered for: " + id);
 
                 // Check chest injection groups
                 for (UnifiedLootConfig.LootGroup group : chestInjectionGroups) {
                         if (LootMatchingUtil.matchesTarget(id, group.targets())) {
-                                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                                .debug("[UniversalLoot] Injecting (Chest) into: " + id);
                                 injectItems(generatedLoot, group, context);
                         }
                 }
@@ -137,8 +122,6 @@ public class UniversalLootModifier extends LootModifier {
                 // Check entity drop groups
                 for (UnifiedLootConfig.LootGroup group : entityDropGroups) {
                         if (LootMatchingUtil.matchesTarget(id, group.targets())) {
-                                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                                .debug("[UniversalLoot] Injecting (Entity) into: " + id);
                                 injectItems(generatedLoot, group, context);
                         }
                 }
@@ -159,9 +142,6 @@ public class UniversalLootModifier extends LootModifier {
                         rolls += random.nextInt(group.rolls().max() - group.rolls().min() + 1);
                 }
 
-                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                .debug("[UniversalLoot] Rolling " + rolls + " times.");
-
                 List<UnifiedLootConfig.LootEntry> validEntries = new ArrayList<>();
                 int totalWeight = 0;
                 for (UnifiedLootConfig.LootEntry entry : group.entries()) {
@@ -170,10 +150,6 @@ public class UniversalLootModifier extends LootModifier {
                                 totalWeight += entry.weight();
                         }
                 }
-
-                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger().debug(
-                                "[UniversalLoot] Found " + validEntries.size() + " valid entries. Total weight: "
-                                                + totalWeight);
 
                 if (totalWeight <= 0) {
                         return;
@@ -194,14 +170,8 @@ public class UniversalLootModifier extends LootModifier {
 
         private void processEntry(ObjectArrayList<ItemStack> generatedLoot, UnifiedLootConfig.LootEntry entry,
                         LootContext context) {
-                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                .debug("[UniversalLoot] Processing entry: " + entry.type() + " (" + entry.name()
-                                                + ") - Chance: "
-                                                + entry.chance());
                 if (entry.chance() < 1.0f && context.getRandom().nextFloat() >= entry.chance()) {
 
-                        net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
-                                        .debug("[UniversalLoot]   -> Chance failed.");
                         return;
                 }
 

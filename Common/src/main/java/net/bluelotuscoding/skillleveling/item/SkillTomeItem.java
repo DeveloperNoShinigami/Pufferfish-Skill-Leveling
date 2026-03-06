@@ -121,8 +121,6 @@ public class SkillTomeItem extends Item {
         Identifier rawCatId = new Identifier(categoryId);
         Identifier catId = manager.normalizeCategoryId(rawCatId);
 
-        SkillLevelingMod.getInstance().getLogger()
-                .debug("[SkillTome] Resolving category: raw=" + rawCatId + " -> normalized=" + catId);
 
         // Check current BASE level for tome usage
         int currentLevel = manager.getBaseSkillLevel(serverPlayer, catId, skillId);

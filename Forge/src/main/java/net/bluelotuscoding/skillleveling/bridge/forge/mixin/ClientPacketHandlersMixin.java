@@ -19,6 +19,17 @@ public class ClientPacketHandlersMixin {
             java.lang.reflect.Method npcIdMethod = pkt.getClass().getMethod("npcId");
             String npcId = (String) npcIdMethod.invoke(pkt);
             if ("main__gui.epicclassmod.quest.main.1".equals(npcId)) {
+                try {
+                    Class<?> stateClass = Class.forName("com.example.epicclassmod.client.ClientClassState");
+                    Object selectedType = stateClass.getField("selectedType").get(null);
+                    if (selectedType != null && !"NONE".equals(selectedType.toString())) {
+                        ci.cancel();
+                        return; // Player already has a class, block quest
+                    }
+                } catch (Exception ex) {
+                    // Ignore reflection errors
+                }
+
                 if (hasShownQuestThisSession) {
                     ci.cancel();
                 } else {

@@ -24,7 +24,8 @@
         "MobLevelHandlerMixin",
         "AllocateStatPacketMixin",
         "NpcQuestGiverEntityMixin",
-        "ChooseClassPacketMixin"
+        "ChooseClassPacketMixin",
+        "ClassTypeUtilMixin"
     ],
     "injectors": {
         "defaultRequire": 0

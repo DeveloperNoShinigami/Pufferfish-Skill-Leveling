@@ -577,6 +577,21 @@ public final class EpicClassBridge {
         }
     }
 
+    public static boolean isCategoryLocked(Object player, String categoryIdString) {
+        if (!enabled || !(player instanceof PlayerEntity sp))
+            return false;
+
+        Identifier categoryId = new Identifier(categoryIdString);
+        return SkillsAPI.getCategory(categoryId)
+                .map((Category category) -> {
+                    if (sp instanceof ServerPlayerEntity ssp) {
+                        return !category.isUnlocked(ssp); // If it's NOT unlocked, it IS locked
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
+
     private static void lockOtherMappedCategories(Object player, String selectedClassName) {
         java.util.Set<String> safeClasses = new java.util.HashSet<>();
         safeClasses.add(selectedClassName);

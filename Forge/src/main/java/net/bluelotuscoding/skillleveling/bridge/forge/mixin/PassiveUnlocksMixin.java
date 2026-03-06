@@ -59,8 +59,9 @@ public abstract class PassiveUnlocksMixin {
             String className = ((Enum<?>) type).name();
 
             // Only override if this passive is explicitly mapped to a Pufferfish skill
-            if (EpicClassBridge.isPassiveMapped(className, slot)) {
-                boolean isUnlocked = EpicClassBridge.isPassiveUnlocked((ServerPlayerEntity) sp, className, slot);
+            if (net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.isPassiveMapped(className, slot)) {
+                boolean isUnlocked = net.bluelotuscoding.skillleveling.bridge.EpicClassBridge
+                        .isPassiveUnlocked((ServerPlayerEntity) sp, className, slot);
                 cir.setReturnValue(isUnlocked);
             }
         }
@@ -84,8 +85,9 @@ public abstract class PassiveUnlocksMixin {
 
         if (type instanceof Enum) {
             String className = ((Enum<?>) type).name();
-            if (EpicClassBridge.isPassiveMapped(className, slot)) {
-                boolean isUnlocked = EpicClassBridge.isPassiveUnlocked((ServerPlayerEntity) sp, className, slot);
+            if (net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.isPassiveMapped(className, slot)) {
+                boolean isUnlocked = net.bluelotuscoding.skillleveling.bridge.EpicClassBridge
+                        .isPassiveUnlocked((ServerPlayerEntity) sp, className, slot);
                 cir.setReturnValue(isUnlocked);
             }
         }

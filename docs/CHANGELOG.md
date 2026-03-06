@@ -4,6 +4,21 @@ All notable changes to Pufferfish Skill Leveling are documented in this file. Da
 
 ---
 
+## [2026-03-06] — Universal Proxy Passive Blocking & Category Enforcement
+
+### Added
+- **Universal Proxy Passive Suppression:** New `ClassTypeUtilMixin` intercepts `ClassTypeUtil.getType()` to return `null` for custom classes with `epic_class_proxy` set. This blocks ALL proxy passives (mana regen, damage reduction, debuff shortening, dashes) across all 6 base classes with a single mixin — no per-class mixins needed.
+- **Locked Category XP Rejection:** `SkillsModExperienceMixin` now guards `addExperience` and `setExperience` at `HEAD`, cancelling any XP gain for locked Pufferfish categories.
+- **State-Based Quest Suppression:** `ClientPacketHandlersMixin` now checks `ClientClassState.selectedType` to reliably block the initial quest dialog when a player already has a class (e.g., during advancement).
+
+### Fixed
+- **Proxy passives leaking to custom classes:** Custom classes (e.g., Necromancer proxying SORCERER) no longer receive the proxy's event-based passive effects on the server. Previously, `PassiveUnlocksMixin` only intercepted slot-based abilities — the actual event handlers in `SorcererPassives` bypassed it entirely.
+
+### Removed
+- `SorcererPassivesMixin.java` — replaced by universal `ClassTypeUtilMixin`.
+- `shouldBlockProxyPassive()` and `hasCustomPassives()` from `EpicClassBridge` — redundant with upstream blocking.
+
+---
 ## [2026-03-05] — Advanced Class Sync & Quest Fixes
 
 ### Added

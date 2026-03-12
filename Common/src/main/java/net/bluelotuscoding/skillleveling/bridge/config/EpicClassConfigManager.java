@@ -25,6 +25,17 @@ public class EpicClassConfigManager {
     private static java.util.Map<String, java.util.List<ClassPageDef>> classAttributePages = new java.util.HashMap<>();
     private static java.util.Map<String, EpicClassDef> classDefinitions = new java.util.HashMap<>();
     private static java.util.Map<String, JobMasterDef> jobMasterDefinitions = new java.util.HashMap<>();
+    private static net.bluelotuscoding.skillleveling.bridge.BridgeConfig syncedConfig = new net.bluelotuscoding.skillleveling.bridge.BridgeConfig();
+
+    public static void setSyncedConfig(net.bluelotuscoding.skillleveling.bridge.BridgeConfig config) {
+        if (config != null) {
+            syncedConfig = config;
+        }
+    }
+
+    public static net.bluelotuscoding.skillleveling.bridge.BridgeConfig getSyncedConfig() {
+        return syncedConfig;
+    }
 
     public static void load(File configDir) {
         // No-op for now as logic moves to DataLoaders
@@ -59,6 +70,19 @@ public class EpicClassConfigManager {
 
     public static void setAttributePagesOnClient(Map<String, List<ClassPageDef>> pages) {
         classAttributePages.clear();
+        pages.forEach((key, list) -> {
+            for (ClassPageDef page : list) {
+                if (page.slots != null) {
+                    for (AttributeDef def : page.slots) {
+                        if (def != null && def.value != null) {
+                            var result = net.puffish.skillsmod.expression.DefaultParser.parse(def.value,
+                                    java.util.Set.of("points"));
+                            def.compiledExpression = result.getSuccess().orElse(null);
+                        }
+                    }
+                }
+            }
+        });
         classAttributePages.putAll(pages);
     }
 
@@ -205,16 +229,38 @@ public class EpicClassConfigManager {
     }
 
     public static EpicClassDef getClassDef(String className) {
-        if (className == null)
+        if (className == null || className.isEmpty())
             return null;
         String normalized = className.toLowerCase(java.util.Locale.ROOT);
         EpicClassDef def = classDefinitions.get(normalized);
-        if (def == null && !normalized.startsWith("epic_classes:")) {
+        if (def != null)
+            return def;
+
+        // 2. Try with epic_classes prefix if missing
+        if (!normalized.contains(":")) {
             def = classDefinitions.get("epic_classes:" + normalized);
-        } else if (def == null && normalized.startsWith("epic_classes:")) {
-            def = classDefinitions.get(normalized.substring("epic_classes:".length()));
+            if (def != null)
+                return def;
         }
-        return def;
+
+        // 3. Try without prefix if present
+        if (normalized.contains(":")) {
+            String stripped = normalized.split(":")[1];
+            def = classDefinitions.get(stripped);
+            if (def != null)
+                return def;
+        }
+
+        // 4. Fuzzy search: find any key that ends with the requested path
+        String searchPath = normalized.contains(":") ? normalized.split(":")[1] : normalized;
+        for (Map.Entry<String, EpicClassDef> entry : classDefinitions.entrySet()) {
+            String key = entry.getKey();
+            if (key.endsWith(":" + searchPath)) {
+                return entry.getValue();
+            }
+        }
+
+        return null;
     }
 
     public static List<EpicClassDef> getChildClasses(String parentClassId) {

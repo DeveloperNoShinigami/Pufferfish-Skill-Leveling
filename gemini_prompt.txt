@@ -1,0 +1,15 @@
+Analyze the entire Minecraft modding project located in the current directory. 
+Compare all features currently implemented in the codebase (especially focusing on the Epic Class / Rise of Heroes integration, likely found in bridge/EpicClassBridge.java and other related files) against the features currently documented in the `docs/FEATURES.md` and `docs/rise_of_heroes_integration/EPIC_CLASSES_DATAPACK_GUIDE.md` files.
+
+Identify:
+1. All Pufferfish Skills Leveling Core features (compatible with the mod alone).
+2. All Epic Class/Rise of Heroes integration features, including all supported datapack fields and their actual effects based on the code. Look closely at the classes that parse or use the datapack JSONs for Epic Classes.
+3. Any implemented features that are missing from the documentation.
+4. Any documented features that no longer match the code.
+
+Based on this analysis, propose a new documentation structure divided into two main blocks:
+- Block A: Pufferfish Skills Leveling Core (every single feature compatible with just this mod alone).
+- Block B: Epic Class / Rise of Heroes Integration (all added features, entire datapack fields supported, and what they actually do).
+
+Also provide a brief plan on how to update the video guides (episode_1 to episode_8) to match this new structure (no thumbnails needed).
+Output the result as a detailed Markdown report.

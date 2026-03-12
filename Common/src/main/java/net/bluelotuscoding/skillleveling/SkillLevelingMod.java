@@ -53,10 +53,12 @@ public class SkillLevelingMod {
     private final AddonLogger logger;
     private final net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader tradeLoader;
     private final net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader reputationLoader;
+    private final net.bluelotuscoding.skillleveling.data.ExpTomeConfigLoader expTomeConfigLoader;
     private final net.bluelotuscoding.skillleveling.bridge.config.EpicClassDataLoader epicClassDataLoader;
     private final net.bluelotuscoding.skillleveling.bridge.config.JobMasterDataLoader jobMasterDataLoader;
     private final net.bluelotuscoding.skillleveling.bridge.config.EpicAttributeDataLoader epicAttributeDataLoader;
     private final net.bluelotuscoding.skillleveling.bridge.config.BridgeDataLoader bridgeDataLoader;
+    private final net.bluelotuscoding.skillleveling.bridge.config.ItemRequirementsManager itemRequirementsManager;
 
     private final net.bluelotuscoding.skillleveling.loot.LootImbueManager lootImbueManager;
     private final net.bluelotuscoding.skillleveling.loot.UniversalLootHandler universalLootHandler;
@@ -72,10 +74,12 @@ public class SkillLevelingMod {
         this.logger = new AddonLogger();
         this.tradeLoader = new net.bluelotuscoding.skillleveling.data.SkillMasterTradeLoader();
         this.reputationLoader = new net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader();
+        this.expTomeConfigLoader = new net.bluelotuscoding.skillleveling.data.ExpTomeConfigLoader();
         this.epicClassDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.EpicClassDataLoader();
         this.jobMasterDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.JobMasterDataLoader();
         this.epicAttributeDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.EpicAttributeDataLoader();
         this.bridgeDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.BridgeDataLoader();
+        this.itemRequirementsManager = new net.bluelotuscoding.skillleveling.bridge.config.ItemRequirementsManager();
 
         this.lootImbueManager = new net.bluelotuscoding.skillleveling.loot.LootImbueManager();
         this.universalLootHandler = new net.bluelotuscoding.skillleveling.loot.UniversalLootHandler();
@@ -172,6 +176,10 @@ public class SkillLevelingMod {
         return reputationLoader;
     }
 
+    public net.bluelotuscoding.skillleveling.data.ExpTomeConfigLoader getExpTomeConfigLoader() {
+        return expTomeConfigLoader;
+    }
+
     public net.bluelotuscoding.skillleveling.bridge.config.EpicClassDataLoader getEpicClassDataLoader() {
         return epicClassDataLoader;
     }
@@ -186,6 +194,10 @@ public class SkillLevelingMod {
 
     public net.bluelotuscoding.skillleveling.bridge.config.BridgeDataLoader getBridgeDataLoader() {
         return bridgeDataLoader;
+    }
+
+    public net.bluelotuscoding.skillleveling.bridge.config.ItemRequirementsManager getItemRequirementsManager() {
+        return itemRequirementsManager;
     }
 
     public net.bluelotuscoding.skillleveling.loot.LootImbueManager getLootImbueManager() {
@@ -222,7 +234,8 @@ public class SkillLevelingMod {
                     new net.bluelotuscoding.skillleveling.network.SyncBridgeContentPacket(
                             net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager.getClasses(),
                             net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
-                                    .getAttributePagesMap()),
+                                    .getAttributePagesMap(),
+                            net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager.getConfig()),
                     player);
         }
     }

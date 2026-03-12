@@ -28,7 +28,8 @@ public class TomeItem extends Item {
     public enum TomeType {
         PROGRESSION, // +1 category level (grants point)
         CLEAR_MIND, // -1 skill level (requires skill selection)
-        GREATER_CLEAR_MIND // Refund N skill levels (requires skill + amount selection)
+        GREATER_CLEAR_MIND, // Refund N skill levels (requires skill + amount selection)
+        EXPERIENCE // +X raw Pufferfish experience
     }
 
     private final TomeType tomeType;

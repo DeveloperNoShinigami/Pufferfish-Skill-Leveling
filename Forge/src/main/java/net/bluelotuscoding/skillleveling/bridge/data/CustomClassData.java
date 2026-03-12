@@ -49,7 +49,12 @@ public final class CustomClassData {
         if ((Object) player instanceof net.minecraftforge.common.extensions.IForgeEntity forgeEntity) {
             NbtCompound tag = forgeEntity.getPersistentData();
             tag.putString(KEY_CLASS_NAME, classId);
-            tag.putBoolean(KEY_CHOSEN, !classId.equals("epic_classes:none"));
+
+            // Normalize for comparison
+            String normalized = classId != null ? classId.toLowerCase(java.util.Locale.ROOT) : "epic_classes:none";
+            boolean isChosen = !normalized.equals("epic_classes:none") && !normalized.equals("none");
+
+            tag.putBoolean(KEY_CHOSEN, isChosen);
         }
     }
 
@@ -90,7 +95,7 @@ public final class CustomClassData {
             }
         }
 
-        // 3. Absolute fallback: WARRIOR (to keep all Epic Class systems firing)
-        return com.example.epicclassmod.data.PlayerClassData.ClassType.WARRIOR;
+        // 3. Absolute fallback: NONE
+        return com.example.epicclassmod.data.PlayerClassData.ClassType.NONE;
     }
 }

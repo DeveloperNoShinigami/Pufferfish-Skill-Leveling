@@ -13,6 +13,7 @@ public class BridgeConfig {
     public boolean autoActivateCategory = true;
     public boolean lockOtherCategories = true;
     public boolean syncOnLogin = true;
+    public boolean disableBaseClasses = false;
 
     public BridgeConfig() {
         // Default mappings (category path only; namespace resolved at runtime)

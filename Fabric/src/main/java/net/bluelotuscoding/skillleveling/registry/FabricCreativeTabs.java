@@ -31,9 +31,21 @@ public class FabricCreativeTabs {
             })
             .build();
 
+    public static final RegistryKey<ItemGroup> EXP_TOMES_KEY = RegistryKey.of(RegistryKeys.ITEM_GROUP,
+            SkillLevelingMod.createIdentifier("exp_tomes"));
+
+    public static final ItemGroup EXP_TOMES_GROUP = FabricItemGroup.builder()
+            .icon(() -> new ItemStack(ModItems.EXP_TOME))
+            .displayName(Text.translatable("itemGroup.puffish_skill_leveling_exp_tomes"))
+            .entries((context, entries) -> {
+                ModItems.fillExpTomesTab(entries::add);
+            })
+            .build();
+
     public static void register() {
         Registry.register(Registries.ITEM_GROUP, BASE_TOMES_KEY, BASE_TOMES_GROUP);
         Registry.register(Registries.ITEM_GROUP, SkillLevelingMod.createIdentifier("skill_tomes"),
                 SKILL_TOMES_GROUP);
+        Registry.register(Registries.ITEM_GROUP, EXP_TOMES_KEY, EXP_TOMES_GROUP);
     }
 }

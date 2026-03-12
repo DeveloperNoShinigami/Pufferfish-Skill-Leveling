@@ -79,6 +79,24 @@ public class ClientClassStateMixin {
         return null;
     }
 
+    private static boolean addon$isNone() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null) {
+            return true;
+        }
+
+        String customClassId = ClientCustomClassState.getCustomClass(mc.player.getUuid());
+        if (customClassId == null || "epic_classes:none".equals(customClassId) || "none".equals(customClassId)) {
+            Object selectedTypeObj = addon$getStaticField("com.example.epicclassmod.client.ClientClassState",
+                    "selectedType");
+            if (selectedTypeObj instanceof Enum) {
+                return "NONE".equals(((Enum<?>) selectedTypeObj).name());
+            }
+            return true;
+        }
+        return false;
+    }
+
     @Inject(method = "setClassOf", at = @At("TAIL"), remap = false)
     private static void addon$onSetClassOf(java.util.UUID id, @Coerce Object t, CallbackInfo ci) {
         net.bluelotuscoding.skillleveling.bridge.forge.ClientClassUIHelper.forceRefresh();
@@ -94,6 +112,8 @@ public class ClientClassStateMixin {
             if (name != null && !name.isEmpty()) {
                 cir.setReturnValue(name);
             }
+        } else if (addon$isNone()) {
+            cir.setReturnValue("");
         }
     }
 
@@ -107,6 +127,8 @@ public class ClientClassStateMixin {
             if (name != null && !name.isEmpty()) {
                 cir.setReturnValue(name);
             }
+        } else if (addon$isNone()) {
+            cir.setReturnValue("");
         }
     }
 
@@ -144,6 +166,9 @@ public class ClientClassStateMixin {
                 }
             }
             cir.setReturnValue(lines);
+        } else if (addon$isNone()) {
+            int noteLines = addon$getStaticInt("com.example.epicclassmod.client.ClientClassState", "NOTE_LINES");
+            cir.setReturnValue(new String[noteLines > 0 ? noteLines : 7]);
         }
     }
 
@@ -179,6 +204,8 @@ public class ClientClassStateMixin {
             }
             cir.setReturnValue(arr);
         } else if (def != null) {
+            cir.setReturnValue(padArray(new String[0], weaponEffectsCount));
+        } else if (addon$isNone()) {
             cir.setReturnValue(padArray(new String[0], weaponEffectsCount));
         }
     }
@@ -216,6 +243,8 @@ public class ClientClassStateMixin {
             cir.setReturnValue(arr);
         } else if (def != null) {
             cir.setReturnValue(padArray(new String[0], weaponEffectsCount));
+        } else if (addon$isNone()) {
+            cir.setReturnValue(padArray(new String[0], weaponEffectsCount));
         }
     }
 
@@ -242,6 +271,10 @@ public class ClientClassStateMixin {
                 arr[1] = net.minecraft.client.resource.language.I18n.translate(weaponType);
             }
             cir.setReturnValue(arr);
+        } else if (addon$isNone()) {
+            int weaponLinesCount = addon$getStaticInt("com.example.epicclassmod.client.ClientClassState",
+                    "CLASS_WEAPON_LINES");
+            cir.setReturnValue(new String[weaponLinesCount > 0 ? weaponLinesCount : 2]);
         }
     }
 
@@ -263,6 +296,8 @@ public class ClientClassStateMixin {
             if (!list.isEmpty()) {
                 cir.setReturnValue(list.toArray(new String[0]));
             }
+        } else if (addon$isNone()) {
+            cir.setReturnValue(new String[0]);
         }
     }
 }

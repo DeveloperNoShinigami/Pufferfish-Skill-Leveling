@@ -11,6 +11,7 @@ import net.bluelotuscoding.skillleveling.registry.ModBlocks;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
 import net.bluelotuscoding.skillleveling.registry.ModVillagers;
 import net.bluelotuscoding.skillleveling.bridge.forge.EpicClassBridgeForgeLoader;
+import net.bluelotuscoding.skillleveling.bridge.config.ItemRequirementsManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.bluelotuscoding.skillleveling.forge.loot.LootInjectionHandler;
@@ -73,6 +74,7 @@ public class ForgeMain {
         public void onAddReloadListener(AddReloadListenerEvent event) {
                 event.addListener(SkillLevelingMod.getInstance().getTradeLoader());
                 event.addListener(SkillLevelingMod.getInstance().getReputationLoader());
+                event.addListener(SkillLevelingMod.getInstance().getExpTomeConfigLoader());
                 event.addListener(SkillLevelingMod.getInstance().getLootImbueManager());
                 event.addListener(SkillLevelingMod.getInstance().getUniversalLootHandler());
 
@@ -80,6 +82,7 @@ public class ForgeMain {
                 event.addListener(SkillLevelingMod.getInstance().getJobMasterDataLoader());
                 event.addListener(SkillLevelingMod.getInstance().getEpicAttributeDataLoader());
                 event.addListener(SkillLevelingMod.getInstance().getBridgeDataLoader());
+                event.addListener(SkillLevelingMod.getInstance().getItemRequirementsManager());
         }
 
         @SubscribeEvent
@@ -112,6 +115,24 @@ public class ForgeMain {
                                         SkillLevelingMod.getInstance().getSkillLevelingManager()
                                                         .syncAllSkillsToPlayer(serverPlayer);
                                         SkillLevelingMod.getInstance().syncBridgeContent(serverPlayer);
+
+                                        // Sync item restrictions to client
+                                        var handler = SkillLevelingMod.getInstance().getNetworkHandler();
+                                        if (handler != null) {
+                                                handler.sendToPlayer(
+                                                                new net.bluelotuscoding.skillleveling.network.SyncItemRestrictionsPacket(
+                                                                                ItemRequirementsManager
+                                                                                                .getItemRequirements(),
+                                                                                ItemRequirementsManager
+                                                                                                .getBlockRequirements(),
+                                                                                ItemRequirementsManager
+                                                                                                .getEntityRequirements(),
+                                                                                ItemRequirementsManager
+                                                                                                .getDimensionRequirements(),
+                                                                                ItemRequirementsManager
+                                                                                                .getStructureRequirements()),
+                                                                serverPlayer);
+                                        }
 
                                         // Defer category lock initialization...
                                         // AFTER Pufferfish's own updateAllCategories sync completes.
@@ -158,6 +179,7 @@ public class ForgeMain {
                 ModItems.BLANK_TOME = ForgeItemRegistry.BLANK_TOME.get();
                 ModItems.SKILL_SCRIBE_TABLE_ITEM = ForgeItemRegistry.SKILL_SCRIBE_TABLE_ITEM.get();
                 ModItems.SKILL_CHARM = ForgeItemRegistry.SKILL_CHARM.get();
+                ModItems.EXP_TOME = ForgeItemRegistry.EXP_TOME.get();
 
                 ModBlocks.SKILL_SCRIBE_TABLE = ForgeBlockRegistry.SKILL_SCRIBE_TABLE.get();
                 ModVillagers.SKILL_MASTER = ForgeVillagerRegistry.SKILL_MASTER.get();

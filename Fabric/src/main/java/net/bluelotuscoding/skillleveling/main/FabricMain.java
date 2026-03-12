@@ -21,6 +21,7 @@ import net.minecraft.util.Rarity;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.poi.PointOfInterestType;
 import net.minecraft.resource.ResourceManager;
+import net.bluelotuscoding.skillleveling.bridge.config.ItemRequirementsManager;
 import net.minecraft.resource.ResourceReloader;
 import net.minecraft.resource.ResourceType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -248,6 +249,28 @@ public class FabricMain implements ModInitializer {
                                         }
                                 });
 
+                ResourceManagerHelper.get(ResourceType.SERVER_DATA)
+                                .registerReloadListener(new IdentifiableResourceReloadListener() {
+                                        @Override
+                                        public Identifier getFabricId() {
+                                                return SkillLevelingMod.createIdentifier("item_restrictions");
+                                        }
+
+                                        @Override
+                                        public CompletableFuture<Void> reload(
+                                                        ResourceReloader.Synchronizer synchronizer,
+                                                        ResourceManager manager,
+                                                        Profiler prepareProfiler,
+                                                        Profiler applyProfiler, Executor prepareExecutor,
+                                                        Executor applyExecutor) {
+                                                return SkillLevelingMod.getInstance().getItemRequirementsManager()
+                                                                .reload(synchronizer, manager,
+                                                                                prepareProfiler, applyProfiler,
+                                                                                prepareExecutor,
+                                                                                applyExecutor);
+                                        }
+                                });
+
                 net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
                         SkillLevelingMod.getInstance().getSkillLevelingManager().tick(server);
                 });
@@ -261,8 +284,27 @@ public class FabricMain implements ModInitializer {
                 net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN
                                 .register((handler, sender, server) -> {
                                         var player = handler.getPlayer();
-                                        // Defer to next tick so Pufferfish's updateAllCategories runs first
+                                        // Defer category lock initialization...
+                                        // AFTER Pufferfish's own updateAllCategories sync completes.
                                         server.execute(() -> {
+                                                // Sync item restrictions to client
+                                                var networkHandler = SkillLevelingMod.getInstance().getNetworkHandler();
+                                                if (networkHandler != null) {
+                                                        networkHandler.sendToPlayer(
+                                                                        new net.bluelotuscoding.skillleveling.network.SyncItemRestrictionsPacket(
+                                                                                        ItemRequirementsManager
+                                                                                                        .getItemRequirements(),
+                                                                                        ItemRequirementsManager
+                                                                                                        .getBlockRequirements(),
+                                                                                        ItemRequirementsManager
+                                                                                                        .getEntityRequirements(),
+                                                                                        ItemRequirementsManager
+                                                                                                        .getDimensionRequirements(),
+                                                                                        ItemRequirementsManager
+                                                                                                        .getStructureRequirements()),
+                                                                        player);
+                                                }
+
                                                 net.bluelotuscoding.skillleveling.manager.CategoryLockManager
                                                                 .initializeLocks(player);
                                         });

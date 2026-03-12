@@ -35,22 +35,35 @@ public class TomePendingActionManager {
         public final long createdAt;
         public final Identifier categoryId; // null until category is selected
         public final String skillId; // null until skill is selected
-        public final int stage; // 0 = awaiting category, 1 = awaiting skill, 2 = awaiting amount (for Greater)
+        public final int stage; // 0 = category, 1 = skill, 2 = amount (Greater Clear), 3 = quantity (Exp Tome)
 
-        public PendingTomeAction(TomeItem.TomeType tomeType, Identifier categoryId, String skillId, int stage) {
+        // Exp Tome specific fields
+        public final int xpAmount;
+        public final String tomeName;
+        public final int totalSameTomes;
+
+        public PendingTomeAction(TomeItem.TomeType tomeType, Identifier categoryId, String skillId, int stage,
+                int xpAmount, String tomeName, int totalSameTomes) {
             this.tomeType = tomeType;
             this.categoryId = categoryId;
             this.skillId = skillId;
             this.stage = stage;
+            this.xpAmount = xpAmount;
+            this.tomeName = tomeName;
+            this.totalSameTomes = totalSameTomes;
             this.createdAt = System.currentTimeMillis();
         }
 
         public PendingTomeAction withCategory(Identifier categoryId) {
-            return new PendingTomeAction(tomeType, categoryId, null, 1);
+            return new PendingTomeAction(tomeType, categoryId, null, 1, xpAmount, tomeName, totalSameTomes);
         }
 
         public PendingTomeAction withSkill(String skillId) {
-            return new PendingTomeAction(tomeType, categoryId, skillId, 2);
+            return new PendingTomeAction(tomeType, categoryId, skillId, 2, xpAmount, tomeName, totalSameTomes);
+        }
+
+        public PendingTomeAction withQuantityStage(Identifier categoryId, int totalSameTomes) {
+            return new PendingTomeAction(tomeType, categoryId, null, 3, xpAmount, tomeName, totalSameTomes);
         }
 
         public boolean isExpired() {
@@ -94,8 +107,21 @@ public class TomePendingActionManager {
         // Clear any existing pending action
         pendingActions.remove(playerId);
 
+        int xpAmount = 0;
+        String tomeName = "";
+        if (tomeType == TomeItem.TomeType.EXPERIENCE) {
+            net.minecraft.item.ItemStack stack = player.getMainHandStack();
+            if (!(stack.getItem() instanceof net.bluelotuscoding.skillleveling.item.ExpTomeItem)) {
+                stack = player.getOffHandStack();
+            }
+            if (stack.getItem() instanceof net.bluelotuscoding.skillleveling.item.ExpTomeItem) {
+                xpAmount = net.bluelotuscoding.skillleveling.item.ExpTomeItem.getExperienceGranted(stack);
+                tomeName = stack.getName().getString();
+            }
+        }
+
         // All tomes start with category selection
-        pendingActions.put(playerId, new PendingTomeAction(tomeType, null, null, 0));
+        pendingActions.put(playerId, new PendingTomeAction(tomeType, null, null, 0, xpAmount, tomeName, 0));
         sendCategoryPrompt(player);
     }
 
@@ -151,6 +177,8 @@ public class TomePendingActionManager {
                 return processSkillInput(player, action, input);
             case 2: // Awaiting amount (Greater Clear Mind only)
                 return processAmountInput(player, action, input);
+            case 3: // Awaiting quantity (Exp Tome bulk consume)
+                return processQuantityInput(player, action, input);
             default:
                 return false;
         }
@@ -186,13 +214,28 @@ public class TomePendingActionManager {
             boolean success = SkillLevelingMod.getInstance().getSkillLevelingManager()
                     .handleTomeOfProgression(player, matchedCategory);
             if (success) {
-                consumeTome(player, action.tomeType);
+                consumeTome(player, action.tomeType, 1);
                 player.sendMessage(Text.literal("§a+1 skill point in " + toTitleCase(matchedCategory.getPath()) + "!"),
                         false);
             } else {
                 player.sendMessage(Text.literal("§cFailed to add point. Category may be at max level."), false);
             }
             pendingActions.remove(player.getUuid());
+        } else if (action.tomeType == TomeItem.TomeType.EXPERIENCE) {
+            // Experience tome - check for bulk consumption
+            int totalIdentical = countIdenticalTomes(player);
+            if (totalIdentical > 1) {
+                pendingActions.put(player.getUuid(), action.withQuantityStage(matchedCategory, totalIdentical));
+                player.sendMessage(
+                        Text.literal("§eYou have §f" + totalIdentical + "§e of these tomes in your inventory."), false);
+                player.sendMessage(
+                        Text.literal("§eHow many would you like to consume? (1-" + totalIdentical + ", or 'all')"),
+                        false);
+            } else {
+                // Only 1 tome, process immediately
+                applyExperience(player, matchedCategory, action.xpAmount, 1);
+                pendingActions.remove(player.getUuid());
+            }
         } else {
             // Clear Mind tomes - need skill selection next
             pendingActions.put(player.getUuid(), action.withCategory(matchedCategory));
@@ -248,7 +291,7 @@ public class TomePendingActionManager {
             boolean success = SkillLevelingMod.getInstance().getSkillLevelingManager()
                     .handleTomeOfClearMind(player, action.categoryId, matchedSkillId);
             if (success) {
-                consumeTome(player, action.tomeType);
+                consumeTome(player, action.tomeType, 1);
                 player.sendMessage(Text.literal("§aRefunded 1 level of " + toTitleCase(matchedSkillId) + "!"), false);
             } else {
                 player.sendMessage(Text.literal("§cFailed to refund. Skill may already be at level 0."), false);
@@ -319,7 +362,7 @@ public class TomePendingActionManager {
             // Explicitly sync points ONCE after all refunds are complete with message
             manager.syncCategoryPoints(player, action.categoryId, totalPoints);
 
-            consumeTome(player, action.tomeType);
+            consumeTome(player, action.tomeType, 1);
             player.sendMessage(
                     Text.literal("§aRefunded " + refunded + " level(s) of " + toTitleCase(action.skillId) + "!"),
                     false);
@@ -328,6 +371,58 @@ public class TomePendingActionManager {
         }
         pendingActions.remove(player.getUuid());
         return true;
+    }
+
+    private static boolean processQuantityInput(ServerPlayerEntity player, PendingTomeAction action, String input) {
+        int amount;
+        if (input.equals("all")) {
+            amount = action.totalSameTomes;
+        } else {
+            try {
+                amount = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                player.sendMessage(
+                        Text.literal("§cPlease enter a number (1-" + action.totalSameTomes + ") or 'all'."),
+                        false);
+                return true;
+            }
+        }
+
+        if (amount < 1 || amount > action.totalSameTomes) {
+            player.sendMessage(Text.literal("§cInvalid amount. Please enter 1-" + action.totalSameTomes + " or 'all'."),
+                    false);
+            return true;
+        }
+
+        applyExperience(player, action.categoryId, action.xpAmount, amount);
+        pendingActions.remove(player.getUuid());
+        return true;
+    }
+
+    private static void applyExperience(ServerPlayerEntity player, Identifier categoryId, int xpPerTome, int quantity) {
+        int totalXp = xpPerTome * quantity;
+        SkillLevelingMod.getInstance().getPlatform().addPufferfishExperience(player, categoryId, totalXp);
+        consumeTome(player, TomeItem.TomeType.EXPERIENCE, quantity);
+        player.sendMessage(Text.literal("§aConsumed §f" + quantity + " " + toTitleCase(categoryId.getPath())
+                + " Experience Tomes§a for §f" + totalXp + " XP§a!"), false);
+    }
+
+    private static int countIdenticalTomes(ServerPlayerEntity player) {
+        net.minecraft.item.ItemStack source = player.getMainHandStack();
+        if (!(source.getItem() instanceof net.bluelotuscoding.skillleveling.item.ExpTomeItem)) {
+            source = player.getOffHandStack();
+        }
+        if (!(source.getItem() instanceof net.bluelotuscoding.skillleveling.item.ExpTomeItem))
+            return 0;
+
+        int count = 0;
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            net.minecraft.item.ItemStack stack = player.getInventory().getStack(i);
+            if (net.minecraft.item.ItemStack.canCombine(source, stack)) {
+                count += stack.getCount();
+            }
+        }
+        return count;
     }
 
     private static void sendCategoryPrompt(ServerPlayerEntity player) {
@@ -367,17 +462,38 @@ public class TomePendingActionManager {
         player.sendMessage(Text.literal("§eType the skill name (or 'cancel' to cancel):"), false);
     }
 
-    private static void consumeTome(ServerPlayerEntity player, TomeItem.TomeType tomeType) {
-        // Try to find and consume a tome from inventory
-        var mainHand = player.getMainHandStack();
-        var offHand = player.getOffHandStack();
+    private static void consumeTome(ServerPlayerEntity player, TomeItem.TomeType tomeType, int amount) {
+        if (tomeType == TomeItem.TomeType.EXPERIENCE) {
+            // Bulk consume across inventory
+            net.minecraft.item.ItemStack source = player.getMainHandStack();
+            if (!(source.getItem() instanceof net.bluelotuscoding.skillleveling.item.ExpTomeItem)) {
+                source = player.getOffHandStack();
+            }
+            if (!(source.getItem() instanceof net.bluelotuscoding.skillleveling.item.ExpTomeItem))
+                return;
 
-        if (mainHand.getItem() instanceof TomeItem tome && tome.getTomeType() == tomeType) {
-            TomeItem.consumeTome(player, net.minecraft.util.Hand.MAIN_HAND);
-        } else if (offHand.getItem() instanceof TomeItem tome && tome.getTomeType() == tomeType) {
-            TomeItem.consumeTome(player, net.minecraft.util.Hand.OFF_HAND);
+            int remaining = amount;
+            for (int i = 0; i < player.getInventory().size() && remaining > 0; i++) {
+                net.minecraft.item.ItemStack stack = player.getInventory().getStack(i);
+                if (net.minecraft.item.ItemStack.canCombine(source, stack)) {
+                    int toTake = Math.min(stack.getCount(), remaining);
+                    stack.decrement(toTake);
+                    remaining -= toTake;
+                }
+            }
+        } else {
+            // Single tome consume from hand
+            var mainHand = player.getMainHandStack();
+            var offHand = player.getOffHandStack();
+
+            if (mainHand.getItem() instanceof TomeItem tome && tome.getTomeType() == tomeType) {
+                if (!player.getAbilities().creativeMode)
+                    mainHand.decrement(1);
+            } else if (offHand.getItem() instanceof TomeItem tome && tome.getTomeType() == tomeType) {
+                if (!player.getAbilities().creativeMode)
+                    offHand.decrement(1);
+            }
         }
-        // If not in hand (shouldn't happen), no tome is consumed
     }
 
     /**

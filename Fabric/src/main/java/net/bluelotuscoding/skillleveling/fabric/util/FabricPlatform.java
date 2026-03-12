@@ -64,6 +64,11 @@ public class FabricPlatform implements Platform {
     }
 
     @Override
+    public void addPufferfishExperience(Object player, net.minecraft.util.Identifier categoryId, int amount) {
+        // No-op on Fabric
+    }
+
+    @Override
     public String getEpicClassName(Object player) {
         return null;
     }
@@ -87,5 +92,11 @@ public class FabricPlatform implements Platform {
     @Override
     public void sendAdvanceClassScreen(Object player, String parentClassId) {
         // Fabric implementation pending Epic Classes networking integration
+    }
+
+    @Override
+    public boolean isClient() {
+        return net.fabricmc.loader.api.FabricLoader.getInstance()
+                .getEnvironmentType() == net.fabricmc.api.EnvType.CLIENT;
     }
 }

@@ -131,13 +131,17 @@ public class CustomClassSelectScreen extends Screen {
         this.parentClassId = parentClassId;
 
         if (parentClassId == null) {
-            // Setup choices: Base classes first
-            allChoices.add(PlayerClassData.ClassType.WARRIOR);
-            allChoices.add(PlayerClassData.ClassType.PALADIN);
-            allChoices.add(PlayerClassData.ClassType.BERSERKER);
-            allChoices.add(PlayerClassData.ClassType.REAPER);
-            allChoices.add(PlayerClassData.ClassType.SORCERER);
-            allChoices.add(PlayerClassData.ClassType.ARCHER);
+            // Setup choices: Base classes first (if not disabled)
+            boolean disableBase = EpicClassConfigManager.getSyncedConfig().disableBaseClasses;
+
+            if (!disableBase) {
+                allChoices.add(PlayerClassData.ClassType.WARRIOR);
+                allChoices.add(PlayerClassData.ClassType.PALADIN);
+                allChoices.add(PlayerClassData.ClassType.BERSERKER);
+                allChoices.add(PlayerClassData.ClassType.REAPER);
+                allChoices.add(PlayerClassData.ClassType.SORCERER);
+                allChoices.add(PlayerClassData.ClassType.ARCHER);
+            }
 
             // Then custom classes that are base level (no parent)
             for (EpicClassDef def : EpicClassConfigManager.getClasses().values()) {
@@ -225,6 +229,10 @@ public class CustomClassSelectScreen extends Screen {
 
     @Override
     protected void init() {
+        if (allChoices.isEmpty()) {
+            MinecraftClient.getInstance().setScreen(null);
+            return;
+        }
         computeLayout();
         rebuildButtons();
         initEpicPreview();
@@ -542,6 +550,9 @@ public class CustomClassSelectScreen extends Screen {
         g.fill(mX, mY, mX + 1, mY + mH, CLR_CARD_EDGE);
         g.fill(mX + mW - 1, mY, mX + mW, mY + mH, CLR_CARD_EDGE);
 
+        if (allChoices.isEmpty()) {
+            return;
+        }
         Object choice = allChoices.get(currentIndex);
 
         // Use EpicFightPreviewComponent instead of rendering the real player.

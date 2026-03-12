@@ -20,7 +20,7 @@ public class EpicAttributeDataLoader extends JsonDataLoader {
     private final Map<String, List<ClassPageDef>> classAttributePages = new HashMap<>();
 
     public EpicAttributeDataLoader() {
-        super(GSON, "rise_of_heros");
+        super(GSON, "epicclassmod");
     }
 
     @Override

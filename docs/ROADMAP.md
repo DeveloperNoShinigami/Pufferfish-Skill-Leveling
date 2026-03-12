@@ -78,18 +78,24 @@ Current development status and future plans for Pufferfish Skill Leveling.
 - [x] 5-tier trade progression with mastery pricing
 - [x] Village structure generation (Plains, Desert, Savanna, Snowy, Taiga)
 - [x] Tiered loot barrels in structures
+- [x] Rare Experience Tomes in Skill Master Shop (Level-scaling)
 
 ### Epic Classes Integration
 - [x] Full Rise of Heroes datapack support
 - [x] S2C Network sync for bridge data
 - [x] NBT Item icon parsing for class previews
 - [x] 10 Multi-file standardized skill categories
-- [x] Custom Job Master config and loading
+- [x] Block interaction gating (Breaking/Right-click)
+- [x] Entity interaction/attack gating
+- [x] Dimension access gating
+- [x] Area/Structure proximity gating
+- [x] Environmental gating (in_water, time_of_day)
 
 ---
 
 ## Experimental / In Development
 
+- [ ] Epic Class Quest gating (require_quest implementation)
 - [ ] Expression-based cost formulas for more complex scaling
 - [ ] Additional toggle patterns and edge cases
 
@@ -103,11 +109,16 @@ Current development status and future plans for Pufferfish Skill Leveling.
   - [ ] `require_unlock_for_imbuing` — gate imbued gear bonuses behind base skill unlock
   - [ ] `require_unlock_for_curio_imbuing` — gate curio imbued bonuses behind base skill unlock
   - [ ] `debug_logging` — persistent debug logging toggle (currently runtime-only via command)
+- [ ] **Robust Structure Enforcement (Overhaul)**
+  - [ ] Implement 40-tick (2s) interval polling for performance
+  - [ ] Use `StructureAccessor` for component-level detection
+  - [ ] Implement "Teleport Out" fallback for persistent intruders
 - [ ] More datapack template categories (magic-focused, ranged-focused)
 - [ ] Expanded template pack with demo datapacks covering every feature
 - [ ] In-game configuration UI for server admins
 
 ### Medium Term
+- [ ] Custom Job Master integration (Currently disabled/partly working; NPC class switching will be overhauled in the future)
 - [ ] Skill synergy system (bonus effects for specific skill combinations)
 - [ ] Party/team skill sharing (share passive bonuses with nearby allies)
 - [ ] Achievement-based progression (grant levels from advancement triggers)

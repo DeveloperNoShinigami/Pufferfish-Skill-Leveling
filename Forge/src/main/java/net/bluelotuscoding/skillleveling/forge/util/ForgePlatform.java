@@ -78,6 +78,27 @@ public class ForgePlatform implements Platform {
     @Override
     public int getPufferfishLevel(Object player,
             net.minecraft.util.Identifier categoryId) {
+        int level = getLevelInternal(player, categoryId);
+        if (level > 0) {
+            return level;
+        }
+
+        // Namespace fallback: if level is 0, check categories with the same path but
+        // DIFFERENT namespaces
+        String path = categoryId.getPath();
+        for (net.puffish.skillsmod.api.Category cat : net.puffish.skillsmod.api.SkillsAPI.streamCategories().toList()) {
+            if (cat.getId().getPath().equals(path) && !cat.getId().getNamespace().equals(categoryId.getNamespace())) {
+                int altLevel = getLevelInternal(player, cat.getId());
+                if (altLevel > 0) {
+                    return altLevel;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    private int getLevelInternal(Object player, net.minecraft.util.Identifier categoryId) {
         return net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId)
                 .flatMap(cat -> cat.getExperience())
                 .map(exp -> {
@@ -91,6 +112,26 @@ public class ForgePlatform implements Platform {
     @Override
     public int getPufferfishExperience(Object player,
             net.minecraft.util.Identifier categoryId) {
+        int xp = getExperienceInternal(player, categoryId);
+        if (xp > 0) {
+            return xp;
+        }
+
+        // Namespace fallback
+        String path = categoryId.getPath();
+        for (net.puffish.skillsmod.api.Category cat : net.puffish.skillsmod.api.SkillsAPI.streamCategories().toList()) {
+            if (cat.getId().getPath().equals(path) && !cat.getId().getNamespace().equals(categoryId.getNamespace())) {
+                int altXp = getExperienceInternal(player, cat.getId());
+                if (altXp > 0) {
+                    return altXp;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    private int getExperienceInternal(Object player, net.minecraft.util.Identifier categoryId) {
         return net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId)
                 .flatMap(cat -> cat.getExperience())
                 .map(exp -> {
@@ -105,16 +146,72 @@ public class ForgePlatform implements Platform {
     public void addPufferfishExperience(Object player, int amount) {
         // Find any active category for the player and add XP to it
         net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.getActiveCategory(player).ifPresent(catId -> {
-            net.puffish.skillsmod.api.SkillsAPI.getCategory(catId).ifPresent(category -> {
-                category.getExperience().ifPresent(exp -> {
-                    try {
-                        // Use reflection to call addTotal(Object player, int amount)
-                        java.lang.reflect.Method addTotal = exp.getClass().getMethod("addTotal", Object.class,
-                                int.class);
-                        addTotal.invoke(exp, player, amount);
-                    } catch (Exception ignored) {
+            addPufferfishExperience(player, catId, amount);
+        });
+    }
+
+    @Override
+    public void addPufferfishExperience(Object player, net.minecraft.util.Identifier categoryId, int amount) {
+        net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId).ifPresent(category -> {
+            category.getExperience().ifPresent(exp -> {
+                try {
+                    java.lang.reflect.Method method = null;
+                    for (java.lang.reflect.Method m : exp.getClass().getMethods()) {
+                        if (m.getParameterCount() == 2 && m.getParameterTypes()[1] == int.class) {
+                            if (m.getParameterTypes()[0].isAssignableFrom(player.getClass())) {
+                                String name = m.getName();
+                                if (name.equals("addTotal") || name.equals("addExperience")) {
+                                    method = m;
+                                    break;
+                                }
+                            }
+                        }
                     }
-                });
+                    if (method == null) {
+                        for (java.lang.reflect.Method m : exp.getClass().getMethods()) {
+                            if (m.getParameterCount() == 2 && m.getParameterTypes()[1] == int.class) {
+                                if (m.getParameterTypes()[0].isAssignableFrom(player.getClass())) {
+                                    String name = m.getName().toLowerCase();
+                                    if (name.contains("experience") || name.contains("add")) {
+                                        method = m;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (method == null) {
+                        // DEEP DEBUG LOGGING
+                        StringBuilder debug = new StringBuilder("Failed to find XP gain method. Available methods:\n");
+                        for (java.lang.reflect.Method m : exp.getClass().getMethods()) {
+                            debug.append(" - ").append(m.getName()).append("(");
+                            Class<?>[] params = m.getParameterTypes();
+                            for (int i = 0; i < params.length; i++) {
+                                debug.append(params[i].getName());
+                                if (i < params.length - 1) {
+                                    debug.append(", ");
+                                }
+                            }
+                            debug.append(")\n");
+                        }
+                        debug.append("Player class: ").append(player.getClass().getName());
+                        net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
+                                .error(debug.toString());
+                    }
+
+                    if (method != null) {
+                        method.setAccessible(true);
+                        method.invoke(exp, player, amount);
+                    } else {
+                        net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
+                                .error("Failed to find XP gain method on " + exp.getClass().getName());
+                    }
+                } catch (Exception e) {
+                    net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getLogger()
+                            .error("Error invoking XP gain method on " + exp.getClass().getName() + ": "
+                                    + e.getMessage());
+                }
             });
         });
     }
@@ -175,5 +272,10 @@ public class ForgePlatform implements Platform {
                     net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> serverPlayer),
                     new net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket(parentClassId));
         }
+    }
+
+    @Override
+    public boolean isClient() {
+        return net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient();
     }
 }

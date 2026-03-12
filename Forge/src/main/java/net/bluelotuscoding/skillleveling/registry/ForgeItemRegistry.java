@@ -39,6 +39,8 @@ public class ForgeItemRegistry {
                         .register("blank_tome", ModItems::createBlankTome);
         public static final RegistryObject<SkillCharmItem> SKILL_CHARM = ITEMS
                         .register("skill_charm", ModItems::createSkillCharm);
+        public static final RegistryObject<net.bluelotuscoding.skillleveling.item.ExpTomeItem> EXP_TOME = ITEMS
+                        .register("experience_tome", ModItems::createExperienceTome);
 
         // Block Items
         public static final RegistryObject<Item> SKILL_SCRIBE_TABLE_ITEM = ITEMS.register("skill_scribe_table",

@@ -35,11 +35,11 @@ public class SkillMasterTradeProvider {
             }
         }
 
-        // 2. Determine dynamic slot count based on tier (5-12 range)
-        int minSlots = 5 + (tier - 1); // 5 at Novice (T1), 9 at Master (T5)
-        int maxSlots = minSlots + 2;
+        // 2. Updated slots: Increased by 2 per tier
+        int minSlots = 7 + (tier - 1); // 7 at Novice (T1), 11 at Master (T5)
+        int maxSlots = minSlots + 2; // 9 at Novice (T1), 13 at Master (T5)
         if (tier == 5)
-            maxSlots = 12;
+            maxSlots = 14;
 
         // 3. Add Trade-In Offers
         addTradeInOffers(trades, tier, player);
@@ -49,18 +49,76 @@ public class SkillMasterTradeProvider {
             addTomeUpgradeTrades(player, trades, tier);
         }
 
-        // 6. Randomized Skill Trades (Remaining slots)
-        int remainingSlots = maxSlots - trades.size();
-        if (remainingSlots > 0) {
-            addOverhauledDynamicTrades(player, trades, remainingSlots, tier);
+        // 6. Tome Probability Logic (Exactly 2 tomes total)
+        float roll = villager.getWorld().getRandom().nextFloat();
+        int expTomesToFill = 0;
+        int skillTomesToFill = 0;
+
+        if (roll < 0.15f) {
+            expTomesToFill = 2;
+        } else if (roll < 0.25f) { // 15% + 10%
+            skillTomesToFill = 2;
+        } else {
+            expTomesToFill = 1;
+            skillTomesToFill = 1;
         }
 
-        // 6. Check for Mastery message
+        addExpTomeTrades(player, trades, expTomesToFill, tier);
+        addOverhauledDynamicTrades(player, trades, skillTomesToFill, tier);
+
+        // 7. Filler Trades: Ensure at least minSlots are showing
+        while (trades.size() < minSlots) {
+            trades.add(new TradeOffer(new ItemStack(Items.EMERALD, 5), new ItemStack(Items.BOOK),
+                    new ItemStack(ModItems.BLANK_TOME), 12, 1, 0.05f));
+        }
+
+        // 8. Check for Mastery message
         checkAndNotifyMastery(player);
 
-        // 7. Limit to maxSlots
+        // 9. Limit to maxSlots
         while (trades.size() > maxSlots) {
             trades.remove(trades.size() - 1);
+        }
+    }
+
+    private static void addExpTomeTrades(ServerPlayerEntity player, TradeOfferList trades, int slotsToFill, int tier) {
+        var tomes = ExpTomeConfigLoader.getTomes();
+        if (tomes.isEmpty())
+            return;
+
+        int added = 0;
+        List<String> tomeIds = new ArrayList<>(tomes.keySet());
+        Collections.shuffle(tomeIds);
+
+        for (String tomeId : tomeIds) {
+            if (added >= slotsToFill)
+                break;
+
+            var def = tomes.get(tomeId);
+
+            // Tier-based level scaling
+            int maxOfferLevel = (int) Math.round(def.maxLevels * (tier / 5.0));
+            int minOfferLevel = (int) Math.round(def.maxLevels * ((tier - 1) / 5.0)) + 1;
+
+            if (tier == 5)
+                maxOfferLevel = def.maxLevels;
+            maxOfferLevel = Math.max(1, Math.min(maxOfferLevel, def.maxLevels));
+            minOfferLevel = Math.max(1, Math.min(minOfferLevel, maxOfferLevel));
+
+            int levelToOffer = minOfferLevel + player.getRandom().nextInt(maxOfferLevel - minOfferLevel + 1);
+            int xpAmount = def.experiencePerLevel.getCost(levelToOffer);
+
+            ItemStack tome = net.bluelotuscoding.skillleveling.item.ExpTomeItem.createExpTome(
+                    ModItems.EXP_TOME, tomeId, def.name, def.rarity, levelToOffer, xpAmount);
+
+            int price = calculateTomePrice(player.getRandom(), levelToOffer, def.maxLevels);
+            // Ensure Exp Tomes feel premium
+            price = Math.max(price, 15 + (tier * 5));
+            price = Math.min(64, price);
+
+            trades.add(
+                    new TradeOffer(new ItemStack(Items.EMERALD, price), new ItemStack(Items.BOOK), tome, 1, 12, 0.05f));
+            added++;
         }
     }
 

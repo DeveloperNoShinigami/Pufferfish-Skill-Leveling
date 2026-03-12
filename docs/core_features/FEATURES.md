@@ -1,5 +1,9 @@
 # Features Reference
 
+[< Back to Core Index](index.md) | [Next: Datapack Guide >](DATAPACK_GUIDE.md)
+
+---
+
 A complete reference of every feature in the Pufferfish Skill Leveling addon. Each section explains what the feature does, how to configure it, and when to use it.
 
 ---
@@ -65,6 +69,9 @@ The core feature of this addon. Skills can have any number of levels (1 to N), e
 ```
 
 > **Best Practice:** Always define rewards for every level from 1 to `max_skill_level`. Skipping levels can cause unexpected behavior.
+
+> [!WARNING]
+> **CRITICAL:** The `max_skill_level` defined in your `definitions.json` MUST exactly match the number of levels provided in your `rewards` array. If your skill is level 3, you **must** have 3 levels worth of progression defined. Mismatching these values will result in broken progression states or crashes when the player attempts to advance past the defined array bounds.
 
 ---
 
@@ -444,4 +451,4 @@ A specialized villager profession that serves as the primary NPC-driven progress
 
 ---
 
-*See [Datapack Guide](./DATAPACK_GUIDE.md) for hands-on configuration tutorials.*
+[< Back to Core Index](index.md) | [Next: Datapack Guide >](DATAPACK_GUIDE.md)

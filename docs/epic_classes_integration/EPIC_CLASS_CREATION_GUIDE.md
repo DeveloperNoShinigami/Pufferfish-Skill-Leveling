@@ -1,4 +1,8 @@
-# Epic Classes Datapack Guide
+# Epic Class Creation Guide
+
+[< Back to Epic Classes Index](index.md) | [Next: Item Restrictions & Gating >](ITEM_RESTRICTIONS_GUIDE.md)
+
+---
 
 This guide details how to create and configure custom Epic Classes to tie natively into the Pufferfish Skill Leveling system. By utilizing Minecraft's DataPack system, you can define complete classes, custom GUIs, attribute modifiers, and NPC Job Masters without writing any code.
 
@@ -86,88 +90,43 @@ Here is a comprehensive example of a full class setup using external weapons (TA
 ```
 
 ### Core Configuration Fields
-| Field | Type | Description |
-|---|---|---|
-| `class_name` | String | Unique identifier for your class. Must match the filename logically. |
-| `display_name` | String | Fallback name used if translation keys are missing. |
-| `display_name_key` | String | Language key for the title of the class. |
-| `lore_key` | String | Language key for the detailed lore/description. |
-| `skill_category_id` | String | The exact ID of the Pufferfish Skills category to map this class to. |
-| `job_master_id` | String | The ID of the Job Master NPC config that allows players to pick this class. |
-| `epic_class_proxy` | String | **Critical.** Tells Epic Fight which core animation logic to use. Valid: `WARRIOR`, `PALADIN`, `BERSERKER`, `REAPER`, `SORCERER`, `ARCHER`. |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `class_name` | String | **Yes** | Unique identifier for your class. Must match the filename logically. |
+| `class_parent` | String | No | The `class_name` of the previous class in the progression tree. Used to define advancement forward from a base class to this class. |
+| `display_name` | String | No | Fallback name used if translation keys are missing. |
+| `display_name_key` | String | **Yes** | Language key for the title of the class. |
+| `description` | String | No | Fallback description text if translation keys are missing. |
+| `lore_key` | String | No | Language key for the detailed lore/description. |
+| `book_lore` | String | No | Literal string used for detailed lore in the class book. |
+| `skill_category_id` | String | **Yes** | **Critical.** The ID of the Pufferfish Skills category to map this class to. The bridge natively tries the `epic_classes:` namespace. Ensure your Pufferfish folders match this exactly. |
+| `job_master_id` | String | No | *Future Addition.* The ID of the Job Master NPC config. |
+| `epic_class_proxy` | String | **Yes** | **Critical.** Tells Epic Fight which core animation logic to use. Valid: `WARRIOR`, `PALADIN`, `BERSERKER`, `REAPER`, `SORCERER`, `ARCHER`. |
 
 ### UI & Presentation Fields
-| Field | Type | Description |
-|---|---|---|
-| `class_weapon_type` | String | Text descriptor displayed in the class book. |
-| `class_weapon_icon` | String | The item ID (supports NBT) used as the icon. |
-| `preview_animation` | String | The Epic Fight animation ID to loop in the class select menu. |
-| `preview_armor_base` | String | The base armor ID prefix to equip on the dummy (e.g. `minecraft:iron_` wraps to `iron_helmet`, etc). |
-| `preview_mainhand_item` | String | Item in the dummy's mainhand. Supports full NBT strings. |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `gui_title` | String | No | Title specifically shown in the new Class Select screen UI. |
+| `gui_description` | String | No | Short description shown in the Class Select screen UI. |
+| `gui_notes` | String Array | No | List of bullet points shown in the Class Select screen below the description. |
+| `class_weapon_type` | String | No | Text descriptor displayed in the class book. |
+| `class_weapon_icon` | String | No | The item ID (supports NBT) used as the icon in the class book. |
+| `preview_animation` | String | No | The Epic Fight animation ID to loop in the class select menu dummy. |
+| `preview_armor_base` | String | No | The base armor ID prefix to equip on the dummy (e.g. `minecraft:iron_`). |
+| `preview_mainhand_item` | String | No | Item in the dummy's mainhand. Supports full NBT strings. |
+| `preview_offhand_item` | String | No | Item in the dummy's offhand. Supports full NBT strings. |
 
 ### Gameplay Fields
-| Field | Type | Description |
-|---|---|---|
-| `class_weapon_items` | String Array | List of acceptable weapon IDs for this class. |
-| `starting_items` | String Array | Items granted to the player the moment they select the class. Supports quantities via `@` (e.g. `bone@10`) or NBT strings. |
-| `attributes` | Object | The immediate stat changes applied permanently when selecting the class. |
-| `gui_stats` | Object Array | Visual representation of stats on the UI. Doesn't grant stats, purely for display. |
-| `gui_passives` | Object Array | Lists Pufferfish Skills to display as "Class Traits" in the UI. Links directly to the `puffish_skills` definitions. |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `class_weapon_items` | String Array | No | List of acceptable weapon IDs for this class. |
+| `starting_items` | String Array | No | Items granted to the player the moment they select the class. Supports quantities via `@` (e.g. `bone@10`) or NBT strings. |
+| `attributes` | Object | No | The immediate stat changes applied permanently when selecting the class. |
+| `gui_stats` | Object Array | No | Visual representation of stats on the UI. Doesn't grant stats, purely for display. |
+| `gui_passives` | Object Array | No | Lists Pufferfish Skills to display as "Class Traits" in the UI. Links directly to the `puffish_skills` definitions. |
 
 ---
 
-## 3. Configuring Class Attributes
-
-This system bridges the gap between Pufferfish points and Epic Fight stats. Place these in `epic_classes/attributes/<class_id>.json`.
-
-> [!TIP]
-> This config evaluates mathematical expressions. You can scale stats exactly how you want.
-
-```json
-[
-  {
-    "id": "gunslinger_page",
-    "slots": [
-      {
-        "id": "movement_speed",
-        "name": "gui.epicclassmod.speed",
-        "icon": "minecraft:feather",
-        "attribute_id": "minecraft:generic.movement_speed",
-        "value": "points * 0.01",
-        "operation": "ADDITION",
-        "max_points": 10,
-        "description": "Increases your movement speed."
-      }
-    ]
-  }
-]
-```
-* **`value`**: The math expression defining the stat increase. `points` refers to points invested.
-* **`attribute_id`**: The raw Minecraft or Epic Fight attribute to modify.
-
 ---
 
-## 4. Defining Job Masters
-
-Job Masters are Custom NPCs that allow players to change or select classes. Define them in `epic_classes/job_masters/`.
-
-> [!WARNING]
-> While Job Masters correctly load and can be targeted, some interactions with the native Epic Classes NPC dialogues are currently listed as **partly working** and are pending upstream updates.
-
-```json
-{
-  "id": "job_master_gunslinger",
-  "npc_id": "village_gunslinger",
-  "name_key": "npc.example_mod.job_master.gunslinger",
-  "texture": "example_mod:textures/entity/npc/gunslinger.png",
-  "dialogue_key": "main__gui.epicclassmod.quest.job_master.gunslinger",
-  "marker_block": "minecraft:iron_block",
-  "equipment": {
-    "HEAD": "minecraft:leather_helmet",
-    "CHEST": "minecraft:iron_chestplate",
-    "MAINHAND": "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}"
-  }
-}
-```
-
-By placing an NPC entity in the world with the matching `npc_id`, the system will automatically inject this equipment and register it as the gateway to the `gunslinger` class.
+[< Back to Epic Classes Index](index.md) | [Next: Item Restrictions & Gating >](ITEM_RESTRICTIONS_GUIDE.md)

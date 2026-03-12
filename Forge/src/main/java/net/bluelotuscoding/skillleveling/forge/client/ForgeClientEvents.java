@@ -2,6 +2,7 @@ package net.bluelotuscoding.skillleveling.forge.client;
 
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.client.MasteryKeybinds;
+import net.bluelotuscoding.skillleveling.client.ItemRestrictionKeybind;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -17,6 +18,7 @@ public class ForgeClientEvents {
         for (var key : MasteryKeybinds.KEYBINDINGS) {
             event.register(key);
         }
+        event.register(ItemRestrictionKeybind.VIEW_RESTRICTIONS);
     }
 
     @Mod.EventBusSubscriber(modid = SkillLevelingMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)

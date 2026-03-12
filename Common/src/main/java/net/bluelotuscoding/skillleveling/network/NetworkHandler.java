@@ -16,4 +16,6 @@ public interface NetworkHandler {
     void sendToPlayer(SyncToggleCooldownPacket packet, ServerPlayerEntity player);
 
     void sendToServer(RequestToggleSkillPacket packet);
+
+    void sendToPlayer(SyncItemRestrictionsPacket packet, ServerPlayerEntity player);
 }

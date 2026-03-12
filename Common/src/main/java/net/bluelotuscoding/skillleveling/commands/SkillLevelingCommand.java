@@ -266,12 +266,26 @@ public class SkillLevelingCommand {
                 }
 
                 if (def.skill_category_id != null && !def.skill_category_id.isEmpty()) {
-                        net.minecraft.util.Identifier categoryId = new net.minecraft.util.Identifier(
-                                        def.skill_category_id);
+                        net.minecraft.util.Identifier categoryId = net.bluelotuscoding.skillleveling.bridge.EpicClassBridge
+                                        .resolveCategoryId(def.skill_category_id);
+
+                        if (categoryId == null) {
+                                source.sendMessage(Text.literal("§cCould not resolve Pufferfish category: "
+                                                + def.skill_category_id));
+                                return 0;
+                        }
+
                         var categoryOptional = net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId);
 
                         if (categoryOptional.isPresent()) {
                                 net.puffish.skillsmod.api.Category category = categoryOptional.get();
+                                net.minecraft.util.Identifier catId = category.getId();
+                                if (!category.isUnlocked(player)) {
+                                        source.sendMessage(
+                                                        Text.literal("§cYour current class category is not unlocked!"));
+                                        return 0;
+                                }
+
                                 var addon = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance();
                                 var manager = addon.getSkillLevelingManager();
 
@@ -279,16 +293,22 @@ public class SkillLevelingCommand {
 
                                 // Calculate total player level vs total category max level
                                 category.streamSkills().forEach((net.puffish.skillsmod.api.Skill skill) -> {
-                                        totals[0] += manager.getTotalSkillLevel(player, categoryId, skill.getId());
-                                        totals[1] += manager.getMaxLevel(categoryId, skill.getId());
+                                        totals[0] += manager.getTotalSkillLevel(player, catId, skill.getId());
+                                        totals[1] += manager.getMaxLevel(catId, skill.getId());
                                 });
 
                                 int playerTotalLevel = totals[0];
                                 int categoryMaxPossibleLevel = totals[1];
 
+                                if (categoryMaxPossibleLevel <= 0) {
+                                        source.sendMessage(Text.literal(
+                                                        "§cThis class category has no level progression configured."));
+                                        return 0;
+                                }
+
                                 if (playerTotalLevel < categoryMaxPossibleLevel) {
                                         source.sendMessage(Text.literal(
-                                                        "§cYou must master your current class before advancing. ("
+                                                        "§cYou must master your current class before advancing (obtain all class skills). ("
                                                                         + playerTotalLevel + "/"
                                                                         + categoryMaxPossibleLevel + ")"));
                                         return 0;

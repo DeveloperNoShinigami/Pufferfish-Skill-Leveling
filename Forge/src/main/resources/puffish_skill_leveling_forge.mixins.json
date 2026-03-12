@@ -10,7 +10,8 @@
         "ClientPacketHandlerMixin",
         "NpcQuestGiverRendererMixin",
         "ClientLevelStateMixin",
-        "ClientPacketHandlersMixin"
+        "ClientPacketHandlersMixin",
+        "ItemRequirementTooltipMixin"
     ],
     "mixins": [
         "NetworkSyncMixin",

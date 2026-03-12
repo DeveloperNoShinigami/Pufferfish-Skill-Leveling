@@ -8,64 +8,126 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.bluelotuscoding.skillleveling.bridge.EpicClassBridge;
-import net.bluelotuscoding.skillleveling.bridge.forge.EpicClassBridgeForgeAccess;
 import net.bluelotuscoding.skillleveling.bridge.forge.EpicClassSyncHelper;
 import net.bluelotuscoding.skillleveling.util.AddonLogger;
-import java.lang.reflect.Method;
+import net.minecraft.util.Identifier;
+import net.minecraft.server.network.ServerPlayerEntity;
+import java.util.Optional;
 
 /**
  * Mixin to sync Pufferfish experience changes to Epic Class.
  * 
- * When Pufferfish gains XP or Level, we trigger a sync to ECM
- * to ensure its internal Stat Points and NBT are updated accordingly.
+ * We hook into SkillsMod directly because it's the central hub for all XP
+ * changes,
+ * including those from mob kills which bypass the public Experience API.
  */
-@Mixin(targets = "net.puffish.skillsmod.impl.ExperienceImpl", remap = false)
+@Mixin(targets = "net.puffish.skillsmod.SkillsMod", remap = false)
 public abstract class PufferfishExperienceMixin {
 
     @Unique
     private static final AddonLogger LOGGER = new AddonLogger();
 
-    /**
-     * Injects at RETURN of addTotal(Object, int) to sync after XP is added.
-     */
-    @Inject(method = "addTotal", at = @At("RETURN"), remap = false)
-    private void onAddTotalReturn(@Coerce Object player, int amount, CallbackInfo ci) {
-        sync(player, amount);
+    private static final ThreadLocal<Integer> OLD_TOTAL = ThreadLocal.withInitial(() -> 0);
+    private static final ThreadLocal<Integer> SYNC_DEPTH = ThreadLocal.withInitial(() -> 0);
+
+    // --- addExperience Hooks ---
+
+    @Inject(method = "addExperience(Lnet/minecraft/server/level/ServerPlayer;Lnet/puffish/skillsmod/config/CategoryConfig;Lnet/puffish/skillsmod/config/experience/ExperienceConfig;Lnet/puffish/skillsmod/server/data/CategoryData;I)V", at = @At("HEAD"), remap = false)
+    private void onAddExperienceInternalHead(@Coerce Object player, @Coerce Object categoryConfig,
+            @Coerce Object experienceConfig, @Coerce Object categoryData, int amount, CallbackInfo ci) {
+        handlePreXpChange(player, categoryConfig);
     }
 
-    /**
-     * Injects at RETURN of setTotal(Object, int) to sync after level/XP is set
-     * directly.
-     * This covers commands like /puffish_skills level set.
-     */
-    @Inject(method = "setTotal", at = @At("RETURN"), remap = false)
-    private void onSetTotalReturn(@Coerce Object player, int total, CallbackInfo ci) {
-        sync(player, 0);
+    @Inject(method = "addExperience(Lnet/minecraft/server/level/ServerPlayer;Lnet/puffish/skillsmod/config/CategoryConfig;Lnet/puffish/skillsmod/config/experience/ExperienceConfig;Lnet/puffish/skillsmod/server/data/CategoryData;I)V", at = @At("RETURN"), remap = false)
+    private void onAddExperienceInternalReturn(@Coerce Object player, @Coerce Object categoryConfig,
+            @Coerce Object experienceConfig, @Coerce Object categoryData, int amount, CallbackInfo ci) {
+        handlePostXpChange(player, categoryConfig);
+    }
+
+    // --- setExperience Hooks ---
+    @Inject(method = "setExperience(Lnet/minecraft/server/level/ServerPlayer;Lnet/puffish/skillsmod/config/CategoryConfig;Lnet/puffish/skillsmod/config/experience/ExperienceConfig;Lnet/puffish/skillsmod/server/data/CategoryData;I)V", at = @At("HEAD"), remap = false)
+    private void onSetExperienceInternalHead(@Coerce Object player, @Coerce Object categoryConfig,
+            @Coerce Object experienceConfig, @Coerce Object categoryData, int experience, CallbackInfo ci) {
+        handlePreXpChange(player, categoryConfig);
+    }
+
+    @Inject(method = "setExperience(Lnet/minecraft/server/level/ServerPlayer;Lnet/puffish/skillsmod/config/CategoryConfig;Lnet/puffish/skillsmod/config/experience/ExperienceConfig;Lnet/puffish/skillsmod/server/data/CategoryData;I)V", at = @At("RETURN"), remap = false)
+    private void onSetExperienceInternalReturn(@Coerce Object player, @Coerce Object categoryConfig,
+            @Coerce Object experienceConfig, @Coerce Object categoryData, int experience, CallbackInfo ci) {
+        handlePostXpChange(player, categoryConfig);
     }
 
     @Unique
-    private void sync(Object player, int lastGain) {
-        if (!EpicClassBridge.isEnabled() || !EpicClassBridgeForgeAccess.isServerPlayer(player)) {
+    private void handlePreXpChange(Object player, Object categoryConfig) {
+        if (player instanceof ServerPlayerEntity spe) {
+            Identifier categoryId = invokeIdentifier(categoryConfig, "id");
+            if (categoryId != null) {
+                if (SYNC_DEPTH.get() == 0) {
+                    captureOldTotal(spe, categoryId);
+                }
+                SYNC_DEPTH.set(SYNC_DEPTH.get() + 1);
+            }
+        }
+    }
+
+    @Unique
+    private void handlePostXpChange(Object player, Object categoryConfig) {
+        if (player instanceof ServerPlayerEntity spe) {
+            Identifier categoryId = invokeIdentifier(categoryConfig, "id");
+            if (categoryId != null) {
+                int newDepth = Math.max(0, SYNC_DEPTH.get() - 1);
+                SYNC_DEPTH.set(newDepth);
+                if (newDepth == 0) {
+                    int oldTotal = OLD_TOTAL.get();
+                    int newTotal = invokeGetExperience(this, spe, categoryId).orElse(0);
+                    int delta = newTotal - oldTotal;
+                    if (delta > 0) {
+                        syncFromSkillsMod(spe, categoryId, delta);
+                    } else if (delta == 0) {
+                        // Sometimes XP doesn't change visually, but internal state might (level ups).
+                        // Let's force a silent sync just in case internal levels changed, but no toast.
+                        syncFromSkillsMod(spe, categoryId, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    @Unique
+    private void captureOldTotal(ServerPlayerEntity player, Identifier categoryId) {
+        try {
+            // Find the getExperience method with correct Mojang names for parameters via
+            // reflection
+            // Actually, we can just use this.getExperience(player, categoryId) if we cast
+            // 'this' to SkillsMod or similar
+            // But we don't have the class in classpath.
+            Optional<Integer> oldXpOpt = invokeGetExperience(this, player, categoryId);
+            OLD_TOTAL.set(oldXpOpt.orElse(0));
+        } catch (Exception e) {
+            OLD_TOTAL.set(0);
+        }
+    }
+
+    @Unique
+    private void syncFromSkillsMod(ServerPlayerEntity player, Identifier categoryId, int lastGain) {
+        if (!EpicClassBridge.isEnabled()) {
             return;
         }
 
         try {
-            // "this" is the Experience instance
-            Object experience = (Object) this;
+            // Get current Level and XP from Pufferfish via SkillsMod methods
+            Optional<Integer> levelOpt = invokeGetCurrentLevel(this, player, categoryId);
+            Optional<Integer> currentXpOpt = invokeGetCurrentExperience(this, player, categoryId);
 
-            // Get current Level and XP from Pufferfish
-            Integer level = invokeInt(experience, "getLevel", player);
-            Integer currentXp = invokeInt(experience, "getCurrent", player);
+            if (levelOpt.isPresent() && currentXpOpt.isPresent()) {
+                int level = levelOpt.get();
+                int currentXp = currentXpOpt.get();
 
-            if (level != null && currentXp != null) {
-                LOGGER.info("[Bridge] Pufferfish level/XP change detected. Triggering sync for " + player + ". Level="
-                        + level + ", Gain=" + lastGain);
+                LOGGER.info("[Bridge] Pufferfish XP sync: Category=" + categoryId + ", Level=" + level + ", Gain="
+                        + lastGain);
+
                 // Sync to Epic Class
-                EpicClassSyncHelper.syncFromPufferfish(
-                        (net.minecraft.server.network.ServerPlayerEntity) player,
-                        level,
-                        currentXp,
-                        lastGain);
+                EpicClassSyncHelper.syncFromPufferfish(player, level, currentXp, lastGain);
             }
 
         } catch (Exception e) {
@@ -73,27 +135,58 @@ public abstract class PufferfishExperienceMixin {
         }
     }
 
-    private static Integer invokeInt(Object target, String methodName, Object player) {
+    @Unique
+    private Identifier invokeIdentifier(Object target, String methodName) {
         try {
-            for (Method method : target.getClass().getMethods()) {
-                if (!method.getName().equals(methodName)) {
-                    continue;
-                }
-                if (method.getParameterCount() != 1) {
-                    continue;
-                }
-                if (!method.getParameterTypes()[0].isAssignableFrom(player.getClass())) {
-                    continue;
-                }
+            Object result = target.getClass().getMethod(methodName).invoke(target);
+            if (result instanceof Identifier id) {
+                return id;
+            }
+            // Fallback for Mojang ResourceLocation which will be a different class at
+            // runtime but have same toString
+            if (result != null) {
+                return new Identifier(result.toString());
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        return null;
+    }
 
-                Object result = method.invoke(target, player);
-                if (result instanceof Integer) {
-                    return (Integer) result;
+    @Unique
+    private Optional<Integer> invokeGetExperience(Object skillsMod, ServerPlayerEntity player, Identifier categoryId) {
+        return invokeOptionalInt(skillsMod, "getExperience", player, categoryId);
+    }
+
+    @Unique
+    private Optional<Integer> invokeGetCurrentLevel(Object skillsMod, ServerPlayerEntity player,
+            Identifier categoryId) {
+        return invokeOptionalInt(skillsMod, "getCurrentLevel", player, categoryId);
+    }
+
+    @Unique
+    private Optional<Integer> invokeGetCurrentExperience(Object skillsMod, ServerPlayerEntity player,
+            Identifier categoryId) {
+        return invokeOptionalInt(skillsMod, "getCurrentExperience", player, categoryId);
+    }
+
+    @Unique
+    private Optional<Integer> invokeOptionalInt(Object target, String methodName, ServerPlayerEntity player,
+            Identifier categoryId) {
+        try {
+            for (java.lang.reflect.Method m : target.getClass().getMethods()) {
+                if (m.getName().equals(methodName) && m.getParameterCount() == 2) {
+                    // Method parameters are Mojang types at runtime, but we pass Yarn types.
+                    // This works if they are the same underlying class.
+                    Object result = m.invoke(target, player, categoryId);
+                    if (result instanceof Optional<?> opt) {
+                        return (Optional<Integer>) opt;
+                    }
                 }
             }
         } catch (Exception e) {
-            // Ignore reflection errors
+            // Ignore
         }
-        return null;
+        return Optional.empty();
     }
 }

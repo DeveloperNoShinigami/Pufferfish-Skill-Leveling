@@ -1,0 +1,97 @@
+{
+    "restrictions": [
+        {
+            "item": "minecraft:diamond_sword",
+            "require_class": "Warrior",
+            "require_level": {
+                "category": "puffish_skills:warrior",
+                "min": 10
+            },
+            "require_held": [
+                "minecraft:shield"
+            ]
+        },
+        {
+            "item": [
+                "minecraft:iron_chestplate",
+                "minecraft:iron_leggings",
+                "minecraft:iron_boots",
+                "minecraft:iron_helmet"
+            ],
+            "require_level": {
+                "category": "puffish_skills:warrior",
+                "min": 5
+            },
+            "require_quest": [
+                "main.3"
+            ]
+        },
+        {
+            "item": "minecraft:bow",
+            "require_class": "lich",
+            "require_effect": [
+                "minecraft:speed"
+            ],
+            "require_attribute": {
+                "attribute": "minecraft:generic.movement_speed",
+                "min": 0.15
+            }
+        },
+        {
+            "item": [
+                "minecraft:golden_apple",
+                "minecraft:enchanted_golden_apple"
+            ],
+            "require_quest": [
+                "main.5",
+                "side.golden_harvest"
+            ],
+            "require_worn": [
+                "minecraft:golden_chestplate"
+            ]
+        },
+        {
+            "blocks": [
+                "minecraft:obsidian"
+            ],
+            "require_level": {
+                "category": "puffish_skills:mining",
+                "min": 20
+            }
+        },
+        {
+            "entities": [
+                "minecraft:iron_golem"
+            ],
+            "require_class": "Warrior"
+        },
+        {
+            "dimensions": [
+                "minecraft:the_nether"
+            ],
+            "require_level": {
+                "category": "puffish_skills:defense",
+                "min": 15
+            }
+        },
+        {
+            "structures": [
+                "puffish_skill_leveling:skill_master_house"
+            ],
+            "require_class": "rogue"
+        },
+        {
+            "item": "minecraft:fishing_rod",
+            "in_water": true,
+            "tooltip": true
+        },
+        {
+            "item": "minecraft:netherite_sword",
+            "time_of_day": {
+                "min": 13000,
+                "max": 23000
+            },
+            "tooltip": true
+        }
+    ]
+}

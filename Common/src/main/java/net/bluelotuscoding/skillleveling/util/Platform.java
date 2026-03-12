@@ -61,6 +61,11 @@ public interface Platform {
         void addPufferfishExperience(Object player, int amount);
 
         /**
+         * Adds experience to a specific player's Pufferfish category.
+         */
+        void addPufferfishExperience(Object player, net.minecraft.util.Identifier categoryId, int amount);
+
+        /**
          * Gets the current Epic Class name for a player (Forge only)
          */
         String getEpicClassName(Object player);
@@ -85,4 +90,9 @@ public interface Platform {
          * Sends a network packet to the player to open the class advancement screen.
          */
         void sendAdvanceClassScreen(Object player, String parentClassId);
+
+        /**
+         * Checks if the current environment is a physical client.
+         */
+        boolean isClient();
 }

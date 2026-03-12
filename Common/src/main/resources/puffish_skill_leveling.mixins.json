@@ -13,6 +13,7 @@
 		"ServerChatMixin",
 		"AnvilScreenHandlerMixin",
 		"LivingEntityMixin",
+		"EntityMixin",
 		"ServerPlayNetworkHandlerMixin",
 		"ServerPlayerEntityMixin",
 		"VillageProfessionMixin",
@@ -22,7 +23,9 @@
 		"ClientSkillDefinitionConfigMixin",
 		"ItemTooltipMixin",
 		"SkillsScreenMixin",
-		"ClientCategoryDataMixin"
+		"ClientCategoryDataMixin",
+		"KeyBindingAccessor",
+		"InGameHudMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -31,6 +31,7 @@ public class ModItems {
                         .createIdentifier("tome_of_cleansing_3");
         public static final Identifier BLANK_TOME_ID = SkillLevelingMod.createIdentifier("blank_tome");
         public static final Identifier SKILL_CHARM_ID = SkillLevelingMod.createIdentifier("skill_charm");
+        public static final Identifier EXP_TOME_ID = SkillLevelingMod.createIdentifier("experience_tome");
 
         // Item instances - these will be populated during platform registration
         public static TomeItem TOME_OF_PROGRESSION;
@@ -44,6 +45,7 @@ public class ModItems {
         public static Item BLANK_TOME;
         public static Item SKILL_SCRIBE_TABLE_ITEM;
         public static SkillCharmItem SKILL_CHARM;
+        public static net.bluelotuscoding.skillleveling.item.ExpTomeItem EXP_TOME;
 
         /**
          * Create the Tome of Progression item.
@@ -146,6 +148,16 @@ public class ModItems {
         }
 
         /**
+         * Create the Experience Tome item.
+         */
+        public static net.bluelotuscoding.skillleveling.item.ExpTomeItem createExperienceTome() {
+                return new net.bluelotuscoding.skillleveling.item.ExpTomeItem(
+                                new Item.Settings()
+                                                .maxCount(16)
+                                                .rarity(Rarity.RARE));
+        }
+
+        /**
          * Populates the Base Tomes creative tab.
          */
         public static void fillBaseTomesTab(Consumer<ItemStack> entries) {
@@ -203,6 +215,7 @@ public class ModItems {
                                 }
                         }
                 }
+
                 if (SKILL_CHARM != null) {
                         // Add blank charm
                         ItemStack blankCharm = new ItemStack(SKILL_CHARM);
@@ -217,6 +230,24 @@ public class ModItems {
                                                 entries.accept(SkillCharmItem.createSkillCharm(SKILL_CHARM,
                                                                 config.categoryId, skillId, level));
                                         }
+                                }
+                        }
+                }
+        }
+
+        /**
+         * Populates the Experience Tomes creative tab.
+         */
+        public static void fillExpTomesTab(Consumer<ItemStack> entries) {
+                if (EXP_TOME != null) {
+                        for (var entry : net.bluelotuscoding.skillleveling.data.ExpTomeConfigLoader.getTomes()
+                                        .entrySet()) {
+                                String tomeId = entry.getKey();
+                                var def = entry.getValue();
+                                for (int level = 1; level <= def.maxLevels; level++) {
+                                        int xpAmount = def.experiencePerLevel.getCost(level);
+                                        entries.accept(net.bluelotuscoding.skillleveling.item.ExpTomeItem.createExpTome(
+                                                        EXP_TOME, tomeId, def.name, def.rarity, level, xpAmount));
                                 }
                         }
                 }

@@ -131,12 +131,17 @@ public class EpicClassSyncHelper {
         }
         try {
             applyAllModifiersMethod.invoke(null, player);
+        } catch (Exception e) {
+            AddonLogger.LOGGER.error("[Bridge] Failed to apply standard modifiers: " + e.getMessage());
+        }
+
+        try {
             // After standard modifiers, apply our custom JSON ones
             if (player instanceof ServerPlayerEntity sp) {
                 applyCustomAttributes(sp);
             }
         } catch (Exception e) {
-            AddonLogger.LOGGER.error("[Bridge] Failed to apply modifiers: " + e.getMessage());
+            AddonLogger.LOGGER.error("[Bridge] Failed to apply custom modifiers: " + e.getMessage());
         }
     }
 
@@ -353,10 +358,9 @@ public class EpicClassSyncHelper {
                     applyModifiers(player);
                     forceSync(player, lastGain);
 
-                    AddonLogger.LOGGER
-                            .info("[Bridge] Synced Pufferfish -> ECM (Authoritative): Level=" + authoritativeLevel
-                                    + ", SP=" + spNow + " (Used="
-                                    + used + ")");
+                    AddonLogger.LOGGER.info(
+                            "[Bridge] Synced Pufferfish -> ECM (Authoritative): Level=" + authoritativeLevel
+                                    + ", SP=" + spNow + ", Used=" + used);
                 } else {
                     AddonLogger.LOGGER.warn("[Bridge] Could not find NBT getInt/putInt methods via reflection");
                 }

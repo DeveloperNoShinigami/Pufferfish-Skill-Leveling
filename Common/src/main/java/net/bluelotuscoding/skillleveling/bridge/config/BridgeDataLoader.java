@@ -18,7 +18,7 @@ public class BridgeDataLoader extends JsonDataLoader {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public BridgeDataLoader() {
-        super(GSON, "rise_of_heros");
+        super(GSON, "epicclassmod");
     }
 
     @Override

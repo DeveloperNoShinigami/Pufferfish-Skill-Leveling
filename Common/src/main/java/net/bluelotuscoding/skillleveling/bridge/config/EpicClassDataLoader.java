@@ -17,7 +17,7 @@ public class EpicClassDataLoader extends JsonDataLoader {
     private final Map<Identifier, EpicClassDef> classes = new HashMap<>();
 
     public EpicClassDataLoader() {
-        super(GSON, "rise_of_heros/classes");
+        super(GSON, "epicclassmod/classes");
     }
 
     @Override

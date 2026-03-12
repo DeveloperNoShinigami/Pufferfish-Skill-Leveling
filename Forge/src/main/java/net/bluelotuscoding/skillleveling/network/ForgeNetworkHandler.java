@@ -119,6 +119,8 @@ public class ForgeNetworkHandler implements NetworkHandler {
                                     .setClassesOnClient(packet.getClassDefinitions());
                             net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
                                     .setAttributePagesOnClient(packet.getClassAttributePages());
+                            net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
+                                    .setSyncedConfig(packet.getConfig());
                         });
                     }
                     context.setPacketHandled(true);
@@ -132,6 +134,15 @@ public class ForgeNetworkHandler implements NetworkHandler {
                             net.bluelotuscoding.skillleveling.client.ClientCustomClassState
                                     .setCustomClass(packet.getPlayerId(), packet.getClassId());
                         });
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, SyncItemRestrictionsPacket.class, SyncItemRestrictionsPacket::encode,
+                SyncItemRestrictionsPacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(packet::handleClient);
                     }
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -165,6 +176,11 @@ public class ForgeNetworkHandler implements NetworkHandler {
 
     @Override
     public void sendToPlayer(SyncToggleCooldownPacket packet, ServerPlayerEntity player) {
+        CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    @Override
+    public void sendToPlayer(SyncItemRestrictionsPacket packet, ServerPlayerEntity player) {
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 

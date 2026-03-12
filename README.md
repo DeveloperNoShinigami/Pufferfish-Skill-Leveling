@@ -8,16 +8,36 @@ Supports **Forge** and **Fabric** from a shared codebase via Architectury.
 
 ## Documentation
 
+### Block 1: Pufferfish Skills Leveling Core
+This core documentation covers everything that works independently of Epic Classes.
+
 | Guide | Description |
 |-------|-------------|
+| [Core Index](docs/core_features/index.md) | **Start Here:** The main navigation hub for core features |
 | [Getting Started](docs/core_features/GETTING_STARTED.md) | First-time setup, creating your first datapack and skill |
-| [Features](docs/FEATURES.md) | Complete feature reference with quick examples |
+| [Features Guide](docs/core_features/FEATURES.md) | Complete core feature list and explanations |
 | [Datapack Guide](docs/core_features/DATAPACK_GUIDE.md) | Full datapack schema, field reference, and best practices |
-| [Epic Classes Bridge](docs/rise_of_heroes_integration/EPIC_CLASSES_DATAPACK_GUIDE.md) | Native integration with the Epic Classes mod (Rise of Heroes) |
 | [Toggle System](docs/core_features/Toggle_System.md) | Pure, basic, and hybrid toggle skills with examples |
 | [Skill Master](docs/core_features/Skill_Master_System.md) | Villager profession, trades, tiers, and mastery pricing |
 | [Skill Imbuement](docs/core_features/Skill_Imbuement_System.md) | Dynamic skill imbuing on loot equipment |
 | [Universal Loot](docs/core_features/Universal_Loot_System.md) | Injecting Skill Tomes and items into loot tables |
+
+### Block 2: Epic Class / Rise of Heroes Integration
+This block provides a comprehensive guide to bridging Pufferfish Skills with the Epic Classes mod.
+
+| Guide | Description |
+|-------|-------------|
+| [Integration Index](docs/epic_classes_integration/index.md) | **Start Here:** The main navigation hub for integration features |
+| [Global Bridge Config](docs/epic_classes_integration/GLOBAL_BRIDGE_CONFIG.md) | Setting up the main bridge behavior and class-to-category mapping |
+| [Epic Class Creation Guide](docs/epic_classes_integration/EPIC_CLASS_CREATION_GUIDE.md) | Creating, inheriting, and configuring custom Epic Classes |
+| [Job Masters Guide](docs/epic_classes_integration/JOB_MASTERS_GUIDE.md) | Outfitting and configuring NPC Job Masters |
+| [Class Attributes Guide](docs/epic_classes_integration/CLASS_ATTRIBUTES_GUIDE.md) | UI layout, custom math expressions, and max points |
+| [Item Restrictions Guide](docs/epic_classes_integration/ITEM_RESTRICTIONS_GUIDE.md) | Datapack-driven item usage and attack restriction rules |
+| [Datapack Reference](docs/epic_classes_integration/DATAPACK_REFERENCE.md) | Raw JSON cheat sheet for all fields across the integration |
+
+### Project Updates
+| Document | Description |
+|----------|-------------|
 | [Changelog](docs/CHANGELOG.md) | Version history and recent fixes |
 | [Roadmap](docs/ROADMAP.md) | Completed, planned, and experimental features |
 

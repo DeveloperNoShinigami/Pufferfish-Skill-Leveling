@@ -1,5 +1,9 @@
 # Datapack Guide
 
+[< Back to Core Index](index.md) | [Next: Toggle System >](Toggle_System.md)
+
+---
+
 A progressive tutorial that starts with the basics and builds to expert-level configurations. Each section adds complexity — skip ahead to what you need or read through for the full journey.
 
 **Prerequisites:** You've followed [Getting Started](./GETTING_STARTED.md) and have a working datapack with at least one skill.
@@ -586,3 +590,7 @@ If something isn't working, check your server log (`logs/latest.log`). The addon
 ---
 
 *For toggle skill configuration, see [Toggle System](./Toggle_System.md). For loot configuration, see [Universal Loot System](./Universal_Loot_System.md) and [Skill Imbuement System](./Skill_Imbuement_System.md).*
+
+---
+
+[< Back to Core Index](index.md) | [Next: Toggle System >](Toggle_System.md)

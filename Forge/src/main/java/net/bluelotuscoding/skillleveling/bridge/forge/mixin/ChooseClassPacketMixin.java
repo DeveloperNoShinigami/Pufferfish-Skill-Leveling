@@ -33,12 +33,11 @@ public abstract class ChooseClassPacketMixin {
         if (ctx.getSender() != null) {
             ctx.enqueueWork(() -> {
                 // By this time the class is set via PlayerClassData.
-                String className = net.bluelotuscoding.skillleveling.bridge.forge.EpicClassBridgeForgeAccess
-                        .getClassName(ctx.getSender());
+                String className = net.bluelotuscoding.skillleveling.bridge.data.CustomClassData
+                        .getCustomClass(ctx.getSender());
 
                 if (className != null && !className.isEmpty()) {
                     EpicClassBridge.onClassChanged(ctx.getSender(), className);
-
                 }
             });
         }

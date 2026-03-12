@@ -4,6 +4,38 @@ All notable changes to Pufferfish Skill Leveling are documented in this file. Da
 
 ---
 
+## [2026-03-11] — XP Sync Refinement & Experience Tomes
+
+### Added
+- **Experience Tomes System**: Introduced configurable items that grant Pufferfish XP and synchronize with Epic Classes. Includes bulk consumption and chat-based selection UI.
+- **Experience Tome DataPack Schema**: New JSON schema for defining custom tomes under `tome_config/`.
+- **Shop Expansion**: Skill Master now offers rare Experience Tomes in the dynamic trade pool, scaling with player progression and villager tier.
+- **Advanced World Gating**: Expanded restrictions to include Blocks, Entities, Dimensions, and Structure proximity.
+- **Environmental Gating**: Added `in_water` and `time_of_day` conditions to all restriction types.
+
+### Fixed
+- **SYNC_DEPTH Mechanism**: Replaced boolean recursion guards with a depth counter in `PufferfishExperienceMixin`. This accurately captures the XP delta across nested method calls (e.g., `addExperience` calling `setExperience`) and ensures exactly one sync packet is sent per transaction.
+- **HUD Notification Restoration**: Reverted aggressive suppression that was disabling EXP toasts and Level Up animations. Both are now correctly rendered as the authoritative UI for Pufferfish-originated XP gains.
+- **Silent Login Sync**: Refined `ClientLevelStateMixin` to exclusively suppress Level Up animations during initial world connection, preventing noisy login notifications while maintaining normal gameplay feedback.
+- **XP Delta Correction**: Added missing hooks to `setExperienceInternal` to ensure accurate before/after total comparisons for sync packets.
+
+### UI & Stability
+- **Class Selection Safety**: Added bounds checks to `CustomClassSelectScreen` to prevent `IndexOutOfBoundsException` when no valid classes are available for selection.
+- **Improved Environmental Checks**: Refined `in_water` restriction to use `isTouchingWater()` for better compatibility with standing/surface water detection.
+- **Resource Path Reliability**: Fixed a pathing bug in `ItemRequirementsManager` ensuring restrictions load correctly from datapacks regardless of folder nesting.
+
+---
+
+## [2026-03-10] — Category Locking & Namespace Resilience Fixes
+
+### Fixed
+- **Category Locking Logic**: Prevented parent classes from locking their own categories when child classes exist sharing the same category ID. The bridge now correctly checks if a shared category belongs to the "safe" class list before locking it.
+- **Namespace-Resilient Sync**: Fixed a critical bug where class progress was reset to 0 on login. The `ForgePlatform` level retrieval now implements a fallback mechanism that checks alternative namespaces (e.g., `epic_classes` if `epic_class` fails) when attempting to sync Pufferfish progress.
+- **Hierarchy Awareness**: Restored parent category unlocking in `onClassChanged`, ensuring progression trees stay accessible.
+- **Advancement Gating**: Fixed `/skillleveling advanceclass` to correctly gate progress based on obtaining all class skills for mastery, rather than simple point thresholds.
+
+---
+
 ## [2026-03-06] — Universal Proxy Passive Blocking & Category Enforcement
 
 ### Added

@@ -1,5 +1,9 @@
 # Getting Started with Pufferfish Skill Leveling
 
+[< Back to Core Index](index.md) | [Next: Features Guide >](FEATURES.md)
+
+---
+
 Welcome! This guide walks you through installing the addon and creating your first multi-level skill. No prior datapack experience is required — just follow along step by step.
 
 > **Requires:** [Pufferfish Skills](https://www.curseforge.com/minecraft/mc-mods/pufferfish-skills) v0.17.1+ for Minecraft 1.20.1 (Forge or Fabric).
@@ -219,3 +223,7 @@ That's it! You've created a multi-level skill.
 ---
 
 *Having trouble? Check the [Datapack Guide — Troubleshooting](./DATAPACK_GUIDE.md#-troubleshooting) section.*
+
+---
+
+[< Back to Core Index](index.md) | [Next: Features Guide >](FEATURES.md)

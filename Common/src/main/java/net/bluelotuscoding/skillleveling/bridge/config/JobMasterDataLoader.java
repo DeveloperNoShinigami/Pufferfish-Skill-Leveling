@@ -17,7 +17,7 @@ public class JobMasterDataLoader extends JsonDataLoader {
     private final Map<String, JobMasterDef> jobMasters = new HashMap<>();
 
     public JobMasterDataLoader() {
-        super(GSON, "rise_of_heros/job_masters");
+        super(GSON, "epicclassmod/job_masters");
     }
 
     @Override

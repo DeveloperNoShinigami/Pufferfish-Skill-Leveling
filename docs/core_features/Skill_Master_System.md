@@ -25,11 +25,11 @@ The Skill Master follows Minecraft's standard 5-tier villager leveling. Each tie
 
 | Tier | Name | Trade Slots | Static Offers | Dynamic Offers |
 |------|------|-------------|---------------|----------------|
-| 1 | Novice | 5–7 | Blank Tome, Sigil of Imbuement | Introductory skill tomes |
-| 2 | Apprentice | 6–8 | Tome of Clear Mind, Tome of Cleansing I | Low–mid skill tomes |
-| 3 | Journeyman | 7–9 | Tome of Cleansing II | Tome upgrades + mid-level skill tomes |
-| 4 | Expert | 8–10 | Tome of Cleansing III, Tome of Greater Clear Mind (50%) | High-level skill tomes |
-| 5 | Master | 9–12 | Tome of Progression, Sigil of Imbuement (50%) | Highest-level skill tomes |
+| 1 | Novice | 5–7 | Sigil of Imbuement | Introductory skill & exp tomes |
+| 2 | Apprentice | 6–8 | Tome of Clear Mind, Tome of Cleansing I | Low–mid skill & exp tomes |
+| 3 | Journeyman | 7–9 | Tome of Cleansing II | Tome upgrades + mid-level tomes |
+| 4 | Expert | 8–10 | Tome of Cleansing III, Tome of Greater Clear Mind (50%) | High-level tomes |
+| 5 | Master | 9–12 | Tome of Progression, Sigil of Imbuement (50%) | Highest-level tomes |
 
 **Trade slot range** is `5 + (tier - 1)` minimum, +2 maximum, with Tier 5 capping at 12.
 
@@ -45,7 +45,6 @@ These are defined in JSON files under `data/<namespace>/skill_master_trades/`. T
 
 | Tier | Input | Output | Max Uses | Chance |
 |------|-------|--------|----------|--------|
-| 1 | 5 Emeralds + Book | Blank Tome | 12 | 100% |
 | 1 | 32 Emeralds + Gold Block | Sigil of Imbuement | 3 | 100% |
 | 2 | 16 Emeralds + Book | Tome of Clear Mind | 4 | 100% |
 | 2 | 24 Emeralds + Ghast Tear | Tome of Cleansing I | 2 | 100% |
@@ -61,6 +60,15 @@ The remaining trade slots are filled dynamically. The system scans every skill r
 
 - **Unlearned skills** (Level 0) — 70% selection weight. The Skill Master prioritizes introducing you to new skills.
 - **In-progress skills** (Level 1+, not maxed) — 30% selection weight. Offers the next advancement for skills you've already started.
+
+#### Tome-Only Filling Logic
+
+The Skill Master **never** defaults to Blank Tomes as fillers. Instead, every available slot up to the minimum count is filled with a randomized mix:
+- **75% Mix**: 1 Experience Tome + 1 Skill Tome.
+- **15% Exp Focus**: Both filler slots are Experience Tomes.
+- **10% Skill Focus**: Both filler slots are Skill Tomes.
+
+If no Skill Tomes are available for the player (e.g., all skills in that tier's range are maxed), the system gracefully falls back to Experience Tomes to ensure the shop is never empty.
 
 #### Tier-Based Level Ranges
 
@@ -216,7 +224,11 @@ Each file is a JSON array of trade templates:
         "tier": 2,
         "input1": { "item": "minecraft:emerald", "count": 10 },
         "input2": { "item": "minecraft:book", "count": 1 },
-        "output": { "item": "puffish_skill_leveling:blank_tome", "count": 3 },
+    {
+        "tier": 2,
+        "input1": { "item": "minecraft:emerald", "count": 10 },
+        "input2": { "item": "minecraft:book", "count": 1 },
+        "output": { "item": "minecraft:diamond", "count": 1 },
         "maxUses": 8,
         "experience": 5,
         "multiplier": 0.05,

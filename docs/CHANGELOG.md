@@ -2,6 +2,14 @@
 
 All notable changes to Pufferfish Skill Leveling are documented in this file. Dates are in YYYY-MM-DD format.
 
+## [2026-03-12] — Skill Master Trade Refinement
+
+### Fixed
+- **Tome-Only Shop Logic**: Removed all hardcoded Blank Tome fillers from the Skill Master's trade pool. The shop now dynamically populates all slots with meaningful Experience and Skill Tomes.
+- **Robust Filler Fallback**: Implemented a "Tome-only" filling sequence that ensures no empty or "fake" slots (e.g., Blank Tomes) appear, even at Novice tier or when player skills are maxed.
+- **Dynamic Trade Distribution**: Fixed the probability distribution for random tome slots (15% 2x Exp, 10% 2x Skill, 75% Mix).
+- **Infinite Tome Cycling**: Updated Experience Tome generation to cycle through available types if requested slots exceed unique tome types, ensuring constant variety.
+
 ---
 
 ## [2026-03-11] — XP Sync Refinement & Experience Tomes

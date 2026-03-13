@@ -9,9 +9,11 @@
     "epic_class_proxy": "SORCERER",
     "book_lore": "An Ascended Necromancer who has shed their mortal coil. Commands terrifying spiritual forces and wields the scythe of death itself.",
     "class_weapon_type": "Scythe",
-    "class_weapon_icon": "goety:death_scythe",
+    "class_weapon_icon": "epicfightx:eternal_night_scythe",
     "class_weapon_items": [
-        "goety:death_scythe"
+        "epicfightx:eternal_night_scythe",
+        "dungeons_and_combat:ebony_scythe",
+        "dungeons_and_combat:crimson_scythe"
     ],
     "attributes": {
         "minecraft:generic.max_health": {
@@ -32,14 +34,14 @@
         }
     },
     "gui_title": "class.epicclassmod.lich.title",
+    "preview_armor_base": "dacxirons:crimson_wizard_",
     "preview_animation": "efn:biped/scythe/living/scythe_idle_combat",
-    "preview_mainhand_item": "goety:death_scythe",
+    "preview_mainhand_item": "epicfightx:eternal_night_scythe",
     "preview_offhand_item": "minecraft:air",
     "starting_items": [
-        "goety:death_scythe",
-        "goety:shadow_essence@5",
-        "goety:howling_soul@2",
-        "goety:terror_soul@1"
+        "dungeons_and_combat:cursed_soul",
+        "dungeons_and_combat:fractured_soul@5",
+        "epicfightx:eternal_night_scythe"
     ],
     "gui_stats": [
         {
@@ -58,19 +60,23 @@
     "gui_passives": [
         {
             "pufferfish_skill_id": "soul_reaper",
-            "icon": "epicclassmod:textures/gui/icons/sword.png"
+            "icon": "epicclassmod:textures/gui/icons/sword.png",
+            "level": 5
         },
         {
             "pufferfish_skill_id": "spectral_ward",
-            "icon": "epicclassmod:textures/gui/icons/shield.png"
+            "icon": "epicclassmod:textures/gui/icons/shield.png",
+            "level": 10
         },
         {
             "pufferfish_skill_id": "immortality",
-            "icon": "epicclassmod:textures/gui/icons/heart.png"
+            "icon": "epicclassmod:textures/gui/icons/heart.png",
+            "level": 15
         },
         {
             "pufferfish_skill_id": "terror_aura",
-            "icon": "epicclassmod:textures/gui/icons/boots.png"
+            "icon": "epicclassmod:textures/gui/icons/boots.png",
+            "level": 20
         }
     ]
 }

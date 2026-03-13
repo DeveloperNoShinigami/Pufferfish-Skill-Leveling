@@ -57,19 +57,23 @@
     "gui_passives": [
         {
             "pufferfish_skill_id": "behead",
-            "icon": "epicclassmod:textures/gui/icons/sword.png"
+            "icon": "epicclassmod:textures/gui/icons/sword.png",
+            "level": 1
         },
         {
             "pufferfish_skill_id": "siphon",
-            "icon": "epicclassmod:textures/gui/icons/heart.png"
+            "icon": "epicclassmod:textures/gui/icons/heart.png",
+            "level": 5
         },
         {
             "pufferfish_skill_id": "quake",
-            "icon": "epicclassmod:textures/gui/icons/chest.png"
+            "icon": "epicclassmod:textures/gui/icons/chest.png",
+            "level": 10
         },
         {
             "pufferfish_skill_id": "terrorize",
-            "icon": "epicclassmod:textures/gui/icons/helm.png"
+            "icon": "epicclassmod:textures/gui/icons/helm.png",
+            "level": 15
         }
     ]
 }

@@ -42,7 +42,7 @@ public class FabricPlatform implements Platform {
 
     @Override
     public void syncEpicClassLevel(Object player, int level, int xp,
-            int lastGain) {
+            int neededXp, int lastGain) {
         // No-op on Fabric
     }
 
@@ -54,6 +54,12 @@ public class FabricPlatform implements Platform {
 
     @Override
     public int getPufferfishExperience(Object player,
+            net.minecraft.util.Identifier categoryId) {
+        return 0;
+    }
+
+    @Override
+    public int getPufferfishNeededExperience(Object player,
             net.minecraft.util.Identifier categoryId) {
         return 0;
     }
@@ -98,5 +104,15 @@ public class FabricPlatform implements Platform {
     public boolean isClient() {
         return net.fabricmc.loader.api.FabricLoader.getInstance()
                 .getEnvironmentType() == net.fabricmc.api.EnvType.CLIENT;
+    }
+
+    @Override
+    public void cleanupPlayerData(Object player) {
+        // No-op on Fabric
+    }
+
+    @Override
+    public void cleanupWorldData(Object level) {
+        // No-op on Fabric
     }
 }

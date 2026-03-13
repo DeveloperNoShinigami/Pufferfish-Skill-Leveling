@@ -58,19 +58,23 @@
     "gui_passives": [
         {
             "pufferfish_skill_id": "quick_draw",
-            "icon": "epicclassmod:textures/gui/icons/sword.png"
+            "icon": "epicclassmod:textures/gui/icons/sword.png",
+            "level": 1
         },
         {
             "pufferfish_skill_id": "lead_rain",
-            "icon": "epicclassmod:textures/gui/icons/chest.png"
+            "icon": "epicclassmod:textures/gui/icons/chest.png",
+            "level": 5
         },
         {
             "pufferfish_skill_id": "ghost_step",
-            "icon": "epicclassmod:textures/gui/icons/boots.png"
+            "icon": "epicclassmod:textures/gui/icons/boots.png",
+            "level": 10
         },
         {
             "pufferfish_skill_id": "killshot",
-            "icon": "epicclassmod:textures/gui/icons/helm.png"
+            "icon": "epicclassmod:textures/gui/icons/helm.png",
+            "level": 15
         }
     ]
 }

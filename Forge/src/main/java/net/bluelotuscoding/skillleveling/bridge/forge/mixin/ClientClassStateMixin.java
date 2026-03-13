@@ -14,10 +14,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Pseudo
 @Mixin(targets = "com.example.epicclassmod.client.ClientClassState", remap = false)
 public class ClientClassStateMixin {
+    private static final Set<String> FAILED_CLASS_LOGS = new HashSet<>();
 
     private static String[] padArray(String[] raw, int len) {
         if (raw == null) {
@@ -60,8 +63,10 @@ public class ClientClassStateMixin {
         if (customClassId != null && !"epic_classes:none".equals(customClassId)) {
             var res = EpicClassConfigManager.getClassDef(customClassId);
             if (res == null) {
-                net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER
-                        .error("Failed to find class definition for ID: " + customClassId);
+                if (FAILED_CLASS_LOGS.add(customClassId)) {
+                    net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER
+                            .error("Failed to find class definition for ID: " + customClassId);
+                }
             }
             return res;
         }

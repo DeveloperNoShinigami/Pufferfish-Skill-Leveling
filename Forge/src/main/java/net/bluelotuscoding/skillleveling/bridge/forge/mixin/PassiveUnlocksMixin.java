@@ -49,11 +49,6 @@ public abstract class PassiveUnlocksMixin {
             return;
         }
 
-        // Validate player type (handles multi-loader / mapping differences safely)
-        if (!EpicClassBridgeForgeAccess.isServerPlayer(sp)) {
-            return;
-        }
-
         // Get class name from enum
         if (type instanceof Enum) {
             String className = ((Enum<?>) type).name();
@@ -61,7 +56,7 @@ public abstract class PassiveUnlocksMixin {
             // Only override if this passive is explicitly mapped to a Pufferfish skill
             if (net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.isPassiveMapped(className, slot)) {
                 boolean isUnlocked = net.bluelotuscoding.skillleveling.bridge.EpicClassBridge
-                        .isPassiveUnlocked((ServerPlayerEntity) sp, className, slot);
+                        .isPassiveUnlocked(sp, className, slot);
                 cir.setReturnValue(isUnlocked);
             }
         }
@@ -79,15 +74,11 @@ public abstract class PassiveUnlocksMixin {
             return;
         }
 
-        if (!EpicClassBridgeForgeAccess.isServerPlayer(sp)) {
-            return;
-        }
-
         if (type instanceof Enum) {
             String className = ((Enum<?>) type).name();
             if (net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.isPassiveMapped(className, slot)) {
                 boolean isUnlocked = net.bluelotuscoding.skillleveling.bridge.EpicClassBridge
-                        .isPassiveUnlocked((ServerPlayerEntity) sp, className, slot);
+                        .isPassiveUnlocked(sp, className, slot);
                 cir.setReturnValue(isUnlocked);
             }
         }

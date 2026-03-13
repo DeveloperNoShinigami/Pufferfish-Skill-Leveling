@@ -33,12 +33,7 @@ public class CustomSyncClassPacket {
         ctx.enqueueWork(() -> {
             ClientCustomClassState.setCustomClass(msg.playerId, msg.customClassId);
 
-            // If it's the local player, force a refresh of the bridge-overridden state
-            // fields
-            net.minecraft.client.MinecraftClient mc = net.minecraft.client.MinecraftClient.getInstance();
-            if (mc.player != null && msg.playerId.equals(mc.player.getUuid())) {
-                net.bluelotuscoding.skillleveling.bridge.forge.ClientClassUIHelper.forceRefresh();
-            }
+            net.bluelotuscoding.skillleveling.bridge.forge.client.network.ForgeClientPacketHandlers.handleCustomSyncClass(msg.playerId, msg.customClassId);
         });
         ctx.setPacketHandled(true);
     }

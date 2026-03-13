@@ -115,6 +115,7 @@ public class ForgeMain {
                                         SkillLevelingMod.getInstance().getSkillLevelingManager()
                                                         .syncAllSkillsToPlayer(serverPlayer);
                                         SkillLevelingMod.getInstance().syncBridgeContent(serverPlayer);
+                                        SkillLevelingMod.getInstance().syncAllConfigs(serverPlayer);
 
                                         // Sync item restrictions to client
                                         var handler = SkillLevelingMod.getInstance().getNetworkHandler();

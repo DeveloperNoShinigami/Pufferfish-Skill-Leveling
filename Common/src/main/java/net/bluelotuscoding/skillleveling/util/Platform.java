@@ -41,7 +41,7 @@ public interface Platform {
          * Synchronizes Epic Class level and XP from Pufferfish (Forge only)
          */
         void syncEpicClassLevel(Object player, int level, int xp,
-                        int lastGain);
+                        int neededXp, int lastGain);
 
         /**
          * Gets the current Pufferfish level for a player and category.
@@ -53,6 +53,12 @@ public interface Platform {
          * Gets the current Pufferfish experience for a player and category.
          */
         int getPufferfishExperience(Object player,
+                        net.minecraft.util.Identifier categoryId);
+
+        /**
+         * Gets the experience needed for the current Pufferfish level.
+         */
+        int getPufferfishNeededExperience(Object player,
                         net.minecraft.util.Identifier categoryId);
 
         /**
@@ -95,4 +101,14 @@ public interface Platform {
          * Checks if the current environment is a physical client.
          */
         boolean isClient();
+
+        /**
+         * Clears all mod-specific data for a player (Forge specific, wipes bridged mod data).
+         */
+        void cleanupPlayerData(Object player);
+
+        /**
+         * Clears all mod-specific world data (Forge specific).
+         */
+        void cleanupWorldData(Object level);
 }

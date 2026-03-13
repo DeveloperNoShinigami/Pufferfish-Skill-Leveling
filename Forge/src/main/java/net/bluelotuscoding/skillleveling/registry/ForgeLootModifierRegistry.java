@@ -1,5 +1,7 @@
 package net.bluelotuscoding.skillleveling.registry;
 
+import net.bluelotuscoding.skillleveling.util.AddonLogger;
+
 import com.mojang.serialization.Codec;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.forge.loot.SkillImbueLootModifier;
@@ -18,7 +20,7 @@ public class ForgeLootModifierRegistry {
                         .create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, SkillLevelingMod.MOD_ID);
 
         static {
-                System.out.println("[ForgeLootModifierRegistry] Static initializer triggered.");
+                AddonLogger.LOGGER.info("[ForgeLootModifierRegistry] Static initializer triggered.");
         }
 
         public static final RegistryObject<Codec<? extends IGlobalLootModifier>> SKILL_IMBUE = LOOT_MODIFIERS

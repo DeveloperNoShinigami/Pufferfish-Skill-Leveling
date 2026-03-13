@@ -252,4 +252,31 @@ public class ModItems {
                         }
                 }
         }
+
+        public static void initForForge(
+                        TomeItem tomeOfProgression,
+                        TomeItem tomeOfClearMind,
+                        TomeItem tomeOfGreaterClearMind,
+                        SkillTomeItem skillTome,
+                        SigilOfImbuementItem sigilOfImbuement,
+                        TomeOfCleansingItem tomeOfCleansing,
+                        TomeOfCleansingItem tomeOfCleansing2,
+                        TomeOfCleansingItem tomeOfCleansing3,
+                        Item blankTome,
+                        SkillCharmItem skillCharm,
+                        net.bluelotuscoding.skillleveling.item.ExpTomeItem expTome,
+                        Item scribeTable) {
+                TOME_OF_PROGRESSION = tomeOfProgression;
+                TOME_OF_CLEAR_MIND = tomeOfClearMind;
+                TOME_OF_GREATER_CLEAR_MIND = tomeOfGreaterClearMind;
+                SKILL_TOME = skillTome;
+                SIGIL_OF_IMBUEMENT = sigilOfImbuement;
+                TOME_OF_CLEANSING = tomeOfCleansing;
+                TOME_OF_CLEANSING_2 = tomeOfCleansing2;
+                TOME_OF_CLEANSING_3 = tomeOfCleansing3;
+                BLANK_TOME = blankTome;
+                SKILL_CHARM = skillCharm;
+                EXP_TOME = expTome;
+                SKILL_SCRIBE_TABLE_ITEM = scribeTable;
+        }
 }

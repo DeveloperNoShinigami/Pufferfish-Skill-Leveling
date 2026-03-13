@@ -2,6 +2,18 @@
 
 All notable changes to Pufferfish Skill Leveling are documented in this file. Dates are in YYYY-MM-DD format.
 
+## [2026-03-13] — XP Sync & Data Cleanup Fixes
+
+### Fixed
+- **XP Bar Synchronisation**: Completely eliminated the "100 XP" fallback bug. The bridge now utilizes the authoritative Pufferfish API `Experience.getRequired(level)` for both initial login sync and real-time XP changes (kills, etc.). This ensures the Epic Classes XP bar always matches the Pufferfish HUD.
+- **Gear Requirement Inheritance**: Resolved an issue where child classes (e.g., advanced classes) failed to inherit gear/item restrictions from their parent classes.
+- **Client HUD Resilience**: Implemented a high fallback value for `xpNeeded` on the client during initialization to prevent the XP bar from visually "overflowing" before server data arrives.
+
+### Added
+- **Data Cleanup Command**: Added `/skillleveling cleanup <player>` to safely remove all addon-specific NBT data and reset Epic Class state. This ensures safe mod removal without risking player or world corruption.
+
+---
+
 ## [2026-03-12] — Skill Master Trade Refinement
 
 ### Fixed

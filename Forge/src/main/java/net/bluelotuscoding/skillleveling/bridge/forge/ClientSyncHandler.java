@@ -83,8 +83,10 @@ public class ClientSyncHandler {
                 fieldLevel.setInt(null, currentLevel);
                 fieldXp.setInt(null, currentXp);
 
+                // If neededXp is 0 or 100 (fallback), it's likely incorrect
+                // In some cases Pufferfish returns 0 for max level or if data isn't ready
                 if (neededXp <= 0) {
-                    neededXp = Integer.MAX_VALUE;
+                    neededXp = 1000000; // High value to avoid "full bar" look if unknown
                 }
                 fieldXpNeeded.setInt(null, neededXp);
             }

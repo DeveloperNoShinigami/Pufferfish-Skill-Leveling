@@ -286,7 +286,7 @@ public class EpicClassSyncHelper {
      * Master Sync: Sets ECM data from Pufferfish values.
      * Called whenever Pufferfish XP or Level changes.
      */
-    public static void syncFromPufferfish(PlayerEntity player, int newLevel, int newXp, int lastGain) {
+    public static void syncFromPufferfish(PlayerEntity player, int newLevel, int newXp, int neededXp, int lastGain) {
         if (isSyncing()) {
             return;
         }
@@ -346,6 +346,7 @@ public class EpicClassSyncHelper {
 
                     putInt.invoke(result, "level", authoritativeLevel);
                     putInt.invoke(result, "xp", authoritativeXp);
+                    putInt.invoke(result, "xp_needed", neededXp); // Pass needed XP for client-side scaling
                     putInt.invoke(result, "stat_points", spNow);
 
                     // Ensure the tag is actually attached to the player's persistent data
@@ -360,7 +361,7 @@ public class EpicClassSyncHelper {
 
                     AddonLogger.LOGGER.info(
                             "[Bridge] Synced Pufferfish -> ECM (Authoritative): Level=" + authoritativeLevel
-                                    + ", SP=" + spNow + ", Used=" + used);
+                                    + ", XP=" + authoritativeXp + "/" + neededXp + ", SP=" + spNow + ", Used=" + used);
                 } else {
                     AddonLogger.LOGGER.warn("[Bridge] Could not find NBT getInt/putInt methods via reflection");
                 }
@@ -477,6 +478,39 @@ public class EpicClassSyncHelper {
             }
         } catch (Exception e) {
             AddonLogger.LOGGER.error("[Bridge] Failed to force sync: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Wipes all mod-specific data from Epic Classes for a player.
+     * Removes ecm_leveling tag and resets state to default.
+     */
+    public static void cleanupData(PlayerEntity player) {
+        try {
+            // 1. Remove Forge persistent NBT
+            // 1. Remove Forge persistent NBT
+            // Note: PlayerEntity implements IForgeEntity on Forge/NeoForge.
+            net.minecraft.nbt.NbtCompound tag = ((net.minecraftforge.common.extensions.IForgeEntity) player).getPersistentData();
+            if (tag != null) {
+                tag.remove("ecm_leveling");
+            }
+
+            // 2. Reset PlayerLevelData in Epic Classes via reflection
+            initReflection();
+            if (playerLevelDataClass != null) {
+                for (java.lang.reflect.Method m : playerLevelDataClass.getMethods()) {
+                    if (m.getName().equals("cleanupForModRemoval")) {
+                        m.invoke(null, player);
+                        break;
+                    } else if (m.getName().equals("resetLevels") || m.getName().equals("resetAll")) {
+                        m.invoke(null, player);
+                    }
+                }
+            }
+
+            // 3. Force sync to client to clear UI/client state
+            forceSync(player);
+        } catch (Throwable ignored) {
         }
     }
 }

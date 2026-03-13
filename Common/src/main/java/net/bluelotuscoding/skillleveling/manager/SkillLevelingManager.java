@@ -560,6 +560,12 @@ public class SkillLevelingManager {
 
     public void initializeSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         dataManager.setSkillLevel(player, categoryId, skillId, 1);
+        
+        // SYNC TO CLIENT: Immediately inform client of the new level 1 initialization
+        // so passive unlocks show up in UI without log-out.
+        int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
+        int maxLevel = getMaxLevel(categoryId, skillId);
+        syncSkillLevelToClient(player, categoryId, skillId, 1, totalLevel, maxLevel, skillId);
     }
 
     /**
@@ -592,6 +598,18 @@ public class SkillLevelingManager {
 
     public void clearSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         dataManager.clearSkillLevel(player, categoryId, skillId);
+    }
+
+    /**
+     * Wipes all skill data for a player and resets their NBT to empty.
+     */
+    public void clearAllData(ServerPlayerEntity player) {
+        dataManager.clearAllData(player);
+        // Also clear internal caches
+        playerCooldowns.remove(player.getUuid());
+        protectedEffects.remove(player.getUuid());
+        // Sync to client to wipe UI
+        syncAllSkillsToPlayer(player);
     }
 
     /**

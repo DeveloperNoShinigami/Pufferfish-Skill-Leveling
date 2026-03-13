@@ -85,6 +85,18 @@ public class ExpTomeConfigLoader extends JsonDataLoader {
         }
     }
 
+    public static void setAllOnClient(Map<String, ExpTomeDefinition> definitions) {
+        TOMES.clear();
+        if (definitions != null) {
+            definitions.forEach((id, def) -> {
+                if (def.experiencePerLevel != null) {
+                    def.experiencePerLevel.recompile();
+                }
+                TOMES.put(id, def);
+            });
+        }
+    }
+
     public static Map<String, ExpTomeDefinition> getTomes() {
         return Collections.unmodifiableMap(TOMES);
     }

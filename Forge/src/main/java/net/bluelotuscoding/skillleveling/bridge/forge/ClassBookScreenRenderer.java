@@ -95,8 +95,6 @@ public final class ClassBookScreenRenderer {
                 renderPagingArrows(screen, event.getGuiGraphics());
             }
         } catch (Exception e) {
-            net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER.error(
-                    "[Bridge] Failed to render skill tab or arrows: " + e.getMessage());
         }
     }
 
@@ -174,7 +172,6 @@ public final class ClassBookScreenRenderer {
 
             // --- Existing Pufferfish Tab click handling ---
             if (mouseX >= screenX && mouseX < screenX + w && mouseY >= screenY && mouseY < screenY + h) {
-                net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER.info("[Bridge] Skill tab clicked!");
 
                 // Try to get determining category for the current class
                 java.util.Optional<Identifier> categoryId = java.util.Optional.empty();

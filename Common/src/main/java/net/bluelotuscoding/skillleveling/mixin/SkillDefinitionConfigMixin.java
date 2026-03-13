@@ -1,5 +1,7 @@
 package net.bluelotuscoding.skillleveling.mixin;
 
+import net.bluelotuscoding.skillleveling.util.AddonLogger;
+
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.util.Problem;
@@ -317,7 +319,7 @@ public abstract class SkillDefinitionConfigMixin {
                                     imbuementCost,
                                     slotOpeningCost, cleansingCost, isLootable, hidden, toggle, keybindSlot, cooldown));
 
-                    System.out.println("[SkillDefinitionConfigMixin] Registered Addon Features for: " + id
+                    AddonLogger.LOGGER.info("[SkillDefinitionConfigMixin] Registered Addon Features for: " + id
                             + " (Toggle: " + toggle + ")");
                 }
             });

@@ -1,8 +1,7 @@
 package net.bluelotuscoding.skillleveling.bridge.network;
 
 import java.util.function.Supplier;
-import net.bluelotuscoding.skillleveling.bridge.forge.client.screen.CustomClassSelectScreen;
-import net.minecraft.client.MinecraftClient;
+import net.bluelotuscoding.skillleveling.bridge.forge.client.network.ForgeClientPacketHandlers;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -28,12 +27,9 @@ public class OpenAdvanceClassScreenPacket {
 
     public static void handle(OpenAdvanceClassScreenPacket msg, Supplier<NetworkEvent.Context> ctxSup) {
         NetworkEvent.Context ctx = ctxSup.get();
-        ctx.enqueueWork(() -> {
-            // Must run on the client thread to open the screen safely
-            MinecraftClient.getInstance().execute(() -> {
-                MinecraftClient.getInstance().setScreen(new CustomClassSelectScreen(msg.parentClassId));
-            });
-        });
+        if (ctx.getDirection().getReceptionSide().isClient()) {
+            ctx.enqueueWork(() -> ForgeClientPacketHandlers.handleOpenAdvanceClassScreen(msg.parentClassId));
+        }
         ctx.setPacketHandled(true);
     }
 }

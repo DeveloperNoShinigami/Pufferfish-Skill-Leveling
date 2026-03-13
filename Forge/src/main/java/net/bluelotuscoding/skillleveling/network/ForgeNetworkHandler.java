@@ -5,9 +5,15 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.bluelotuscoding.skillleveling.bridge.forge.client.network.ForgeClientPacketHandlers;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 import java.util.Optional;
+import net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket;
+import net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket;
+import net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket;
+import net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket;
+import net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket;
 
 public class ForgeNetworkHandler implements NetworkHandler {
     private static final String PROTOCOL_VERSION = "1";
@@ -75,53 +81,36 @@ public class ForgeNetworkHandler implements NetworkHandler {
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
-        CHANNEL.registerMessage(id++,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket.class,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket::encode,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket::decode,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket::handle,
-                Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        CHANNEL.registerMessage(id++, CustomChooseClassPacket.class,
+                CustomChooseClassPacket::encode, CustomChooseClassPacket::decode,
+                CustomChooseClassPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
-        CHANNEL.registerMessage(id++,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket.class,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket::encode,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket::decode,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket::handle,
-                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(id++, CustomSyncClassPacket.class,
+                CustomSyncClassPacket::encode, CustomSyncClassPacket::decode,
+                CustomSyncClassPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
 
-        CHANNEL.registerMessage(id++,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket.class,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket::encode,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket::decode,
-                net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket::handle,
-                Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        CHANNEL.registerMessage(id++, CustomAllocateStatPacket.class,
+                CustomAllocateStatPacket::encode, CustomAllocateStatPacket::decode,
+                CustomAllocateStatPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
-        CHANNEL.registerMessage(id++,
-                net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket.class,
-                net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket::encode,
-                net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket::decode,
-                net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket::handle,
-                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(id++, SyncCustomNbtPacket.class,
+                SyncCustomNbtPacket::encode, SyncCustomNbtPacket::decode,
+                SyncCustomNbtPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
 
-        CHANNEL.registerMessage(id++,
-                net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket.class,
-                net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket::encode,
-                net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket::decode,
-                net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket::handle,
-                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(id++, OpenAdvanceClassScreenPacket.class,
+                OpenAdvanceClassScreenPacket::encode, OpenAdvanceClassScreenPacket::decode,
+                OpenAdvanceClassScreenPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
 
         CHANNEL.registerMessage(id++, SyncBridgeContentPacket.class, SyncBridgeContentPacket::write,
                 SyncBridgeContentPacket::read, (packet, contextSupplier) -> {
                     var context = contextSupplier.get();
                     if (context.getDirection().getReceptionSide().isClient()) {
-                        context.enqueueWork(() -> {
-                            net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
-                                    .setClassesOnClient(packet.getClassDefinitions());
-                            net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
-                                    .setAttributePagesOnClient(packet.getClassAttributePages());
-                            net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
-                                    .setSyncedConfig(packet.getConfig());
-                        });
+                        context.enqueueWork(() -> ForgeClientPacketHandlers.handleSyncBridgeContent(
+                                packet.getClassDefinitions(),
+                                packet.getClassAttributePages(),
+                                packet.getSkillDisplayCache(),
+                                packet.getConfig()
+                        ));
                     }
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -130,10 +119,9 @@ public class ForgeNetworkHandler implements NetworkHandler {
                 SyncCustomClassPacket::read, (packet, contextSupplier) -> {
                     var context = contextSupplier.get();
                     if (context.getDirection().getReceptionSide().isClient()) {
-                        context.enqueueWork(() -> {
-                            net.bluelotuscoding.skillleveling.client.ClientCustomClassState
-                                    .setCustomClass(packet.getPlayerId(), packet.getClassId());
-                        });
+                        context.enqueueWork(() -> ForgeClientPacketHandlers.handleCustomSyncClass(
+                                packet.getPlayerId(), packet.getClassId()
+                        ));
                     }
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -143,6 +131,18 @@ public class ForgeNetworkHandler implements NetworkHandler {
                     var context = contextSupplier.get();
                     if (context.getDirection().getReceptionSide().isClient()) {
                         context.enqueueWork(packet::handleClient);
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, SyncAllConfigsPacket.class, SyncAllConfigsPacket::write,
+                SyncAllConfigsPacket::read, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(() -> ForgeClientPacketHandlers.handleSyncAllConfigs(
+                                packet.getLeveledConfigs(),
+                                packet.getExpTomeDefinitions()
+                        ));
                     }
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -181,6 +181,11 @@ public class ForgeNetworkHandler implements NetworkHandler {
 
     @Override
     public void sendToPlayer(SyncItemRestrictionsPacket packet, ServerPlayerEntity player) {
+        CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    @Override
+    public void sendToPlayer(SyncAllConfigsPacket packet, ServerPlayerEntity player) {
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 

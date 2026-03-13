@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import net.bluelotuscoding.skillleveling.SkillLevelingMod;
+import net.bluelotuscoding.skillleveling.bridge.EpicClassBridge;
 import net.bluelotuscoding.skillleveling.util.AddonLogger;
 import net.minecraft.resource.JsonDataLoader;
 import net.minecraft.resource.ResourceManager;
@@ -368,28 +369,14 @@ public class ItemRequirementsManager extends JsonDataLoader {
         if (required == null || actual == null || actual.isEmpty()) {
             return false;
         }
-        // Direct case-insensitive match
-        if (required.equalsIgnoreCase(actual)) {
-            return true;
-        }
-        // Strip namespace from actual (e.g. "epic_classes:lich" -> "lich")
-        String actualName = actual;
-        int colonIdx = actual.indexOf(':');
-        if (colonIdx >= 0) {
-            actualName = actual.substring(colonIdx + 1);
-        }
-        // Strip namespace from required too (in case they put "epic_classes:lich" in
-        // JSON)
-        String requiredName = required;
-        int reqColonIdx = required.indexOf(':');
-        if (reqColonIdx >= 0) {
-            requiredName = required.substring(reqColonIdx + 1);
-        }
+
         // Handle "none" case
-        if (actualName.equalsIgnoreCase("none")) {
+        if (actual.equalsIgnoreCase("none") || actual.equalsIgnoreCase("epic_classes:none")) {
             return false;
         }
-        return requiredName.equalsIgnoreCase(actualName);
+
+        // Use the bridge's inheritance-aware check
+        return EpicClassBridge.isClassOrParent(actual, required);
     }
 
     // ---- Quest Reflection ----

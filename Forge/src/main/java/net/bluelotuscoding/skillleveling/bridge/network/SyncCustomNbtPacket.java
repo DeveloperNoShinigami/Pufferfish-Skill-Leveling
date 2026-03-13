@@ -4,6 +4,7 @@ package net.bluelotuscoding.skillleveling.bridge.network;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import net.bluelotuscoding.skillleveling.bridge.forge.client.network.ForgeClientPacketHandlers;
 import java.util.function.Supplier;
 
 public class SyncCustomNbtPacket {
@@ -23,13 +24,9 @@ public class SyncCustomNbtPacket {
 
     public static void handle(SyncCustomNbtPacket msg, Supplier<NetworkEvent.Context> ctxSup) {
         NetworkEvent.Context ctx = ctxSup.get();
-        ctx.enqueueWork(() -> {
-            net.minecraft.entity.player.PlayerEntity player = net.minecraft.client.MinecraftClient.getInstance().player;
-            if (player != null && msg.nbt != null) {
-                // Update the ecm_leveling tag in the player's persistent data
-                player.getPersistentData().put("ecm_leveling", msg.nbt);
-            }
-        });
+        if (ctx.getDirection().getReceptionSide().isClient()) {
+            ctx.enqueueWork(() -> ForgeClientPacketHandlers.handleSyncCustomNbt(msg.nbt));
+        }
         ctx.setPacketHandled(true);
     }
 }

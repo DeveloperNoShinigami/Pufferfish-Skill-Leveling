@@ -5,11 +5,17 @@ import net.bluelotuscoding.skillleveling.integration.SkillsModEventHandler;
 import net.bluelotuscoding.skillleveling.rewards.PerLevelRewardsReward;
 import net.bluelotuscoding.skillleveling.rewards.EffectReward;
 import net.bluelotuscoding.skillleveling.rewards.ToggleReward;
+import net.bluelotuscoding.skillleveling.config.LeveledConfigStorage;
+import net.bluelotuscoding.skillleveling.data.ExpTomeConfigLoader;
+import net.bluelotuscoding.skillleveling.network.NetworkHandler;
+import net.bluelotuscoding.skillleveling.network.SyncAllConfigsPacket;
 import net.bluelotuscoding.skillleveling.util.AddonLogger;
 import net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager;
 import net.bluelotuscoding.skillleveling.bridge.EpicClassBridge;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import java.util.Optional;
+import net.puffish.skillsmod.api.SkillsAPI;
 
 /**
  * ADDON MAIN CLASS: Integrates with Pufferfish Skills to provide per-level
@@ -138,6 +144,17 @@ public class SkillLevelingMod {
     // ADDON API ACCESS (PUBLIC INTERFACE)
     // ===========================================
 
+    public void syncAllConfigs(ServerPlayerEntity player) {
+        if (networkHandler != null) {
+            AddonLogger.LOGGER.info("Syncing all configs to player: " + player.getName().getString());
+            var packet = new SyncAllConfigsPacket(
+                LeveledConfigStorage.getAllEntries(),
+                ExpTomeConfigLoader.getTomes()
+            );
+            networkHandler.sendToPlayer(packet, player);
+        }
+    }
+
     public static SkillLevelingMod getInstance() {
         return instance;
     }
@@ -235,6 +252,7 @@ public class SkillLevelingMod {
                             net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager.getClasses(),
                             net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
                                     .getAttributePagesMap(),
+                            net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.getSkillDisplayCache(),
                             net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager.getConfig()),
                     player);
         }

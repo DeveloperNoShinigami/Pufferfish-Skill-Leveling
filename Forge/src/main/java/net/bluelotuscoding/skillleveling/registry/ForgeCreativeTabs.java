@@ -16,7 +16,7 @@ public class ForgeCreativeTabs {
 
         public static final RegistryObject<ItemGroup> BASE_TOMES_TAB = CREATIVE_TABS.register("base_tomes_tab",
                         () -> ItemGroup.builder()
-                                        .icon(() -> new ItemStack(ModItems.TOME_OF_PROGRESSION))
+                                        .icon(() -> new ItemStack(ForgeItemRegistry.TOME_OF_PROGRESSION.get()))
                                         .displayName(Text.translatable("itemGroup.puffish_skill_leveling_base"))
                                         .entries((displayContext, entries) -> ModItems.fillBaseTomesTab(entries::add))
                                         .build());
@@ -24,7 +24,7 @@ public class ForgeCreativeTabs {
         public static final RegistryObject<ItemGroup> SKILL_TOMES_TAB = CREATIVE_TABS.register("skill_tomes_tab",
                         () -> ItemGroup.builder()
                                         .withTabsBefore(BASE_TOMES_TAB.getId())
-                                        .icon(() -> new ItemStack(ModItems.SKILL_TOME))
+                                        .icon(() -> new ItemStack(ForgeItemRegistry.SKILL_TOME.get()))
                                         .displayName(Text.translatable("itemGroup.puffish_skill_leveling_tomes"))
                                         .entries((displayContext, entries) -> ModItems.fillSkillTomesTab(entries::add))
                                         .build());
@@ -32,7 +32,7 @@ public class ForgeCreativeTabs {
         public static final RegistryObject<ItemGroup> EXP_TOMES_TAB = CREATIVE_TABS.register("exp_tomes_tab",
                         () -> ItemGroup.builder()
                                         .withTabsBefore(SKILL_TOMES_TAB.getId())
-                                        .icon(() -> new ItemStack(ModItems.EXP_TOME))
+                                        .icon(() -> new ItemStack(ForgeItemRegistry.EXP_TOME.get()))
                                         .displayName(Text.translatable("itemGroup.puffish_skill_leveling_exp_tomes"))
                                         .entries((displayContext, entries) -> ModItems.fillExpTomesTab(entries::add))
                                         .build());

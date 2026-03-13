@@ -50,5 +50,24 @@ public class ForgeItemRegistry {
         public static void register(IEventBus bus) {
                 SkillLevelingMod.getInstance().getLogger().info("Initializing Forge Item Registry...");
                 ITEMS.register(bus);
+                bus.addListener(ForgeItemRegistry::onRegisterItems);
+        }
+
+        private static void onRegisterItems(net.minecraftforge.registries.RegisterEvent event) {
+                if (event.getRegistryKey().equals(net.minecraftforge.registries.ForgeRegistries.Keys.ITEMS)) {
+                        ModItems.initForForge(
+                                        TOME_OF_PROGRESSION.get(),
+                                        TOME_OF_CLEAR_MIND.get(),
+                                        TOME_OF_GREATER_CLEAR_MIND.get(),
+                                        SKILL_TOME.get(),
+                                        SIGIL_OF_IMBUEMENT.get(),
+                                        TOME_OF_CLEANSING.get(),
+                                        TOME_OF_CLEANSING_2.get(),
+                                        TOME_OF_CLEANSING_3.get(),
+                                        BLANK_TOME.get(),
+                                        SKILL_CHARM.get(),
+                                        EXP_TOME.get(),
+                                        SKILL_SCRIBE_TABLE_ITEM.get());
+                }
         }
 }

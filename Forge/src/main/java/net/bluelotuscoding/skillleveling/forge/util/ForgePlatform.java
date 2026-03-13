@@ -68,10 +68,10 @@ public class ForgePlatform implements Platform {
     }
 
     @Override
-    public void syncEpicClassLevel(Object player, int level, int xp, int lastGain) {
+    public void syncEpicClassLevel(Object player, int level, int xp, int neededXp, int lastGain) {
         if (player instanceof PlayerEntity sp) {
             net.bluelotuscoding.skillleveling.bridge.forge.EpicClassSyncHelper.syncFromPufferfish(sp, level,
-                    xp, lastGain);
+                    xp, neededXp, lastGain);
         }
     }
 
@@ -140,6 +140,36 @@ public class ForgePlatform implements Platform {
                     return xp != null ? xp : 0;
                 })
                 .orElse(0);
+    }
+
+    @Override
+    public int getPufferfishNeededExperience(Object player,
+            net.minecraft.util.Identifier categoryId) {
+        return net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId)
+                .flatMap(cat -> cat.getExperience())
+                .map(exp -> {
+                    // Use the official API to get the requirement for the current level
+                    Integer level = net.bluelotuscoding.skillleveling.bridge.forge.EpicClassBridgeForgeAccess
+                            .invokeExperienceInt(exp, "getLevel", player);
+                    if (level != null) {
+                        try {
+                            java.lang.reflect.Method getRequired = exp.getClass().getMethod("getRequired", int.class);
+                            getRequired.setAccessible(true);
+                            return (Integer) getRequired.invoke(exp, level.intValue());
+                        } catch (Exception e) {
+                            // Fallback to the previous reflection if getRequired(int) fails
+                            Integer needed = net.bluelotuscoding.skillleveling.bridge.forge.EpicClassBridgeForgeAccess
+                                    .invokeExperienceInt(exp, "getNeeded", player);
+                            if (needed == null) {
+                                needed = net.bluelotuscoding.skillleveling.bridge.forge.EpicClassBridgeForgeAccess
+                                        .invokeExperienceInt(exp, "getMax", player);
+                            }
+                            return needed != null ? needed : 100;
+                        }
+                    }
+                    return 100;
+                })
+                .orElse(100);
     }
 
     @Override
@@ -277,5 +307,21 @@ public class ForgePlatform implements Platform {
     @Override
     public boolean isClient() {
         return net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient();
+    }
+
+    @Override
+    public void cleanupPlayerData(Object player) {
+        if (player instanceof PlayerEntity sp) {
+            net.bluelotuscoding.skillleveling.bridge.forge.EpicClassSyncHelper.cleanupData(sp);
+        }
+    }
+
+    @Override
+    public void cleanupWorldData(Object level) {
+        if (level instanceof net.minecraft.server.world.ServerWorld sw) {
+            net.bluelotuscoding.skillleveling.bridge.data.CustomJobNpcSavedData data = net.bluelotuscoding.skillleveling.bridge.data.CustomJobNpcSavedData
+                    .get(sw);
+            data.clearAll();
+        }
     }
 }

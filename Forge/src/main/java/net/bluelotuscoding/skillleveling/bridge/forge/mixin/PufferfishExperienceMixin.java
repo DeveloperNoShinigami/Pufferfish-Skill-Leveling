@@ -115,19 +115,21 @@ public abstract class PufferfishExperienceMixin {
         }
 
         try {
+            net.bluelotuscoding.skillleveling.util.Platform platform = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getPlatform();
+            
             // Get current Level and XP from Pufferfish via SkillsMod methods
             Optional<Integer> levelOpt = invokeGetCurrentLevel(this, player, categoryId);
             Optional<Integer> currentXpOpt = invokeGetCurrentExperience(this, player, categoryId);
+            
+            // Use the robust platform implementation for needed XP to avoid 100 fallback
+            int neededXp = platform.getPufferfishNeededExperience(player, categoryId);
 
             if (levelOpt.isPresent() && currentXpOpt.isPresent()) {
                 int level = levelOpt.get();
                 int currentXp = currentXpOpt.get();
-
-                LOGGER.info("[Bridge] Pufferfish XP sync: Category=" + categoryId + ", Level=" + level + ", Gain="
-                        + lastGain);
-
+                
                 // Sync to Epic Class
-                EpicClassSyncHelper.syncFromPufferfish(player, level, currentXp, lastGain);
+                EpicClassSyncHelper.syncFromPufferfish(player, level, currentXp, neededXp, lastGain);
             }
 
         } catch (Exception e) {

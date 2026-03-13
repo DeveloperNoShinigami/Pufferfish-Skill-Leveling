@@ -66,6 +66,31 @@ public class LeveledConfigStorage {
         return get(skillId) != null;
     }
 
+    public static void setAllOnClient(Map<String, LeveledConfig> configs) {
+        leveledConfigs.clear();
+        if (configs != null) {
+            configs.forEach((id, config) -> {
+                if (config.enchantmentCost != null)
+                    config.enchantmentCost.recompile();
+                if (config.imbuementCost != null)
+                    config.imbuementCost.recompile();
+                if (config.slotOpeningCost != null)
+                    config.slotOpeningCost.recompile();
+                if (config.cleansingCost != null)
+                    config.cleansingCost.recompile();
+
+                if (config.requiredSkillsForLevel != null) {
+                    config.requiredSkillsForLevel.values().forEach(list -> {
+                        if (list != null) {
+                            // No recompilation needed for RequiredSkillEntry as it's just plain data
+                        }
+                    });
+                }
+                leveledConfigs.put(id, config);
+            });
+        }
+    }
+
     public static Map<String, LeveledConfig> getAllEntries() {
         return new HashMap<>(leveledConfigs);
     }
@@ -166,7 +191,8 @@ public class LeveledConfigStorage {
         public final Type type;
         private int scalarValue = 0;
         private int[] arrayValues = null;
-        private net.puffish.skillsmod.expression.Expression<Double> expression = null;
+        private String rawExpression = null;
+        private transient net.puffish.skillsmod.expression.Expression<Double> expression = null;
 
         private EnchantmentCostConfig() {
             this.type = Type.FREE;
@@ -184,8 +210,28 @@ public class LeveledConfigStorage {
 
         public EnchantmentCostConfig(String expressionStr) {
             this.type = Type.EXPRESSION;
-            var result = net.puffish.skillsmod.expression.DefaultParser.parse(expressionStr, java.util.Set.of("level"));
-            this.expression = result.getSuccess().orElse(null);
+            this.rawExpression = expressionStr;
+            recompile();
+        }
+
+        public void recompile() {
+            if (type == Type.EXPRESSION && rawExpression != null) {
+                var result = net.puffish.skillsmod.expression.DefaultParser.parse(rawExpression,
+                        java.util.Set.of("level"));
+                this.expression = result.getSuccess().orElse(null);
+            }
+        }
+
+        public String getRawExpression() {
+            return rawExpression;
+        }
+
+        public int getScalarValue() {
+            return scalarValue;
+        }
+
+        public int[] getArrayValues() {
+            return arrayValues;
         }
 
         public int getCost(int level) {

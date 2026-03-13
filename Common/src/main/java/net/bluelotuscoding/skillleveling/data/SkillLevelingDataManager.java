@@ -67,6 +67,14 @@ public class SkillLevelingDataManager {
         playerCaches.clear();
     }
 
+    /**
+     * Wipes all skill data for a player and resets their NBT to empty.
+     */
+    public void clearAllData(ServerPlayerEntity player) {
+        playerCaches.remove(player.getUuid());
+        saveToNbt(player, new PlayerCache());
+    }
+
     public int getSkillLevel(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         var cache = getPlayerCache(player);
         var categoryData = getCategoryData(cache.levels, categoryId);

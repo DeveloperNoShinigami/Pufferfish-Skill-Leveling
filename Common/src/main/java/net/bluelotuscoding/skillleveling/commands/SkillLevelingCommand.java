@@ -76,6 +76,15 @@ public class SkillLevelingCommand {
                                                                                                 .integer())
                                                                                 .executes(SkillLevelingCommand::handleIntegration)))));
 
+                // ADMIN
+                root.then(CommandManager.literal("admin")
+                                .requires(source -> source.hasPermissionLevel(4))
+                                .then(CommandManager.literal("cleanup")
+                                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                                                .executes(SkillLevelingCommand::cleanupPlayer)))
+                                .then(CommandManager.literal("world_cleanup")
+                                                .executes(SkillLevelingCommand::cleanupWorld)));
+
                 // GET
                 root.then(CommandManager.literal("get")
                                 .then(CommandManager.argument("player", EntityArgumentType.player())
@@ -798,9 +807,55 @@ public class SkillLevelingCommand {
 
                 } catch (Exception e) {
                         source.sendError(Text.literal("§cFailed to set category level: " + e.getMessage()));
-                        SkillLevelingMod.getInstance().getLogger().error("setCategoryLevel error: " + e);
                         return 0;
                 }
+        }
+
+        private static int cleanupPlayer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+                var source = context.getSource();
+                var player = EntityArgumentType.getPlayer(context, "player");
+
+                source.sendMessage(Text.literal("§eStarting data cleanup for " + player.getName().getString() + "..."));
+
+                // 1. Cleanup Pufferfish Data via Manager
+                try {
+                        var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+                        manager.clearAllData(player);
+                } catch (Exception e) {
+                        source.sendError(Text.literal("§cFailed to clear Pufferfish data: " + e.getMessage()));
+                }
+
+                // 2. Cleanup Cross-Mod Data via Platform
+                try {
+                        var platform = SkillLevelingMod.getInstance().getPlatform();
+                        platform.cleanupPlayerData(player);
+                } catch (Exception e) {
+                        source.sendError(Text.literal("§cFailed to clear cross-mod data: " + e.getMessage()));
+                }
+
+                source.sendMessage(Text.literal("§aCleanup complete for " + player.getName().getString()
+                                + ". Traces of skill/class data have been removed from this player."));
+                return 1;
+        }
+
+        private static int cleanupWorld(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+                var source = context.getSource();
+                var level = source.getWorld();
+
+                source.sendMessage(Text.literal("§eStarting world-wide data cleanup..."));
+
+                // Cleanup World Data via Platform
+                try {
+                        var platform = SkillLevelingMod.getInstance().getPlatform();
+                        platform.cleanupWorldData(level);
+                } catch (Exception e) {
+                        source.sendError(Text.literal("§cFailed to clear world data: " + e.getMessage()));
+                        return 0;
+                }
+
+                source.sendMessage(Text.literal(
+                                "§aWorld cleanup complete. All NPC spawn records and shared world data have been cleared."));
+                return 1;
         }
 
         /**

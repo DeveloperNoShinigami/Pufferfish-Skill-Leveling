@@ -108,4 +108,11 @@ public class CustomJobNpcSavedData extends PersistentState {
         spawned.put(jobId, v);
         markDirty();
     }
+
+    public void clearAll() {
+        npcPos.clear();
+        npcUuid.clear();
+        spawned.clear();
+        markDirty();
+    }
 }

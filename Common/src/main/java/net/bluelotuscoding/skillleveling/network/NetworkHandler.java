@@ -18,4 +18,6 @@ public interface NetworkHandler {
     void sendToServer(RequestToggleSkillPacket packet);
 
     void sendToPlayer(SyncItemRestrictionsPacket packet, ServerPlayerEntity player);
+
+    void sendToPlayer(SyncAllConfigsPacket packet, ServerPlayerEntity player);
 }

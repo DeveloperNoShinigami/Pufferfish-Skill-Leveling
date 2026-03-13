@@ -76,5 +76,10 @@ public class EpicClassDef {
          * is resolved from skill_category_id on this class def.
          */
         public String pufferfish_skill_id;
+        /**
+         * The Pufferfish level required to unlock this passive. 
+         * Overrides the global bridge mapping if set.
+         */
+        public int level;
     }
 }

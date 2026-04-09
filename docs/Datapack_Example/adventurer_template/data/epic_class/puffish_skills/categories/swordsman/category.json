@@ -1,0 +1,10 @@
+{
+    "title": "Swordsman",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:iron_sword"
+        }
+    },
+    "background": "minecraft:textures/block/stone_bricks.png"
+}

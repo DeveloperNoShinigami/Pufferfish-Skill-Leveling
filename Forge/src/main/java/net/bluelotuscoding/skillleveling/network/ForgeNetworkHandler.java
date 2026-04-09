@@ -14,9 +14,16 @@ import net.bluelotuscoding.skillleveling.bridge.network.CustomSyncClassPacket;
 import net.bluelotuscoding.skillleveling.bridge.network.CustomAllocateStatPacket;
 import net.bluelotuscoding.skillleveling.bridge.network.SyncCustomNbtPacket;
 import net.bluelotuscoding.skillleveling.bridge.network.OpenAdvanceClassScreenPacket;
+import net.bluelotuscoding.skillleveling.bridge.network.CnpcQuestAbandonPacket;
+import net.bluelotuscoding.skillleveling.bridge.network.CnpcQuestTurnInPacket;
+import net.bluelotuscoding.skillleveling.bridge.network.RequestCnpcQuestRefreshPacket;
+import net.bluelotuscoding.skillleveling.bridge.network.SyncCnpcQuestAnnouncementPacket;
+import net.bluelotuscoding.skillleveling.bridge.network.SyncCnpcNpcRolePacket;
+import net.bluelotuscoding.skillleveling.bridge.cnpc.runtime.CnpcRuntimeBridge;
+import net.bluelotuscoding.skillleveling.network.SyncCnpcQuestUiPacket;
 
 public class ForgeNetworkHandler implements NetworkHandler {
-    private static final String PROTOCOL_VERSION = "1";
+    private static final String PROTOCOL_VERSION = "6";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new Identifier(SkillLevelingMod.MOD_ID, "main"),
             () -> PROTOCOL_VERSION,
@@ -147,6 +154,73 @@ public class ForgeNetworkHandler implements NetworkHandler {
                     context.setPacketHandled(true);
                 }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
 
+        CHANNEL.registerMessage(id++, SyncToggleCooldownPacket.class, SyncToggleCooldownPacket::encode,
+                SyncToggleCooldownPacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(packet::handleClient);
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, CnpcQuestTurnInPacket.class, CnpcQuestTurnInPacket::encode,
+                CnpcQuestTurnInPacket::decode, CnpcQuestTurnInPacket::handle,
+                Optional.of(NetworkDirection.PLAY_TO_SERVER));
+
+        CHANNEL.registerMessage(id++, CnpcQuestAbandonPacket.class, CnpcQuestAbandonPacket::encode,
+                CnpcQuestAbandonPacket::decode, CnpcQuestAbandonPacket::handle,
+                Optional.of(NetworkDirection.PLAY_TO_SERVER));
+
+        CHANNEL.registerMessage(id++, RequestCnpcQuestRefreshPacket.class, RequestCnpcQuestRefreshPacket::encode,
+                RequestCnpcQuestRefreshPacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isServer()) {
+                        context.enqueueWork(() -> {
+                            if (context.getSender() != null) {
+                                CnpcRuntimeBridge.refreshPlayer(context.getSender());
+                            }
+                        });
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+
+        CHANNEL.registerMessage(id++, SyncCnpcQuestUiPacket.class, SyncCnpcQuestUiPacket::encode,
+                SyncCnpcQuestUiPacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(() -> ForgeClientPacketHandlers.handleSyncCnpcQuestUi(
+                                packet.getQuests(),
+                                packet.getAcceptedKeys(),
+                                packet.getCompletedKeys(),
+                                packet.getReadyToTurnInKeys()));
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, SyncCnpcNpcRolePacket.class, SyncCnpcNpcRolePacket::encode,
+                SyncCnpcNpcRolePacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(() -> ForgeClientPacketHandlers.handleSyncCnpcNpcRole(
+                                packet.getEntityId(),
+                                packet.getJobMasterClassId(),
+                                packet.getQuestNpcRoleId()));
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
+        CHANNEL.registerMessage(id++, SyncCnpcQuestAnnouncementPacket.class, SyncCnpcQuestAnnouncementPacket::encode,
+                SyncCnpcQuestAnnouncementPacket::decode, (packet, contextSupplier) -> {
+                    var context = contextSupplier.get();
+                    if (context.getDirection().getReceptionSide().isClient()) {
+                        context.enqueueWork(() -> ForgeClientPacketHandlers.handleSyncCnpcQuestAnnouncement(
+                                packet.getSequence(),
+                                packet.getQuestTitle(),
+                                packet.isCompleted()));
+                    }
+                    context.setPacketHandled(true);
+                }, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+
     }
 
     @Override
@@ -186,6 +260,16 @@ public class ForgeNetworkHandler implements NetworkHandler {
 
     @Override
     public void sendToPlayer(SyncAllConfigsPacket packet, ServerPlayerEntity player) {
+        CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    @Override
+    public void sendToPlayer(SyncCnpcQuestUiPacket packet, ServerPlayerEntity player) {
+        CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    @Override
+    public void sendToPlayer(SyncCnpcNpcRolePacket packet, ServerPlayerEntity player) {
         CHANNEL.sendTo(packet, player.networkHandler.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 

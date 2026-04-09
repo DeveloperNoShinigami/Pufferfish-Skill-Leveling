@@ -14,8 +14,8 @@ import net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager;
 import net.bluelotuscoding.skillleveling.bridge.EpicClassBridge;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import java.io.File;
 import java.util.Optional;
-import net.puffish.skillsmod.api.SkillsAPI;
 
 /**
  * ADDON MAIN CLASS: Integrates with Pufferfish Skills to provide per-level
@@ -61,7 +61,6 @@ public class SkillLevelingMod {
     private final net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader reputationLoader;
     private final net.bluelotuscoding.skillleveling.data.ExpTomeConfigLoader expTomeConfigLoader;
     private final net.bluelotuscoding.skillleveling.bridge.config.EpicClassDataLoader epicClassDataLoader;
-    private final net.bluelotuscoding.skillleveling.bridge.config.JobMasterDataLoader jobMasterDataLoader;
     private final net.bluelotuscoding.skillleveling.bridge.config.EpicAttributeDataLoader epicAttributeDataLoader;
     private final net.bluelotuscoding.skillleveling.bridge.config.BridgeDataLoader bridgeDataLoader;
     private final net.bluelotuscoding.skillleveling.bridge.config.ItemRequirementsManager itemRequirementsManager;
@@ -82,7 +81,6 @@ public class SkillLevelingMod {
         this.reputationLoader = new net.bluelotuscoding.skillleveling.data.SkillMasterReputationLoader();
         this.expTomeConfigLoader = new net.bluelotuscoding.skillleveling.data.ExpTomeConfigLoader();
         this.epicClassDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.EpicClassDataLoader();
-        this.jobMasterDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.JobMasterDataLoader();
         this.epicAttributeDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.EpicAttributeDataLoader();
         this.bridgeDataLoader = new net.bluelotuscoding.skillleveling.bridge.config.BridgeDataLoader();
         this.itemRequirementsManager = new net.bluelotuscoding.skillleveling.bridge.config.ItemRequirementsManager();
@@ -201,10 +199,6 @@ public class SkillLevelingMod {
         return epicClassDataLoader;
     }
 
-    public net.bluelotuscoding.skillleveling.bridge.config.JobMasterDataLoader getJobMasterDataLoader() {
-        return jobMasterDataLoader;
-    }
-
     public net.bluelotuscoding.skillleveling.bridge.config.EpicAttributeDataLoader getEpicAttributeDataLoader() {
         return epicAttributeDataLoader;
     }
@@ -256,6 +250,18 @@ public class SkillLevelingMod {
                             net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager.getConfig()),
                     player);
         }
+    }
+
+    /**
+     * Synchronizes the bridge configuration to all online players.
+     * Called when the datapack is reloaded to ensure real-time UI updates.
+     */
+    public void syncBridgeToAll() {
+        skillLevelingManager.getServer().ifPresent(server -> {
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                syncBridgeContent(player);
+            }
+        });
     }
 
     // ================================================

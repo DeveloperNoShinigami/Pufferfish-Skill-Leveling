@@ -10,9 +10,13 @@ public class EpicClassDef {
     public String display_name_key;
     public String lore_key;
 
-    public String job_master_id;
     public String skill_category_id;
     public String epic_class_proxy;
+    /** When true, this class shows the mana (sorcerer) tab in the ClassBookScreen. */
+    public boolean is_sorcerer_type = false;
+
+    /** ECM character level required to advance INTO this class (i.e. on the child class). */
+    public int required_level = 0;
 
     // --- New Class Book Fields ---
     public String book_lore;
@@ -21,6 +25,9 @@ public class EpicClassDef {
     public List<String> class_weapon_items;
 
     public Map<String, AttributeDef> attributes = new HashMap<>();
+
+    /** ECM stat points granted per Pufferfish level. 0 = use BridgeConfig global. */
+    public int stat_points_per_level = 0;
 
     // --- Branding & Text ---
     public String display_name;
@@ -45,6 +52,7 @@ public class EpicClassDef {
         public String attribute;
         public String operation;
         public double value;
+        public String command = null;
     }
 
     public static class StatDef {

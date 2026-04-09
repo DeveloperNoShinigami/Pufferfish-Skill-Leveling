@@ -1,0 +1,34 @@
+{
+    "tomes": [
+        {
+            "id": "minor_exp_tome",
+            "name": "Minor Experience Tome",
+            "rarity": "COMMON",
+            "max_levels": 5,
+            "experience_per_level": {
+                "type": "values",
+                "data": {
+                    "values": [
+                        10,
+                        25,
+                        50,
+                        100,
+                        200
+                    ]
+                }
+            }
+        },
+        {
+            "id": "major_exp_tome",
+            "name": "Major Experience Tome",
+            "rarity": "RARE",
+            "max_levels": 10,
+            "experience_per_level": {
+                "type": "expression",
+                "data": {
+                    "expression": "min(level ^ 1.432 + 10, 1000)"
+                }
+            }
+        }
+    ]
+}

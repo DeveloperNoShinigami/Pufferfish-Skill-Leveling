@@ -4,7 +4,7 @@
 
 ---
 
-This guide details how to create and configure custom Epic Classes to tie natively into the Pufferfish Skill Leveling system. By utilizing Minecraft's DataPack system, you can define complete classes, custom GUIs, attribute modifiers, and NPC Job Masters without writing any code.
+This guide details how to create and configure custom Epic Classes to tie natively into the Pufferfish Skill Leveling system. By utilizing Minecraft's DataPack system, you can define complete classes, custom GUIs, and attribute modifiers without writing any code.
 
 > [!NOTE]
 > All configurations for Epic Classes have moved to native DataPacks in the `data/<namespace>/puffish_skill_leveling/epic_classes/` folder. This ensures absolute compatibility with servers and modpacks.
@@ -30,7 +30,6 @@ data/
         └── epic_classes/
             ├── classes/         (Defines GUI, stats, passives, layout)
             ├── attributes/      (Links Pufferfish skill points to stats)
-            └── job_masters/     (Defines NPCs the player can talk to)
 ```
 
 ## 2. Defining an Epic Class
@@ -47,7 +46,6 @@ Here is a comprehensive example of a full class setup using external weapons (TA
     "display_name_key": "class.epicclassmod.gunslinger.title",
     "lore_key": "class.epicclassmod.gunslinger.desc",
     "skill_category_id": "gunslinger",
-    "job_master_id": "job_master_gunslinger",
     "epic_class_proxy": "ARCHER",
     "book_lore": "A master of modern ballistics. Relying on agility and precision, they dominate from a distance.",
     "class_weapon_type": "Handguns / Rifles",
@@ -100,8 +98,16 @@ Here is a comprehensive example of a full class setup using external weapons (TA
 | `lore_key` | String | No | Language key for the detailed lore/description. |
 | `book_lore` | String | No | Literal string used for detailed lore in the class book. |
 | `skill_category_id` | String | **Yes** | **Critical.** The ID of the Pufferfish Skills category to map this class to. The bridge natively tries the `epic_classes:` namespace. Ensure your Pufferfish folders match this exactly. |
-| `job_master_id` | String | No | *Future Addition.* The ID of the Job Master NPC config. |
 | `epic_class_proxy` | String | **Yes** | **Critical.** Tells Epic Fight which core animation logic to use. Valid: `WARRIOR`, `PALADIN`, `BERSERKER`, `REAPER`, `SORCERER`, `ARCHER`. |
+| `is_sorcerer_type` | Boolean | No | When `true`, the Class Book screen shows the mana/sorcerer stat tab for this class. Default: `false`. |
+| `required_level` | Integer | No | The ECM character level required before a player can advance **into** this class. Set on the child class in a progression chain. Default: `0`. |
+| `stat_points_per_level` | Integer | No | ECM stat points granted to the player per Pufferfish level gained while in this class. Overrides the global `stat_points_per_level` value from the bridge config. `0` = use global. |
+
+CNPC-driven class NPCs are configured separately through NPC stored data:
+
+```js
+event.npc.getStoreddata().put("job_master", "gunslinger");
+```
 
 ### UI & Presentation Fields
 | Field | Type | Required | Description |
@@ -120,10 +126,10 @@ Here is a comprehensive example of a full class setup using external weapons (TA
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `class_weapon_items` | String Array | No | List of acceptable weapon IDs for this class. |
-| `starting_items` | String Array | No | Items granted to the player the moment they select the class. Supports quantities via `@` (e.g. `bone@10`) or NBT strings. |
-| `attributes` | Object | No | The immediate stat changes applied permanently when selecting the class. |
-| `gui_stats` | Object Array | No | Visual representation of stats on the UI. Doesn't grant stats, purely for display. |
-| `gui_passives` | Object Array | No | Lists Pufferfish Skills to display as "Class Traits" in the UI. Links directly to the `puffish_skills` definitions. |
+| `starting_items` | String Array | No | Items granted to the player the moment they select the class. Supports quantities via `@` (e.g. `bone@10`) or NBT strings. Only given once per class per player. |
+| `attributes` | Object | No | Immediate stat changes applied permanently when selecting the class. Keys **must** be fully-qualified Minecraft attribute IDs — e.g. `"roleveling:str"`, `"minecraft:generic.max_health"`. Bare names like `"str"` will not resolve. Each entry is `{"value": X, "operation": "BASE"}`. An optional `"command"` field fires a server command on class select (use `{value}` and `{player}` tokens); when present the attribute modifier step is skipped for that entry. See [Datapack Reference](DATAPACK_REFERENCE.md) for full schema. |
+| `gui_stats` | Object Array | No | Visual representation of stats on the UI. Doesn't grant stats, purely for display. Supports `hearts` and `number` display modes. |
+| `gui_passives` | Object Array | No | Lists Pufferfish Skills to display as "Class Traits" in the UI. Links directly to `puffish_skills` definitions via `pufferfish_skill_id`. The `level` field (integer) controls the Pufferfish level at which the passive is unlocked — this is shown in the UI and used for bridge passive mapping. |
 
 ---
 

@@ -46,6 +46,11 @@ public class CustomChooseClassPacket {
                 return;
             }
 
+            if ("epic_classes:none".equalsIgnoreCase(msg.customId) || "none".equalsIgnoreCase(msg.customId)) {
+                net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getSkillLevelingManager()
+                        .resetPufferfishProgressForClassReset(sp);
+            }
+
             // 1. Mark class as chosen in persistent NBT (Epic Class reads this on login)
             net.minecraft.nbt.NbtCompound tag = ((net.minecraftforge.common.extensions.IForgeEntity) (Object) sp)
                     .getPersistentData();
@@ -75,7 +80,29 @@ public class CustomChooseClassPacket {
 
                 // Apply all attributes via Minecraft's system
                 net.minecraft.nbt.NbtList appliedAttrs = new net.minecraft.nbt.NbtList();
+                net.minecraft.nbt.NbtList appliedCmds = new net.minecraft.nbt.NbtList();
                 for (var entry : def.attributes.entrySet()) {
+                    EpicClassDef.AttributeDef ad = entry.getValue();
+
+                    if (ad.command != null) {
+                        // Command slot: fire once on class select; KubeJS handles side-effects
+                        String valStr = (ad.value == Math.floor(ad.value))
+                                ? String.valueOf((long) ad.value) : String.valueOf(ad.value);
+                        String cmd = ad.command
+                                .replace("{value}", valStr)
+                                .replace("{player}", sp.getEntityName());
+                        sp.getServer().getCommandManager().executeWithPrefix(
+                                sp.getServer().getCommandSource(), cmd);
+                        // Track the command template (with {value}) so clearClassModifiers can undo it
+                        appliedCmds.add(net.minecraft.nbt.NbtString.of(ad.command));
+                        continue;
+                    }
+
+                    // NBT value override: script writes ro_attrval_<key>, config value is fallback
+                    double effectiveValue = tag.contains("ro_attrval_" + entry.getKey())
+                            ? tag.getInt("ro_attrval_" + entry.getKey())
+                            : ad.value;
+
                     Identifier attrId = new Identifier(entry.getKey());
                     EntityAttribute attr = ForgeRegistries.ATTRIBUTES.getValue(attrId);
                     if (attr == null) {
@@ -87,11 +114,10 @@ public class CustomChooseClassPacket {
                         continue;
                     }
 
-                    EpicClassDef.AttributeDef ad = entry.getValue();
                     String opStr = ad.operation == null ? "BASE" : ad.operation.toUpperCase();
 
                     if ("BASE".equals(opStr)) {
-                        inst.setBaseValue(ad.value);
+                        inst.setBaseValue(effectiveValue);
                     } else {
                         EntityAttributeModifier.Operation op = EntityAttributeModifier.Operation.ADDITION;
                         try {
@@ -102,12 +128,13 @@ public class CustomChooseClassPacket {
                         inst.addPersistentModifier(new EntityAttributeModifier(
                                 UUID.nameUUIDFromBytes(("ec_custom_" + entry.getKey()).getBytes()),
                                 "epic_class_custom",
-                                ad.value,
+                                effectiveValue,
                                 op));
                     }
                     appliedAttrs.add(net.minecraft.nbt.NbtString.of(entry.getKey()));
                 }
                 tag.put("ecm_applied_attributes", appliedAttrs);
+                tag.put("ecm_applied_commands", appliedCmds);
 
                 // Reset health to new max if attributes changed
                 sp.setHealth(sp.getMaxHealth());
@@ -143,6 +170,20 @@ public class CustomChooseClassPacket {
      * using the ecm_applied_attributes list in the player's persistent data.
      */
     private static void clearClassModifiers(ServerPlayerEntity sp, net.minecraft.nbt.NbtCompound tag) {
+        // Re-fire command entries with {value}=0 to undo their effects
+        if (tag.contains("ecm_applied_commands", 9)) {
+            net.minecraft.nbt.NbtList appliedCmds = tag.getList("ecm_applied_commands", 8);
+            for (int i = 0; i < appliedCmds.size(); i++) {
+                String cmdTemplate = appliedCmds.getString(i);
+                String cmd = cmdTemplate
+                        .replace("{value}", "0")
+                        .replace("{player}", sp.getEntityName());
+                sp.getServer().getCommandManager().executeWithPrefix(
+                        sp.getServer().getCommandSource(), cmd);
+            }
+            tag.remove("ecm_applied_commands");
+        }
+
         if (!tag.contains("ecm_applied_attributes", 9)) { // 9 for NbtList
             return;
         }

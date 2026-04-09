@@ -2,19 +2,26 @@
     "required": true,
     "minVersion": "0.8",
     "package": "net.bluelotuscoding.skillleveling.bridge.forge.mixin",
+    "plugin": "net.bluelotuscoding.skillleveling.bridge.forge.mixin.PuffishForgeMixinPlugin",
     "compatibilityLevel": "JAVA_17",
     "client": [
         "ClassBookScreenMixin",
+        "ClassBookQuestsPageMixin",
         "ClientClassStateMixin",
-        "DialogueScreenMixin",
+        "ClientQuestStateMixin",
         "ClientPacketHandlerMixin",
-        "NpcQuestGiverRendererMixin",
         "ClientLevelStateMixin",
         "ClientPacketHandlersMixin",
-        "ItemRequirementTooltipMixin"
+        "ItemRequirementTooltipMixin",
+        "PacketAchievementMixin",
+        "PacketChatMixin",
+        "PacketDialogMixin",
+        "PacketQuestCompletionMixin",
+        "QuestPreviewOverlayMixin"
     ],
     "mixins": [
         "NetworkSyncMixin",
+        "MainQuestChainMixin",
         "PlayerClassDataMixin",
         "PlayerLevelDataMixin",
         "PlayerLevelAllocateMixin",
@@ -24,7 +31,6 @@
         "PufferfishExperienceMixin",
         "MobLevelHandlerMixin",
         "AllocateStatPacketMixin",
-        "NpcQuestGiverEntityMixin",
         "ChooseClassPacketMixin",
         "ClassTypeUtilMixin"
     ],

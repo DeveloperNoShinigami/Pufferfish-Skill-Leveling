@@ -1,0 +1,93 @@
+{
+    "class_name": "adventurer",
+    "display_name": "Adventurer",
+    "skill_category_id": "adventurer",
+    "required_level": 0,
+    "stat_points_per_level": 3,
+    "book_lore": "Every legend starts somewhere. The Adventurer is a fresh face in the world — untrained but full of potential. Master the basics before choosing your true path.",
+    "class_weapon_type": "Any Weapon",
+    "class_weapon_icon": "minecraft:wooden_sword",
+    "class_weapon_items": [
+        "minecraft:wooden_sword",
+        "minecraft:stone_sword",
+        "minecraft:iron_sword"
+    ],
+    "attributes": {
+        "roleveling:str": { "value": 1.0, "operation": "BASE" },
+        "roleveling:agi": { "value": 1.0, "operation": "BASE" },
+        "roleveling:vit": { "value": 1.0, "operation": "BASE" },
+        "roleveling:int": { "value": 1.0, "operation": "BASE" },
+        "roleveling:dex": { "value": 1.0, "operation": "BASE" },
+        "roleveling:luk": { "value": 1.0, "operation": "BASE" }
+    },
+    "gui_description": "A fresh start. Master the basics before choosing your path.",
+    "preview_animation": "epicfight:biped/living/idle",
+    "preview_armor_base": "minecraft:leather_",
+    "preview_mainhand_item": "minecraft:wooden_sword",
+    "preview_offhand_item": "",
+    "starting_items": [
+        "minecraft:wooden_sword",
+        "minecraft:bread@16"
+    ],
+    "gui_stats": [
+    
+        {
+            "label_key": "STR",
+            "icon": "minecraft:textures/item/iron_sword.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "AGI",
+            "icon": "minecraft:textures/item/feather.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "VIT",
+            "icon": "minecraft:textures/item/apple.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "INT",
+            "icon": "minecraft:textures/item/book.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "DEX",
+            "icon": "minecraft:textures/item/bow.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "LUK",
+            "icon": "minecraft:textures/item/rabbit_foot.png",
+            "stat_type": "number",
+            "count": 1
+        }
+    ],
+    "gui_passives": [
+        {
+            "pufferfish_skill_id": "toughen_up",
+            "icon": "minecraft:textures/item/apple.png",
+            "level": 1
+        },
+        {
+            "pufferfish_skill_id": "keen_edge",
+            "icon": "minecraft:textures/item/flint.png",
+            "level": 5
+        },
+        {
+            "pufferfish_skill_id": "iron_skin",
+            "icon": "minecraft:textures/item/iron_nugget.png",
+            "level": 10
+        },
+        {
+            "pufferfish_skill_id": "second_wind",
+            "icon": "minecraft:textures/item/golden_apple.png",
+            "level": 15
+        }
+    ]
+}

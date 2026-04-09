@@ -4,13 +4,16 @@ import com.example.epicclassmod.client.ClientClassState;
 import com.example.epicclassmod.client.ClientPacketHandlers;
 import com.example.epicclassmod.data.ModSettings;
 import com.example.epicclassmod.data.PlayerClassData;
-import com.example.epicclassmod.data.PlayerClassData.ClassType;
 import com.example.epicclassmod.network.ChooseClassPacket;
 import com.example.epicclassmod.network.ModNetwork;
 import com.example.epicclassmod.network.OpenDialoguePacket;
-import net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket;
+import yesman.epicfight.api.animation.AnimationManager;
+import yesman.epicfight.api.asset.AssetAccessor;
+import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.gameasset.Armatures;
 import net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager;
 import net.bluelotuscoding.skillleveling.bridge.config.EpicClassDef;
+import net.bluelotuscoding.skillleveling.bridge.network.CustomChooseClassPacket;
 import net.bluelotuscoding.skillleveling.util.PuffishItemHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -25,10 +28,6 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.util.Identifier;
 import net.minecraft.text.OrderedText;
 import net.minecraft.util.Hand;
-import yesman.epicfight.api.animation.AnimationManager;
-import yesman.epicfight.api.asset.AssetAccessor;
-import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.gameasset.Armatures;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -409,15 +408,10 @@ public class CustomClassSelectScreen extends Screen {
             ClientClassState.selectedType = t;
             ModNetwork.CHANNEL.sendToServer(new ChooseClassPacket(t));
         } else if (choice instanceof EpicClassDef customDef) {
-            // Use proxy type for local visual state instead of hardcoded WARRIOR
-            PlayerClassData.ClassType proxyT = PlayerClassData.ClassType.WARRIOR;
-            if (customDef.epic_class_proxy != null) {
-                try {
-                    proxyT = PlayerClassData.ClassType.valueOf(customDef.epic_class_proxy.toUpperCase());
-                } catch (Exception ignored) {
-                }
-            }
-            ClientClassState.selectedType = proxyT;
+            // Always use WARRIOR as the ECM sentinel so the book/UI treats a class as active.
+            // Our ClientClassStateMixin overrides all displayed data, so the enum value itself
+            // is never shown to the player — it just needs to be non-NONE.
+            ClientClassState.selectedType = PlayerClassData.ClassType.WARRIOR;
 
             net.bluelotuscoding.skillleveling.network.ForgeNetworkHandler.CHANNEL
                     .sendToServer(new CustomChooseClassPacket(customDef.class_name));
@@ -425,8 +419,12 @@ public class CustomClassSelectScreen extends Screen {
 
         MinecraftClient.getInstance().setScreen(null);
         if (this.parentClassId == null) {
-            OpenDialoguePacket fake = new OpenDialoguePacket(-1, "main__gui.epicclassmod.quest.main.1", false);
-            ClientPacketHandlers.scheduleMainDialogue(fake, 2500L);
+            net.bluelotuscoding.skillleveling.bridge.BridgeConfig _cfg =
+                    net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager.getConfig();
+            if (_cfg == null || !_cfg.useCnpcQuests) {
+                OpenDialoguePacket fake = new OpenDialoguePacket(-1, "main__gui.epicclassmod.quest.main.1", false);
+                ClientPacketHandlers.scheduleMainDialogue(fake, 2500L);
+            }
         }
     }
 
@@ -599,20 +597,22 @@ public class CustomClassSelectScreen extends Screen {
         int nextY = drawWrappedScaled(g, desc, descX, descY, descW, CLR_SUBTEXT, 0.95f);
 
         int siTitleY = nextY + pageSizeToScreenH(8);
-        drawStringPxBase(g, textRenderer, trOr("gui.epicclassmod.starting_items", "Starting Items"),
+        String siLabel = trOr("gui.epicclassmod.starting_items", "Starting Items");
+        drawStringPxBase(g, textRenderer, siLabel,
                 pageToScreenX(rightX0), siTitleY, CLR_TEXT, 1.0f, false);
 
         List<ItemStack> items = startingItems(choice);
-        int iconX = pageToScreenX(rightX0);
-        int iconY = siTitleY + pageSizeToScreenH(14);
-        int slot = 0;
         int START_ITEM_PX0 = 18;
         int startItemPx = pageSizeToScreenW(START_ITEM_PX0);
         int iconGapPx = pageSizeToScreenW(6);
+        int labelW = Math.round(textRenderer.getWidth(siLabel) * globalScale);
+        int iconX = pageToScreenX(rightX0) + labelW + pageSizeToScreenW(6);
+        int iconY = siTitleY - (startItemPx - linePxH(1.0f)) / 2;
+        int slot = 0;
 
         if (items.isEmpty()) {
             drawStringPxBase(g, textRenderer, trOr("gui.epicclassmod.starting_items.none", "-"), iconX,
-                    iconY + pageSizeToScreenH(4), -5592406, 1.0f, false);
+                    siTitleY, -5592406, 1.0f, false);
         } else {
             for (ItemStack st : items) {
                 int ix = iconX + slot * (startItemPx + iconGapPx);
@@ -993,6 +993,7 @@ public class CustomClassSelectScreen extends Screen {
     private static String trOr(String key, String fallback, Object... args) {
         Language lang = Language.getInstance();
         return lang.hasTranslation(key) ? Text.translatable(key, args).getString() : fallback;
+
     }
 
     private String titleKey(PlayerClassData.ClassType t) {

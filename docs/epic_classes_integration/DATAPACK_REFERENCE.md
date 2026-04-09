@@ -20,7 +20,6 @@ The main configuration file for Epic Classes.
 | `lore_key` | String | No | Language key for the detailed lore/description. |
 | `book_lore` | String | No | Literal string used for detailed lore in the class book if key is missing. |
 | `skill_category_id` | String | **Yes** | The Pufferfish Skills category ID mapped to this class. |
-| `job_master_id` | String | No | The Job Master NPC config ID. |
 | `epic_class_proxy` | String | **Yes** | Epic Fight animation root (`WARRIOR`, `PALADIN`, `BERSERKER`, `REAPER`, `SORCERER`, `ARCHER`). |
 | `gui_title` | String | No | Language key for the title specifically shown in the new Class Select screen. |
 | `gui_description` | String | No | Short description shown in the Class Select screen. |
@@ -32,8 +31,11 @@ The main configuration file for Epic Classes.
 | `preview_armor_base` | String | No | Base armor ID prefix to equip on the dummy (e.g. `minecraft:iron_`). |
 | `preview_mainhand_item` | String | No | Item in the dummy's mainhand. Supports full NBT strings. |
 | `preview_offhand_item` | String | No | Item in the dummy's offhand. Supports full NBT strings. |
-| `starting_items` | String[] | No | Items granted when selecting the class. Supports quantities via `@` or NBT. |
-| `attributes` | Object | No | Immediate stats applied permanently when selecting the class. Keys are attribute IDs, values are `{"value": X, "operation": "..."}` objects. |
+| `is_sorcerer_type` | Boolean | No | When `true`, the Class Book shows the mana (sorcerer) stat tab for this class. Default: `false`. |
+| `required_level` | Integer | No | ECM character level required before a player can advance into this class. Set on the child class. Default: `0`. |
+| `stat_points_per_level` | Integer | No | Stat points granted per Pufferfish level while in this class. `0` = use the global bridge config value. |
+| `starting_items` | String[] | No | Items granted when selecting the class. Supports quantities via `@` or NBT. Only given once per class per player. |
+| `attributes` | Object | No | Immediate stats applied permanently when selecting the class. Keys must be fully-qualified Minecraft attribute IDs (e.g. `"roleveling:str"`, `"minecraft:generic.max_health"`). Values are `{"value": X, "operation": "BASE\|ADDITION\|MULTIPLY_BASE\|MULTIPLY_TOTAL"}` objects. Do **not** use bare stat names (`"str"`) — they will not resolve. An optional `"command"` field can be added to any entry to fire a server command when the class is selected (e.g. for special one-time interactions, granting permissions, or triggering external mod hooks); use `{value}` and `{player}` as substitution tokens. When `command` is present the attribute modifier step is skipped for that entry — it is a command-only slot. |
 | `gui_stats` | Object[] | No | Visual representation of stats on the UI. See Stat UI Schema below. |
 | `gui_passives` | Object[] | No | Pufferfish Skills to display as "Class Traits" in the UI. See Passive UI Schema below. |
 
@@ -51,34 +53,29 @@ The main configuration file for Epic Classes.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `pufferfish_skill_id` | String | No | The ID of the Pufferfish skill to link to. Overrides name/desc keys if found. |
+| `pufferfish_skill_id` | String | No | The ID of the Pufferfish skill to link to. When set, the screen auto-fetches the skill's title and description instead of using `name_key`/`desc_key`. |
 | `icon` | String | No | Valid item ID or texture path. |
-| `name_key` | String | No | Translation key for the passive's name (if not using Pufferfish ID). |
-| `desc_key` | String | No | Translation key for the passive's description (if not using Pufferfish ID). |
+| `name_key` | String | No | Translation key for the passive's name (used only when `pufferfish_skill_id` is absent or unresolvable). |
+| `desc_key` | String | No | Translation key for the passive's description (used only when `pufferfish_skill_id` is absent or unresolvable). |
+| `level` | Integer | No | The Pufferfish level at which this passive is unlocked. Shown in the Class Select UI and used for bridge passive slot mapping. Default: `1`. |
 
-## Attribute Schema (`epic_classes/attributes/<id>.json`)
+## Attribute Schema (`epicclassmod/epic_class_attributes.json` — slot entries)
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | String | **Yes** | Unique ID within the file. |
-| `name` | String | **Yes** | Translation key for the attribute. |
-| `icon` | String | No | Item ID used as icon. |
-| `attribute_id` | String | **Yes** | Raw Minecraft/Epic Fight attribute to modify. |
-| `value` | String | **Yes** | Math expression (uses `points`). |
-| `operation` | String | **Yes** | Combine operation (`ADDITION`, `MULTIPLY_BASE`, etc). |
-| `max_points` | Integer | No | Cap the stat to this maximum point investment. |
-| `description` | String | No | Tooltip description. |
-
-## Job Master Schema (`epic_classes/job_masters/<id>.json`)
+Slots live inside `attributes_by_class.<classId>[].slots[]`. Use `"global"` as the class key for pages shown to every class.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `id` | String | **Yes** | Unique identifier for your job master config. |
-| `marker_block` | String | No | Registry ID of the block that triggers spawning/location marking. |
-| `texture` | String | No | Resource location of the NPC's custom texture. |
-| `name_key` | String | No | Translation key for the NPC's display name. |
-| `dialogue_key` | String | No | Translation key for the overarching NPC dialogue. |
-| `equipment` | Object | No | Key-value mapping of the NPC's worn equipment and weapons. Valid keys: `mainhand`, `offhand`, `helmet`, `chestplate`, `leggings`, `boots`. Values are item IDs/NBT strings. |
+| `id` | String | **Yes** | Unique ID within the page. |
+| `name` | String | **Yes** | Translation key or literal string for the attribute's display name. |
+| `icon` | String | No | Item ID used as the slot icon. |
+| `attribute_id` | String | **Yes** | Fully-qualified Minecraft attribute ID to modify (e.g. `roleveling:str`, `minecraft:generic.max_health`). Bare names will not resolve. |
+| `value` | String | **Yes** | Math expression defining the modifier value. Available variable: `points` (total points invested in this slot). |
+| `operation` | String | **Yes** | How the value is applied: `ADDITION`, `MULTIPLY_BASE`, or `MULTIPLY_TOTAL`. |
+| `format` | String | No | Number format string for the UI display (e.g. `+#` for whole numbers, `+%.2f` for decimals). |
+| `max_points` | Integer | No | Maximum points a player can invest in this slot. |
+| `point_cost` | String | No | Math expression for how many stat points each allocation costs. Supports `points`. Defaults to `1` per allocation if omitted. |
+| `command` | String | No | Server command fired on each allocation. Tokens: `{value}` (computed value), `{player}` (player name). Runs in addition to the attribute modifier — does not replace it. |
+| `description` | String | No | Tooltip description shown in the Class Book UI. |
 
 ## Global Bridge Schema (`config/pufferfish_epic_classes_bridge.json`)
 
@@ -94,6 +91,26 @@ The main configuration file for Epic Classes.
 | `lockOtherCategories` | Boolean | `true` | Automatically locks all non-mapped Pufferfish categories when a player changes classes. |
 | `syncOnLogin` | Boolean | `true` | Re-syncs levels and attributes when a player joins the server. |
 | `disableBaseClasses` | Boolean | `false` | Disables selection of the base Epic Classes via traditional menus if utilizing custom class progression. |
+| `useCnpcQuests` | Boolean | `false` | Switches the integration into CNPC-first quest mode. CustomNPCs owns visible quest/dialog flows, while the addon continues to own class and Pufferfish state. |
+| `cnpcQuestMappings` | Map<String, Object> | Empty | Optional metadata keyed by the exact CustomNPCs quest ID for Epic Class-facing quest UI placement. |
+
+### `cnpcQuestMappings` Schema
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `classId` | String | No | Optional class ID for quests that belong to a specific class/job line. |
+| `bookCategory` | String | No | Controls which Epic Class-facing quest section the CNPC quest appears in: `main`, `job`, or `side`. |
+
+## CustomNPCs Stored Data Contract
+
+When `useCnpcQuests` is enabled, the bridge reads role markers from the NPC's `CNPCStoredData`.
+
+| Key | Type | Required | Description |
+|---|---|---|---|
+| `job_master` | String | No | Exact class ID for NPCs that can participate in class-related flows. These NPCs may also give regular quests. |
+| `quest_npc` | String | No | Exact quest role or pool ID for NPCs that only participate in general quest/dialog flows. |
+
+NPCs may define both keys at once.
 
 ## Item Restriction Schema (`epicclassmod/item_restrictions/<id>.json`)
 
@@ -109,6 +126,7 @@ Defines advanced item usage requirements. Supports both a single object format a
 | `require_worn` | String Array | No | The player must wear at least one of these armor piece item IDs. |
 | `require_effect` | String Array | No | The player must have ALL of these status effect IDs active. |
 | `require_quest` | String Array | No | The player must have accepted ALL of these Epic Class Quest IDs. |
+| `tooltip` | Boolean | No | When `true`, displays a restriction tooltip on the item tooltip when the player does not meet requirements. Default: `false`. |
 
 ---
 

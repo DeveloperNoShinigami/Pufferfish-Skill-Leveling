@@ -34,7 +34,10 @@ dependencies {
 	modImplementation("net.puffish:skillsmod:${project.properties["skills_version"]}:forge")
 
 	// Epic Class Mod (local jar for mixin targets)
-	modImplementation(files("../libs/epicclassmod-1.8.0.jar"))
+	modImplementation(files("../libs/epicclassmod-1.8.2.jar"))
+
+	// CustomNPCs integration - compile against exact signatures, but keep it optional at runtime
+	compileOnly(files("../libs/CustomNPCs-1.20.1-GBPort-Unofficial-1.20.1.20260227.jar"))
 
 	implementation(project(path = ":Common", configuration = "namedElements"))
 
@@ -60,6 +63,24 @@ tasks.check {
 tasks.jar {
 	from(project.rootDir.resolve("LICENSE.txt"))
 	from(project.rootDir.resolve("LICENSE-RESOURCES.txt"))
+	archiveClassifier.set("dev")
+}
+
+tasks.remapJar {
+	// Explicit dependency on Common so a clean build always recompiles it first.
+	dependsOn(project(":Common").tasks.named("compileJava"))
+	dependsOn(project(":Common").tasks.named("processResources"))
+	inputFile.set(tasks.jar.get().archiveFile)
+	archiveClassifier.set("")
+	destinationDirectory.set(layout.buildDirectory.dir("libs"))
+}
+
+// Convenience: ./gradlew :Forge:cleanAll  — cleans both Forge and Common.
+tasks.register("cleanAll") {
+	group = "build"
+	description = "Cleans Forge and Common build outputs."
+	dependsOn(tasks.clean)
+	dependsOn(project(":Common").tasks.named("clean"))
 }
 
 tasks.processResources {

@@ -1,5 +1,6 @@
 package net.bluelotuscoding.skillleveling.bridge.forge.mixin;
 
+import net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,6 +20,10 @@ public class ClientPacketHandlersMixin {
             java.lang.reflect.Method npcIdMethod = pkt.getClass().getMethod("npcId");
             String npcId = (String) npcIdMethod.invoke(pkt);
             if ("main__gui.epicclassmod.quest.main.1".equals(npcId)) {
+                if (BridgeConfigManager.getConfig() != null && BridgeConfigManager.getConfig().useCnpcQuests) {
+                    ci.cancel();
+                    return;
+                }
                 try {
                     Class<?> stateClass = Class.forName("com.example.epicclassmod.client.ClientClassState");
                     Object selectedType = stateClass.getField("selectedType").get(null);

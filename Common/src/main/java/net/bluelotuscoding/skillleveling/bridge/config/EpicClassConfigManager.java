@@ -5,14 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.io.File;
-import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
-import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.minecraft.util.Identifier;
 
 public class EpicClassConfigManager {
@@ -20,11 +18,8 @@ public class EpicClassConfigManager {
     private static File epicClassesDir;
     private static File attributesFile;
     private static File classesDir;
-    private static File jobMastersDir;
-
     private static java.util.Map<String, java.util.List<ClassPageDef>> classAttributePages = new java.util.HashMap<>();
     private static java.util.Map<String, EpicClassDef> classDefinitions = new java.util.HashMap<>();
-    private static java.util.Map<String, JobMasterDef> jobMasterDefinitions = new java.util.HashMap<>();
     private static net.bluelotuscoding.skillleveling.bridge.BridgeConfig syncedConfig = new net.bluelotuscoding.skillleveling.bridge.BridgeConfig();
 
     public static void setSyncedConfig(net.bluelotuscoding.skillleveling.bridge.BridgeConfig config) {
@@ -47,11 +42,6 @@ public class EpicClassConfigManager {
             String name = def.class_name != null ? def.class_name : id.toString();
             classDefinitions.put(name.toLowerCase(java.util.Locale.ROOT), def);
         });
-    }
-
-    public static void setJobMasters(Map<String, JobMasterDef> jobMasters) {
-        jobMasterDefinitions.clear();
-        jobMasterDefinitions.putAll(jobMasters);
     }
 
     public static void setAttributePages(Map<String, List<ClassPageDef>> pages) {
@@ -79,6 +69,11 @@ public class EpicClassConfigManager {
                                     java.util.Set.of("points"));
                             def.compiledExpression = result.getSuccess().orElse(null);
                         }
+                        if (def != null && def.point_cost != null && !def.point_cost.isBlank()) {
+                            var costResult = net.puffish.skillsmod.expression.DefaultParser.parse(def.point_cost,
+                                    java.util.Set.of("current"));
+                            def.compiledPointCostExpression = costResult.getSuccess().orElse(null);
+                        }
                     }
                 }
             }
@@ -91,7 +86,6 @@ public class EpicClassConfigManager {
         try (Writer writer = Files.newBufferedWriter(defaultClassFile.toPath(), StandardCharsets.UTF_8)) {
             JsonObject root = new JsonObject();
             root.addProperty("class_name", "epic_classes:necromancer");
-            root.addProperty("job_master_id", "necromancer_master");
             root.addProperty("gui_title", "Necromancer");
             root.addProperty("gui_description", "A master of the dark arts who summons minions.");
 
@@ -134,32 +128,6 @@ public class EpicClassConfigManager {
                     .info("Generated default class: " + defaultClassFile.getName());
         } catch (Exception e) {
             net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER.warn("Failed to generate default class config.");
-        }
-    }
-
-    private static void generateDefaultJobMaster() {
-        File defaultMasterFile = new File(jobMastersDir, "necromancer_master.json");
-        try (Writer writer = Files.newBufferedWriter(defaultMasterFile.toPath(), StandardCharsets.UTF_8)) {
-            JsonObject root = new JsonObject();
-            root.addProperty("id", "necromancer_master");
-            root.addProperty("name_key", "npc.epicclassmod.job_master.necromancer");
-            root.addProperty("texture", "epicclassmod:textures/entity/npc/necromancer.png");
-            root.addProperty("dialogue_key", "main__gui.epicclassmod.quest.job_master.necromancer");
-
-            JsonObject equipment = new JsonObject();
-            equipment.addProperty("HEAD", "minecraft:wither_skeleton_skull");
-            equipment.addProperty("CHEST", "minecraft:netherite_chestplate");
-            equipment.addProperty("MAINHAND", "minecraft:bone");
-            root.add("equipment", equipment);
-
-            root.addProperty("marker_block", "minecraft:bone_block");
-
-            GSON.toJson(root, writer);
-            net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER
-                    .info("Generated default job master: " + defaultMasterFile.getName());
-        } catch (Exception e) {
-            net.bluelotuscoding.skillleveling.util.AddonLogger.LOGGER
-                    .warn("Failed to generate default job master config.");
         }
     }
 
@@ -221,7 +189,10 @@ public class EpicClassConfigManager {
         if (normalized.startsWith("epic_classes:")) {
             normalized = normalized.substring("epic_classes:".length());
         }
-        return classAttributePages.getOrDefault(normalized, java.util.Collections.emptyList());
+        List<ClassPageDef> result = new java.util.ArrayList<>();
+        result.addAll(classAttributePages.getOrDefault("global", java.util.Collections.emptyList()));
+        result.addAll(classAttributePages.getOrDefault(normalized, java.util.Collections.emptyList()));
+        return result;
     }
 
     public static Map<String, EpicClassDef> getClasses() {
@@ -286,11 +257,4 @@ public class EpicClassConfigManager {
         return children;
     }
 
-    public static Map<String, JobMasterDef> getJobMasters() {
-        return jobMasterDefinitions;
-    }
-
-    public static JobMasterDef getJobMaster(String id) {
-        return jobMasterDefinitions.get(id);
-    }
 }

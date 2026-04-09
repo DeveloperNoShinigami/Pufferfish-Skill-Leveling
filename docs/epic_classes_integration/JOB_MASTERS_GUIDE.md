@@ -1,43 +1,59 @@
-# Job Masters
+# CNPC Class NPCs
 
 [< Back to Epic Classes Index](index.md) | [Next: Class Attributes & Scaling >](CLASS_ATTRIBUTES_GUIDE.md)
 
 ---
 
-> [!WARNING]
-> **CURRENT LIMITATION / FUTURE ADDITION:** Job Masters are currently listed as a **future addition** and are not actively used natively in the current release. While the configs exist, NPC class changing via dialogue overlaps with native Epic Classes behavior that is pending an upstream overhaul. Rely on the `/skillleveling advanceclass` command or native progression trees for now.
+Epic Class-facing NPC flows are now CNPC-owned. There is no separate `job_masters/` datapack path anymore.
 
-Job Masters are Custom NPCs that allow players to change or select classes. Define them in `data/<namespace>/puffish_skill_leveling/epic_classes/job_masters/`.
+To make a CustomNPCs NPC participate in class selection or class advancement, assign the class directly in stored data:
 
-## Configuration Syntax
-
-```json
-{
-  "id": "job_master_gunslinger",
-  "marker_block": "minecraft:iron_block",
-  "texture": "example_mod:textures/entity/npc/gunslinger.png",
-  "name_key": "npc.example_mod.job_master.gunslinger",
-  "dialogue_key": "main__gui.epicclassmod.quest.job_master.gunslinger",
-  "equipment": {
-    "helmet": "minecraft:leather_helmet",
-    "chestplate": "minecraft:iron_chestplate",
-    "mainhand": "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}"
-  }
+```js
+function init(event) {
+    event.npc.getStoreddata().put("job_master", "adventurer");
 }
 ```
 
-## Field Explanations
+That value must match the exact custom class id from your Epic Class datapack. The bridge reads the NPC's stored data and opens the correct class UI while CNPC continues to own the visible dialog.
 
-| Field | Type | Required | Description |
+If the same NPC also acts as a quest giver, add a quest role id as well:
+
+```js
+function init(event) {
+    event.npc.getStoreddata().put("job_master", "adventurer");
+    event.npc.getStoreddata().put("quest_npc", "starter_town");
+}
+```
+
+## Supported Stored Data Keys
+
+| Key | Type | Required | Description |
 |---|---|---|---|
-| `id` | String | **Yes** | Unique identifier for your job master config. |
-| `marker_block` | String | No | Registry ID of the block that triggers spawning/location marking. |
-| `texture` | String | No | Resource location of the NPC's custom texture. |
-| `name_key` | String | No | Translation key for the NPC's display name. |
-| `dialogue_key` | String | No | Translation key for the overarching NPC dialogue. |
-| `equipment` | Object | No | Key-value mapping of the NPC's worn equipment and weapons. Valid keys: `mainhand`, `offhand`, `helmet`, `chestplate`, `leggings`, `boots`. Values are item IDs/NBT strings. |
+| `job_master` | String | No | Exact custom class id for NPCs that open class-related flows. |
+| `quest_npc` | String | No | Exact quest role or pool id for NPCs that participate in mirrored CNPC quest flows. |
+| `cnpcQuestMappings` | String (JSON) | No | Optional JSON string containing per-quest metadata such as `classId`, `bookCategory`, and `title`. |
 
-By assigning this configuration ID to a matching Job Master entity in the world, the system will apply the specified texture, name, equipment, and dialogue to act as a gateway to class changes.
+## Example Combined Setup
+
+```js
+function init(event) {
+    event.npc.getStoreddata().put("job_master", "adventurer");
+    event.npc.getStoreddata().put("quest_npc", "starter_town");
+    event.npc.getStoreddata().put("cnpcQuestMappings", JSON.stringify({
+        "1": {
+            "title": "Test Quest 2",
+            "bookCategory": "job"
+        }
+    }));
+}
+```
+
+## Notes
+
+- `job_master` replaces the old `job_master_id` / `job_masters/<id>.json` pipeline.
+- `quest_npc` is a string role id, not a boolean flag.
+- `cnpcQuestMappings` uses the same object shape as the bridge config and is keyed by the exact CNPC quest id.
+- When a custom class is active, the class book uses that custom class's display identity in the job quest area instead of surfacing the Epic Class proxy enum.
 
 ---
 

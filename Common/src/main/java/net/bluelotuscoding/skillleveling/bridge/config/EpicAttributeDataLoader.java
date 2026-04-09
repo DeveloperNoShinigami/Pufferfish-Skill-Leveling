@@ -71,6 +71,11 @@ public class EpicAttributeDataLoader extends JsonDataLoader {
                             java.util.Set.of("points"));
                     def.compiledExpression = result.getSuccess().orElse(null);
                 }
+                if (def != null && def.point_cost != null && !def.point_cost.isBlank()) {
+                    var costResult = net.puffish.skillsmod.expression.DefaultParser.parse(def.point_cost,
+                            java.util.Set.of("current"));
+                    def.compiledPointCostExpression = costResult.getSuccess().orElse(null);
+                }
             }
         }
     }

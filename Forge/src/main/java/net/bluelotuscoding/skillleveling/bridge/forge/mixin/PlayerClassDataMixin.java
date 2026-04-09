@@ -1,64 +1,120 @@
 package net.bluelotuscoding.skillleveling.bridge.forge.mixin;
 
-import com.example.epicclassmod.data.PlayerClassData;
-import net.bluelotuscoding.skillleveling.bridge.data.CustomClassData;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.common.extensions.IForgeEntity;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import net.minecraft.entity.player.PlayerEntity;
 
-@Mixin(value = com.example.epicclassmod.data.PlayerClassData.class, remap = false)
+@Pseudo
+@Mixin(targets = "com.example.epicclassmod.data.PlayerClassData", remap = false)
 public class PlayerClassDataMixin {
 
     /**
-     * @author Antigravity
-     * @reason Overwriting the native ClassType fetch to pull from our custom String
-     *         ID NBT, mapping back if necessary.
+     * Intercept the native ClassType fetch to pull from our custom String
+     * ID NBT, mapping back to the enum if necessary.
+     *
+     * Uses @Inject + cancellation instead of @Overwrite for resilience
+     * against minor epicclassmod version changes.
      */
-    @Overwrite
-    public static PlayerClassData.ClassType get(PlayerEntity p) {
-        String customId = CustomClassData.getCustomClass(p);
-        return CustomClassData.getFallbackEnum(customId);
+    @SuppressWarnings("rawtypes")
+    @Inject(method = "get", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void onGet(PlayerEntity p, CallbackInfoReturnable<Object> cir) {
+        try {
+            // Only intercept on the server side — on the client, let native
+            // epicclassmod logic handle it to avoid freezes from unsynced data.
+            if (p.getWorld().isClient()) {
+                return;
+            }
+            String customId = net.bluelotuscoding.skillleveling.bridge.data.CustomClassData.getCustomClass(p);
+            Object fallback = net.bluelotuscoding.skillleveling.bridge.data.CustomClassData.getFallbackEnum(customId);
+            cir.setReturnValue(fallback);
+        } catch (Exception e) {
+            // If our bridge fails, fall through to native epicclassmod logic
+        }
+    }
+
+    @Inject(method = "set", at = @At("HEAD"), remap = false)
+    private static void beforeSet(PlayerEntity player, @Coerce Object type, CallbackInfo ci) {
+        if (!(player instanceof net.minecraft.server.network.ServerPlayerEntity ssp)) {
+            return;
+        }
+
+        if (addon$isResetType(type)) {
+            net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getSkillLevelingManager()
+                    .resetPufferfishProgressForClassReset(ssp);
+        }
     }
 
     @Inject(method = "set", at = @At("TAIL"), remap = false)
-    private static void afterSet(PlayerEntity sp, PlayerClassData.ClassType type, CallbackInfo ci) {
-        if (sp instanceof net.minecraft.server.network.ServerPlayerEntity ssp) {
-            // Using the 'type' parameter directly from the 'set' method call to avoid
-            // shadowed getClass()
-            // Use the actual custom class ID from NBT instead of the generic enum name
-            String className = net.bluelotuscoding.skillleveling.bridge.data.CustomClassData.getCustomClass(sp);
+    private static void afterSet(PlayerEntity player, @Coerce Object type, CallbackInfo ci) {
+        // Safe-cast: only process if it's a ServerPlayerEntity on the server side
+        if (!(player instanceof net.minecraft.server.network.ServerPlayerEntity ssp)) {
+            return;
+        }
 
-            if ("NONE".equalsIgnoreCase(className) || "epic_classes:none".equalsIgnoreCase(className)) {
-                // Reset stats and level to 0
-                com.example.epicclassmod.data.PlayerLevelData.resetStats(ssp);
-                try {
-                    // Use reflection to set level to 0 if possible, or direct NBT manipulation if
-                    // necessary
-                    // Testing showed the user wants "Level 0"
-                    java.lang.reflect.Method setLevel = com.example.epicclassmod.data.PlayerLevelData.class.getMethod(
-                            "setLevelDirect", net.minecraft.server.network.ServerPlayerEntity.class, int.class,
-                            boolean.class);
-                    setLevel.invoke(null, ssp, 0, true);
-                } catch (Exception e) {
-                    // Fallback to NBT if method not found or fails
-                    net.minecraft.nbt.NbtCompound tag = ((IForgeEntity) ssp).getPersistentData();
-                    if (tag.contains("ecm_leveling")) {
-                        tag.getCompound("ecm_leveling").putInt("level", 0);
-                    }
+        String className = net.bluelotuscoding.skillleveling.bridge.data.CustomClassData.getCustomClass(ssp);
+
+        if ("NONE".equalsIgnoreCase(className) || "epic_classes:none".equalsIgnoreCase(className)) {
+            try {
+                Class<?> pldClass = Class.forName("com.example.epicclassmod.data.PlayerLevelData");
+                java.lang.reflect.Method resetStats = pldClass.getMethod("resetStats", player.getClass());
+                resetStats.invoke(null, player);
+
+                java.lang.reflect.Method setLevel = pldClass.getMethod("setLevelDirect", player.getClass(), int.class,
+                        boolean.class);
+                setLevel.invoke(null, player, 0, true);
+
+            } catch (Exception e) {
+                net.minecraft.nbt.NbtCompound tag = ((net.minecraftforge.common.extensions.IForgeEntity) ssp)
+                        .getPersistentData();
+                if (tag.contains("ecm_leveling")) {
+                    tag.getCompound("ecm_leveling").putInt("level", 0);
                 }
             }
-
-            // Force native sync packet - Using the enum type directly as required by
-            // SyncClassPacket(UUID, ClassType)
-            com.example.epicclassmod.network.ModNetwork.sendToTrackingAndSelf(ssp,
-                    new com.example.epicclassmod.network.SyncClassPacket(ssp.getUuid(), type));
-
-            // Bridge handles the rest (locking categories, etc.)
-            net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.onClassChanged(ssp, className);
         }
+
+        try {
+            Class<?> modNetworkClass = Class.forName("com.example.epicclassmod.network.ModNetwork");
+            Class<?> syncPacketClass = Class.forName("com.example.epicclassmod.network.SyncClassPacket");
+            java.lang.reflect.Constructor<?> syncPacketCtor = syncPacketClass.getConstructor(java.util.UUID.class,
+                    type.getClass());
+            Object syncPacket = syncPacketCtor.newInstance(ssp.getUuid(), type);
+
+            java.lang.reflect.Method sendTracking = modNetworkClass.getMethod("sendToTrackingAndSelf", ssp.getClass(),
+                    Object.class);
+            sendTracking.invoke(null, ssp, syncPacket);
+        } catch (Exception e) {
+            // Ignore if mod network fails
+        }
+
+        net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.onClassChanged(ssp, className);
+    }
+
+    private static boolean addon$isResetType(Object type) {
+        if (type == null) {
+            return false;
+        }
+
+        try {
+            if ("NONE".equalsIgnoreCase(type.toString()) || "epic_classes:none".equalsIgnoreCase(type.toString())) {
+                return true;
+            }
+
+            try {
+                var nameMethod = type.getClass().getMethod("name");
+                Object name = nameMethod.invoke(type);
+                if (name != null && "NONE".equalsIgnoreCase(name.toString())) {
+                    return true;
+                }
+            } catch (Exception ignored) {
+            }
+        } catch (Exception ignored) {
+        }
+
+        return false;
     }
 }

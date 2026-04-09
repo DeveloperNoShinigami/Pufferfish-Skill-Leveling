@@ -43,9 +43,12 @@ puffish_skills-*_source_do_not_edit/
 epicclassmod-*_source_do_not_edit/
 decompilers/
 decompiled_classes/
-docs/Datapack_Example/old_templates
+docs/Datapack_Example/old_templates/
+docs/Class_Skill_Scripts/
+docs/cnpc_extended_scripts_and_html/
 
 #Antigravity
+.agents/
 antigravity_core/
 skill_sets/
 AGENTS.md
@@ -60,6 +63,8 @@ run/
 build_errors.txt
 .gemini/
 .antigravity/
+.claude/
+.tmp/
 
 # System Clutter
 .DS_Store

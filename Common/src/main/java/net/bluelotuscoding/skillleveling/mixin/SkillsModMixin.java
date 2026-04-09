@@ -140,16 +140,9 @@ public abstract class SkillsModMixin {
                         }
                     }
 
-                    // Get current points available
-                    int pointsLeft = 0;
-                    try {
-                        var getPointsLeftMethod = CategoryData.class.getDeclaredMethod("getPointsLeft",
-                                net.puffish.skillsmod.config.CategoryConfig.class);
-                        getPointsLeftMethod.setAccessible(true);
-                        pointsLeft = (int) getPointsLeftMethod.invoke(categoryData, categoryConfig);
-                    } catch (Exception e) {
-                        // Fallback
-                    }
+                    // Get current points available via the public API (avoids reflection)
+                    int pointsLeft = net.bluelotuscoding.skillleveling.points.SkillPointManager
+                            .getCurrentPoints(player, categoryId);
 
                     if (pointsLeft < pointsPerLevel && !force) {
                         ci.cancel();
@@ -159,8 +152,12 @@ public abstract class SkillsModMixin {
                     // Increment level
                     ext.addon$incrementSkillLevel(skillId);
 
-                    // Manually trigger ONLY the per-level rewards for the new level
+                    // Mark this level as paid so getSpentPoints counts it correctly
                     int newLevel = ext.addon$getSkillLevel(skillId);
+                    long currentPointsPaid = ext.addon$getPaidLevels(skillId);
+                    ext.addon$setPaidLevels(skillId, currentPointsPaid | (1L << newLevel));
+
+                    // Manually trigger ONLY the per-level rewards for the new level
                     triggerPerLevelRewardsOnly(player, categoryConfig, skillId, newLevel);
 
                     // Deduct points

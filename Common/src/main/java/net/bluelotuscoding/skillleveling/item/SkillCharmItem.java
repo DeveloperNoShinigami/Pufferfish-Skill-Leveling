@@ -42,8 +42,15 @@ public class SkillCharmItem extends Item {
             tooltip.add(Text.translatable("item.puffish_skill_leveling.skill_charm.unconfigured")
                     .formatted(Formatting.RED, Formatting.ITALIC));
         } else {
-            // Bonuses are now handled by ItemTooltipMixin for all imbued items
-            // preserving consistency across Gear and Curios.
+            for (ImbuedSkillHelper.ImbuedSkill skill : skills) {
+                String displayName = toTitleCase(skill.skillId);
+                tooltip.add(Text.literal(displayName + " +" + skill.level).formatted(Formatting.GOLD));
+
+                String description = resolveDescription(skill.skillId, skill.level);
+                if (description != null && !description.isEmpty()) {
+                    tooltip.add(Text.literal(description).formatted(Formatting.BLUE));
+                }
+            }
         }
 
         tooltip.add(Text.translatable("item.puffish_skill_leveling.skill_charm.hint")
@@ -53,5 +60,66 @@ public class SkillCharmItem extends Item {
     @Override
     public boolean hasGlint(ItemStack stack) {
         return true;
+    }
+
+    private static String resolveDescription(String skillId, int level) {
+        String description = net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage
+                .getDescriptionSingle(skillId, level);
+        if (description != null) {
+            return description;
+        }
+
+        for (String key : net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage.getAllKeys()) {
+            if (isFuzzySkillMatch(key, skillId)) {
+                description = net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage
+                        .getDescriptionSingle(key, level);
+                if (description != null) {
+                    return description;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static boolean isFuzzySkillMatch(String left, String right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        if (left.equals(right)) {
+            return true;
+        }
+
+        net.minecraft.util.Identifier leftId = net.minecraft.util.Identifier.tryParse(left);
+        net.minecraft.util.Identifier rightId = net.minecraft.util.Identifier.tryParse(right);
+        if (leftId != null && rightId != null) {
+            return leftId.getPath().equals(rightId.getPath());
+        }
+
+        String leftPath = left.contains(":") ? left.substring(left.indexOf(':') + 1) : left;
+        String rightPath = right.contains(":") ? right.substring(right.indexOf(':') + 1) : right;
+        return leftPath.equals(rightPath);
+    }
+
+    private static String toTitleCase(String text) {
+        if (text == null || text.isEmpty()) {
+            return "";
+        }
+
+        String normalized = text.contains(":") ? text.substring(text.indexOf(':') + 1) : text;
+        String[] parts = normalized.split("_");
+        StringBuilder result = new StringBuilder();
+
+        for (String part : parts) {
+            if (part.isEmpty()) {
+                continue;
+            }
+            if (result.length() > 0) {
+                result.append(" ");
+            }
+            result.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1).toLowerCase());
+        }
+
+        return result.toString();
     }
 }

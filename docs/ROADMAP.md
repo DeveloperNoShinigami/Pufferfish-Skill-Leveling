@@ -32,6 +32,9 @@ Current development status and future plans for Pufferfish Skill Leveling.
 - [x] Hidden skills (reveal on prerequisite met)
 - [x] Category gating with `prerequisite_skills`
 - [x] `keep_unlocked` for permanent category access
+- [x] Exclusive root enforcement (`exclusive_root: true` blocks multi-class selection)
+- [x] Parent connection enforcement (non-root skills require connected unlocked neighbor)
+- [x] Paid-level bitmask integrity (multi-rank purchases correctly tracked for point accounting)
 
 ### Description System
 - [x] Level descriptions (current rank tooltip)
@@ -85,11 +88,29 @@ Current development status and future plans for Pufferfish Skill Leveling.
 - [x] S2C Network sync for bridge data
 - [x] NBT Item icon parsing for class previews
 - [x] 10 Multi-file standardized skill categories
+- [x] Command-slot value parity (client display matches server shorthand command math)
+- [x] Reset-time command cleanup (`{value}=0` dispatch for removed command-backed allocations)
+- [x] Immediate class-book reset refresh for command-only slots (optimistic client clear)
 - [x] Block interaction gating (Breaking/Right-click)
 - [x] Entity interaction/attack gating
 - [x] Dimension access gating
 - [x] Area/Structure proximity gating
 - [x] Environmental gating (in_water, time_of_day)
+
+### CustomNPCs Integration (Soft Dependency)
+- [x] `PuffishForgeMixinPlugin` — gates all CNPC mixins at classload time; fully inert without CustomNPCs
+- [x] `CnpcClientQuestState` — client-side tracker for accepted, completed, and ready-to-turn-in quests
+- [x] `CnpcQuestEventBridge` — reflection-based event registration; registers CNPC quest listeners without hard import
+- [x] Structure tracker auto-clear — when a tracked Epic Classes structure quest completes, `ClientStructureTracker.clear()` is called automatically via reflection (event-driven, not tick-based)
+
+### RO Stat System (KubeJS Bridge)
+- [x] `roleveling:str/agi/vit/int/dex/luk` — registered as real Minecraft attributes; `getValue()` automatically includes item `AttributeModifier` contributions
+- [x] `EpicClassSyncHelper.applyCustomAttributes` — Java reads `alloc_*` NBT and writes base modifiers to live attribute instances on every sync
+- [x] `CustomAllocateStatPacket` — correctly increments `alloc_*` NBT and calls `applyCustomAttributes` immediately on packet receipt
+- [x] `getRoStat(player, stat)` — reads `roleveling:*` attribute value directly; no double-counting
+- [x] `applyStats` KubeJS bridge — translates `roleveling:*` values into puffish/vanilla attributes (HP, defense, HIT/FLEE, arrow damage, etc.)
+- [x] `ForgeEvents.onEvent(EntityAttributeModifiedEvent)` trigger — `applyStats` fires immediately after Java writes any `roleveling:*` modifier
+- [x] HP/SP recovery tick system — standalone, uses iRO VIT/INT formulas with equipment bonus stat modifiers
 
 ---
 
@@ -98,6 +119,7 @@ Current development status and future plans for Pufferfish Skill Leveling.
 - [ ] Epic Class Quest gating (require_quest implementation)
 - [ ] Expression-based cost formulas for more complex scaling
 - [ ] Additional toggle patterns and edge cases
+- [ ] iRO sub-stats display (`battlestats` command) — ASPD, CRIT, HIT, FLEE, ATK, MATK as calculated read-only values derived from base stats + equipment; no new attribute registration
 
 ---
 
@@ -105,7 +127,7 @@ Current development status and future plans for Pufferfish Skill Leveling.
 
 ### Short Term
 - [ ] Persistent config file system (`config/puffish_skill_leveling/config.json`)
-  - [ ] `disable_skill_master_house` — disable Skill Master House structure generation
+  - [x] `disable_skill_master_house` — disable Skill Master House structure generation
   - [ ] `require_unlock_for_imbuing` — gate imbued gear bonuses behind base skill unlock
   - [ ] `require_unlock_for_curio_imbuing` — gate curio imbued bonuses behind base skill unlock
   - [ ] `debug_logging` — persistent debug logging toggle (currently runtime-only via command)

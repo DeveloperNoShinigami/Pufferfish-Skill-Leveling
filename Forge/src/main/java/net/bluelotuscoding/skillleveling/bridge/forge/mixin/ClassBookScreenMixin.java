@@ -242,7 +242,7 @@ public abstract class ClassBookScreenMixin {
     @Inject(method = "isSorcererSelected()Z", at = @At("HEAD"), cancellable = true, remap = false)
     private void onIsSorcererSelected(CallbackInfoReturnable<Boolean> cir) {
         var def = addon$getSelectedClassDef();
-        if (def != null && "SORCERER".equals(def.epic_class_proxy)) {
+        if (def != null && def.is_sorcerer_type) {
             cir.setReturnValue(true);
         }
     }
@@ -253,40 +253,14 @@ public abstract class ClassBookScreenMixin {
         if (mc.player == null) {
             return null;
         }
+        // ClientCustomClassState is always authoritative — synced on login and every class change.
+        // We do NOT fall back to proxy lookup because multiple custom classes can share the same
+        // epic_class_proxy (e.g. both adventurer and swordsman use WARRIOR), making the reverse
+        // lookup non-deterministic and causing the wrong passives to render.
         String customId = ClientCustomClassState.getCustomClass(mc.player.getUuid());
         if (customId != null && !"epic_classes:none".equals(customId)) {
-            EpicClassDef res = EpicClassConfigManager.getClassDef(customId);
-            return res;
+            return EpicClassConfigManager.getClassDef(customId);
         }
-
-        // 2. Fallback to enum-based class if no custom class is active
-        try {
-            Class<?> stateClazz = Class.forName("com.example.epicclassmod.client.ClientClassState");
-            java.lang.reflect.Field selectedTypeField = stateClazz.getDeclaredField("selectedType");
-            selectedTypeField.setAccessible(true);
-            Object selectedTypeObj = selectedTypeField.get(null);
-            if (selectedTypeObj instanceof Enum) {
-                String enumName = ((Enum<?>) selectedTypeObj).name();
-                if (!"NONE".equals(enumName)) {
-                    // Try direct match first (e.g. enum NECROMANCER -> epic_classes:necromancer)
-                    String direct = "epic_classes:" + enumName.toLowerCase(java.util.Locale.ROOT);
-                    EpicClassDef directDef = EpicClassConfigManager.getClassDef(direct);
-                    if (directDef != null) {
-                        return directDef;
-                    }
-
-                    // Reverse-lookup by epic_class_proxy (e.g. enum SORCERER -> necromancer with
-                    // proxy SORCERER)
-                    for (EpicClassDef candidate : EpicClassConfigManager.getClasses().values()) {
-                        if (enumName.equals(candidate.epic_class_proxy)) {
-                            return candidate;
-                        }
-                    }
-                }
-            }
-        } catch (Exception ignored) {
-        }
-
         return null;
     }
 
@@ -458,10 +432,8 @@ public abstract class ClassBookScreenMixin {
     private int addon$currentStatIdx = -1;
 
     @Unique
-    private int addon$getClientAllocPoints(String statId) {
-        // 1. Try mapping custom stat IDs to ClientLevelState fields (optimistic local
-        // state)
-        String fieldName = switch (statId) {
+    private String addon$getClientAllocFieldName(String statId) {
+        return switch (statId) {
             case "atk" -> "allocAtk";
             case "def" -> "allocDef";
             case "aspd" -> "allocAS";
@@ -470,6 +442,13 @@ public abstract class ClassBookScreenMixin {
             case "regen" -> "allocRegen";
             default -> null;
         };
+    }
+
+    @Unique
+    private int addon$getClientAllocPoints(String statId) {
+        // 1. Try mapping custom stat IDs to ClientLevelState fields (optimistic local
+        // state)
+        String fieldName = addon$getClientAllocFieldName(statId);
 
         if (fieldName != null) {
             try {
@@ -492,6 +471,75 @@ public abstract class ClassBookScreenMixin {
         }
 
         return 0;
+    }
+
+    @Unique
+    private void addon$applyOptimisticResetClientState() {
+        var def = addon$getSelectedClassDef();
+        var player = MinecraftClient.getInstance().player;
+        if (def == null || player == null) {
+            return;
+        }
+
+        List<ClassPageDef> pages = EpicClassConfigManager.getPagesForClass(def.class_name);
+        if (pages == null || pages.isEmpty()) {
+            return;
+        }
+
+        int refundedPoints = 0;
+
+        try {
+            Class<?> stateClazz = Class.forName("com.example.epicclassmod.client.ClientLevelState");
+            java.lang.reflect.Field statPointsField = stateClazz.getDeclaredField("statPoints");
+            statPointsField.setAccessible(true);
+
+            net.minecraft.nbt.NbtCompound persistentData = player.getPersistentData();
+            net.minecraft.nbt.NbtCompound ecm = persistentData.getCompound("ecm_leveling");
+
+            for (ClassPageDef page : pages) {
+                if (page.slots == null) {
+                    continue;
+                }
+
+                for (AttributeDef slot : page.slots) {
+                    if (slot == null || slot.id == null || slot.id.isBlank()) {
+                        continue;
+                    }
+
+                    int currentPoints = addon$getClientAllocPoints(slot.id);
+                    if (currentPoints <= 0) {
+                        continue;
+                    }
+
+                    refundedPoints += currentPoints;
+
+                    String fieldName = addon$getClientAllocFieldName(slot.id);
+                    if (fieldName != null) {
+                        try {
+                            java.lang.reflect.Field allocField = stateClazz.getDeclaredField(fieldName);
+                            allocField.setAccessible(true);
+                            allocField.setInt(null, 0);
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    String allocKey = "alloc_" + slot.id;
+                    if (ecm.contains(allocKey)) {
+                        ecm.remove(allocKey);
+                    }
+                }
+            }
+
+            if (refundedPoints > 0) {
+                int currentStatPoints = statPointsField.getInt(null);
+                int updatedStatPoints = currentStatPoints + refundedPoints;
+                statPointsField.setInt(null, updatedStatPoints);
+                ecm.putInt("stat_points", updatedStatPoints);
+            }
+
+            persistentData.put("ecm_leveling", ecm);
+        } catch (Exception ignored) {
+        }
     }
 
     @Unique
@@ -746,6 +794,23 @@ public abstract class ClassBookScreenMixin {
                                 }
                             }
 
+                            // Keep client display aligned with server-side shorthand:
+                            // plain numeric value means per-point scaling.
+                            if (customAttr.value != null) {
+                                String expr = customAttr.value.trim();
+                                if (!expr.isEmpty() && !expr.contains("points")) {
+                                    try {
+                                        expressionVal = Double.parseDouble(expr) * p;
+                                    } catch (NumberFormatException ignored) {
+                                        // Keep expression result when this is not a plain number.
+                                    }
+                                }
+                            }
+
+                            if (p <= 0) {
+                                expressionVal = 0;
+                            }
+
                             // 2. Display strategy: Total value if attribute exists, expression bonus
                             // otherwise
                             try {
@@ -833,6 +898,15 @@ public abstract class ClassBookScreenMixin {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Redirect(method = "m_6375_(DDI)Z", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/network/simple/SimpleChannel;sendToServer(Ljava/lang/Object;)V"), remap = false)
+    private void addon$redirSendToServer(net.minecraftforge.network.simple.SimpleChannel channel, Object packet) {
+        if (packet != null
+                && packet.getClass().getName().equals("com.example.epicclassmod.network.ResetStatsPacket")) {
+            addon$applyOptimisticResetClientState();
+        }
+        channel.sendToServer(packet);
     }
 
     @Inject(method = "statTooltipLines(I)[Ljava/lang/String;", at = @At("HEAD"), cancellable = true, remap = false)

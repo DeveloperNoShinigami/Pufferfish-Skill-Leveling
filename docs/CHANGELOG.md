@@ -2,6 +2,110 @@
 
 All notable changes to Pufferfish Skill Leveling are documented in this file. Dates are in YYYY-MM-DD format.
 
+## [2026-04-08] — Command Sync Regression Hotfix (RO Refresh + Reset Timing)
+
+### Fixed
+- **Per-Click Command Slot Execution Restored**: Attribute slots configured with `command` (including mixed attribute+command slots) now execute their command again on each stat allocation click via `CustomAllocateStatPacket`.
+- **`roleveling refresh` Command Compatibility**: Command side-effects are executed with player command context so KubeJS commands that require `ctx.source.player` run correctly during stat allocation.
+- **Reset-Time RO Refresh Ordering**: Reset cleanup commands are now deferred to run after reset writes complete, so `roleveling refresh` sees post-reset values instead of stale pre-reset allocations.
+
+### Notes
+- This keeps the reset-only command dedupe behavior while restoring real-time click-sync for command-backed stat slots.
+
+## [2026-04-08] — Command Slot Consistency & Reset Sync
+
+### Fixed
+- **Client/Server Value Parity for Command Slots**: Class Book display math now matches server-side command execution for shorthand numeric `value` expressions (for example, `"value": "1"`). Numeric values without `points` are now treated as per-point scaling on the client, matching command execution logic on the server.
+- **Reset-Time Command Cleanup**: Full stat reset now runs each affected command-backed attribute slot once with `{value}=0`, ensuring command-driven effects are properly cleared when allocated points are removed.
+- **Immediate Class Book Reset Refresh**: Confirming a reset now applies an optimistic client-side allocation clear so command-only slots visually reset to 0 immediately without requiring a book reopen.
+
+### Notes
+- Reset popup visuals are intentionally unchanged (the current inventory-based diamond display remains by design).
+
+## [2026-04-08] — Skill Tree Unlock Regression Fix
+
+### Fixed
+- **Skill Tree Completely Locked (Regression)**: Skills were appearing fully gray/unclickable in the Pufferfish skill tree even when the player had positive skill points. Root cause: three connection-validation checks added to `onCanUnlockSkill` (`CategoryDataMixin`) in the previous session were implemented using `category.connections().normal().getNeighborsFor(skill.id())`, which returns a skill's **children** (outgoing connections), not its **parents**. This caused the parent-connection check to always find 0 unlocked neighbors for every non-root skill (`0 < requiredParents = 1`), making `canUnlockSkill` return `false` for all non-root skills — showing them as `LOCKED` in the UI. The three blocks (exclusive-connections check, exclusive-root check, parent-connection check) have been removed. Pufferfish enforces these constraints natively through its own `canUnlockSkill` logic, which runs unobstructed when our mixin does not cancel early. The native cost safety gate (which guards skills that have a `definition.cost()` but no `PerLevelRewardsReward`) is retained as it remains necessary.
+
+---
+
+## [2026-04-07] — RO Stat Attribute Migration & KubeJS Bridge Rework
+
+### Added
+- **`roleveling:*` Real Minecraft Attributes**: STR, AGI, VIT, INT, DEX, and LUK are now registered as actual Minecraft attributes (`roleveling:str` through `roleveling:luk`) via `RoLevelingAttributes`. This means `getValue()` automatically includes all item `AttributeModifier` contributions without any manual gear scanning — the engine handles it for free.
+- **`EpicClassSyncHelper.applyCustomAttributes`**: On every server sync, Java reads the player's `alloc_str/agi/vit/int/dex/luk` NBT keys and writes them as base modifiers to the corresponding `roleveling:*` attribute instances. This is the authoritative source of truth for allocated stat points.
+- **ForgeEvents Trigger for `applyStats`**: Added a `ForgeEvents.onEvent('net.minecraftforge.event.entity.EntityAttributeModifiedEvent')` listener filtered to `roleveling:*` attributes. Whenever Java writes a stat point allocation, `applyStats` fires immediately — closing the gap where the ClassBook UI allocated points but the KubeJS attribute bridge didn't know until relog or inventory change.
+- **HP/SP Recovery System (Standalone)**: `ro_status_system.js` now provides a self-contained HP/SP regeneration tick system using Ragnarok Online formulas. HP recovery scales with VIT and max HP; SP recovery scales with INT, max SP, and an optional modifier from equipment bonus stats. Both are exported for external use.
+
+### Fixed
+- **`CustomAllocateStatPacket` Stat Allocation**: The packet handler now correctly reads the incoming stat key, increments the `alloc_*` NBT counter, and calls `applyCustomAttributes` to push the modifier to the live `roleveling:*` attribute — previously the modifier was not being applied until the next full sync.
+- **`ro_attribute_bridge.js` Double-Counting Eliminated**: `getRoStat(player, stat)` now reads directly from `player.getAttribute("roleveling:" + stat.toLowerCase()).getValue()`. The old pattern that read base NBT values and added gear bonuses manually caused double-counting when items also had `AttributeModifier` entries.
+- **`applyStats` Loop Safety**: The ForgeEvents `EntityAttributeModifiedEvent` listener is safe from recursion — `applyStats` only writes to puffish/vanilla attributes, never back to `roleveling:*`. Firing 6× per allocation (once per attribute in `applyCustomAttributes`) is functionally harmless.
+- **Class JSON Attribute Keys**: `adventurer.json` and `swordsman.json` had bare keys (`"str"`, `"agi"`, etc.) that Java was looking up via `ForgeRegistries.ATTRIBUTES` — which requires the full namespaced ID. Fixed to `"roleveling:str"`, `"roleveling:agi"`, etc. The dead `command` fields (`roleveling setbase ... {player}`) have also been removed; that command no longer exists in the reworked system.
+
+### Removed
+- **Status Effect Infrastructure in `ro_status_system.js`**: `RO_STATUS_KEYS`, `getPlayerStatuses`, `addStatus`, `removeStatus`, `hasStatus`, `getStatusData`, the per-status tick loop, the `rostatus` command, and all related global exports have been stripped. The status system scope is HP/SP recovery only; full status effects (Poison, Stun, Silence, etc.) are deferred to a future implementation.
+- **`initPlayerData` from `ro_attribute_bridge.js`**: The old initialization function that seeded base stat NBT values on login is gone. Stats now live exclusively as Minecraft attribute modifiers — no NBT seeds needed.
+- **`addstat`/`setbase` commands from `ro_leveling_system.js`**: These KubeJS commands were the old mechanism for writing stat values. The Java attribute system replaces them entirely.
+
+### UI
+- **Starting Items Inline Layout**: In `CustomClassSelectScreen`, starting item icons now render on the same line as the "Starting Items" label rather than on a separate row below it. Label pixel width is measured via `textRenderer.getWidth(siLabel) * globalScale` and the icons begin immediately after with a 6px gap. This frees a full row of vertical space, giving the passives grid more room.
+
+---
+
+## [2026-04-05] — Skill Tree Integrity Fixes
+
+### Fixed
+- **Points Overcounting Bug**: Multi-rank skill purchases (rank 1→2+) now correctly mark each level as paid in the `addon_paid_levels` bitmask. Previously, only the first unlock (rank 0→1) set the paid bit, causing `getSpentPoints` to undercount — which inflated `getPointsLeft` and allowed players to spend phantom points on other skills for free.
+- **Exclusive Root Enforcement**: Players can no longer unlock multiple root skills in a category with `"exclusive_root": true`. The `canUnlockSkill` gate now checks whether any other root in the same category is already unlocked and blocks the attempt if so. Checks also fall back to pufferfish's native `unlockedSkills` set so natively-tracked first unlocks are caught correctly.
+- **Parent Connection Enforcement**: Non-root skills are now blocked unless the required number of connected normal-connection neighbors are already unlocked. Previously, the server-side `canUnlockSkill` gate did not verify parent connectivity, allowing any skill in the tree to be clicked regardless of position. Fallback to `unlockedSkills` added for parity with exclusive root check.
+- **Native Cost Gate**: `canAffordLevel` previously returned `true` unconditionally for any skill without a `PerLevelRewardsReward` (e.g. plain attribute-only skills, NYI placeholder nodes, class roots). A final native cost check now enforces `definition.cost()` via `SkillsAPI.getPointsLeft()` before allowing an unlock, closing the gap where players could click and spend skills for free.
+
+---
+
+## [2026-04-01] — Datapack Sync, Class Reset, and Skill Charm Fixes
+
+### Added
+- **Datapack-Driven Bridge Reloads**: Epic Class bridge configuration is now driven by datapacks through `BridgeDataLoader`, with `syncBridgeToAll()` pushing refreshed bridge data to connected clients immediately after `/reload`.
+- **Passive Display Reloading**: Passive skill titles and descriptions are now reloaded and cached from datapack definitions during bridge reloads so client-facing class and skill text stays current without relogging.
+- **Toggle Cooldown Client Sync**: Registered `SyncToggleCooldownPacket` on the Forge channel and bumped the network protocol so cooldown state can be pushed cleanly to clients.
+
+### Fixed
+- **Pre-Reset Pufferfish Cleanup**: `/class reset` now clears addon and Pufferfish progression before the previous class/category context is lost, including skill levels, paid-level bookkeeping, category XP, and follow-up lock resync.
+- **Skill Charm Tooltip Accuracy**: Skill Charms now read their imbued skill data directly from charm NBT and display the correct skill name, level bonus, and available synced description text in the tooltip.
+- **Client Charm Resolution**: Fixed definition-based client skill lookups by replacing flattened `category:skill` parsing with structured mapping and fuzzy matching, allowing equipped charms to resolve namespaced and shorthand ids correctly.
+- **Dynamic Point-Cost Detection**: Point-cost lookups now detect nested `PerLevelRewardsReward` entries inside `ToggleReward`, preventing missed dynamic cost handling for toggle-backed skills.
+- **Class Screen Stability**: Corrected the class-selection fallback text path so `CustomClassSelectScreen` no longer fails on the broken translation fallback branch.
+
+### UI & Sync
+- **Real-Time Datapack UI Updates**: Reloaded bridge config now updates already-connected clients instead of leaving class-selection and bridge-driven UI state stale until relog.
+- **Optional-Mod Sync Safety**: Epic Class sync hooks now use reflection-based `SyncClassPacket` handling and `@Pseudo` mixin targets so optional bridge sync paths remain safe when the dependency is absent.
+- **Creative Tab Behavior Clarified**: Synced bridge/config updates no longer pretend to rebuild creative tab entries during the current client session; creative-tab contents remain static until restart or a natural tab rebuild.
+
+### Performance & Reliability
+- **Skill Master Trade Caching**: Skill Master villager trades are now cached per player per in-game day instead of being rebuilt on every interaction, reducing unnecessary server-side generation work.
+- **Trade Pool Cleanup**: Skill Master trade generation now reserves special slots for premium rolls, supports Skill Charm offers, and reduces filler-style outcomes for more consistent shop contents.
+
+---
+
+## [2026-03-16] — Crash Fixes, Robust Conditional Loading & CNPC Quest Integration
+
+### Added
+- **Fail-Safe Bridge Integration**: Refactored the Rise of Heroes (Epic Class) bridge to use `@Pseudo` Mixins and reflection. The mod now loads and runs perfectly even if the Rise of Heroes mod is missing.
+- **Early-Stage Mod Detection**: Implemented `Class.forName` based mod checking in `BridgeMixinPlugin` for reliable loading during early Forge initialization.
+- **CustomNPCs Quest Integration (Soft Dependency)**: Added full CustomNPCs quest tracking as an optional integration. When CustomNPCs is present, the mod bridges into its quest event system via reflection to track accepted, completed, and ready-to-turn-in quests on the client (`CnpcClientQuestState`). All CNPC mixins are gated by `PuffishForgeMixinPlugin` which checks for `noppes.npcs.api.NpcAPI` at mixin load time — the mod runs fully without CustomNPCs installed.
+- **Structure Tracker Auto-Clear on Quest Completion**: When a player completes a CNPC quest whose ID matches the currently tracked structure in Epic Classes (`ClientStructureTracker`), the tracker is automatically cleared. This fires on every quest state packet received, not on a tick — entirely event-driven and works via reflection so it does not create a hard dependency.
+
+### Fixed
+- **Mod Loading Crash**: Resolved `NoClassDefFoundError` and `ClassNotFoundException` errors caused by hard dependencies on Epic Class classes.
+- **Mixin Compatibility**: Cleaned up legacy renderer and entity mixins (`NpcQuestGiverRendererMixin`, `NpcQuestGiverEntityMixin`) that were causing startup failures.
+- **Event Subscriber Safety**: Commented out the `CustomJobMasterSpawner` event subscriber to prevent classloading errors when the bridge is inactive.
+
+### UI & Sync
+- **Graceful Bridge Degradation**: Bridge-specific UI elements (like the class choice packet handling and dialogue screens) now remain inert and safe when the optional dependency is absent.
+
+---
+
 ## [2026-03-13] — XP Sync & Data Cleanup Fixes
 
 ### Fixed

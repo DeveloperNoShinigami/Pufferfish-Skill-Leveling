@@ -9,6 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Stores skill levels synchronized from the server for display in the UI.
  */
 public class ClientSkillLevelStorage {
+    private record DefinitionSkillRef(String categoryId, String skillId) {
+    }
+
     private static final Map<String, Integer> baseSkillLevels = new ConcurrentHashMap<>();
     private static final Map<String, Integer> totalSkillLevels = new ConcurrentHashMap<>();
     private static final Map<String, Integer> skillMaxLevels = new ConcurrentHashMap<>();
@@ -24,8 +27,8 @@ public class ClientSkillLevelStorage {
     // resolution)
     private static final Map<String, String> pathToFullCategory = new ConcurrentHashMap<>();
 
-    // Mapping from definition ID to the key (for mixin lookups)
-    private static final Map<String, String> definitionToKey = new ConcurrentHashMap<>();
+    // Mapping from definition ID to the resolved category/skill pair.
+    private static final Map<String, DefinitionSkillRef> definitionToSkill = new ConcurrentHashMap<>();
 
     private static String getKey(String categoryId, String skillId) {
         if (categoryId == null || skillId == null) {
@@ -81,7 +84,6 @@ public class ClientSkillLevelStorage {
             baseSkillLevels.remove(key);
             totalSkillLevels.remove(key);
             skillMaxLevels.remove(key);
-            skillMaxLevels.remove(key);
             skillPointsPerLevel.remove(key);
             // Don't remove lootMode here as it's static config data, not dynamic level data
         } else {
@@ -94,7 +96,6 @@ public class ClientSkillLevelStorage {
         hiddenSkillFlags.put(key, hidden);
         toggleSkills.put(key, toggle);
         keybindSlots.put(key, keybindSlot);
-        keybindSlots.put(key, keybindSlot);
         activeToggleStates.put(key, active);
         if (lootMode != null) {
             skillLootModes.put(key, lootMode);
@@ -106,8 +107,8 @@ public class ClientSkillLevelStorage {
     }
 
     public static boolean isToggledOnByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        return key != null && activeToggleStates.getOrDefault(key, false);
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        return ref != null && activeToggleStates.getOrDefault(getKey(ref.categoryId(), ref.skillId()), false);
     }
 
     /**
@@ -115,7 +116,7 @@ public class ClientSkillLevelStorage {
      * Called when syncing descriptions so we can look up levels by definition.
      */
     public static void registerDefinitionMapping(String definitionId, String categoryId, String skillId) {
-        definitionToKey.put(definitionId, getKey(categoryId, skillId));
+        definitionToSkill.put(definitionId, new DefinitionSkillRef(categoryId, skillId));
     }
 
     /**
@@ -123,44 +124,50 @@ public class ClientSkillLevelStorage {
      * Returns 0 if no mapping found.
      */
     public static int getLevelByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        if (key == null) {
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        if (ref == null) {
             return 0;
         }
-        return baseSkillLevels.getOrDefault(key, 0);
+        return baseSkillLevels.getOrDefault(getKey(ref.categoryId(), ref.skillId()), 0);
     }
 
     /**
      * Get TOTAL level by definition ID.
      */
     public static int getTotalLevelByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        if (key == null) {
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        if (ref == null) {
             return 0;
         }
-        return totalSkillLevels.getOrDefault(key, 0);
+        String key = getKey(ref.categoryId(), ref.skillId());
+        int base = baseSkillLevels.getOrDefault(key, 0);
+        int liveBonus = getEquipmentBonus(ref.categoryId(), ref.skillId());
+        if (SideSafeClient.getPlayer() instanceof net.minecraft.entity.player.PlayerEntity) {
+            return base + liveBonus;
+        }
+        return totalSkillLevels.getOrDefault(key, base);
     }
 
     /**
      * Get max level by definition ID.
      */
     public static int getMaxLevelByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        if (key == null) {
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        if (ref == null) {
             return 0; // Changed default from 1 to 0 for better leveled check
         }
-        return skillMaxLevels.getOrDefault(key, 0);
+        return skillMaxLevels.getOrDefault(getKey(ref.categoryId(), ref.skillId()), 0);
     }
 
     /**
      * Get loot mode by definition ID.
      */
     public static String getLootModeByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        if (key == null) {
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        if (ref == null) {
             return "";
         }
-        return skillLootModes.getOrDefault(key, "");
+        return skillLootModes.getOrDefault(getKey(ref.categoryId(), ref.skillId()), "");
     }
 
     /**
@@ -174,16 +181,21 @@ public class ClientSkillLevelStorage {
      * Get points per level by definition ID.
      */
     public static int getPointsPerLevelByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        if (key == null) {
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        if (ref == null) {
             return 0; // Means not a leveled skill in this context
         }
-        return skillPointsPerLevel.getOrDefault(key, 0);
+        return skillPointsPerLevel.getOrDefault(getKey(ref.categoryId(), ref.skillId()), 0);
     }
 
     public static int getLevel(String categoryId, String skillId) {
-        // Default to 0 (not unlocked)
-        return totalSkillLevels.getOrDefault(getKey(categoryId, skillId), 0);
+        String key = getKey(categoryId, skillId);
+        int base = baseSkillLevels.getOrDefault(key, 0);
+        int liveBonus = getEquipmentBonus(categoryId, skillId);
+        if (SideSafeClient.getPlayer() instanceof net.minecraft.entity.player.PlayerEntity) {
+            return base + liveBonus;
+        }
+        return totalSkillLevels.getOrDefault(key, base);
     }
 
     public static int getBaseLevel(String categoryId, String skillId) {
@@ -199,8 +211,8 @@ public class ClientSkillLevelStorage {
     }
 
     public static boolean isToggleByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        return key != null && toggleSkills.getOrDefault(key, false);
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        return ref != null && toggleSkills.getOrDefault(getKey(ref.categoryId(), ref.skillId()), false);
     }
 
     public static boolean isHidden(String categoryId, String skillId) {
@@ -208,13 +220,13 @@ public class ClientSkillLevelStorage {
     }
 
     public static boolean isHiddenByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        return key != null && hiddenSkillFlags.getOrDefault(key, false);
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        return ref != null && hiddenSkillFlags.getOrDefault(getKey(ref.categoryId(), ref.skillId()), false);
     }
 
     public static int getKeybindSlotByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        return key != null ? keybindSlots.getOrDefault(key, 0) : 0;
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        return ref != null ? keybindSlots.getOrDefault(getKey(ref.categoryId(), ref.skillId()), 0) : 0;
     }
 
     public static void setCooldown(String categoryId, String skillId, int cooldownTicks) {
@@ -229,9 +241,10 @@ public class ClientSkillLevelStorage {
     }
 
     public static int getRemainingCooldownSecondsByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        if (key == null)
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        if (ref == null)
             return 0;
+        String key = getKey(ref.categoryId(), ref.skillId());
 
         Long expiry = skillCooldownExpiries.get(key);
         if (expiry == null)
@@ -292,8 +305,20 @@ public class ClientSkillLevelStorage {
         }
 
         int bonus = 0;
+
+        // Build combined list of equipment from standard slots and Curios
+        java.util.List<net.minecraft.item.ItemStack> equipment = new java.util.ArrayList<>();
         for (var slot : net.minecraft.entity.EquipmentSlot.values()) {
-            var stack = player.getEquippedStack(slot);
+            equipment.add(player.getEquippedStack(slot));
+        }
+
+        var extraEquipment = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getEquipmentScanner()
+                .getExtraEquipment(player);
+        if (extraEquipment != null) {
+            equipment.addAll(extraEquipment);
+        }
+
+        for (var stack : equipment) {
             if (stack.isEmpty()) {
                 continue;
             }
@@ -302,21 +327,8 @@ public class ClientSkillLevelStorage {
             var skills = net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper.getSkills(stack);
             if (!skills.isEmpty()) {
                 for (var skill : skills) {
-                    // Path-aware matching for equipment: allows shorthand category in NBT
-                    // to match a full namespaced category in the tree.
-                    boolean skillMatch = skill.skillId.equals(skillId);
-                    boolean catMatch = skill.categoryId.equals(categoryId);
-
-                    if (!catMatch && !skill.categoryId.contains(":")) {
-                        // Try matching only paths if the item has no namespace
-                        try {
-                            net.minecraft.util.Identifier treeId = net.minecraft.util.Identifier.tryParse(categoryId);
-                            if (treeId != null && treeId.getPath().equals(skill.categoryId)) {
-                                catMatch = true;
-                            }
-                        } catch (Exception ignored) {
-                        }
-                    }
+                    boolean skillMatch = isFuzzySkillMatch(skill.skillId, skillId);
+                    boolean catMatch = isCategoryMatch(skill.categoryId, categoryId);
 
                     if (skillMatch && catMatch) {
                         bonus += skill.level;
@@ -331,7 +343,7 @@ public class ClientSkillLevelStorage {
                     String imbueSkill = imbueNbt.getString("SkillId");
 
                     if (imbueCategory != null && !imbueCategory.isEmpty()) {
-                        if (imbueCategory.equals(categoryId) && skillId.equals(imbueSkill)) {
+                        if (isCategoryMatch(imbueCategory, categoryId) && isFuzzySkillMatch(imbueSkill, skillId)) {
                             int level = imbueNbt.contains("Level") ? imbueNbt.getInt("Level") : 1;
                             bonus += level;
                         }
@@ -342,19 +354,57 @@ public class ClientSkillLevelStorage {
         return bonus;
     }
 
+    private static boolean isCategoryMatch(String itemCategoryId, String categoryId) {
+        if (itemCategoryId == null || categoryId == null) {
+            return false;
+        }
+        if (itemCategoryId.equals(categoryId)) {
+            return true;
+        }
+
+        net.minecraft.util.Identifier itemId = net.minecraft.util.Identifier.tryParse(itemCategoryId);
+        net.minecraft.util.Identifier treeId = net.minecraft.util.Identifier.tryParse(categoryId);
+
+        if (itemId != null && treeId != null) {
+            return itemId.getPath().equals(treeId.getPath());
+        }
+
+        String itemPath = itemCategoryId.contains(":") ? itemCategoryId.substring(itemCategoryId.indexOf(':') + 1)
+                : itemCategoryId;
+        String treePath = categoryId.contains(":") ? categoryId.substring(categoryId.indexOf(':') + 1) : categoryId;
+        return itemPath.equals(treePath);
+    }
+
+    private static boolean isFuzzySkillMatch(String itemSkillId, String skillId) {
+        if (itemSkillId == null || skillId == null) {
+            return false;
+        }
+        if (itemSkillId.equals(skillId)) {
+            return true;
+        }
+
+        net.minecraft.util.Identifier itemId = net.minecraft.util.Identifier.tryParse(itemSkillId);
+        net.minecraft.util.Identifier targetId = net.minecraft.util.Identifier.tryParse(skillId);
+
+        if (itemId != null && targetId != null) {
+            return itemId.getPath().equals(targetId.getPath());
+        }
+
+        String itemPath = itemSkillId.contains(":") ? itemSkillId.substring(itemSkillId.indexOf(':') + 1)
+                : itemSkillId;
+        String targetPath = skillId.contains(":") ? skillId.substring(skillId.indexOf(':') + 1) : skillId;
+        return itemPath.equals(targetPath);
+    }
+
     /**
      * Get equipment bonus by definition ID.
      */
     public static int getEquipmentBonusByDefinitionId(String definitionId) {
-        String key = definitionToKey.get(definitionId);
-        if (key == null) {
+        DefinitionSkillRef ref = definitionToSkill.get(definitionId);
+        if (ref == null) {
             return 0;
         }
-        String[] parts = key.split(":", 2);
-        if (parts.length == 2) {
-            return getEquipmentBonus(parts[0], parts[1]);
-        }
-        return 0;
+        return getEquipmentBonus(ref.categoryId(), ref.skillId());
     }
 
     /**
@@ -369,8 +419,7 @@ public class ClientSkillLevelStorage {
         skillCooldownExpiries.clear();
         toggleSkills.clear();
         keybindSlots.clear();
-        definitionToKey.clear();
-        definitionToKey.clear();
+        definitionToSkill.clear();
         activeToggleStates.clear();
         skillLootModes.clear();
     }

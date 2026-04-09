@@ -1,0 +1,100 @@
+{
+    "attributes_by_class": {
+        "global": [
+            {
+                "id": "page_0",
+                "slots": [
+                    {
+                        "id": "str",
+                        "name": "STR (Strength)",
+                        "attribute_id": "roleveling:str",
+                        "icon": "minecraft:iron_sword",
+                        "description": "Raises STR. Increases melee ATK, ranged ATK (partial), and crit.",
+                        "value": "1",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 99,
+                        "command": "roleveling refresh"
+                    },
+                    {
+                        "id": "agi",
+                        "name": "AGI (Agility)",
+                        "attribute_id": "roleveling:agi",
+                        "icon": "minecraft:feather",
+                        "description": "Raises AGI. Increases attack speed, movement speed, and flee.",
+                        "value": "1",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 99,
+                        "command": "roleveling refresh"
+                    },
+                    {
+                        "id": "vit",
+                        "name": "VIT (Vitality)",
+                        "attribute_id": "roleveling:vit",
+                        "icon": "minecraft:apple",
+                        "description": "Raises VIT. Increases max HP, DEF, and natural regeneration.",
+                        "value": "1",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 99,
+                        "command": "roleveling refresh"
+                    },
+                    {
+                        "id": "int",
+                        "name": "INT (Intelligence)",
+                        "attribute_id": "roleveling:int",
+                        "icon": "minecraft:book",
+                        "description": "Raises INT. Increases MATK, max SP, spell power, and MDEF.",
+                        "value": "1",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 99,
+                        "command": "roleveling refresh"
+                    },
+                    {
+                        "id": "dex",
+                        "name": "DEX (Dexterity)",
+                        "attribute_id": "roleveling:dex",
+                        "icon": "minecraft:bow",
+                        "description": "Raises DEX. Increases ranged ATK, hit rate, and cast speed.",
+                        "value": "1",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 99,
+                        "command": "roleveling refresh"
+                    },
+                    {
+                        "id": "luk",
+                        "name": "LUK (Luck)",
+                        "attribute_id": "roleveling:luk",
+                        "icon": "minecraft:rabbit_foot",
+                        "description": "Raises LUK. Increases crit chance, crit damage, and fortune.",
+                        "value": "1",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 99,
+                        "command": "roleveling refresh"
+                    }
+                ]
+            },
+            {
+                "id": "page_1",
+                "slots": [
+                    {
+                        "id": "atk_dmg_test",
+                        "name": "ATK DMG Test",
+                        "attribute_id": null,
+                        "icon": "minecraft:iron_sword",
+                        "description": "Test slot: command-only. Uses vanilla /attribute command to grant +1 attack_damage per click. Verifies command-only slot execution works.",
+                        "value": "1",
+                        "format": "+#",
+                        "operation": "ADDITION",
+                        "max_points": 10,
+                        "command": "attribute {player} minecraft:generic.attack_damage base set {value}"
+                    }
+                ]
+            }
+        ]
+    }
+}

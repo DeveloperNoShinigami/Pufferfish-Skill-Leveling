@@ -12,6 +12,9 @@ public class AttributeDef {
     public String value;
     public String operation;
     public int max_points;
+    public String command = null;
+    public String point_cost = null;
 
     public transient Expression<Double> compiledExpression;
+    public transient Expression<Double> compiledPointCostExpression;
 }

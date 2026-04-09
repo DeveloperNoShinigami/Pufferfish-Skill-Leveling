@@ -1,0 +1,12 @@
+{
+    "restrictions": [
+        {
+            "item": "minecraft:netherite_sword",
+            "require_class": "adventurer",
+            "require_level": {
+                "category": "adventurer",
+                "min": 10
+            }
+        }
+    ]
+}

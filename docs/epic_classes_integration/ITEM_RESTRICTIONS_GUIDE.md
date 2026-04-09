@@ -1,6 +1,6 @@
 # Item Restrictions & Gating
 
-[< Back to Epic Classes Index](index.md) | [Next: Job Masters >](JOB_MASTERS_GUIDE.md)
+[< Back to Epic Classes Index](index.md) | [Next: CNPC Class NPCs >](JOB_MASTERS_GUIDE.md)
 
 ---
 
@@ -119,4 +119,4 @@ Any restriction (Item, Block, etc.) can also include environmental conditions:
 
 ---
 
-[< Back to Epic Classes Index](index.md) | [Next: Job Masters >](JOB_MASTERS_GUIDE.md)
+[< Back to Epic Classes Index](index.md) | [Next: CNPC Class NPCs >](JOB_MASTERS_GUIDE.md)

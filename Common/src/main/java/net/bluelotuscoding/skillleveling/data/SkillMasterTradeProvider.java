@@ -35,10 +35,10 @@ public class SkillMasterTradeProvider {
         }
 
         // 2. Slots Configuration
-        int minSlots = 7 + (tier - 1); // 7 at Novice (T1), 11 at Master (T5)
-        int maxSlots = minSlots + 2; // 9 at Novice (T1), 13 at Master (T5)
-        if (tier == 5)
-            maxSlots = 14;
+        // Total slots still increase per tier, but we reserve exactly 2 for "Special/Gamble" slots
+        int minSlots = 7 + (tier - 1); 
+        int maxSlots = minSlots + 2;
+        if (tier == 5) maxSlots = 14;
 
         // 3. Add Trade-In Offers
         addTradeInOffers(trades, tier, player);
@@ -48,44 +48,77 @@ public class SkillMasterTradeProvider {
             addTomeUpgradeTrades(player, trades, tier);
         }
 
-        // 5. Calculate Guaranteed Tome Slots (Fill until minSlots, minimum 2)
+        // 5. Fill Standard Tome Slots (Up to maxSlots - 2)
+        int standardCap = maxSlots - 2;
         int currentCount = trades.size();
-        int slotsToFill = Math.max(2, minSlots - currentCount);
-
-        float roll = villager.getWorld().getRandom().nextFloat();
-        int skillTomesToFill;
-        int expTomesToFill;
-
-        if (roll < 0.15f) {
-            expTomesToFill = slotsToFill;
-            skillTomesToFill = 0;
-        } else if (roll < 0.25f) { // 15% + 10%
-            skillTomesToFill = slotsToFill;
-            expTomesToFill = 0;
-        } else {
-            skillTomesToFill = slotsToFill / 2;
-            expTomesToFill = slotsToFill - skillTomesToFill;
+        if (currentCount < standardCap) {
+            addOverhauledDynamicTrades(player, trades, standardCap - currentCount, tier);
         }
 
-        // 6. Add the Tomes (with Fallback logic)
-        int addedTomes = 0;
-        if (skillTomesToFill > 0) {
-            addedTomes += addOverhauledDynamicTrades(player, trades, skillTomesToFill, tier);
-        }
-
-        // Fill remaining intended tome slots (including fallbacks) with Exp Tomes
-        int remainingSlots = slotsToFill - addedTomes;
-        if (remainingSlots > 0) {
-            addExpTomeTrades(player, trades, remainingSlots, tier);
-        }
+        // 6. Add the 2 EXCLUSIVE Special Slots (Chance-based)
+        addSpecialSlots(player, trades, tier);
 
         // 7. Check for Mastery message
         checkAndNotifyMastery(player);
 
-        // 8. Truncate to maxSlots (Don't let it overflow if we added too many fillers)
+        // 8. Final truncation if somehow overflowed
         while (trades.size() > maxSlots) {
             trades.remove(trades.size() - 1);
         }
+    }
+
+    /**
+     * Special slots follow a specific probability:
+     * - 10-15% chance for Exp Tome
+     * - 5% chance for Skill Charm
+     * - Otherwise Skill Tome
+     */
+    private static void addSpecialSlots(ServerPlayerEntity player, TradeOfferList trades, int tier) {
+        for (int i = 0; i < 2; i++) {
+            float roll = player.getRandom().nextFloat();
+            if (roll < 0.125f) { // 12.5% chance for Exp Tome
+                addExpTomeTrades(player, trades, 1, tier);
+            } else if (roll < 0.175f) { // 5% additional for Skill Charm (0.125 + 0.05)
+                addSkillCharmTrades(player, trades, 1, tier);
+            } else {
+                // Default filler: Standard Skill Tome
+                addOverhauledDynamicTrades(player, trades, 1, tier);
+            }
+        }
+    }
+
+    private static int addSkillCharmTrades(ServerPlayerEntity player, TradeOfferList trades, int slotsToFill, int tier) {
+        List<SkillInfo> availableSkills = getWeightedSelection(player);
+        if (availableSkills.isEmpty()) return 0;
+
+        int added = 0;
+        for (int i = 0; i < slotsToFill && !availableSkills.isEmpty(); i++) {
+            SkillInfo info = availableSkills.remove(player.getRandom().nextInt(availableSkills.size()));
+            
+            // Charms are usually cheaper than Tomes but rarer
+            int price = 10 + (tier * 10) + player.getRandom().nextInt(10);
+            
+            ItemStack charm = net.bluelotuscoding.skillleveling.item.SkillCharmItem.createSkillCharm(
+                ModItems.SKILL_CHARM, info.catId.toString(), info.skillId, tier); // Tier matches charm strength
+            
+            trades.add(new TradeOffer(new ItemStack(Items.EMERALD, price), new ItemStack(Items.GOLD_INGOT, 5), charm, 1, 20, 0.05f));
+            added++;
+        }
+        return added;
+    }
+
+    private static List<SkillInfo> getWeightedSelection(ServerPlayerEntity player) {
+        List<SkillInfo> availableSkills = new ArrayList<>();
+        Map<String, LeveledConfigStorage.LeveledConfig> entries = LeveledConfigStorage.getAllEntries();
+        SkillLevelingManager manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+
+        for (var entry : entries.entrySet()) {
+            String skillId = entry.getKey();
+            var config = entry.getValue();
+            if (config.categoryId == null || config.lootMode == null) continue;
+            availableSkills.add(new SkillInfo(new Identifier(config.categoryId), skillId, manager.getBaseSkillLevel(player, new Identifier(config.categoryId), skillId), config.lootMode));
+        }
+        return availableSkills;
     }
 
     private static int addExpTomeTrades(ServerPlayerEntity player, TradeOfferList trades, int slotsToFill, int tier) {

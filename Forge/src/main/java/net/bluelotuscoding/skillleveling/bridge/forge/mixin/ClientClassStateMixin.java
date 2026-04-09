@@ -58,8 +58,9 @@ public class ClientClassStateMixin {
         if (mc.player == null) {
             return null;
         }
+        // ClientCustomClassState is authoritative. No proxy fallback — multiple classes
+        // can share the same epic_class_proxy making reverse lookup non-deterministic.
         String customClassId = ClientCustomClassState.getCustomClass(mc.player.getUuid());
-
         if (customClassId != null && !"epic_classes:none".equals(customClassId)) {
             var res = EpicClassConfigManager.getClassDef(customClassId);
             if (res == null) {
@@ -70,17 +71,6 @@ public class ClientClassStateMixin {
             }
             return res;
         }
-
-        Object selectedTypeObj = addon$getStaticField("com.example.epicclassmod.client.ClientClassState",
-                "selectedType");
-        if (selectedTypeObj instanceof Enum) {
-            Enum<?> selectedType = (Enum<?>) selectedTypeObj;
-            if (!"NONE".equals(selectedType.name())) {
-                String classNameStr = "epic_classes:" + selectedType.name().toLowerCase();
-                return EpicClassConfigManager.getClassDef(classNameStr);
-            }
-        }
-
         return null;
     }
 
@@ -288,14 +278,27 @@ public class ClientClassStateMixin {
         EpicClassDef def = getSelectedClassDef();
         if (def != null) {
             java.util.List<String> list = new java.util.ArrayList<>();
-            if (def.class_weapon_icon != null && !def.class_weapon_icon.isEmpty()) {
-                list.add(def.class_weapon_icon);
-            }
-            if (def.class_weapon_items != null) {
-                for (String item : def.class_weapon_items) {
-                    if (!list.contains(item)) {
-                        list.add(item);
+            // Walk the parent chain so child classes inherit parent weapon restrictions
+            EpicClassDef current = def;
+            while (current != null) {
+                if (current.class_weapon_icon != null && !current.class_weapon_icon.isEmpty()
+                        && !list.contains(current.class_weapon_icon)) {
+                    list.add(current.class_weapon_icon);
+                }
+                if (current.class_weapon_items != null) {
+                    for (String item : current.class_weapon_items) {
+                        if (!list.contains(item)) {
+                            list.add(item);
+                        }
                     }
+                }
+                // Advance to parent
+                if (current.class_parent != null && !current.class_parent.isEmpty()) {
+                    EpicClassDef parent = EpicClassConfigManager.getClassDef(current.class_parent);
+                    // Avoid infinite loop if parent chain is circular
+                    current = (parent != def) ? parent : null;
+                } else {
+                    current = null;
                 }
             }
             if (!list.isEmpty()) {

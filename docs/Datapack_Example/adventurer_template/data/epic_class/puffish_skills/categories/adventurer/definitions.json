@@ -1,0 +1,311 @@
+{
+    "toughen_up": {
+        "type": "puffish_skills:default",
+        "category_id": "adventurer",
+        "title": "Toughen Up",
+        "description": "Your journey begins. Build basic endurance to survive the wilds.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:apple"
+            }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 1,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +1 Max HP",
+            "2": "Rank 2: +2 Max HP",
+            "3": "Rank 3: +3 Max HP"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "toughen_up",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 1.0
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 2.0
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.max_health",
+                                    "operation": "addition",
+                                    "value": 3.0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "toughen_up"
+        }
+    },
+    "keen_edge": {
+        "type": "puffish_skills:default",
+        "category_id": "adventurer",
+        "title": "Keen Edge",
+        "description": "Sharpen your strikes. Every bit of damage counts when you're starting out.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:flint"
+            }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 1,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +0.5 Attack Damage",
+            "2": "Rank 2: +1.0 Attack Damage",
+            "3": "Rank 3: +1.5 Attack Damage"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "keen_edge",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "addition",
+                                    "value": 0.5
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "addition",
+                                    "value": 1.0
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.attack_damage",
+                                    "operation": "addition",
+                                    "value": 1.5
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "keen_edge"
+        }
+    },
+    "swift_feet": {
+        "type": "puffish_skills:default",
+        "category_id": "adventurer",
+        "title": "Swift Feet",
+        "description": "Learn to move faster. Speed is survival.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:feather"
+            }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 1,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +5% Movement Speed",
+            "2": "Rank 2: +10% Movement Speed",
+            "3": "Rank 3: +15% Movement Speed"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "swift_feet",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.movement_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.05
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.movement_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.10
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.movement_speed",
+                                    "operation": "multiply_base",
+                                    "value": 0.15
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "swift_feet"
+        }
+    },
+    "iron_skin": {
+        "type": "puffish_skills:default",
+        "category_id": "adventurer",
+        "title": "Iron Skin",
+        "description": "Toughen your body against blows. A little armor goes a long way.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:iron_nugget"
+            }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 1,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +1 Armor",
+            "2": "Rank 2: +2 Armor",
+            "3": "Rank 3: +3 Armor"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "iron_skin",
+                    "levels": {
+                        "1": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 1.0
+                                }
+                            }
+                        ],
+                        "2": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 2.0
+                                }
+                            }
+                        ],
+                        "3": [
+                            {
+                                "type": "puffish_skills:attribute",
+                                "data": {
+                                    "attribute": "minecraft:generic.armor",
+                                    "operation": "addition",
+                                    "value": 3.0
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "iron_skin"
+        }
+    },
+    "second_wind": {
+        "type": "puffish_skills:default",
+        "category_id": "adventurer",
+        "title": "Second Wind",
+        "description": "Catch your breath in the heat of battle. Grants a burst of regeneration.",
+        "icon": {
+            "type": "item",
+            "data": {
+                "item": "minecraft:golden_apple"
+            }
+        },
+        "toggle": true,
+        "keybind_slot": 1,
+        "cooldown": 600,
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:toggle",
+                "data": {
+                    "enable_rewards": [
+                        {
+                            "type": "puffish_skill_leveling:effect",
+                            "data": {
+                                "effect": "minecraft:regeneration",
+                                "amplifier": 0,
+                                "duration": 100,
+                                "persistent": false,
+                                "is_protected": false
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Second Wind activated!\",\"color\":\"green\"}"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "playsound minecraft:entity.player.levelup player @s ~ ~ ~ 0.5 1.5"
+                            }
+                        }
+                    ],
+                    "disable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Second Wind cooling down...\",\"color\":\"gray\"}"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "metadata": {
+            "icon": "second_wind"
+        }
+    }
+}

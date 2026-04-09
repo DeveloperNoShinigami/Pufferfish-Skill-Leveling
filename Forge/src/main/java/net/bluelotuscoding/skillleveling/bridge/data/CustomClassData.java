@@ -68,34 +68,11 @@ public final class CustomClassData {
         if (classId == null || classId.isEmpty() || classId.equals("epic_classes:none")) {
             return com.example.epicclassmod.data.PlayerClassData.ClassType.NONE;
         }
-
-        // 1. Try mapping the literal string to enum (e.g. "epic_classes:warrior" ->
-        // WARRIOR)
-        String idPart = classId.contains(":") ? classId.split(":")[1] : classId;
-        try {
-            return com.example.epicclassmod.data.PlayerClassData.ClassType.valueOf(idPart.toUpperCase());
-        } catch (Exception ignored) {
-        }
-
-        // 2. Check for epic_class_proxy in the class definition
-        net.bluelotuscoding.skillleveling.bridge.config.EpicClassDef def = net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
-                .getClassDef(classId);
-
-        if (def == null && classId.contains(":")) {
-            // Fallback to searching without namespace (many configs omit 'epic_classes:'
-            // prefix in keys)
-            def = net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager.getClassDef(idPart);
-        }
-
-        if (def != null && def.epic_class_proxy != null && !def.epic_class_proxy.isEmpty()) {
-            try {
-                return com.example.epicclassmod.data.PlayerClassData.ClassType
-                        .valueOf(def.epic_class_proxy.toUpperCase());
-            } catch (Exception ignored) {
-            }
-        }
-
-        // 3. Absolute fallback: NONE
-        return com.example.epicclassmod.data.PlayerClassData.ClassType.NONE;
+        // Any active custom class uses WARRIOR as the ECM sentinel value.
+        // This tells ECM "a class is active" so its rendering path runs,
+        // while our ClientClassStateMixin overrides replace all displayed data.
+        // We no longer rely on epic_class_proxy for this — multiple classes can share
+        // the same proxy enum which caused non-deterministic behaviour.
+        return com.example.epicclassmod.data.PlayerClassData.ClassType.WARRIOR;
     }
 }

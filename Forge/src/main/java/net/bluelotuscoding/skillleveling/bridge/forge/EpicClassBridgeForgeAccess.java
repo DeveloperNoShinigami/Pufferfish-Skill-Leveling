@@ -5,8 +5,11 @@ import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 
 public final class EpicClassBridgeForgeAccess {
     private static final String CLASS_NAME = "com.example.epicclassmod.data.PlayerClassData";
+    private static final String LEVEL_DATA_CLASS = "com.example.epicclassmod.data.PlayerLevelData";
     private static Method getMethod;
+    private static Method getLevelMethod;
     private static boolean initialized = false;
+    private static boolean levelInitialized = false;
 
     private EpicClassBridgeForgeAccess() {
     }
@@ -112,5 +115,32 @@ public final class EpicClassBridgeForgeAccess {
 
     private static void logWarn(String message) {
         SkillLevelingMod.getInstance().getLogger().warn(message);
+    }
+
+    public static int getPlayerLevel(Object player) {
+        if (!levelInitialized) {
+            levelInitialized = true;
+            try {
+                Class<?> levelDataClass = Class.forName(LEVEL_DATA_CLASS);
+                for (Method m : levelDataClass.getMethods()) {
+                    if ("getLevel".equals(m.getName()) && m.getParameterCount() == 1) {
+                        m.setAccessible(true);
+                        getLevelMethod = m;
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                logWarn("PlayerLevelData.getLevel init failed: " + e.getMessage());
+            }
+        }
+        if (getLevelMethod == null || player == null) {
+            return 0;
+        }
+        try {
+            Object result = getLevelMethod.invoke(null, player);
+            return result instanceof Integer i ? i : 0;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

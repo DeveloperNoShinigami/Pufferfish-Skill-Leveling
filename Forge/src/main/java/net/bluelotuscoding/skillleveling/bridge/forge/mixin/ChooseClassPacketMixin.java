@@ -1,23 +1,15 @@
 package net.bluelotuscoding.skillleveling.bridge.forge.mixin;
 
-import com.example.epicclassmod.network.ChooseClassPacket;
-import net.bluelotuscoding.skillleveling.bridge.EpicClassBridge;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraftforge.network.NetworkEvent;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Identifier;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.registries.ForgeRegistries;
 import java.util.function.Supplier;
 
+@Pseudo
 @Mixin(targets = "com.example.epicclassmod.network.ChooseClassPacket", remap = false)
 public abstract class ChooseClassPacketMixin {
 
@@ -27,17 +19,16 @@ public abstract class ChooseClassPacketMixin {
      *         the skill level reset logic.
      */
     @Inject(method = "handle", at = @At("TAIL"))
-    private static void onHandleClassChoice(ChooseClassPacket msg, Supplier<NetworkEvent.Context> ctxSup,
+    private static void onHandleClassChoice(@Coerce Object msg, Supplier<NetworkEvent.Context> ctxSup,
             CallbackInfo ci) {
         NetworkEvent.Context ctx = ctxSup.get();
         if (ctx.getSender() != null) {
             ctx.enqueueWork(() -> {
-                // By this time the class is set via PlayerClassData.
                 String className = net.bluelotuscoding.skillleveling.bridge.data.CustomClassData
                         .getCustomClass(ctx.getSender());
 
                 if (className != null && !className.isEmpty()) {
-                    EpicClassBridge.onClassChanged(ctx.getSender(), className);
+                    net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.onClassChanged(ctx.getSender(), className);
                 }
             });
         }

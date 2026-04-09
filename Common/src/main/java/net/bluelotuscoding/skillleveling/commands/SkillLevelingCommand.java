@@ -274,54 +274,14 @@ public class SkillLevelingCommand {
                         return 0;
                 }
 
-                if (def.skill_category_id != null && !def.skill_category_id.isEmpty()) {
-                        net.minecraft.util.Identifier categoryId = net.bluelotuscoding.skillleveling.bridge.EpicClassBridge
-                                        .resolveCategoryId(def.skill_category_id);
-
-                        if (categoryId == null) {
-                                source.sendMessage(Text.literal("§cCould not resolve Pufferfish category: "
-                                                + def.skill_category_id));
+                if (def.required_level > 0) {
+                        int playerLevel = platform.getEpicClassPlayerLevel(player);
+                        if (playerLevel < def.required_level) {
+                                source.sendMessage(Text.literal(
+                                                "§cYou must reach level §e" + def.required_level
+                                                                + " §cbefore advancing. (Current level: §e"
+                                                                + playerLevel + "§c)"));
                                 return 0;
-                        }
-
-                        var categoryOptional = net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId);
-
-                        if (categoryOptional.isPresent()) {
-                                net.puffish.skillsmod.api.Category category = categoryOptional.get();
-                                net.minecraft.util.Identifier catId = category.getId();
-                                if (!category.isUnlocked(player)) {
-                                        source.sendMessage(
-                                                        Text.literal("§cYour current class category is not unlocked!"));
-                                        return 0;
-                                }
-
-                                var addon = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance();
-                                var manager = addon.getSkillLevelingManager();
-
-                                int[] totals = new int[2]; // 0 = player level, 1 = max level
-
-                                // Calculate total player level vs total category max level
-                                category.streamSkills().forEach((net.puffish.skillsmod.api.Skill skill) -> {
-                                        totals[0] += manager.getTotalSkillLevel(player, catId, skill.getId());
-                                        totals[1] += manager.getMaxLevel(catId, skill.getId());
-                                });
-
-                                int playerTotalLevel = totals[0];
-                                int categoryMaxPossibleLevel = totals[1];
-
-                                if (categoryMaxPossibleLevel <= 0) {
-                                        source.sendMessage(Text.literal(
-                                                        "§cThis class category has no level progression configured."));
-                                        return 0;
-                                }
-
-                                if (playerTotalLevel < categoryMaxPossibleLevel) {
-                                        source.sendMessage(Text.literal(
-                                                        "§cYou must master your current class before advancing (obtain all class skills). ("
-                                                                        + playerTotalLevel + "/"
-                                                                        + categoryMaxPossibleLevel + ")"));
-                                        return 0;
-                                }
                         }
                 }
 

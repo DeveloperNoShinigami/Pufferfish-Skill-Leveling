@@ -5,7 +5,6 @@ import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.api.Skill;
-import net.bluelotuscoding.skillleveling.SkillLevelingMod;
 import net.bluelotuscoding.skillleveling.manager.SkillLevelingManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

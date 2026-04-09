@@ -2,7 +2,7 @@
 
 This block of documentation covers all features provided by the integration between Pufferfish Skill Leveling and the Epic Classes (Rise of Heroes) mod.
 
-If you are building a class-based RPG experience, this is where you will find information on creating classes, configuring attributes, setting up item restrictions, and designing Job Masters.
+If you are building a class-based RPG experience, this is where you will find information on creating classes, configuring attributes, setting up item restrictions, and wiring CNPC-driven class and quest NPCs.
 
 ---
 
@@ -14,13 +14,15 @@ Follow these guides in order to master the integration features:
    *The complete tutorial on making custom Epic Classes that tie into Pufferfish Skill categories.*
 2. **[Item Restrictions & Gating](ITEM_RESTRICTIONS_GUIDE.md)**  
    *How to restrict items, weapons, blocks, entities, and dimensions based on class and skill level.*
-3. **[Job Masters](JOB_MASTERS_GUIDE.md)**  
-   *Setting up the custom NPCs that allow players to join classes or change professions.*
-4. **[Class Attributes & Scaling](CLASS_ATTRIBUTES_GUIDE.md)**  
+3. **[CNPC Class NPCs](JOB_MASTERS_GUIDE.md)**  
+   *Setting up CustomNPCs NPCs that allow players to join classes or change professions.*
+4. **[CNPC Quest Mode](CNPC_QUESTS_GUIDE.md)**  
+   *Using CustomNPCs as the visible quest/dialog frontend while the addon keeps class and skill state authoritative.*
+5. **[Class Attributes & Scaling](CLASS_ATTRIBUTES_GUIDE.md)**  
    *Creating custom attributes and integrating them into the UI.*
-5. **[Global Bridge Configuration](GLOBAL_BRIDGE_CONFIG.md)**  
+6. **[Global Bridge Configuration](GLOBAL_BRIDGE_CONFIG.md)**  
    *The main configuration file linking the two mods together.*
-6. **[Datapack Reference](DATAPACK_REFERENCE.md)**  
+7. **[Datapack Reference](DATAPACK_REFERENCE.md)**  
    *The complete cheat-sheet of all JSON fields used specifically for the integration.*
 
 ---

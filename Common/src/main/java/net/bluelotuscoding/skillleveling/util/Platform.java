@@ -77,6 +77,11 @@ public interface Platform {
         String getEpicClassName(Object player);
 
         /**
+         * Gets the ECM character level for a player (from PlayerLevelData.getLevel).
+         */
+        int getEpicClassPlayerLevel(Object player);
+
+        /**
          * Gets the total Pufferfish points earned for a player and category.
          */
         int getPufferfishPoints(Object player,

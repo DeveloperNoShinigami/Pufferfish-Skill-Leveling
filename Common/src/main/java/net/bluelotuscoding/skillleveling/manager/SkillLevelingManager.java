@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -560,7 +562,7 @@ public class SkillLevelingManager {
 
     public void initializeSkillData(ServerPlayerEntity player, Identifier categoryId, String skillId) {
         dataManager.setSkillLevel(player, categoryId, skillId, 1);
-        
+
         // SYNC TO CLIENT: Immediately inform client of the new level 1 initialization
         // so passive unlocks show up in UI without log-out.
         int totalLevel = getTotalSkillLevel(player, categoryId, skillId);
@@ -610,6 +612,138 @@ public class SkillLevelingManager {
         protectedEffects.remove(player.getUuid());
         // Sync to client to wipe UI
         syncAllSkillsToPlayer(player);
+    }
+
+    /**
+     * Resets Pufferfish/addon progression while the player's current category context is
+     * still valid. This is intended to run before Epic Class clears the class.
+     */
+    public void resetPufferfishProgressForClassReset(ServerPlayerEntity player) {
+        Set<Identifier> categoriesToReset = collectCategoriesForClassReset(player);
+        if (categoriesToReset.isEmpty()) {
+            return;
+        }
+
+        for (Identifier categoryId : categoriesToReset) {
+            resetCategoryProgressForClassReset(player, categoryId);
+        }
+
+        playerCooldowns.remove(player.getUuid());
+        protectedEffects.remove(player.getUuid());
+
+        try {
+            net.puffish.skillsmod.SkillsMod.getInstance().updateAllCategories(player);
+        } catch (Exception ignored) {
+        }
+
+        syncAllSkillsToPlayer(player);
+        CategoryLockManager.updateLocks(player);
+    }
+
+    private Set<Identifier> collectCategoriesForClassReset(ServerPlayerEntity player) {
+        Set<Identifier> categories = new LinkedHashSet<>();
+
+        net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.getActiveCategory(player)
+                .map(this::normalizeCategoryId)
+                .ifPresent(categories::add);
+
+        String currentClass = SkillLevelingMod.getInstance().getPlatform().getEpicClassName(player);
+        if (currentClass != null && !currentClass.isEmpty()
+                && !"none".equalsIgnoreCase(currentClass)
+                && !"epic_classes:none".equalsIgnoreCase(currentClass)) {
+            for (Identifier categoryId : net.bluelotuscoding.skillleveling.bridge.EpicClassBridge
+                    .getCategoriesForClass(currentClass)) {
+                categories.add(normalizeCategoryId(categoryId));
+            }
+        }
+
+        categories.addAll(net.bluelotuscoding.skillleveling.bridge.EpicClassBridge.getConfiguredCategories().stream()
+                .map(this::normalizeCategoryId)
+                .toList());
+
+        categories.addAll(net.bluelotuscoding.skillleveling.config.LeveledConfigStorage.getAllGatedCategories()
+                .stream()
+                .map(this::normalizeCategoryId)
+                .toList());
+
+        SkillsAPI.streamCategories().forEach(category -> {
+            try {
+                if (category.isUnlocked(player)) {
+                    categories.add(normalizeCategoryId(category.getId()));
+                }
+            } catch (Exception ignored) {
+            }
+        });
+
+        categories.remove(null);
+        return categories;
+    }
+
+    private void resetCategoryProgressForClassReset(ServerPlayerEntity player, Identifier categoryId) {
+        categoryId = normalizeCategoryId(categoryId);
+        var categoryOpt = SkillsAPI.getCategory(categoryId);
+        if (categoryOpt.isEmpty()) {
+            return;
+        }
+
+        var category = categoryOpt.get();
+        var ext = getCategoryDataExtension(player, categoryId);
+        if (ext != null) {
+            ext.addon$setOwner(player);
+            ext.addon$setCategoryId(categoryId);
+        }
+
+        resetCategoryExperience(player, categoryId);
+
+        for (var skill : category.streamSkills().toList()) {
+            String skillId = skill.getId();
+            int currentBaseLevel = getBaseSkillLevel(player, categoryId, skillId);
+
+            if (currentBaseLevel > 0) {
+                for (int level = currentBaseLevel; level >= 1; level--) {
+                    deactivateLevelRewards(player, categoryId, skillId, level);
+                }
+            }
+
+            if (ext != null) {
+                ext.addon$setPaidLevels(skillId, 0L);
+                ext.addon$setSkillLevel(skillId, 0);
+            } else {
+                dataManager.clearSkillLevel(player, categoryId, skillId);
+            }
+        }
+
+        dataManager.resetCategorySkillLevels(player, categoryId);
+        dataManager.markCategoryLocked(player, categoryId);
+
+        try {
+            if (category.isUnlocked(player)) {
+                category.lock(player);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void resetCategoryExperience(ServerPlayerEntity player, Identifier categoryId) {
+        try {
+            Object skillsMod = net.puffish.skillsmod.SkillsMod.getInstance();
+            for (java.lang.reflect.Method method : skillsMod.getClass().getMethods()) {
+                if (!method.getName().equals("setExperience") || method.getParameterCount() != 3) {
+                    continue;
+                }
+
+                Class<?>[] params = method.getParameterTypes();
+                if (!params[0].isAssignableFrom(player.getClass())
+                        || !params[1].isAssignableFrom(categoryId.getClass())
+                        || params[2] != int.class) {
+                    continue;
+                }
+
+                method.invoke(skillsMod, player, categoryId, 0);
+                return;
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     /**

@@ -30,21 +30,20 @@ public class ClassTypeUtilMixin {
         }
 
         try {
-            // Get the player's actual custom class name
+            // Block ECM's native combat passives for any player using a custom class.
+            // We no longer rely on epic_class_proxy — any custom class should suppress
+            // the native enum-based passives since our system handles them instead.
             String className = SkillLevelingMod.getInstance().getPlatform().getEpicClassName(sp);
-            if (className == null || className.isEmpty()) {
+            if (className == null || className.isEmpty() || "epic_classes:none".equals(className)) {
                 return;
             }
-
-            // Look up the class definition to check for epic_class_proxy
             EpicClassDef def = EpicClassConfigManager.getClassDef(className);
-            if (def != null && def.epic_class_proxy != null && !def.epic_class_proxy.isEmpty()) {
-                // This is a custom class using a proxy — return null to block all proxy
-                // passives
+            if (def != null) {
+                // Custom class is active — return null so ECM skips all its proxy passives
                 cir.setReturnValue(null);
             }
         } catch (Exception ignored) {
-            // Fail-safe: if anything goes wrong, let natural behavior proceed
+            // Fail-safe: if anything goes wrong, let natural behaviour proceed
         }
     }
 }

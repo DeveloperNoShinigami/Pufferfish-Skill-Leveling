@@ -45,14 +45,27 @@ This system bridges the gap between Pufferfish points and Epic Fight stats. Plac
 ### Slot Fields
 
 * **`value`** *(Required)*: The math expression defining the stat increase. `points` refers to points invested.
-* **`attribute_id`** *(Required)*: The raw Minecraft or Epic Fight attribute to modify.
-* **`operation`** *(Required)*: The operation applied (`ADDITION`, `MULTIPLY_BASE`, etc).
+* **`attribute_id`** *(Required)*: The fully-qualified Minecraft attribute ID to modify. Standard vanilla attributes (`minecraft:generic.max_health`, etc.) and RO stat attributes (`roleveling:str`, `roleveling:agi`, `roleveling:vit`, `roleveling:int`, `roleveling:dex`, `roleveling:luk`) are both valid. The `roleveling:*` attributes are real Minecraft attributes — their `getValue()` automatically includes any item `AttributeModifier` contributions without manual gear scanning.
+* **`operation`** *(Required)*: The operation applied (`ADDITION`, `MULTIPLY_BASE`, `MULTIPLY_TOTAL`).
 * **`id`** *(Required)*: Unique ID for the attribute slot.
-* **`name`** *(Required)*: Translation key for the attribute's display name.
-* **`format`** *(Optional)*: String formatting for the number (e.g., `+%.2f`).
+* **`name`** *(Required)*: Translation key or literal string for the attribute's display name.
+* **`format`** *(Optional)*: Number format string for the UI display (e.g., `+#`, `+%.2f`). Use `+#` for whole-number stats like RO base stats.
 * **`max_points`** *(Optional)*: Caps the stat scaling to a maximum number of invested points.
-* **`icon`** *(Optional)*: Item ID used as the icon prefix.
+* **`point_cost`** *(Optional)*: Math expression defining how many class stat points this slot costs per allocation. Defaults to `1` per point if omitted. Supports the `points` variable.
+* **`command`** *(Optional)*: A server command fired once when the player allocates a point into this slot. Tokens: `{value}` (the current computed value), `{player}` (player name). When present the attribute modifier is still applied — this runs in addition, not instead.
+* **`icon`** *(Optional)*: Item ID used as the icon in the attribute UI.
 * **`description`** *(Optional)*: Tooltip description text.
+
+### Command Slot Behavior
+
+When using `command` on a slot, keep these runtime rules in mind:
+
+- **Shorthand numeric `value` is per-point scaling**: If `value` is a plain number and does not reference `points` (for example, `"1"`), the effective value is treated as `number * points`.
+- **Reset-safe command slots**: On full stat reset, affected command slots are executed once with `{value}=0` so command-driven side effects are explicitly cleared.
+- **Immediate reset UI consistency**: The Class Book applies an optimistic client-side clear on reset confirmation so command-only slot values update immediately in the open UI.
+
+> [!NOTE]
+> The `"global"` class key is a special reserved key in `attributes_by_class`. Pages listed under `"global"` are shown in the Class Book attribute screen for **every** class. Use this for shared stat pools (e.g. RO base stats STR/AGI/VIT/INT/DEX/LUK) that all classes in your server share.
 
 ### Mathematical Expressions (`value`)
 

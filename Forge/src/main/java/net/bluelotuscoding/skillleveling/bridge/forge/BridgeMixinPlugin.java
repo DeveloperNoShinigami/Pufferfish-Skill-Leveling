@@ -1,6 +1,5 @@
 package net.bluelotuscoding.skillleveling.bridge.forge;
 
-import net.minecraftforge.fml.ModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -14,7 +13,6 @@ import java.util.Set;
  * This prevents crashes when the target mod is not installed.
  */
 public class BridgeMixinPlugin implements IMixinConfigPlugin {
-    private static final String EPICCLASSMOD_ID = "epicclassmod";
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -29,14 +27,15 @@ public class BridgeMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        // Only apply bridge mixins if Epic Class Mod is loaded
-        // We identify bridge mixins by their package/name or target
         if (mixinClassName.contains("net.bluelotuscoding.skillleveling.bridge.forge.mixin")) {
+            // Check for critical class instead of ModList to avoid null errors during early loading
             try {
-                boolean enabled = ModList.get() != null && ModList.get().isLoaded(EPICCLASSMOD_ID);
-                return enabled;
-            } catch (Exception e) {
+                Class.forName("com.example.epicclassmod.EpicClassMod", false, this.getClass().getClassLoader());
                 return true;
+            } catch (ClassNotFoundException e) {
+                return false;
+            } catch (Exception e) {
+                return false;
             }
         }
         return true;

@@ -259,6 +259,12 @@ public class ForgePlatform implements Platform {
     }
 
     @Override
+    public int getEpicClassPlayerLevel(Object player) {
+        return net.bluelotuscoding.skillleveling.bridge.forge.EpicClassBridgeForgeAccess
+                .getPlayerLevel(player);
+    }
+
+    @Override
     public int getPufferfishPoints(Object player,
             net.minecraft.util.Identifier categoryId) {
         return net.puffish.skillsmod.api.SkillsAPI.getCategory(categoryId)
@@ -318,10 +324,7 @@ public class ForgePlatform implements Platform {
 
     @Override
     public void cleanupWorldData(Object level) {
-        if (level instanceof net.minecraft.server.world.ServerWorld sw) {
-            net.bluelotuscoding.skillleveling.bridge.data.CustomJobNpcSavedData data = net.bluelotuscoding.skillleveling.bridge.data.CustomJobNpcSavedData
-                    .get(sw);
-            data.clearAll();
-        }
+        // Legacy job-master world state was removed when the bridge standardized on
+        // CNPC-owned NPC flows. Nothing remains to purge here.
     }
 }

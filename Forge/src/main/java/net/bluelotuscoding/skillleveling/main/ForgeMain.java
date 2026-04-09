@@ -11,7 +11,11 @@ import net.bluelotuscoding.skillleveling.registry.ModBlocks;
 import net.bluelotuscoding.skillleveling.registry.ModItems;
 import net.bluelotuscoding.skillleveling.registry.ModVillagers;
 import net.bluelotuscoding.skillleveling.bridge.forge.EpicClassBridgeForgeLoader;
+import net.bluelotuscoding.skillleveling.bridge.forge.cnpc.CnpcQuestEventBridge;
+import net.bluelotuscoding.skillleveling.bridge.cnpc.CnpcQuestStoredMappingIndex;
+import net.bluelotuscoding.skillleveling.bridge.cnpc.runtime.CnpcRuntimeBridge;
 import net.bluelotuscoding.skillleveling.bridge.config.ItemRequirementsManager;
+import net.bluelotuscoding.skillleveling.forge.entity.SkillMasterVillagerGuard;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.bluelotuscoding.skillleveling.forge.loot.LootInjectionHandler;
@@ -32,6 +36,8 @@ public class ForgeMain {
         public ForgeMain() {
                 SkillLevelingMod.preInit();
                 IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+                net.bluelotuscoding.skillleveling.config.SkillLevelingConfig
+                                .load(net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().toFile());
 
                 ForgeBlockRegistry.register(bus);
                 ForgeItemRegistry.register(bus);
@@ -51,6 +57,7 @@ public class ForgeMain {
 
                 MinecraftForge.EVENT_BUS.register(this);
                 MinecraftForge.EVENT_BUS.register(new ForgeVillagerTrades());
+                MinecraftForge.EVENT_BUS.register(new SkillMasterVillagerGuard());
                 MinecraftForge.EVENT_BUS.register(new LootInjectionHandler());
 
                 if (net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient()) {
@@ -79,7 +86,6 @@ public class ForgeMain {
                 event.addListener(SkillLevelingMod.getInstance().getUniversalLootHandler());
 
                 event.addListener(SkillLevelingMod.getInstance().getEpicClassDataLoader());
-                event.addListener(SkillLevelingMod.getInstance().getJobMasterDataLoader());
                 event.addListener(SkillLevelingMod.getInstance().getEpicAttributeDataLoader());
                 event.addListener(SkillLevelingMod.getInstance().getBridgeDataLoader());
                 event.addListener(SkillLevelingMod.getInstance().getItemRequirementsManager());
@@ -88,11 +94,14 @@ public class ForgeMain {
         @SubscribeEvent
         public void onServerStarting(ServerStartingEvent event) {
                 SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStarting(event.getServer());
+                CnpcQuestEventBridge.ensureRegistered();
         }
 
         @SubscribeEvent
         public void onServerStopped(ServerStoppedEvent event) {
                 SkillLevelingMod.getInstance().getSkillLevelingManager().onServerStopping(event.getServer());
+                CnpcQuestEventBridge.resetRegistration();
+                CnpcQuestStoredMappingIndex.clear();
         }
 
         @SubscribeEvent
@@ -116,6 +125,7 @@ public class ForgeMain {
                                                         .syncAllSkillsToPlayer(serverPlayer);
                                         SkillLevelingMod.getInstance().syncBridgeContent(serverPlayer);
                                         SkillLevelingMod.getInstance().syncAllConfigs(serverPlayer);
+                                        CnpcRuntimeBridge.refreshPlayer(serverPlayer);
 
                                         // Sync item restrictions to client
                                         var handler = SkillLevelingMod.getInstance().getNetworkHandler();

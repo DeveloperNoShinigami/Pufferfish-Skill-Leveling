@@ -83,7 +83,10 @@ public abstract class PufferfishExperienceMixin {
                     int delta = newTotal - oldTotal;
                     if (delta > 0) {
                         syncFromSkillsMod(spe, categoryId, delta);
-                    } else if (delta == 0) {
+                    } else if (delta < 0) {
+                        // Level decreased (e.g., /skillleveling setcategorylevel) — sync ECM
+                        syncFromSkillsMod(spe, categoryId, delta);
+                    } else {
                         // Sometimes XP doesn't change visually, but internal state might (level ups).
                         // Let's force a silent sync just in case internal levels changed, but no toast.
                         syncFromSkillsMod(spe, categoryId, 0);

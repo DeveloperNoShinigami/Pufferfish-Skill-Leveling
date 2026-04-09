@@ -1,0 +1,9 @@
+[
+    ["sword_mastery",        "bash"],
+    ["bash",                 "magnum_break"],
+    ["magnum_break",         "fatal_blow"],
+    ["two_hand_mastery",     "endure"],
+    ["endure",               "auto_berserk"],
+    ["increase_hp_recovery", "hp_recovery_while_moving"],
+    ["increase_hp_recovery", "provoke"]
+]

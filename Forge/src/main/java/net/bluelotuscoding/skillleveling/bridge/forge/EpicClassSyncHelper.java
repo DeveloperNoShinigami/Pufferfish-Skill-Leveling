@@ -188,6 +188,23 @@ public class EpicClassSyncHelper {
                     }
                 }
 
+                // Treat plain numeric values as per-point scalars for spendable stat slots.
+                // Example: value="1" means +1 per point, not a constant +1 at zero points.
+                if (attr.value != null) {
+                    String expr = attr.value.trim();
+                    if (!expr.isEmpty() && !expr.contains("points")) {
+                        try {
+                            value = Double.parseDouble(expr) * points;
+                        } catch (NumberFormatException ignored) {
+                            // Keep evaluated expression value if this is not a plain number.
+                        }
+                    }
+                }
+
+                if (points <= 0) {
+                    value = 0;
+                }
+
                 applyModifierSafely(sp, attr.attribute_id, value, attr.id, attr.operation);
             }
         }
@@ -317,10 +334,11 @@ public class EpicClassSyncHelper {
 
                 if (getInt != null && putInt != null) {
                     int used = 0;
-                    if (result instanceof net.minecraft.nbt.NbtCompound tag) {
-                        for (String key : tag.getKeys()) {
+                    net.minecraft.nbt.NbtCompound ecmNbt = (result instanceof net.minecraft.nbt.NbtCompound t) ? t : null;
+                    if (ecmNbt != null) {
+                        for (String key : ecmNbt.getKeys()) {
                             if (key.startsWith("alloc_")) {
-                                used += tag.getInt(key);
+                                used += ecmNbt.getInt(key);
                             }
                         }
                     }
@@ -338,16 +356,40 @@ public class EpicClassSyncHelper {
                     if (catIdOpt.isPresent()) {
                         authoritativeLevel = platform.getPufferfishLevel(player, catIdOpt.get());
                         authoritativeXp = platform.getPufferfishExperience(player, catIdOpt.get());
-                        spNow = Math.max(0, authoritativeLevel - used);
+                    }
+
+                    // 4-way SPL resolution: NBT int → NBT string → per-class def → global config
+                    String splKey = "stat_points_per_level";
+                    int resolvedSPL;
+                    if (ecmNbt != null && ecmNbt.contains(splKey, 3)) {
+                        resolvedSPL = ecmNbt.getInt(splKey);
+                    } else if (ecmNbt != null && ecmNbt.contains(splKey, 8)) {
+                        String splExpr = ecmNbt.getString(splKey);
+                        var splParseResult = net.puffish.skillsmod.expression.DefaultParser.parse(splExpr, java.util.Set.of("level"));
+                        int evalLevel = authoritativeLevel;
+                        resolvedSPL = splParseResult.getSuccess().map(expr -> {
+                            try { return (int) Math.ceil(expr.eval(java.util.Map.of("level", (double) evalLevel))); }
+                            catch (Exception ex) { return 1; }
+                        }).orElse(1);
                     } else {
-                        // Fallback to arguments if no class category is active
-                        spNow = Math.max(0, newLevel - used);
+                        String ecmClassName = (player instanceof net.minecraft.server.network.ServerPlayerEntity sp2)
+                                ? platform.getEpicClassName(sp2) : null;
+                        var classDef = EpicClassConfigManager.getClassDef(ecmClassName);
+                        int classDefSPL = (classDef != null) ? classDef.stat_points_per_level : 0;
+                        resolvedSPL = (classDefSPL > 0) ? classDefSPL
+                                : EpicClassConfigManager.getSyncedConfig().stat_points_per_level;
+                    }
+
+                    if (resolvedSPL > 0) {
+                        spNow = Math.max(0, authoritativeLevel * resolvedSPL - used);
                     }
 
                     putInt.invoke(result, "level", authoritativeLevel);
                     putInt.invoke(result, "xp", authoritativeXp);
                     putInt.invoke(result, "xp_needed", neededXp); // Pass needed XP for client-side scaling
-                    putInt.invoke(result, "stat_points", spNow);
+                    if (resolvedSPL > 0) {
+                        putInt.invoke(result, "stat_points", spNow);
+                    }
 
                     // Ensure the tag is actually attached to the player's persistent data
                     // In Case root() returned a new empty compound that wasn't previously there
@@ -437,7 +479,7 @@ public class EpicClassSyncHelper {
 
     public static void allocateStat(PlayerEntity player, String statId, int points) {
         initReflection();
-        if (reflectionFailed || statId == null) {
+        if (reflectionFailed || statId == null || points == 0) {
             return;
         }
         try {
@@ -456,28 +498,91 @@ public class EpicClassSyncHelper {
                     }
                 }
                 if (getInt != null && putInt != null) {
+                    String tagKey = switch (statId) {
+                        case "atk" -> "alloc_atk";
+                        case "def" -> "alloc_def";
+                        case "aspd" -> "alloc_aspd";
+                        case "mspd" -> "alloc_mspd";
+                        case "cooldown" -> "alloc_cooldown";
+                        case "regen" -> "alloc_regen";
+                        default -> statId.startsWith("alloc_") ? statId : "alloc_" + statId;
+                    };
+                    int allocCurrent = (int) getInt.invoke(result, tagKey);
                     int available = (int) getInt.invoke(result, "stat_points");
-                    if (available >= points) {
-                        String tagKey = switch (statId) {
-                            case "atk" -> "alloc_atk";
-                            case "def" -> "alloc_def";
-                            case "aspd" -> "alloc_aspd";
-                            case "mspd" -> "alloc_mspd";
-                            case "cooldown" -> "alloc_cooldown";
-                            case "regen" -> "alloc_regen";
-                            default -> statId.startsWith("alloc_") ? statId : "alloc_" + statId;
-                        };
-                        int current = (int) getInt.invoke(result, tagKey);
-                        putInt.invoke(result, tagKey, current + points);
-                        putInt.invoke(result, "stat_points", available - points);
 
+                    if (points < 0) {
+                        int take = Math.min(allocCurrent, -points);
+                        if (take <= 0) {
+                            return;
+                        }
+                        putInt.invoke(result, tagKey, allocCurrent - take);
+                        putInt.invoke(result, "stat_points", available + take);
+                        applyModifiers(player);
+                        forceSync(player, 0);
+                        return;
+                    }
+
+                    // 4-way point_cost resolution: NBT int → NBT string → config expression → default 1
+                    int cost = 1;
+                    String costNbtKey = "point_cost_" + statId;
+                    if (result instanceof net.minecraft.nbt.NbtCompound ecmTag) {
+                        if (ecmTag.contains(costNbtKey, 3)) {
+                            cost = ecmTag.getInt(costNbtKey);
+                        } else if (ecmTag.contains(costNbtKey, 8)) {
+                            String costExpr = ecmTag.getString(costNbtKey);
+                            var costResult = net.puffish.skillsmod.expression.DefaultParser.parse(costExpr, java.util.Set.of("current"));
+                            int cur = allocCurrent;
+                            cost = costResult.getSuccess().map(expr -> {
+                                try { return (int) Math.ceil(expr.eval(java.util.Map.of("current", (double) cur))); }
+                                catch (Exception e2) { return 1; }
+                            }).orElse(1);
+                        } else {
+                            // Config compiledPointCostExpression fallback
+                            net.bluelotuscoding.skillleveling.bridge.config.AttributeDef slotDef = null;
+                            if (player instanceof net.minecraft.server.network.ServerPlayerEntity sp2) {
+                                String cn = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getPlatform().getEpicClassName(sp2);
+                                var classDef = EpicClassConfigManager.getClassDef(cn);
+                                if (classDef != null) {
+                                    outer: for (var page : EpicClassConfigManager.getPagesForClass(classDef.class_name)) {
+                                        if (page.slots != null) {
+                                            for (var sd : page.slots) {
+                                                if (statId.equals(sd.id)) { slotDef = sd; break outer; }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (slotDef != null && slotDef.compiledPointCostExpression != null) {
+                                try {
+                                    cost = (int) Math.ceil(slotDef.compiledPointCostExpression.eval(java.util.Map.of("current", (double) allocCurrent)));
+                                } catch (Exception e2) {
+                                    cost = 1;
+                                }
+                            }
+                        }
+                    }
+                    cost = Math.max(1, cost);
+
+                    if (available >= cost) {
+                        int grant = Math.max(1, points);
+                        int possible = available / cost;
+                        int delta = Math.min(grant, possible);
+                        if (delta <= 0) {
+                            return;
+                        }
+                        putInt.invoke(result, tagKey, allocCurrent + delta);
+                        putInt.invoke(result, "stat_points", available - (delta * cost));
                         applyModifiers(player);
                         forceSync(player, 0);
                     }
+                } else {
+                    AddonLogger.LOGGER.warn("[Bridge] allocateStat failed: could not resolve NBT get/put methods");
                 }
+            } else {
+                AddonLogger.LOGGER.warn("[Bridge] allocateStat failed: PlayerLevelData.root returned null");
             }
         } catch (Exception e) {
-            AddonLogger.LOGGER.error("[Bridge] Failed to force sync: " + e.getMessage());
+            AddonLogger.LOGGER.error("[Bridge] allocateStat exception: " + e.getMessage());
         }
     }
 

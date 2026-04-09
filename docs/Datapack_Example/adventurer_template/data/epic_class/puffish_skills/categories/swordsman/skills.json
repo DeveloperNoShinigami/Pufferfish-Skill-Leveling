@@ -1,0 +1,12 @@
+{
+    "sword_mastery":            { "x": 0,   "y": 0,   "definition": "sword_mastery" },
+    "two_hand_mastery":         { "x": 100, "y": 0,   "definition": "two_hand_mastery" },
+    "increase_hp_recovery":     { "x": 200, "y": 0,   "definition": "increase_hp_recovery" },
+    "bash":                     { "x": 0,   "y": 50,  "definition": "bash" },
+    "endure":                   { "x": 100, "y": 50,  "definition": "endure" },
+    "hp_recovery_while_moving": { "x": 200, "y": 50,  "definition": "hp_recovery_while_moving" },
+    "magnum_break":             { "x": 0,   "y": 100, "definition": "magnum_break" },
+    "auto_berserk":             { "x": 100, "y": 100, "definition": "auto_berserk" },
+    "provoke":                  { "x": 200, "y": 100, "definition": "provoke" },
+    "fatal_blow":               { "x": 0,   "y": 150, "definition": "fatal_blow" }
+}

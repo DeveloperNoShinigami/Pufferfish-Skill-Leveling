@@ -1,0 +1,581 @@
+{
+    "sword_mastery": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "Sword Mastery",
+        "description": "Train with swords and daggers until the blade feels like part of your arm.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:iron_sword" }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 1,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +0.5 Attack Damage",
+            "2": "Rank 2: +1.0 Attack Damage",
+            "3": "Rank 3: +1.5 Attack Damage",
+            "4": "Rank 4: +2.0 Attack Damage",
+            "5": "Rank 5: +2.5 Attack Damage"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "sword_mastery",
+                    "levels": {
+                        "1": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 0.5 } }],
+                        "2": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 1.0 } }],
+                        "3": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 1.5 } }],
+                        "4": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 2.0 } }],
+                        "5": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 2.5 } }]
+                    }
+                }
+            }
+        ],
+        "metadata": { "icon": "sword_mastery" }
+    },
+
+    "two_hand_mastery": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "Two-Handed Sword Mastery",
+        "description": "The weight of a greatsword becomes power in your hands. Increases ATK and armor toughness when wielding two-handed weapons.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:diamond_sword" }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 1,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +0.5 Attack Damage, +0.5 Armor Toughness",
+            "2": "Rank 2: +1.0 Attack Damage, +1.0 Armor Toughness",
+            "3": "Rank 3: +1.5 Attack Damage, +1.5 Armor Toughness",
+            "4": "Rank 4: +2.0 Attack Damage, +2.0 Armor Toughness",
+            "5": "Rank 5: +2.5 Attack Damage, +2.5 Armor Toughness"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "two_hand_mastery",
+                    "levels": {
+                        "1": [
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage",    "operation": "addition", "value": 0.5 } },
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor_toughness", "operation": "addition", "value": 0.5 } }
+                        ],
+                        "2": [
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage",    "operation": "addition", "value": 1.0 } },
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor_toughness", "operation": "addition", "value": 1.0 } }
+                        ],
+                        "3": [
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage",    "operation": "addition", "value": 1.5 } },
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor_toughness", "operation": "addition", "value": 1.5 } }
+                        ],
+                        "4": [
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage",    "operation": "addition", "value": 2.0 } },
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor_toughness", "operation": "addition", "value": 2.0 } }
+                        ],
+                        "5": [
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage",    "operation": "addition", "value": 2.5 } },
+                            { "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor_toughness", "operation": "addition", "value": 2.5 } }
+                        ]
+                    }
+                }
+            }
+        ],
+        "metadata": { "icon": "two_hand_mastery" }
+    },
+
+    "increase_hp_recovery": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "Increase HP Recovery",
+        "description": "Harden your body so you can take more punishment and recover from wounds faster.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:glistering_melon_slice" }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 1,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +4 Max HP (+2 hearts)",
+            "2": "Rank 2: +8 Max HP (+4 hearts)",
+            "3": "Rank 3: +12 Max HP (+6 hearts)",
+            "4": "Rank 4: +16 Max HP (+8 hearts)",
+            "5": "Rank 5: +20 Max HP (+10 hearts)"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "increase_hp_recovery",
+                    "levels": {
+                        "1": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.max_health", "operation": "addition", "value": 4.0 } }],
+                        "2": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.max_health", "operation": "addition", "value": 8.0 } }],
+                        "3": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.max_health", "operation": "addition", "value": 12.0 } }],
+                        "4": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.max_health", "operation": "addition", "value": 16.0 } }],
+                        "5": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.max_health", "operation": "addition", "value": 20.0 } }]
+                    }
+                }
+            }
+        ],
+        "metadata": { "icon": "increase_hp_recovery" }
+    },
+
+    "bash": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "Bash",
+        "description": "A powerful strike that puts your full strength behind the blow. Press the keybind to unleash a Strength burst — your next hit deals crushing damage.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:flint_and_steel" }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 1,
+        "toggle": true,
+        "keybind_slot": 1,
+        "cooldown": 60,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +0.25 Attack Damage | Active: Strength I for 3s",
+            "2": "Rank 2: +0.50 Attack Damage | Active: Strength I for 3s",
+            "3": "Rank 3: +0.75 Attack Damage | Active: Strength II for 3s",
+            "4": "Rank 4: +1.00 Attack Damage | Active: Strength II for 4s",
+            "5": "Rank 5: +1.25 Attack Damage | Active: Strength II for 5s"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "bash",
+                    "levels": {
+                        "1": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 0.25 } }],
+                        "2": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 0.50 } }],
+                        "3": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 0.75 } }],
+                        "4": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 1.00 } }],
+                        "5": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 1.25 } }]
+                    }
+                }
+            },
+            {
+                "type": "puffish_skill_leveling:toggle",
+                "data": {
+                    "enable_rewards": [
+                        {
+                            "type": "puffish_skill_leveling:effect",
+                            "data": {
+                                "effect": "minecraft:strength",
+                                "amplifier": 1,
+                                "duration": 60,
+                                "persistent": false,
+                                "is_protected": false
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Bash!\",\"color\":\"red\",\"bold\":true}"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "playsound minecraft:entity.player.attack.crit player @s ~ ~ ~ 0.8 1.2"
+                            }
+                        }
+                    ],
+                    "disable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Bash cooling down...\",\"color\":\"dark_gray\"}"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "metadata": { "icon": "bash" }
+    },
+
+    "endure": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "Endure",
+        "description": "Grit your teeth and push through the pain. Press the keybind to activate brief damage resistance.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:shield" }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 1,
+        "toggle": true,
+        "keybind_slot": 2,
+        "cooldown": 200,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +0.5 Armor | Active: Resistance I for 5s",
+            "2": "Rank 2: +1.0 Armor | Active: Resistance I for 7s",
+            "3": "Rank 3: +1.5 Armor | Active: Resistance I for 9s",
+            "4": "Rank 4: +2.0 Armor | Active: Resistance II for 9s",
+            "5": "Rank 5: +2.5 Armor | Active: Resistance II for 10s"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "endure",
+                    "levels": {
+                        "1": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor", "operation": "addition", "value": 0.5 } }],
+                        "2": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor", "operation": "addition", "value": 1.0 } }],
+                        "3": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor", "operation": "addition", "value": 1.5 } }],
+                        "4": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor", "operation": "addition", "value": 2.0 } }],
+                        "5": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.armor", "operation": "addition", "value": 2.5 } }]
+                    }
+                }
+            },
+            {
+                "type": "puffish_skill_leveling:toggle",
+                "data": {
+                    "enable_rewards": [
+                        {
+                            "type": "puffish_skill_leveling:effect",
+                            "data": {
+                                "effect": "minecraft:resistance",
+                                "amplifier": 0,
+                                "duration": 100,
+                                "persistent": false,
+                                "is_protected": false
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Endure!\",\"color\":\"aqua\",\"bold\":true}"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "playsound minecraft:item.armor.equip_iron player @s ~ ~ ~ 1.0 0.9"
+                            }
+                        }
+                    ],
+                    "disable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Endure cooling down...\",\"color\":\"dark_gray\"}"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "metadata": { "icon": "endure" }
+    },
+
+    "hp_recovery_while_moving": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "HP Recovery While Moving",
+        "description": "Your body has learned to heal itself even in the middle of combat. Activate to sustain regeneration while moving.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:nether_wart" }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 1,
+        "toggle": true,
+        "keybind_slot": 3,
+        "cooldown": 0,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: Regeneration I (persistent while toggled on)",
+            "2": "Rank 2: Regeneration I + +2 Max HP",
+            "3": "Rank 3: Regeneration I + +4 Max HP"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "hp_recovery_while_moving",
+                    "levels": {
+                        "1": [],
+                        "2": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.max_health", "operation": "addition", "value": 2.0 } }],
+                        "3": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.max_health", "operation": "addition", "value": 4.0 } }]
+                    }
+                }
+            },
+            {
+                "type": "puffish_skill_leveling:toggle",
+                "data": {
+                    "enable_rewards": [
+                        {
+                            "type": "puffish_skill_leveling:effect",
+                            "data": {
+                                "effect": "minecraft:regeneration",
+                                "amplifier": 0,
+                                "duration": 999999,
+                                "persistent": true,
+                                "is_protected": true
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"HP Recovery: Active\",\"color\":\"green\"}"
+                            }
+                        }
+                    ],
+                    "disable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "effect clear @s minecraft:regeneration"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"HP Recovery: Off\",\"color\":\"gray\"}"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "metadata": { "icon": "hp_recovery_while_moving" }
+    },
+
+    "magnum_break": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "Magnum Break",
+        "description": "Unleash a fiery explosion that blasts enemies away. Press the keybind to ignite the air around you and knock back nearby foes.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:fire_charge" }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 2,
+        "toggle": true,
+        "keybind_slot": 4,
+        "cooldown": 120,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +0.5 Attack Damage | Active: Fire burst, 3-block radius",
+            "2": "Rank 2: +1.0 Attack Damage | Active: Fire burst, 3-block radius",
+            "3": "Rank 3: +1.5 Attack Damage | Active: Stronger fire burst, 4-block radius",
+            "4": "Rank 4: +2.0 Attack Damage | Active: Stronger fire burst, 4-block radius",
+            "5": "Rank 5: +2.5 Attack Damage | Active: Maximum fire burst, 5-block radius"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "magnum_break",
+                    "levels": {
+                        "1": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 0.5 } }],
+                        "2": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 1.0 } }],
+                        "3": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 1.5 } }],
+                        "4": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 2.0 } }],
+                        "5": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 2.5 } }]
+                    }
+                }
+            },
+            {
+                "type": "puffish_skill_leveling:toggle",
+                "data": {
+                    "enable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "execute at @s run particle minecraft:flame ~ ~ ~ 2.0 1.5 2.0 0.2 120"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "execute at @s as @e[distance=..4,type=!player,limit=16] run effect give @s minecraft:slowness 3 1 false"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "execute at @s as @e[distance=..4,type=!player,limit=16] run effect give @s minecraft:fire_resistance 1 0 true"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "playsound minecraft:entity.blaze.shoot master @s ~ ~ ~ 1.2 0.8"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Magnum Break!\",\"color\":\"gold\",\"bold\":true}"
+                            }
+                        }
+                    ],
+                    "disable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Magnum Break cooling down...\",\"color\":\"dark_gray\"}"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "metadata": { "icon": "magnum_break" }
+    },
+
+    "auto_berserk": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "Auto Berserk",
+        "description": "When bloodied and cornered, your rage takes over. At low HP, you automatically enter a berserk state.\n\nKubeJS passive — fires when HP drops below 30%.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:blaze_powder" }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 2,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +0.5 Attack Damage | Berserk: Strength I for 5s at <30% HP",
+            "2": "Rank 2: +1.0 Attack Damage | Berserk: Strength I for 8s at <30% HP",
+            "3": "Rank 3: +1.5 Attack Damage | Berserk: Strength II for 5s at <30% HP",
+            "4": "Rank 4: +2.0 Attack Damage | Berserk: Strength II for 8s at <30% HP",
+            "5": "Rank 5: +2.5 Attack Damage | Berserk: Strength III for 8s at <30% HP"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "auto_berserk",
+                    "levels": {
+                        "1": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 0.5 } }],
+                        "2": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 1.0 } }],
+                        "3": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 1.5 } }],
+                        "4": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 2.0 } }],
+                        "5": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_damage", "operation": "addition", "value": 2.5 } }]
+                    }
+                }
+            }
+        ],
+        "metadata": { "icon": "auto_berserk" }
+    },
+
+    "provoke": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "Provoke",
+        "description": "Draw the attention of nearby enemies onto yourself. Your hardened body can handle the punishment.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:iron_nugget" }
+        },
+        "max_skill_level": 3,
+        "points_per_level": 1,
+        "toggle": true,
+        "keybind_slot": 5,
+        "cooldown": 100,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: Active: Resistance I for 4s + taunt sound",
+            "2": "Rank 2: Active: Resistance I for 6s + taunt sound",
+            "3": "Rank 3: Active: Resistance II for 6s + taunt sound"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:toggle",
+                "data": {
+                    "enable_rewards": [
+                        {
+                            "type": "puffish_skill_leveling:effect",
+                            "data": {
+                                "effect": "minecraft:resistance",
+                                "amplifier": 0,
+                                "duration": 80,
+                                "persistent": false,
+                                "is_protected": false
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "execute at @s run particle minecraft:angry_villager ~ ~1 ~ 1.5 1.0 1.5 0.1 20"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "playsound minecraft:entity.iron_golem.attack master @s ~ ~ ~ 0.8 0.7"
+                            }
+                        },
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Provoke!\",\"color\":\"yellow\",\"bold\":true}"
+                            }
+                        }
+                    ],
+                    "disable_rewards": [
+                        {
+                            "type": "puffish_skills:command",
+                            "data": {
+                                "command": "title @s actionbar {\"text\":\"Provoke cooling down...\",\"color\":\"dark_gray\"}"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "metadata": { "icon": "provoke" }
+    },
+
+    "fatal_blow": {
+        "type": "puffish_skills:default",
+        "category_id": "swordsman",
+        "title": "Fatal Blow",
+        "description": "Your Bash has a chance to stagger enemies, leaving them open for follow-up attacks.\n\nKubeJS passive — chance to apply Slowness IV on melee hit.",
+        "icon": {
+            "type": "item",
+            "data": { "item": "minecraft:netherite_sword" }
+        },
+        "max_skill_level": 5,
+        "points_per_level": 2,
+        "merge_description": true,
+        "descriptions": {
+            "1": "Rank 1: +0.5 Attack Speed | 10% stagger chance on hit",
+            "2": "Rank 2: +0.5 Attack Speed | 20% stagger chance on hit",
+            "3": "Rank 3: +0.5 Attack Speed | 30% stagger chance on hit",
+            "4": "Rank 4: +0.5 Attack Speed | 40% stagger chance on hit",
+            "5": "Rank 5: +0.5 Attack Speed | 50% stagger chance on hit"
+        },
+        "rewards": [
+            {
+                "type": "puffish_skill_leveling:per_level_rewards",
+                "data": {
+                    "skill_id": "fatal_blow",
+                    "levels": {
+                        "1": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_speed", "operation": "addition", "value": 0.5 } }],
+                        "2": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_speed", "operation": "addition", "value": 0.5 } }],
+                        "3": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_speed", "operation": "addition", "value": 0.5 } }],
+                        "4": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_speed", "operation": "addition", "value": 0.5 } }],
+                        "5": [{ "type": "puffish_skills:attribute", "data": { "attribute": "minecraft:generic.attack_speed", "operation": "addition", "value": 0.5 } }]
+                    }
+                }
+            }
+        ],
+        "metadata": { "icon": "fatal_blow" }
+    }
+}

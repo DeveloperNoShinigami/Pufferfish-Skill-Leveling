@@ -282,20 +282,30 @@ Two loot tables are used for the barrels inside Skill Master Houses:
 
 ### Disabling Structure Generation
 
-Disabling Skill Master House generation via config is planned for a future update. Currently, structures always generate when the mod is installed. To prevent them in a specific world, you can remove or override the structure set via a datapack by providing an empty `worldgen/structure_set/skill_master_houses.json`.
+Set `disable_skill_master_house` in `config/puffish_skill_leveling.json` to `true` to fully disable Skill Master Houses.
+
+When enabled, the mod now does both:
+- suppresses the Skill Master House structure set for future worldgen
+- removes already-generated `puffish_skill_leveling:skill_master_house` structures server-wide during server startup by rewriting saved chunk/region data directly
+
+Important behavior:
+- Existing houses are removed using the actual structure-piece footprint, not a full outer-box terrain wipe.
+- This affects saved world structure data as well as the placed house blocks, so removed houses stay gone.
+- The cleanup pass does not live-load world chunks to perform deletion.
+- It does not disable the Skill Master profession, workstation, trades, or villager behavior.
 
 ### Configuration
 
-A persistent config file system is planned for a future update. The following options will be available:
+The addon reads `config/puffish_skill_leveling.json` at startup. Current options:
 
 | Option | Description |
 |--------|-------------|
-| `disable_skill_master_house` | Prevent Skill Master House structures from generating |
+| `disable_skill_master_house` | Prevent new Skill Master House generation and remove already-saved houses during server startup |
 | `require_unlock_for_imbuing` | Imbued gear bonuses require the base skill to be unlocked |
 | `require_unlock_for_curio_imbuing` | Curio (Skill Charm) bonuses require the base skill to be unlocked |
 | `debug_logging` | Enable verbose debug logging (persistent) |
 
-In the meantime, debug logging can be toggled at runtime (resets on restart) with:
+`debug_logging` can also be toggled at runtime with:
 ```
 /skillleveling debug true
 /skillleveling debug false

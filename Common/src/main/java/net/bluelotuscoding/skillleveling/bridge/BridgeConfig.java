@@ -2,6 +2,7 @@ package net.bluelotuscoding.skillleveling.bridge;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.bluelotuscoding.skillleveling.bridge.cnpc.CnpcQuestMappingDef;
 
 public class BridgeConfig {
     public boolean enabled = true;
@@ -14,6 +15,11 @@ public class BridgeConfig {
     public boolean lockOtherCategories = true;
     public boolean syncOnLogin = true;
     public boolean disableBaseClasses = false;
+    public boolean useCnpcQuests = false;
+    public Map<String, CnpcQuestMappingDef> cnpcQuestMappings = new HashMap<>();
+
+    /** Global ECM stat points granted per Pufferfish level. Overridable per-class or via NBT. */
+    public int stat_points_per_level = 1;
 
     public BridgeConfig() {
         // Default mappings (category path only; namespace resolved at runtime)
@@ -62,8 +68,32 @@ public class BridgeConfig {
      * @return true if any entries were added (caller should re-save the file)
      */
     public boolean applyMissingDefaults() {
-        BridgeConfig defaults = new BridgeConfig();
         boolean changed = false;
+        if (classToCategoryMap == null) {
+            classToCategoryMap = new HashMap<>();
+            changed = true;
+        }
+        if (categorySyncEnabled == null) {
+            categorySyncEnabled = new HashMap<>();
+            changed = true;
+        }
+        if (statToSkillMap == null) {
+            statToSkillMap = new HashMap<>();
+            changed = true;
+        }
+        if (classPassiveToSkillMap == null) {
+            classPassiveToSkillMap = new HashMap<>();
+            changed = true;
+        }
+        if (classPassiveToLevelMap == null) {
+            classPassiveToLevelMap = new HashMap<>();
+            changed = true;
+        }
+        if (cnpcQuestMappings == null) {
+            cnpcQuestMappings = new HashMap<>();
+            changed = true;
+        }
+        BridgeConfig defaults = new BridgeConfig();
         for (var e : defaults.classToCategoryMap.entrySet()) {
             if (!classToCategoryMap.containsKey(e.getKey())) {
                 classToCategoryMap.put(e.getKey(), e.getValue());

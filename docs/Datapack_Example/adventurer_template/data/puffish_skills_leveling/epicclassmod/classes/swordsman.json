@@ -1,0 +1,94 @@
+{
+    "class_name": "swordsman",
+    "class_parent": "adventurer",
+    "display_name": "Swordsman",
+    "skill_category_id": "swordsman",
+    "required_level": 10,
+    "stat_points_per_level": 3,
+    "book_lore": "Steel and will — that is the Swordsman's creed. Born of the blade, trained in the art of war, they stand at the front of every battle. Master the sword and bend your enemies to your strength.",
+    "class_weapon_type": "Sword / Axe",
+    "class_weapon_icon": "minecraft:iron_sword",
+    "class_weapon_items": [
+        "minecraft:iron_sword",
+        "minecraft:iron_axe",
+        "minecraft:diamond_sword",
+        "minecraft:diamond_axe"
+    ],
+    "attributes": {
+        "roleveling:str": { "value": 1.0, "operation": "BASE" },
+        "roleveling:agi": { "value": 1.0, "operation": "BASE" },
+        "roleveling:vit": { "value": 1.0, "operation": "BASE" },
+        "roleveling:int": { "value": 1.0, "operation": "BASE" },
+        "roleveling:dex": { "value": 1.0, "operation": "BASE" },
+        "roleveling:luk": { "value": 1.0, "operation": "BASE" }
+    },
+    "gui_description": "A front-line warrior. Specialise in raw offense, endurance, or sustained combat.",
+    "preview_animation": "epicfight:biped/living/idle",
+    "preview_armor_base": "minecraft:gold_",
+    "preview_mainhand_item": "minecraft:iron_sword",
+    "preview_offhand_item": "minecraft:shield",
+    "starting_items": [
+        "minecraft:iron_sword",
+        "minecraft:bread@8"
+    ],
+    "gui_stats": [
+        {
+            "label_key": "STR",
+            "icon": "minecraft:textures/item/iron_sword.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "AGI",
+            "icon": "minecraft:textures/item/feather.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "VIT",
+            "icon": "minecraft:textures/item/apple.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "INT",
+            "icon": "minecraft:textures/item/book.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "DEX",
+            "icon": "minecraft:textures/item/bow.png",
+            "stat_type": "number",
+            "count": 1
+        },
+        {
+            "label_key": "LUK",
+            "icon": "minecraft:textures/item/rabbit_foot.png",
+            "stat_type": "number",
+            "count": 1
+        }
+    ],
+    "gui_passives": [
+        {
+            "pufferfish_skill_id": "sword_mastery",
+            "icon": "minecraft:textures/item/iron_sword.png",
+            "level": 1
+        },
+        {
+            "pufferfish_skill_id": "two_hand_mastery",
+            "icon": "minecraft:textures/item/diamond_sword.png",
+            "level": 5
+        },
+        {
+            "pufferfish_skill_id": "increase_hp_recovery",
+            "icon": "minecraft:textures/item/red_dye.png",
+            "level": 10
+        },
+        {
+            "pufferfish_skill_id": "hp_recovery_while_moving",
+            "icon": "minecraft:textures/item/golden_apple.png",
+            "level": 20
+        }
+    ]
+}

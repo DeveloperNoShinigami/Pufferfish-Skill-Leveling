@@ -374,6 +374,23 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
             return;
         }
 
+        // Native cost safety gate: canAffordLevel only checks PerLevelRewardsReward,
+        // but skills that use pufferfish's native "cost" field (default 1) have no
+        // PerLevelRewardsReward, so canAffordLevel returns true for them unconditionally.
+        // We must also enforce the native definition cost here to prevent free-unlocking
+        // skills like NYI placeholder nodes that have no PerLevelRewardsReward.
+        var defForExclCheck = category.definitions().getById(skill.definitionId());
+        if (!force && owner != null && defForExclCheck.isPresent()) {
+            int nativeCost = defForExclCheck.get().cost();
+            if (nativeCost > 0) {
+                var apiCategory = net.puffish.skillsmod.api.SkillsAPI.getCategory(category.id());
+                if (apiCategory.isPresent() && apiCategory.get().getPointsLeft(owner) < nativeCost) {
+                    cir.setReturnValue(false);
+                    return;
+                }
+            }
+        }
+
         cir.setReturnValue(true);
     }
 
@@ -506,9 +523,23 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                         // Check for PerLevelRewardsReward to handle dynamic point costs per level
                         PerLevelRewardsReward foundPlr = null;
                         for (var reward : defOpt.get().rewards()) {
-                            if (reward.instance() instanceof PerLevelRewardsReward plr) {
+                            var inst = reward.instance();
+                            if (inst instanceof PerLevelRewardsReward plr) {
                                 if (plr.getSkillId() == null || plr.getSkillId().equals(skillId)) {
                                     foundPlr = plr;
+                                    break;
+                                }
+                            } else if (inst instanceof net.bluelotuscoding.skillleveling.rewards.ToggleReward toggleReward) {
+                                // Search inside toggle's enable_rewards for nested PerLevelRewardsReward
+                                for (var enableReward : toggleReward.getEnableRewards()) {
+                                    if (enableReward.instance() instanceof PerLevelRewardsReward plr) {
+                                        if (plr.getSkillId() == null || plr.getSkillId().equals(skillId)) {
+                                            foundPlr = plr;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (foundPlr != null) {
                                     break;
                                 }
                             }
@@ -538,6 +569,21 @@ public abstract class CategoryDataMixin implements CategoryDataExtension {
                 }
             }
         }
+        // Also count level 1 for skills unlocked natively by pufferfish (level 0→1)
+        // that were not tracked in addon$skillLevels. This ensures PointsUpdateOutPacket
+        // carries the correct spentPoints so the client shows the right points remaining.
+        for (String unlockedSkillId : unlockedSkills) {
+            if (addon$skillLevels.getOrDefault(unlockedSkillId, 0) == 0) {
+                var skillOpt = category.skills().getById(unlockedSkillId);
+                if (skillOpt.isPresent()) {
+                    var defOpt = category.definitions().getById(skillOpt.get().definitionId());
+                    if (defOpt.isPresent()) {
+                        total += defOpt.get().cost();
+                    }
+                }
+            }
+        }
+
         cir.setReturnValue(total);
     }
 

@@ -31,6 +31,9 @@ The Bridge config file uses the following schema:
 | `lockOtherCategories` | Boolean | `true` | Automatically locks all non-mapped Pufferfish categories when a player changes classes. |
 | `syncOnLogin` | Boolean | `true` | Re-syncs levels and attributes when a player joins the server. |
 | `disableBaseClasses` | Boolean | `false` | Disables selection of the base Epic Classes via traditional menus if utilizing custom class progression. |
+| `useCnpcQuests` | Boolean | `false` | Enables CNPC-first quest mode. CustomNPCs stays authoritative for quest/dialog flows while the addon remains authoritative for class and Pufferfish state. |
+| `cnpcQuestMappings` | Map<String, Object> | Empty | Optional integration metadata keyed by CustomNPCs quest ID. Used to mark quests as `general`, `job`, or `advancement`, attach a `classId`, route a mirrored `bookCategory`, and trigger bridge actions such as `open_class_select`. |
+| `stat_points_per_level` | Integer | `1` | Global default for how many ECM stat points a player earns per Pufferfish level gained. Can be overridden per-class using `stat_points_per_level` in the class JSON. |
 
 ### Synchronization Stability (March 11 Update)
 

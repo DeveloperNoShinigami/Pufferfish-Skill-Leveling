@@ -405,7 +405,7 @@ A specialized villager profession that serves as the primary NPC-driven progress
 | 5 | Master | 9–12 | Tome of Progression, Sigil of Imbuement (50%), highest-level tomes |
 
 ### World Presence
-- **Skill Master Houses:** Custom jigsaw-based buildings generate in villages (spacing: 40 chunks, separation: 16 chunks) with a Skill Scribe Table workstation and tiered loot barrels. Can be disabled in the mod config.
+- **Skill Master Houses:** Custom jigsaw-based buildings generate in villages (spacing: 40 chunks, separation: 16 chunks) with a Skill Scribe Table workstation and tiered loot barrels. Set `disable_skill_master_house` in `config/puffish_skill_leveling.json` to `true` to stop new houses from generating and remove already-saved Skill Master Houses during server startup by rewriting saved region/chunk data directly. Cleanup is footprint-only and does not live-load chunks.
 
 ---
 
@@ -447,8 +447,8 @@ A specialized villager profession that serves as the primary NPC-driven progress
 | **Attribute Sync** | All attribute changes (health, damage, speed) update instantly in the UI. |
 | **Namespace Agnostic** | Short IDs (e.g., `vitality`) automatically match namespaced IDs (e.g., `template:vitality`). |
 | **Base Mod Safe** | All original Pufferfish Skills functionality is preserved. The addon uses non-intrusive injection points. |
-| **Multi-Platform** | Identical behavior on both Forge and Fabric. |
-
+| **Multi-Platform** | Identical behavior on both Forge and Fabric. || **Rise of Heroes (Epic Classes)** | Full bridge integration: class gating, XP sync, structure tracking, bridge config datapacks, S2C sync. Soft dependency — the mod loads cleanly without it. |
+| **CustomNPCs** | Soft dependency. Quest state (accepted/completed/ready-to-turn-in) is tracked on the client via `CnpcClientQuestState`. Used for structure tracker auto-clear: when the active tracked structure's quest is completed, the tracker clears automatically. All CNPC class access is via reflection — no crash if CustomNPCs is absent. |
 ---
 
 [< Back to Core Index](index.md) | [Next: Datapack Guide >](DATAPACK_GUIDE.md)

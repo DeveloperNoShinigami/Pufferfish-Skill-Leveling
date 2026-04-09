@@ -1,0 +1,10 @@
+{
+    "title": "Adventurer",
+    "icon": {
+        "type": "item",
+        "data": {
+            "item": "minecraft:wooden_sword"
+        }
+    },
+    "background": "minecraft:textures/block/oak_planks.png"
+}

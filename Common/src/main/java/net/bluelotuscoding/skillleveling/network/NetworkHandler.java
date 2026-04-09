@@ -1,6 +1,7 @@
 package net.bluelotuscoding.skillleveling.network;
 
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.bluelotuscoding.skillleveling.bridge.network.SyncCnpcNpcRolePacket;
 
 public interface NetworkHandler {
     void sendToPlayer(SyncBridgeContentPacket packet, ServerPlayerEntity player);
@@ -20,4 +21,8 @@ public interface NetworkHandler {
     void sendToPlayer(SyncItemRestrictionsPacket packet, ServerPlayerEntity player);
 
     void sendToPlayer(SyncAllConfigsPacket packet, ServerPlayerEntity player);
+
+    void sendToPlayer(SyncCnpcQuestUiPacket packet, ServerPlayerEntity player);
+
+    void sendToPlayer(SyncCnpcNpcRolePacket packet, ServerPlayerEntity player);
 }

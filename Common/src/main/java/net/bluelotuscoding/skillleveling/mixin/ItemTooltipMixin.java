@@ -25,34 +25,34 @@ public abstract class ItemTooltipMixin {
     private void onGetTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> cir) {
         try {
             ItemStack stack = (ItemStack) (Object) this;
-            NbtCompound nbt = stack.getNbt();
 
-            if (nbt != null && nbt.contains("SkillLevelingImbued")) {
-                NbtCompound imbuedNbt = nbt.getCompound("SkillLevelingImbued");
-                String skillId = imbuedNbt.getString("SkillId");
+            if (net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper.isImbued(stack)) {
+                List<Text> original = cir.getReturnValue();
+                List<Text> tooltip = new ArrayList<>(original != null ? original : Collections.emptyList());
 
-                if (skillId != null && !skillId.isEmpty()) {
-                    List<Text> original = cir.getReturnValue();
-                    List<Text> tooltip = new ArrayList<>(original != null ? original : Collections.emptyList());
+                List<net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper.ImbuedSkill> skills = net.bluelotuscoding.skillleveling.util.ImbuedSkillHelper
+                        .getSkills(stack);
 
+                tooltip.add(Text.literal(" "));
+                tooltip.add(Text.literal("Imbued Skills:").formatted(Formatting.GRAY));
+
+                for (var imbuedSkill : skills) {
                     // Convert snake_case to Title Case
-                    String displayName = convertToTitleCase(skillId);
-
-                    tooltip.add(Text.literal(" "));
-                    tooltip.add(Text.literal("Imbued Skill:").formatted(Formatting.GRAY));
+                    String displayName = convertToTitleCase(imbuedSkill.skillId);
                     tooltip.add(Text.literal(" " + displayName).formatted(Formatting.GOLD));
 
-                    // Fetch real description for level 1 from client storage
+                    // Fetch real description for level from client storage
                     String description = net.bluelotuscoding.skillleveling.client.ClientDescriptionStorage
-                            .getDescriptionSingle(skillId, 1);
+                            .getDescriptionSingle(imbuedSkill.skillId, imbuedSkill.level);
                     if (description != null) {
-                        tooltip.add(Text.literal(" " + description).formatted(Formatting.BLUE));
+                        tooltip.add(Text.literal("  " + description).formatted(Formatting.BLUE));
                     } else {
-                        tooltip.add(Text.literal(" +1 Level (When Equipped)").formatted(Formatting.BLUE));
+                        tooltip.add(Text.literal("  +" + imbuedSkill.level + " Level (When Equipped)")
+                                .formatted(Formatting.BLUE));
                     }
-
-                    cir.setReturnValue(tooltip);
                 }
+
+                cir.setReturnValue(tooltip);
             }
         } catch (Exception e) {
             // Keep original tooltip on error

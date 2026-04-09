@@ -98,6 +98,11 @@ public class FabricNetworkHandler implements NetworkHandler {
     }
 
     @Override
+    public void sendToPlayer(net.bluelotuscoding.skillleveling.bridge.network.SyncCnpcNpcRolePacket packet, ServerPlayerEntity player) {
+        // Not implemented for Fabric yet
+    }
+
+    @Override
     public void sendToServer(RequestToggleSkillPacket packet) {
         PacketByteBuf buf = PacketByteBufs.create();
         packet.encode(buf);

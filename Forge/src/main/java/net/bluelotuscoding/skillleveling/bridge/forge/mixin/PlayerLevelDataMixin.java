@@ -11,7 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Mixin(targets = "com.example.epicclassmod.data.PlayerLevelData", remap = false)
 public class PlayerLevelDataMixin {
@@ -38,10 +42,15 @@ public class PlayerLevelDataMixin {
             }
 
             List<String> toRemove = new ArrayList<>();
+            List<String> commandRemoved = new ArrayList<>();
 
             // 1. Identify all custom alloc_ tags
             for (String key : tag.getKeys()) {
                 if (key.startsWith("alloc_")) {
+                    int current = Math.max(0, tag.getInt(key));
+                    if (current > 0) {
+                        commandRemoved.add(key);
+                    }
                     // Skip vanilla stats as they are handled by the original method
                     if (key.equals("alloc_atk") || key.equals("alloc_def")
                             || key.equals("alloc_aspd") || key.equals("alloc_mspd")
@@ -59,6 +68,10 @@ public class PlayerLevelDataMixin {
                 tag.remove(key);
             }
 
+            if (sp instanceof ServerPlayerEntity spe && !commandRemoved.isEmpty()) {
+                addon$scheduleResetZeroCommands(spe, commandRemoved);
+            }
+
             if (customRefund > 0) {
                 int currentSp = tag.getInt("stat_points");
                 tag.putInt("stat_points", currentSp + customRefund);
@@ -66,6 +79,63 @@ public class PlayerLevelDataMixin {
         } catch (Exception e) {
             AddonLogger.LOGGER.error("[Bridge] Failed to reset custom stats: " + e.getMessage());
         }
+    }
+
+    private static void addon$runResetZeroCommands(ServerPlayerEntity player, List<String> removedAllocKeys) {
+        String className = net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().getPlatform()
+                .getEpicClassName(player);
+        var def = net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager.getClassDef(className);
+        if (def == null) {
+            return;
+        }
+
+        Map<String, String> slotCommands = new HashMap<>();
+        for (var page : net.bluelotuscoding.skillleveling.bridge.config.EpicClassConfigManager
+                .getPagesForClass(def.class_name)) {
+            if (page.slots == null) {
+                continue;
+            }
+            for (var slot : page.slots) {
+                if (slot != null && slot.id != null && slot.command != null && !slot.command.isBlank()) {
+                    slotCommands.put(slot.id, slot.command);
+                }
+            }
+        }
+
+        Set<String> executedCommands = new LinkedHashSet<>();
+
+        for (String allocKey : removedAllocKeys) {
+            if (!allocKey.startsWith("alloc_")) {
+                continue;
+            }
+            String statId = allocKey.substring("alloc_".length());
+            String commandTemplate = slotCommands.get(statId);
+            if (commandTemplate == null) {
+                continue;
+            }
+
+            try {
+                String command = commandTemplate
+                        .replace("{value}", "0")
+                        .replace("{player}", player.getEntityName())
+                        .trim();
+                if (command.isEmpty() || !executedCommands.add(command)) {
+                    continue;
+                }
+                player.getServer().getCommandManager().executeWithPrefix(
+                        player.getCommandSource().withSilent(), command);
+            } catch (Exception e) {
+                // Command cleanup must never block reset/refund flow.
+                AddonLogger.LOGGER.warn("[Bridge] Reset command cleanup failed for stat " + statId + ": "
+                        + e.getMessage());
+            }
+        }
+    }
+
+    private static void addon$scheduleResetZeroCommands(ServerPlayerEntity player, List<String> removedAllocKeys) {
+        // Defer command cleanup so commands like "roleveling refresh" run after reset writes complete.
+        List<String> snapshot = new ArrayList<>(removedAllocKeys);
+        player.getServer().execute(() -> addon$runResetZeroCommands(player, snapshot));
     }
 
     /**

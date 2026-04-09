@@ -32,10 +32,17 @@ public class BridgeDataLoader extends JsonDataLoader {
                     AddonLogger.LOGGER.info("Applying Epic Class bridge config from datapack: " + id);
                     BridgeConfigManager.setConfig(bridgeConfig);
                     EpicClassBridge.loadConfig(bridgeConfig);
+                    
+                    // SYNC TO ALL PLAYERS: Ensure clients receive updated config (e.g. disableBaseClasses)
+                    // immediately upon /reload without needing to relog.
+                    net.bluelotuscoding.skillleveling.SkillLevelingMod.getInstance().syncBridgeToAll();
                 }
             } catch (Exception e) {
                 AddonLogger.LOGGER.error("Error loading bridge config from datapack " + id + ": " + e.getMessage());
             }
         });
+
+        // Parse and cache passive skill descriptions and titles from the loaded datapack (definitions.json)
+        EpicClassBridge.loadSkillDisplayData(manager);
     }
 }

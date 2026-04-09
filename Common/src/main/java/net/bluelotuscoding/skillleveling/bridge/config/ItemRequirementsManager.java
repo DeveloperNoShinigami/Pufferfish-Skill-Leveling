@@ -11,9 +11,19 @@ import net.bluelotuscoding.skillleveling.util.AddonLogger;
 import net.minecraft.resource.JsonDataLoader;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.BowItem;
+import net.minecraft.item.CrossbowItem;
+import net.minecraft.item.ShieldItem;
+import net.minecraft.item.SwordItem;
+import net.minecraft.item.TridentItem;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -22,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.lang.reflect.Method;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Loads item restriction definitions from datapacks under
@@ -240,11 +251,14 @@ public class ItemRequirementsManager extends JsonDataLoader {
 
     public static List<String> checkRequirements(PlayerEntity player, String id, TargetType type) {
         ItemRequirementDef req = getRequirements(id, type);
-        if (req == null) {
-            return Collections.emptyList();
-        }
-
         List<String> failures = new ArrayList<>();
+
+        if (req == null) {
+            if (type == TargetType.ITEM && isAutoClassWeaponRestrictionsEnabled()) {
+                addClassWeaponFailures(player, id, failures);
+            }
+            return failures;
+        }
 
         // Environmental Gating (Always check if present in any def)
         if (req.in_water != null && player.isTouchingWater() != req.in_water) {
@@ -357,7 +371,287 @@ public class ItemRequirementsManager extends JsonDataLoader {
             }
         }
 
+        // Avoid conflicts with the legacy explicit class requirement path.
+        // If require_class is set, it remains the sole class-gating source.
+        if (type == TargetType.ITEM
+                && isAutoClassWeaponRestrictionsEnabled()
+                && (req.require_class == null || req.require_class.isBlank())) {
+            addClassWeaponFailures(player, id, failures);
+        }
+
         return failures;
+    }
+
+    private static boolean isAutoClassWeaponRestrictionsEnabled() {
+        try {
+            var cfg = net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager.getConfig();
+            if (cfg != null) {
+                return cfg.enableAutoClassWeaponRestrictions;
+            }
+        } catch (Exception ignored) {
+        }
+
+        try {
+            var synced = EpicClassConfigManager.getSyncedConfig();
+            if (synced != null) {
+                return synced.enableAutoClassWeaponRestrictions;
+            }
+        } catch (Exception ignored) {
+        }
+
+        return true;
+    }
+
+    private static void addClassWeaponFailures(PlayerEntity player, String itemId, List<String> failures) {
+        try {
+            if (player == null || itemId == null || itemId.isBlank()) {
+                return;
+            }
+
+            Identifier itemIdentifier = new Identifier(itemId);
+            Item item = Registries.ITEM.get(itemIdentifier);
+            if (item == null || item == Items.AIR) {
+                return;
+            }
+
+            String currentClass = resolveCurrentClassId(player);
+
+            if (currentClass == null || currentClass.isBlank() || "epic_classes:none".equalsIgnoreCase(currentClass)
+                    || "none".equalsIgnoreCase(currentClass)) {
+                return;
+            }
+
+            EpicClassDef classDef = EpicClassConfigManager.getClassDef(currentClass);
+            if (classDef == null) {
+                return;
+            }
+
+            Set<String> allowedItems = new HashSet<>();
+            List<TagKey<Item>> allowedTags = new ArrayList<>();
+            collectClassWeaponAllowRules(classDef, allowedItems, allowedTags);
+
+            // If class tree defines no weapon allow-list, do not auto-restrict.
+            if (allowedItems.isEmpty() && allowedTags.isEmpty()) {
+                return;
+            }
+
+            // Only apply automatic class restrictions to weapon-like items.
+            // A configured class weapon tag is treated as weapon-like, allowing any
+            // namespace tag (not just forge/c) to define the weapon domain.
+            if (!isWeaponLike(item, allowedTags)) {
+                return;
+            }
+
+            if (allowedItems.contains(itemId.toLowerCase(java.util.Locale.ROOT))) {
+                return;
+            }
+
+            var itemEntry = Registries.ITEM.getEntry(item);
+            for (TagKey<Item> tag : allowedTags) {
+                if (itemEntry.isIn(tag)) {
+                    return;
+                }
+            }
+
+            failures.add(buildClassRequirementMessage(itemId, item));
+        } catch (Exception ignored) {
+            // Fail-open to avoid false positives from malformed datapack values.
+        }
+    }
+
+    private static String resolveCurrentClassId(PlayerEntity player) {
+        if (player == null) {
+            return "";
+        }
+
+        String currentClass = "";
+        if (player.getWorld().isClient()) {
+            currentClass = net.bluelotuscoding.skillleveling.client.ClientCustomClassState
+                    .getCustomClass(player.getUuid());
+        }
+
+        if (currentClass == null || currentClass.isBlank()
+                || "epic_classes:none".equalsIgnoreCase(currentClass)
+                || "none".equalsIgnoreCase(currentClass)) {
+            try {
+                currentClass = SkillLevelingMod.getInstance().getPlatform().getEpicClassName(player);
+            } catch (Exception ignored) {
+                currentClass = "";
+            }
+        }
+
+        return currentClass == null ? "" : currentClass;
+    }
+
+    private static String buildClassRequirementMessage(String itemId, Item item) {
+        String normalizedItemId = itemId.toLowerCase(java.util.Locale.ROOT);
+        Set<String> seenClasses = new HashSet<>();
+        List<String> matchingClassNames = new ArrayList<>();
+        var itemEntry = Registries.ITEM.getEntry(item);
+
+        for (EpicClassDef def : EpicClassConfigManager.getClasses().values()) {
+            if (def == null || def.class_name == null || def.class_name.isBlank()) {
+                continue;
+            }
+
+            String classKey = EpicClassBridge.normalizeClassName(def.class_name);
+            if (!seenClasses.add(classKey)) {
+                continue;
+            }
+
+            if (!classWeaponRuleDefinedOnClass(def)) {
+                continue;
+            }
+
+            if (!classWeaponRuleMatchesDirectly(def, normalizedItemId, itemEntry)) {
+                continue;
+            }
+
+            String display = def.display_name;
+            if (display == null || display.isBlank()) {
+                display = def.gui_title;
+            }
+            if (display == null || display.isBlank()) {
+                display = humanizeClassName(classKey);
+            }
+            matchingClassNames.add(display);
+        }
+
+        if (matchingClassNames.isEmpty()) {
+            return "Requires Class Weapon";
+        }
+
+        if (matchingClassNames.size() == 1) {
+            return "Requires Class: " + matchingClassNames.get(0);
+        }
+
+        return "Requires Class: " + String.join(", ", matchingClassNames);
+    }
+
+    private static String humanizeClassName(String normalizedClassName) {
+        if (normalizedClassName == null || normalizedClassName.isBlank()) {
+            return "Unknown";
+        }
+
+        String[] parts = normalizedClassName.replace('-', ' ').replace('_', ' ').trim().split("\\s+");
+        StringBuilder out = new StringBuilder();
+        for (String part : parts) {
+            if (part.isEmpty()) {
+                continue;
+            }
+            if (out.length() > 0) {
+                out.append(' ');
+            }
+            out.append(Character.toUpperCase(part.charAt(0)));
+            if (part.length() > 1) {
+                out.append(part.substring(1));
+            }
+        }
+        return out.toString();
+    }
+
+    private static void collectClassWeaponAllowRules(EpicClassDef root, Set<String> allowedItems,
+            List<TagKey<Item>> allowedTags) {
+        Set<String> visited = new HashSet<>();
+        EpicClassDef current = root;
+        while (current != null) {
+            String key = current.class_name != null && !current.class_name.isBlank()
+                    ? EpicClassBridge.normalizeClassName(current.class_name)
+                    : Integer.toHexString(System.identityHashCode(current));
+            if (!visited.add(key)) {
+                break;
+            }
+
+            if (current.class_weapon_items != null) {
+                for (String value : current.class_weapon_items) {
+                    if (value != null && !value.isBlank()) {
+                        allowedItems.add(value.trim().toLowerCase(java.util.Locale.ROOT));
+                    }
+                }
+            }
+
+            if (current.class_weapon_tags != null) {
+                for (String rawTag : current.class_weapon_tags) {
+                    TagKey<Item> tagKey = parseItemTag(rawTag);
+                    if (tagKey != null && !allowedTags.contains(tagKey)) {
+                        allowedTags.add(tagKey);
+                    }
+                }
+            }
+
+            if (current.class_parent == null || current.class_parent.isBlank()) {
+                break;
+            }
+            current = EpicClassConfigManager.getClassDef(current.class_parent);
+        }
+    }
+
+    private static boolean classWeaponRuleDefinedOnClass(EpicClassDef def) {
+        return def != null
+                && ((def.class_weapon_items != null && !def.class_weapon_items.isEmpty())
+                        || (def.class_weapon_tags != null && !def.class_weapon_tags.isEmpty()));
+    }
+
+    private static boolean classWeaponRuleMatchesDirectly(EpicClassDef def, String normalizedItemId,
+            net.minecraft.registry.entry.RegistryEntry<Item> itemEntry) {
+        if (def == null) {
+            return false;
+        }
+
+        if (def.class_weapon_items != null) {
+            for (String value : def.class_weapon_items) {
+                if (value != null && !value.isBlank()
+                        && normalizedItemId.equals(value.trim().toLowerCase(java.util.Locale.ROOT))) {
+                    return true;
+                }
+            }
+        }
+
+        if (def.class_weapon_tags != null) {
+            for (String rawTag : def.class_weapon_tags) {
+                TagKey<Item> tagKey = parseItemTag(rawTag);
+                if (tagKey != null && itemEntry.isIn(tagKey)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static TagKey<Item> parseItemTag(String rawTag) {
+        if (rawTag == null || rawTag.isBlank()) {
+            return null;
+        }
+
+        String normalized = rawTag.trim();
+        if (normalized.startsWith("#")) {
+            normalized = normalized.substring(1);
+        }
+
+        try {
+            return TagKey.of(RegistryKeys.ITEM, new Identifier(normalized));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static boolean isWeaponLike(Item item, List<TagKey<Item>> classWeaponTags) {
+        if (item instanceof SwordItem || item instanceof AxeItem || item instanceof BowItem
+                || item instanceof CrossbowItem || item instanceof TridentItem || item instanceof ShieldItem) {
+            return true;
+        }
+
+        var itemEntry = Registries.ITEM.getEntry(item);
+        if (classWeaponTags != null) {
+            for (TagKey<Item> tag : classWeaponTags) {
+                if (itemEntry.isIn(tag)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

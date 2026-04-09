@@ -6,13 +6,17 @@
 
 The integration allows you to restrict the usage of powerful items, weapons, and tools based on a player's class and skill levels. This ensures that only players who have invested in the correct progression paths can wield specific equipment.
 
-## 1. Basic Class Restrictions (`class_weapon_items`)
+## 1. Bridge-Owned Class Weapon Restrictions
 
-The simplest system uses the `class_weapon_items` array in your Epic Class `classes/<name>.json` definition. 
+The recommended system uses `class_weapon_items` and/or `class_weapon_tags` in your Epic Class `classes/<name>.json` definition.
 
-When an item is listed here:
-1. Only players who have selected that exact class can use the item to attack or trigger abilities.
-2. If another class tries to use it, the action is blocked, and an error message is displayed.
+Behavior:
+1. The bridge reads the class's allow-list directly from the class JSON.
+2. Child classes inherit parent weapon rules automatically through `class_parent`.
+3. If `enableAutoClassWeaponRestrictions` is `true`, the bridge system is authoritative and ECM's legacy job weapon restriction system is disabled.
+4. If `enableAutoClassWeaponRestrictions` is `false`, the bridge skips these automatic class-weapon checks and ECM's legacy system stays active.
+
+### Direct Item List Example
 
 ```json
 "class_weapon_items": [
@@ -20,6 +24,32 @@ When an item is listed here:
     "minecraft:diamond_sword"
 ]
 ```
+
+### Class Tag Example
+
+```json
+"class_weapon_tags": [
+    "puffish_skills_leveling:class_weapons/gunslinger"
+]
+```
+
+### Recommended Tag Layout
+
+Use one item tag per class and put the actual item IDs inside the tag file.
+
+`data/puffish_skills_leveling/tags/items/class_weapons/gunslinger.json`
+
+```json
+{
+  "replace": false,
+  "values": [
+    "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}",
+    "minecraft:crossbow"
+  ]
+}
+```
+
+This is the preferred workflow for custom classes because the tag file becomes the single source of truth for that class's allowed weapons.
 
 ## 2. Advanced Item Requirements Datapack
 
@@ -61,6 +91,12 @@ You can define either a single requirement object, or a multi-entry file using a
 - `require_worn`: Player must be wearing one of these armor items.
 - `require_effect`: Player must have ALL specified status effect IDs active.
 - `require_quest`: Player must have accepted ALL specified Epic Class Quest IDs.
+
+### Interaction With Class Weapon Restrictions
+
+- `item_restrictions` and bridge-owned class weapon restrictions are separate systems.
+- Explicit `item_restrictions` entries are still the right choice for special-case gating such as level, attribute, armor, quest, or effect checks.
+- If an explicit item restriction already uses `require_class`, that explicit class rule stays authoritative for that item instead of stacking the bridge auto class-weapon message on top.
 
 ### 3. Non-Item Restrictions
 

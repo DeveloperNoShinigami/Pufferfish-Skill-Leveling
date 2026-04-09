@@ -2,6 +2,25 @@
 
 All notable changes to Pufferfish Skill Leveling are documented in this file. Dates are in YYYY-MM-DD format.
 
+## [2026-04-09] — Bridge-Owned Class Weapon Restrictions, Inherited Weapon Permissions & Stat Sync Refinement
+
+### Added
+- **Bridge-Owned Class Weapon Restrictions**: Class weapon gating is now fully handled by the bridge via `class_weapon_items` and `class_weapon_tags` fields on Epic Class definitions. ECM's legacy job-weapon restriction system is replaced when `enableAutoClassWeaponRestrictions: true` is set in the bridge config.
+- **`enableAutoClassWeaponRestrictions` Config Flag**: New global bridge config field. When `true` (default), the bridge enforces class weapon rules and ECM's legacy restriction path is disabled. When `false`, bridge weapon checks are skipped and ECM's own restriction system remains active.
+- **Forge Tag Support for Class Weapon Lists**: Class weapon allow-lists can now reference Forge item tags (e.g. `forge:swords`) in addition to explicit item IDs via `class_weapon_tags`. This lets datapack authors group large weapon families without listing every item by hand.
+- **Inherited Weapon Permissions Across Class Trees**: When a class has a parent class (first-job → second-job progression), the bridge merges the parent's allowed weapon set into the child's allowed set. For example, a `Swordsman` (parent: `Mage`) that lists `swords` will automatically also permit all weapons the `Mage` class was allowed to use (e.g. `staffs`), enabling natural class progression without duplicating weapon entries.
+- **Class-Specific Weapon Tag Workflow**: The example datapack demonstrates per-class custom item tags under `data/puffish_skills_leveling/tags/items/class_weapons/`, giving each class its own explicit allow-list that can be extended by child classes.
+- **Unspent Stat Point Carry-Over to New Classes**: When a player's class changes or level data is resynced, previously unspent stat points are now preserved rather than recalculated away. Players who had accumulated unspent points will no longer lose them on class transition or reload.
+
+### Fixed
+- **Weapon Tag Resolution in Example Datapack**: Class weapon example tags now contain explicit item IDs instead of nested tag references, making the example reliable and easier to debug.
+- **Legacy ECM Restriction Leakage**: The bridge config now mirrors into Epic Class Mod's internal `ModSettings.setJobWeaponRestrEnabled(...)`, ensuring ECM's own restriction system is actually disabled when bridge-owned class weapon restrictions are active.
+- **XP/Level-Up Overlay Suppression**: `setJobWeaponRestrEnabled(false)` had the side effect of making `AnnouncementOverlay.allowNotices()` return `false`, silently suppressing all XP gain and level-up toasts even though the bridge's `forceSync` path was sending `SyncLevelPacket` with the correct `lastGain` value. Fixed by adding `AnnouncementOverlayMixin` which injects into the static `allowNotices()` method and forces it to return `true` when the bridge is active, decoupling notification gating from the weapon restriction flag.
+
+### Changed
+- **Weapon Detection Rules Simplified**: The bridge no longer relies on fallback `forge:` / `c:` weapon tag probing when deciding whether to apply bridge-owned class weapon checks. The configured class allow-list is the authoritative source of truth.
+- **Example Version Bump**: Forge artifacts now build under version `0.17.3`.
+
 ## [2026-04-08] — Command Sync Regression Hotfix (RO Refresh + Reset Timing)
 
 ### Fixed

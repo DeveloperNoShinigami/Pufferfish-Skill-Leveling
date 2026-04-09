@@ -30,7 +30,9 @@ public class CustomAllocateStatPacket {
         NetworkEvent.Context ctx = ctxSup.get();
         ctx.enqueueWork(() -> {
             var player = ctx.getSender();
-            if (player == null) return;
+            if (player == null) {
+                return;
+            }
 
             // Look up the slot definition to check for command slots
             AttributeDef slotDef = null;
@@ -40,7 +42,10 @@ public class CustomAllocateStatPacket {
                 outer: for (var page : EpicClassConfigManager.getPagesForClass(def.class_name)) {
                     if (page.slots != null) {
                         for (var sd : page.slots) {
-                            if (msg.statId.equals(sd.id)) { slotDef = sd; break outer; }
+                            if (msg.statId.equals(sd.id)) {
+                                slotDef = sd;
+                                break outer;
+                            }
                         }
                     }
                 }

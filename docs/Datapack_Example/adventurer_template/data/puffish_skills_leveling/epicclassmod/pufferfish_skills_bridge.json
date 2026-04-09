@@ -7,31 +7,11 @@
         "SWORDSMAN": [
             "adventurer",
             "swordsman"
-        ],
-        "ARCHER": [
-            "archer"
-        ],
-        "SORCERER": [
-            "sorcerer"
-        ],
-        "PALADIN": [
-            "paladin"
-        ],
-        "BERSERKER": [
-            "berserker"
-        ],
-        "REAPER": [
-            "reaper"
         ]
     },
     "categorySyncEnabled": {
         "adventurer": true,
-        "swordsman": true,
-        "archer": true,
-        "sorcerer": true,
-        "paladin": true,
-        "berserker": true,
-        "reaper": true
+        "swordsman": true
     },
     "statToSkillMap": {},
     "classPassiveToSkillMap": {
@@ -42,27 +22,7 @@
         "SWORDSMAN_0": "sword_mastery",
         "SWORDSMAN_1": "two_hand_mastery",
         "SWORDSMAN_2": "increase_hp_recovery",
-        "SWORDSMAN_3": "hp_recovery_while_moving",
-        "ARCHER_0": "agility",
-        "ARCHER_1": "eagle_eye",
-        "ARCHER_2": "piercing_shot",
-        "ARCHER_3": "archer_mastery",
-        "SORCERER_0": "mystic_knowledge",
-        "SORCERER_1": "arcane_power",
-        "SORCERER_2": "mana_shield",
-        "SORCERER_3": "sorcerer_mastery",
-        "PALADIN_0": "holy_light",
-        "PALADIN_1": "righteous_fury",
-        "PALADIN_2": "sanctuary",
-        "PALADIN_3": "paladin_mastery",
-        "BERSERKER_0": "blood_rage",
-        "BERSERKER_1": "savage_strike",
-        "BERSERKER_2": "wild_fury",
-        "BERSERKER_3": "berserker_mastery",
-        "REAPER_0": "soul_harvest",
-        "REAPER_1": "death_touch",
-        "REAPER_2": "shadow_walk",
-        "REAPER_3": "reaper_mastery"
+        "SWORDSMAN_3": "hp_recovery_while_moving"
     },
     "classPassiveToLevelMap": {
         "ADVENTURER_0": 1,
@@ -72,31 +32,12 @@
         "SWORDSMAN_0": 1,
         "SWORDSMAN_1": 5,
         "SWORDSMAN_2": 10,
-        "SWORDSMAN_3": 20,
-        "ARCHER_0": 1,
-        "ARCHER_1": 5,
-        "ARCHER_2": 10,
-        "ARCHER_3": 15,
-        "SORCERER_0": 1,
-        "SORCERER_1": 5,
-        "SORCERER_2": 10,
-        "SORCERER_3": 15,
-        "PALADIN_0": 1,
-        "PALADIN_1": 5,
-        "PALADIN_2": 10,
-        "PALADIN_3": 20,
-        "BERSERKER_0": 0,
-        "BERSERKER_1": 5,
-        "BERSERKER_2": 10,
-        "BERSERKER_3": 20,
-        "REAPER_0": 1,
-        "REAPER_1": 5,
-        "REAPER_2": 10,
-        "REAPER_3": 15
+        "SWORDSMAN_3": 20
     },
     "autoActivateCategory": true,
     "lockOtherCategories": true,
     "disableBaseClasses": true,
     "useCnpcQuests": true,
+    "enableAutoClassWeaponRestrictions": true,
     "syncOnLogin": true
 }

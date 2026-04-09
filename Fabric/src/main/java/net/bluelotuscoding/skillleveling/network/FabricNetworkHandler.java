@@ -98,6 +98,11 @@ public class FabricNetworkHandler implements NetworkHandler {
     }
 
     @Override
+    public void sendToPlayer(SyncCnpcQuestUiPacket packet, ServerPlayerEntity player) {
+        // Not implemented for Fabric yet
+    }
+
+    @Override
     public void sendToPlayer(net.bluelotuscoding.skillleveling.bridge.network.SyncCnpcNpcRolePacket packet, ServerPlayerEntity player) {
         // Not implemented for Fabric yet
     }

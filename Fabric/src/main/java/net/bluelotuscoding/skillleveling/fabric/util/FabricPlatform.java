@@ -80,6 +80,12 @@ public class FabricPlatform implements Platform {
     }
 
     @Override
+    public int getEpicClassPlayerLevel(Object player) {
+        // Epic Class is Forge-only for now
+        return 0;
+    }
+
+    @Override
     public int getPufferfishPoints(Object player,
             net.minecraft.util.Identifier categoryId) {
         return 0;

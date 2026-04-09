@@ -8,11 +8,8 @@
     "book_lore": "Steel and will — that is the Swordsman's creed. Born of the blade, trained in the art of war, they stand at the front of every battle. Master the sword and bend your enemies to your strength.",
     "class_weapon_type": "Sword / Axe",
     "class_weapon_icon": "minecraft:iron_sword",
-    "class_weapon_items": [
-        "minecraft:iron_sword",
-        "minecraft:iron_axe",
-        "minecraft:diamond_sword",
-        "minecraft:diamond_axe"
+    "class_weapon_tags": [
+        "puffish_skills_leveling:class_weapons/swordsman"
     ],
     "attributes": {
         "roleveling:str": { "value": 1.0, "operation": "BASE" },

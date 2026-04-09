@@ -23,6 +23,7 @@ public class EpicClassDef {
     public String class_weapon_type;
     public String class_weapon_icon;
     public List<String> class_weapon_items;
+    public List<String> class_weapon_tags;
 
     public Map<String, AttributeDef> attributes = new HashMap<>();
 

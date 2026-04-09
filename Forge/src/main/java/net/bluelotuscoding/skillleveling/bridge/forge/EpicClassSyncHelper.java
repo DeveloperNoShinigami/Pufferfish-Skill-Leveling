@@ -335,7 +335,11 @@ public class EpicClassSyncHelper {
                 if (getInt != null && putInt != null) {
                     int used = 0;
                     net.minecraft.nbt.NbtCompound ecmNbt = (result instanceof net.minecraft.nbt.NbtCompound t) ? t : null;
+                    int previousLevel = 0;
+                    int previousAvailable = 0;
                     if (ecmNbt != null) {
+                        previousLevel = ecmNbt.getInt("level");
+                        previousAvailable = Math.max(0, ecmNbt.getInt("stat_points"));
                         for (String key : ecmNbt.getKeys()) {
                             if (key.startsWith("alloc_")) {
                                 used += ecmNbt.getInt(key);
@@ -368,8 +372,11 @@ public class EpicClassSyncHelper {
                         var splParseResult = net.puffish.skillsmod.expression.DefaultParser.parse(splExpr, java.util.Set.of("level"));
                         int evalLevel = authoritativeLevel;
                         resolvedSPL = splParseResult.getSuccess().map(expr -> {
-                            try { return (int) Math.ceil(expr.eval(java.util.Map.of("level", (double) evalLevel))); }
-                            catch (Exception ex) { return 1; }
+                            try {
+                                return (int) Math.ceil(expr.eval(java.util.Map.of("level", (double) evalLevel)));
+                            } catch (Exception ex) {
+                                return 1;
+                            }
                         }).orElse(1);
                     } else {
                         String ecmClassName = (player instanceof net.minecraft.server.network.ServerPlayerEntity sp2)
@@ -381,7 +388,9 @@ public class EpicClassSyncHelper {
                     }
 
                     if (resolvedSPL > 0) {
-                        spNow = Math.max(0, authoritativeLevel * resolvedSPL - used);
+                        int recalculatedAvailable = Math.max(0, authoritativeLevel * resolvedSPL - used);
+                        int gainedFromLevels = Math.max(0, authoritativeLevel - previousLevel) * resolvedSPL;
+                        spNow = Math.max(recalculatedAvailable, previousAvailable + gainedFromLevels);
                     }
 
                     putInt.invoke(result, "level", authoritativeLevel);
@@ -533,8 +542,11 @@ public class EpicClassSyncHelper {
                             var costResult = net.puffish.skillsmod.expression.DefaultParser.parse(costExpr, java.util.Set.of("current"));
                             int cur = allocCurrent;
                             cost = costResult.getSuccess().map(expr -> {
-                                try { return (int) Math.ceil(expr.eval(java.util.Map.of("current", (double) cur))); }
-                                catch (Exception e2) { return 1; }
+                                try {
+                                    return (int) Math.ceil(expr.eval(java.util.Map.of("current", (double) cur)));
+                                } catch (Exception e2) {
+                                    return 1;
+                                }
                             }).orElse(1);
                         } else {
                             // Config compiledPointCostExpression fallback
@@ -546,7 +558,10 @@ public class EpicClassSyncHelper {
                                     outer: for (var page : EpicClassConfigManager.getPagesForClass(classDef.class_name)) {
                                         if (page.slots != null) {
                                             for (var sd : page.slots) {
-                                                if (statId.equals(sd.id)) { slotDef = sd; break outer; }
+                                                if (statId.equals(sd.id)) {
+                                                    slotDef = sd;
+                                                    break outer;
+                                                }
                                             }
                                         }
                                     }

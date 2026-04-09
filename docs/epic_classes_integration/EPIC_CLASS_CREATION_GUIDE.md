@@ -50,9 +50,8 @@ Here is a comprehensive example of a full class setup using external weapons (TA
     "book_lore": "A master of modern ballistics. Relying on agility and precision, they dominate from a distance.",
     "class_weapon_type": "Handguns / Rifles",
     "class_weapon_icon": "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}",
-    "class_weapon_items": [
-        "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}",
-        "minecraft:iron_sword"
+    "class_weapon_tags": [
+      "puffish_skills_leveling:class_weapons/gunslinger"
     ],
     "attributes": {
         "minecraft:generic.max_health": {
@@ -125,11 +124,45 @@ event.npc.getStoreddata().put("job_master", "gunslinger");
 ### Gameplay Fields
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `class_weapon_items` | String Array | No | List of acceptable weapon IDs for this class. |
+| `class_weapon_items` | String Array | No | Direct item allow-list for this class. Child classes inherit parent class weapon lists automatically. |
+| `class_weapon_tags` | String Array | No | Item tag allow-list for this class. Recommended for one-tag-per-class setups such as `puffish_skills_leveling:class_weapons/gunslinger`. Child classes inherit parent class weapon tags automatically. |
 | `starting_items` | String Array | No | Items granted to the player the moment they select the class. Supports quantities via `@` (e.g. `bone@10`) or NBT strings. Only given once per class per player. |
 | `attributes` | Object | No | Immediate stat changes applied permanently when selecting the class. Keys **must** be fully-qualified Minecraft attribute IDs — e.g. `"roleveling:str"`, `"minecraft:generic.max_health"`. Bare names like `"str"` will not resolve. Each entry is `{"value": X, "operation": "BASE"}`. An optional `"command"` field fires a server command on class select (use `{value}` and `{player}` tokens); when present the attribute modifier step is skipped for that entry. See [Datapack Reference](DATAPACK_REFERENCE.md) for full schema. |
 | `gui_stats` | Object Array | No | Visual representation of stats on the UI. Doesn't grant stats, purely for display. Supports `hearts` and `number` display modes. |
 | `gui_passives` | Object Array | No | Lists Pufferfish Skills to display as "Class Traits" in the UI. Links directly to `puffish_skills` definitions via `pufferfish_skill_id`. The `level` field (integer) controls the Pufferfish level at which the passive is unlocked — this is shown in the UI and used for bridge passive mapping. |
+
+### Recommended Weapon Tag Pattern
+
+For maintainability, define one item tag per class and place the actual item IDs inside that tag file.
+
+Example class field:
+
+```json
+"class_weapon_tags": [
+  "puffish_skills_leveling:class_weapons/gunslinger"
+]
+```
+
+Example tag file:
+
+```json
+{
+  "replace": false,
+  "values": [
+    "tacz:modern_kinetic_gun{GunId:\"tacz:deagle\"}",
+    "minecraft:crossbow"
+  ]
+}
+```
+
+This keeps class weapon grouping separate from the class JSON and makes it easier to expand or override later.
+
+### Restriction Ownership
+
+Bridge-owned class weapon restrictions are controlled globally by `enableAutoClassWeaponRestrictions` in the bridge datapack config.
+
+- `true`: bridge class weapon restrictions are active and ECM's legacy weapon restriction system is disabled
+- `false`: bridge auto class-weapon restrictions are skipped and ECM's legacy weapon restriction system remains active
 
 ---
 

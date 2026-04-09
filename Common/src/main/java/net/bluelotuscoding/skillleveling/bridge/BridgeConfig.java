@@ -15,6 +15,15 @@ public class BridgeConfig {
     public boolean lockOtherCategories = true;
     public boolean syncOnLogin = true;
     public boolean disableBaseClasses = false;
+    /**
+        * Enables the bridge-owned class weapon restriction system derived from
+        * class_weapon_items/class_weapon_tags on class definitions.
+        * When true, the legacy ECM job-weapon restriction system is disabled in
+        * favor of the bridge implementation.
+        * When false, bridge auto class-weapon checks are skipped and ECM's legacy
+        * job-weapon restriction system remains enabled.
+     */
+    public boolean enableAutoClassWeaponRestrictions = true;
     public boolean useCnpcQuests = false;
     public Map<String, CnpcQuestMappingDef> cnpcQuestMappings = new HashMap<>();
 

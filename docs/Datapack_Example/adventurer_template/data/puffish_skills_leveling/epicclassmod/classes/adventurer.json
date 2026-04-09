@@ -7,10 +7,8 @@
     "book_lore": "Every legend starts somewhere. The Adventurer is a fresh face in the world — untrained but full of potential. Master the basics before choosing your true path.",
     "class_weapon_type": "Any Weapon",
     "class_weapon_icon": "minecraft:wooden_sword",
-    "class_weapon_items": [
-        "minecraft:wooden_sword",
-        "minecraft:stone_sword",
-        "minecraft:iron_sword"
+    "class_weapon_tags": [
+        "puffish_skills_leveling:class_weapons/adventurer"
     ],
     "attributes": {
         "roleveling:str": { "value": 1.0, "operation": "BASE" },

@@ -33,15 +33,13 @@ public abstract class ItemRequirementTooltipMixin {
 
         String itemId = Registries.ITEM.getId(stack.getItem()).toString();
 
-        // Skip if this item doesn't have requirements defined
+        // Optional explicit definition from datapack. Class-weapon auto restrictions can
+        // still apply even when no explicit entry exists.
         net.bluelotuscoding.skillleveling.bridge.config.ItemRequirementDef def = ItemRequirementsManager
-                .getRequirements(itemId);
-        if (def == null) {
-            return;
-        }
+            .getRequirements(itemId);
 
         // Skip if tooltips are explicitly disabled for this definition
-        if (def.tooltip != null && !def.tooltip) {
+        if (def != null && def.tooltip != null && !def.tooltip) {
             return;
         }
 

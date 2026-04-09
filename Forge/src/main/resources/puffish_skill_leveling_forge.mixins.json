@@ -17,7 +17,8 @@
         "PacketChatMixin",
         "PacketDialogMixin",
         "PacketQuestCompletionMixin",
-        "QuestPreviewOverlayMixin"
+        "QuestPreviewOverlayMixin",
+        "AnnouncementOverlayMixin"
     ],
     "mixins": [
         "NetworkSyncMixin",

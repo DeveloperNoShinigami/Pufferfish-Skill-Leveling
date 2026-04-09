@@ -26,7 +26,8 @@ The main configuration file for Epic Classes.
 | `gui_notes` | String[] | No | List of bullet points shown in the Class Select screen below the description. |
 | `class_weapon_type` | String | No | Text descriptor displayed in the class book. |
 | `class_weapon_icon` | String | No | Item ID (supports NBT) used as the icon in the class book. |
-| `class_weapon_items` | String[] | No | Acceptable weapon IDs for this class (Item Restrictions). |
+| `class_weapon_items` | String[] | No | Acceptable weapon IDs for this class. Used by the bridge-owned class weapon restriction system. |
+| `class_weapon_tags` | String[] | No | Item tag IDs used as allowed weapon groups for this class. Recommended for per-class custom tags such as `puffish_skills_leveling:class_weapons/swordsman`. |
 | `preview_animation` | String | No | Epic Fight animation ID to loop in the class select menu. |
 | `preview_armor_base` | String | No | Base armor ID prefix to equip on the dummy (e.g. `minecraft:iron_`). |
 | `preview_mainhand_item` | String | No | Item in the dummy's mainhand. Supports full NBT strings. |
@@ -91,6 +92,7 @@ Slots live inside `attributes_by_class.<classId>[].slots[]`. Use `"global"` as t
 | `lockOtherCategories` | Boolean | `true` | Automatically locks all non-mapped Pufferfish categories when a player changes classes. |
 | `syncOnLogin` | Boolean | `true` | Re-syncs levels and attributes when a player joins the server. |
 | `disableBaseClasses` | Boolean | `false` | Disables selection of the base Epic Classes via traditional menus if utilizing custom class progression. |
+| `enableAutoClassWeaponRestrictions` | Boolean | `true` | Controls the bridge-owned class weapon restriction system. `true` = bridge class weapon restrictions enabled and ECM legacy job weapon restrictions disabled. `false` = bridge auto class weapon restrictions disabled and ECM legacy job weapon restrictions left enabled. |
 | `useCnpcQuests` | Boolean | `false` | Switches the integration into CNPC-first quest mode. CustomNPCs owns visible quest/dialog flows, while the addon continues to own class and Pufferfish state. |
 | `cnpcQuestMappings` | Map<String, Object> | Empty | Optional metadata keyed by the exact CustomNPCs quest ID for Epic Class-facing quest UI placement. |
 

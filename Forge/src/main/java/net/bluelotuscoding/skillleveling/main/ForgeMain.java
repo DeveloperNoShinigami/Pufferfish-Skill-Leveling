@@ -168,10 +168,40 @@ public class ForgeMain {
                 }
 
                 @SubscribeEvent
+                public static void onPlayerClone(PlayerEvent.Clone event) {
+                        if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
+                                var server = serverPlayer.getServer();
+                                if (server != null) {
+                                        server.execute(() -> {
+                                                SkillLevelingMod.getInstance().getSkillLevelingManager()
+                                                                .refreshAllRewards(serverPlayer);
+                                        });
+                                } else {
+                                        SkillLevelingMod.getInstance().getSkillLevelingManager()
+                                                        .refreshAllRewards(serverPlayer);
+                                }
+                        }
+                }
+
+                @SubscribeEvent
                 public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
                         if (event.getEntity() instanceof ServerPlayerEntity serverPlayer) {
-                                SkillLevelingMod.getInstance().getSkillLevelingManager()
-                                                .refreshAllRewards(serverPlayer);
+                                var server = serverPlayer.getServer();
+                                if (server != null) {
+                                        // Schedule refresh on the server thread next tick to ensure
+                                        // player data is fully initialized after respawn/clone.
+                                        server.execute(() -> {
+                                                var manager = SkillLevelingMod.getInstance().getSkillLevelingManager();
+                                                manager.refreshAllRewards(serverPlayer);
+                                                // A second refresh one tick later helps if vanilla respawn
+                                                // processing still mutates attributes after the first update.
+                                                server.execute(() -> manager.refreshAllRewards(serverPlayer));
+                                        });
+                                } else {
+                                        // Fallback: call directly if server reference unavailable
+                                        SkillLevelingMod.getInstance().getSkillLevelingManager()
+                                                        .refreshAllRewards(serverPlayer);
+                                }
                         }
                 }
 

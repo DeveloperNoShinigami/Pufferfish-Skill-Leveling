@@ -77,23 +77,6 @@
                         "command": "roleveling refresh"
                     }
                 ]
-            },
-            {
-                "id": "page_1",
-                "slots": [
-                    {
-                        "id": "atk_dmg_test",
-                        "name": "ATK DMG Test",
-                        "attribute_id": null,
-                        "icon": "minecraft:iron_sword",
-                        "description": "Test slot: command-only. Uses vanilla /attribute command to grant +1 attack_damage per click. Verifies command-only slot execution works.",
-                        "value": "1",
-                        "format": "+#",
-                        "operation": "ADDITION",
-                        "max_points": 10,
-                        "command": "attribute {player} minecraft:generic.attack_damage base set {value}"
-                    }
-                ]
             }
         ]
     }

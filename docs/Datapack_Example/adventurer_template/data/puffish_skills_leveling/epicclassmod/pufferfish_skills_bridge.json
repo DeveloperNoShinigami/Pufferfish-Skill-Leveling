@@ -38,6 +38,6 @@
     "lockOtherCategories": true,
     "disableBaseClasses": true,
     "useCnpcQuests": true,
-    "enableAutoClassWeaponRestrictions": true,
+    "enableAutoClassWeaponRestrictions": false,
     "syncOnLogin": true
 }

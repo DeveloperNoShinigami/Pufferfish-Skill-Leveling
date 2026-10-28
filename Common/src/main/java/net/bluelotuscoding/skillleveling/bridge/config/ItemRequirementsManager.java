@@ -253,10 +253,9 @@ public class ItemRequirementsManager extends JsonDataLoader {
         ItemRequirementDef req = getRequirements(id, type);
         List<String> failures = new ArrayList<>();
 
+        // Only apply class weapon gating when an explicit datapack restriction
+        // definition exists for this item. Legacy fallback behavior is removed.
         if (req == null) {
-            if (type == TargetType.ITEM && isAutoClassWeaponRestrictionsEnabled()) {
-                addClassWeaponFailures(player, id, failures);
-            }
             return failures;
         }
 
@@ -275,13 +274,7 @@ public class ItemRequirementsManager extends JsonDataLoader {
         if (req.require_class != null) {
             String pClass = "";
             try {
-                // On client, try ClientCustomClassState first
-                if (player.getWorld().isClient()) {
-                    pClass = net.bluelotuscoding.skillleveling.client.ClientCustomClassState
-                            .getCustomClass(player.getUuid());
-                } else {
-                    pClass = SkillLevelingMod.getInstance().getPlatform().getEpicClassName(player);
-                }
+                pClass = resolveCurrentClassId(player);
             } catch (Exception e) {
                 pClass = "";
             }
@@ -301,9 +294,13 @@ public class ItemRequirementsManager extends JsonDataLoader {
                             + " in " + req.require_level.category);
                 }
             } catch (Exception e) {
-                // Server-side API not available on client, show as unmet
-                failures.add("Requires Level: " + req.require_level.min
-                        + " in " + req.require_level.category);
+                // Client-side tooltip should not assume the player is below the
+                // requirement just because the local Pufferfish API or category
+                // lookup is unavailable.
+                if (!player.getWorld().isClient()) {
+                    failures.add("Requires Level: " + req.require_level.min
+                            + " in " + req.require_level.category);
+                }
             }
         }
 
@@ -371,36 +368,15 @@ public class ItemRequirementsManager extends JsonDataLoader {
             }
         }
 
-        // Avoid conflicts with the legacy explicit class requirement path.
-        // If require_class is set, it remains the sole class-gating source.
-        if (type == TargetType.ITEM
-                && isAutoClassWeaponRestrictionsEnabled()
-                && (req.require_class == null || req.require_class.isBlank())) {
+        // Only auto-apply class weapon gating when an explicit item restriction
+        // datapack entry is present and no explicit require_class is defined.
+        if (type == TargetType.ITEM && (req.require_class == null || req.require_class.isBlank())) {
             addClassWeaponFailures(player, id, failures);
         }
 
         return failures;
     }
 
-    private static boolean isAutoClassWeaponRestrictionsEnabled() {
-        try {
-            var cfg = net.bluelotuscoding.skillleveling.bridge.BridgeConfigManager.getConfig();
-            if (cfg != null) {
-                return cfg.enableAutoClassWeaponRestrictions;
-            }
-        } catch (Exception ignored) {
-        }
-
-        try {
-            var synced = EpicClassConfigManager.getSyncedConfig();
-            if (synced != null) {
-                return synced.enableAutoClassWeaponRestrictions;
-            }
-        } catch (Exception ignored) {
-        }
-
-        return true;
-    }
 
     private static void addClassWeaponFailures(PlayerEntity player, String itemId, List<String> failures) {
         try {

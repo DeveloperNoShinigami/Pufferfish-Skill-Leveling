@@ -9,15 +9,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Fixes suppressed XP gain and level-up overlay notifications.
  *
- * BridgeConfigManager.syncLegacyEpicClassWeaponRestrictions() calls
- * ModSettings.setJobWeaponRestrEnabled(false) to prevent ECM's legacy weapon
- * restriction system from conflicting with the bridge. As a side effect,
- * AnnouncementOverlay.allowNotices() (which reads isJobWeaponRestrEnabled) returns
- * false, silently suppressing all XP gain and level-up toasts even though the bridge's
- * own forceSync path sends the correct SyncLevelPacket with lastGain > 0.
- *
+ * Some Epic Classes internal state can suppress notice rendering even when
+ * the bridge's own forceSync path delivers the correct SyncLevelPacket.
  * This mixin overrides allowNotices() to return true when the bridge is active,
- * decoupling notification gating from the weapon restriction flag.
+ * ensuring XP/level toasts are shown consistently.
  */
 @Pseudo
 @Mixin(targets = "com.example.epicclassmod.client.AnnouncementOverlay", remap = false)
